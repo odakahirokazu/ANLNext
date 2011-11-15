@@ -76,23 +76,27 @@ A data analysis framework.
 
 1) Obtain ANL Next.
 
-% git clone ...
+% git clone git://github.com/odakahirokazu/ANLNext.git
 
 2) We strongly recomend out-of-source building, in which building does not affect the source directory. Create a directory for building outside the source directory.
 
-% mkdir build_ANLNext
-% cd build_ANLNext
+% cd ANLNext
+% mkdir build
+% cd build
 
 3) Perform cmake to generate Makefiles. There are several options:
  - USE_TVector [Default=OFF]: enable ROOT vector.
  - USE_HepVector [Default=OFF]: enable CLHEP vector.
  - USE_Ruby [Default=ON]: enable Ruby binding.
+ - USE_All [Default=OFF]: enable all libraries.
 
-% cmake ../ANLNext [options]
+% cmake ../ [options]
 
 If you want to use vector libraries of ROOT and CLHEP, perform below:
 
-% cmake ../ANLNext -DUSE_TVector=ON -DUSE_HepVector=ON
+% cmake ../ -DUSE_TVector=ON -DUSE_HepVector=ON
+or
+% cmake ../ -DUSE_All=ON
 
 4) Make
 
