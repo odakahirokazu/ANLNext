@@ -322,7 +322,7 @@ class ANLApp
             else
               param.value_string
             end
-          out.puts '  "'+param.name+'" => '+default_string
+          out.puts '  "'+param.name+'" => '+default_string+","
         end
       }
       out.puts '}'

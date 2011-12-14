@@ -161,6 +161,8 @@ class ANLVModule
   void set_parameter(const std::string& name,
 		     const std::vector<std::string>& val);
 
+  void clear_array(const std::string& name);
+
   void set_vector(const std::string& name, double x, double y);
   void set_vector(const std::string& name, double x, double y, double z);
 
