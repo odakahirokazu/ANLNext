@@ -87,16 +87,14 @@ A data analysis framework.
 3) Perform cmake to generate Makefiles. There are several options:
  - USE_TVector [Default=OFF]: enable ROOT vector.
  - USE_HepVector [Default=OFF]: enable CLHEP vector.
+ - USE_G4Vector [Default=OFF]: enable Geant4-CLHEP vector. Use this option for Geant4 version 9.5 or later.
  - USE_Ruby [Default=ON]: enable Ruby binding.
- - USE_All [Default=OFF]: enable all libraries.
 
 % cmake ../ [options]
 
-If you want to use vector libraries of ROOT and CLHEP, perform below:
+If you want to use vector libraries of ROOT and CLHEP (in Geant4), perform below:
 
-% cmake ../ -DUSE_TVector=ON -DUSE_HepVector=ON
-or
-% cmake ../ -DUSE_All=ON
+% cmake ../ -DUSE_TVector=ON -DUSE_G4Vector=ON
 
 4) Make
 

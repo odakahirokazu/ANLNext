@@ -21,6 +21,9 @@
     <p>This framework is originated by the ANL++ framework (by Shin Watanabe), which is C++ implementation of ANL. ANL is a fundamental framework of event-by-event analysis, which has been used for data processing of X-ray detectors on board ASCA and Suzaku X-ray observatories.</p>
     <p>As ANL Next adopts the ANL concept, we have written the code completely from scratch. This framework is written in C++, and provides Ruby binding for dynamical and flexible use of analysis software.</p>
 
+    <h3>github</h3>
+    <p><a href="https://github.com/odakahirokazu/ANLNext">https://github.com/odakahirokazu/ANLNext</a></p>
+
     <h3>Contact</h3>
     <p>Hirokazu Odaka<br />ISAS/JAXA<br />odaka(AT)astro.isas.jaxa.jp</p>
 
@@ -53,7 +56,7 @@
     
     <h4>f) <a href="http://proj-clhep.web.cern.ch/proj-clhep/">CLHEP</a> (option)</h4>
     <p>[version 2.1 or later]</p>
-    <p>A class library for high energy physics. This is required by <a href="http://geant4.cern.ch/">Geant4</a> simulations.</p>
+    <p>A class library for high energy physics. This is required by <a href="http://geant4.cern.ch/">Geant4</a> simulations. After Geant4 version 9.5, the Geatn4 package includes CLHEP.</p>
 
     <h4>g) <a href="http://root.cern.ch/drupal/">ROOT</a> (option)</h4>
     <p>[version 5.28 or later]</p>
@@ -61,7 +64,7 @@
 
     <h3>2.3 Installation</h3>
     <p>1) Obtain ANL Next</p>
-    <pre class="example">% git clone ...</pre>
+    <pre class="example">% git clone git://github.com/odakahirokazu/ANLNext.git</pre>
     <p>2) We strongly recomend out-of-source building, in which building does not affect the source directory. Create a directory for building outside the source directory.</p>
     <pre class="example">% mkdir build_ANLNext
 % cd build_ANLNext</pre>
@@ -69,11 +72,12 @@
     <ul>
       <li>USE_TVector [Default=OFF]: enable ROOT vector.</li>
       <li>USE_HepVector [Default=OFF]: enable CLHEP vector.</li>
+      <li>USE_G4Vector [Default=OFF]: enable Geant4-CLHEP vector. Use this option for Geant4 version 9.5 or later.</li>
       <li>USE_Ruby [Default=ON]: enable Ruby binding.</li>
     </ul>
     <pre class="example">% cmake ../ANLNext [options]</pre>
-    <p>If you want to use vector libraries of ROOT and CLHEP, perform below:</p>
-    <pre class="example">% cmake ../ANLNext -DUSE_TVector=ON -DUSE_HepVector=ON</pre>
+    <p>If you want to use vector libraries of ROOT and CLHEP (Geant4 included), perform below:</p>
+    <pre class="example">% cmake ../ANLNext -DUSE_TVector=ON -DUSE_G4Vector=ON</pre>
     <p>4) Make</p>
     <pre class="example">% make</pre>
     <p>5) Install. By default, "make install" will install binaries and libraries into the user's home directory, such as ${HOME}/bin or ${HOME}/lib.</p>

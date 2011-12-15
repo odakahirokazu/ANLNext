@@ -20,12 +20,13 @@ set(CMAKE_MODULE_PATH ${AN_TOP}/cmake ${CMAKE_MODULE_PATH})
 
 option(USE_TVector "enable ROOT vector" OFF)
 option(USE_HepVector "enable CLHEP vector" OFF)
+option(USE_G4Vector "enable G4-CLHEP vector" OFF)
 option(USE_Ruby "enable Ruby binding" ON)
 option(USE_All "enable all libraries" OFF)
 
 if(USE_All)
- set(USE_TVector ON)
- set(USE_HepVector ON)
+  set(USE_TVector ON)
+  set(USE_G4Vector ON)
 endif(USE_All)
 
 # build type
