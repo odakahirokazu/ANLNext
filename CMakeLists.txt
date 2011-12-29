@@ -6,7 +6,7 @@ project(ANLNext)
 
 find_package( Boost 1.47.0 )
 
-# Definition of installation path
+### Definition of installation path
 set(AN_INSTALL_PREFIX $ENV{HOME})
 set(AN_BIN_INSTALL_PATH ${AN_INSTALL_PREFIX}/bin)
 set(AN_LIB_INSTALL_PATH ${AN_INSTALL_PREFIX}/lib)
@@ -29,17 +29,15 @@ if(USE_All)
   set(USE_G4Vector ON)
 endif(USE_All)
 
-# build type
+### build type
 set(CMAKE_BUILD_TYPE Release)
 
-# compile option (Debug) 
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_C_FLAGS_DEBUG "-g")
+### compile option (Debug) 
+set(CMAKE_CXX_FLAGS_DEBUG "-g -W -Wall")
+set(CMAKE_C_FLAGS_DEBUG "-g -W -Wall")
 
-# compile option (Release)
-set(CMAKE_CXX_FLAGS_RELEASE "-W -O2")
-set(CMAKE_C_FLAGS_RELEASE "-W -O2")
-# set(CMAKE_CXX_FLAGS_RELEASE "-W -Wall -O2")
-# set(CMAKE_C_FLAGS_RELEASE "-W -Wall -O2")
+### compile option (Release)
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -W -Wall")
+set(CMAKE_C_FLAGS_RELEASE "-O2 -W -Wall")
 
 add_subdirectory(source)

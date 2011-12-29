@@ -11,7 +11,7 @@ if (USE_TVector)
 endif (USE_TVector)
 
 if (USE_HepVector)
-  # use system-CLHEP
+  ### use system-CLHEP
   add_definitions(-DANL_USE_HEPVECTOR)
   set(CLHEP_BASE_DIR $ENV{CLHEP_BASE_DIR})
   set(CLHEP_INC_DIR ${CLHEP_BASE_DIR}/include)
@@ -20,7 +20,7 @@ if (USE_HepVector)
 endif (USE_HepVector)
 
 if (USE_G4Vector)
-  # use Geant4-CLHEP (Geant4.9.5 or later)
+  ### use Geant4-CLHEP (Geant4.9.5 or later)
   add_definitions(-DANL_USE_HEPVECTOR)
   set(CLHEP_BASE_DIR $ENV{G4INSTALL})
   set(CLHEP_INC_DIR ${CLHEP_BASE_DIR}/include/Geant4)

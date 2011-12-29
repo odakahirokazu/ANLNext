@@ -46,6 +46,70 @@ VModuleParameter::VModuleParameter(const std::string& name,
 }
 
 
+void VModuleParameter::set_value(int v) 
+{
+  std::ostringstream oss;
+  oss << v << " " << "[int]";
+  throw_type_match_exception(oss.str());
+}
+
+
+void VModuleParameter::set_value(double v)
+{
+  std::ostringstream oss;
+  oss << v << " " << "[double]";
+  throw_type_match_exception(oss.str());
+}
+
+
+void VModuleParameter::set_value(const std::string& v)
+{
+  std::ostringstream oss;
+  oss << v << " " << "[string]";
+  throw_type_match_exception(oss.str());
+}
+ 
+
+void VModuleParameter::set_value(const std::vector<int>& v)
+{
+  std::ostringstream oss;
+  oss << "vector(" << v.size() << ") " << "[vector<int>]";
+  throw_type_match_exception(oss.str());
+}
+
+
+void VModuleParameter::set_value(const std::vector<double>& v)
+{
+  std::ostringstream oss;
+  oss << "vector(" << v.size() << ") " << "[vector<double>]";
+  throw_type_match_exception(oss.str());
+}
+
+
+void VModuleParameter::set_value(const std::vector<std::string>& v)
+{
+  std::ostringstream oss;
+  oss << "vector(" << v.size() << ") " << "[vector<string>]";
+  throw_type_match_exception(oss.str());
+}
+
+
+void VModuleParameter::set_value(double x, double y)
+{
+  std::ostringstream oss;
+  oss << "( " << x << " " << y << " ) " << "[2-vector]";
+  throw_type_match_exception(oss.str());
+}
+
+
+void VModuleParameter::set_value(double x, double y, double z)
+{
+  std::ostringstream oss;
+  oss << "( " << x << " " << y << " " << z << " ) " << "[3-vector]";
+  throw_type_match_exception(oss.str());
+}
+
+
 void VModuleParameter::print(std::ostream& os) const
 {
   os << name() << " "
@@ -135,7 +199,8 @@ void VModuleParameter::throw_type_match_exception(const std::string& message)
 {
   BOOST_THROW_EXCEPTION( ANLException() <<
                          ANLErrInfo(std::string("type does not match: ")
-                                    + name() + " [" + message + "]") );
+                                    + name() + " [" + type_name() + "] "
+                                    + "<= " + message) );
 }
 
 }

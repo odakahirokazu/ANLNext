@@ -152,7 +152,7 @@ public:
     os.flush();
   }
   
-  void input(std::istream& is)
+  void input(std::istream& )
   {
     ;
   }

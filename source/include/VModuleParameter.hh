@@ -22,6 +22,7 @@ namespace anl
  * @author Hirokazu Odaka
  * @date June, 2010
  * @date 2011-07-12
+ * @date 2011-12-28
  */
 
 class VModuleParameter
@@ -62,40 +63,33 @@ public:
   
   virtual bool ask() { return ask_base(); }
   
-  virtual void set_value(int v) { throw_type_match_exception("int"); }
-  virtual void set_value(double v) { throw_type_match_exception("double"); }
-  virtual void set_value(const std::string& v) { throw_type_match_exception("string"); }
-  virtual void set_value(const std::vector<int>& v)
-  { throw_type_match_exception("vector<int>"); }
-  virtual void set_value(const std::vector<double>& v)
-  { throw_type_match_exception("vector<double>"); }
-  virtual void set_value(const std::vector<std::string>& v)
-  { throw_type_match_exception("vector<string>"); }
-
-  virtual void set_value(double x, double y)
-  { throw_type_match_exception("2vector"); }
-  virtual void set_value(double x, double y, double z)
-  { throw_type_match_exception("3vector"); }
+  virtual void set_value(int v);
+  virtual void set_value(double v);
+  virtual void set_value(const std::string& v);
+  virtual void set_value(const std::vector<int>& v);
+  virtual void set_value(const std::vector<double>& v);
+  virtual void set_value(const std::vector<std::string>& v);
+  virtual void set_value(double x, double y);
+  virtual void set_value(double x, double y, double z);
 
   virtual void clear_array() {}
 
-  virtual void output(std::ostream& os) const {}
-  virtual void input(std::istream& is) {}
+  virtual void output(std::ostream& ) const {}
+  virtual void input(std::istream& ) {}
 
-  virtual void get(void* const value_ptr) const {}
-  virtual void set(const void* const value_ptr) {}
+  virtual void get(void* const /* value_ptr */) const {}
+  virtual void set(const void* const /* value_ptr */) {}
 
   virtual std::string map_key_name() const { return ""; }
-  virtual void set_map_key(const std::string& key) {}
+  virtual void set_map_key(const std::string& /* key */) {}
   virtual size_t num_map_value() const { return 0; }
-  virtual boost::shared_ptr<VModuleParameter const> get_map_value(size_t i) const
+  virtual boost::shared_ptr<VModuleParameter const> get_map_value(size_t /* i */) const
   { return boost::shared_ptr<VModuleParameter>(); }
-  virtual void add_map_value(boost::shared_ptr<VModuleParameter> param) {}
-  virtual void enable_map_value(int type, const std::vector<int>& enables) {}
-  virtual void set_map_value(const std::string& name, int val) {}
-  virtual void set_map_value(const std::string& name, double val) {}
-  virtual void set_map_value(const std::string& name,
-                             const std::string& val) {}
+  virtual void add_map_value(boost::shared_ptr<VModuleParameter> /* param */) {}
+  virtual void enable_map_value(int /* type */, const std::vector<int>& /* enables */) {}
+  virtual void set_map_value(const std::string& /* name */, int /* val */) {}
+  virtual void set_map_value(const std::string& /* name */, double /* val */) {}
+  virtual void set_map_value(const std::string& /* name */, const std::string& /* val */) {}
   virtual void insert_map() {}
   
   void print(std::ostream& os) const;

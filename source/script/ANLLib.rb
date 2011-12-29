@@ -1,3 +1,9 @@
+# = ANLLib
+# Author:: Hirokazu Odaka
+# 
+# This is a class library written in Ruby for the ANL Next framework
+#
+
 require 'anl'
 require 'rexml/document'
 
@@ -13,8 +19,26 @@ def parameter_list(anl_module)
   return l
 end
 
+
+class Vector
+  def initialize(x, y, z=nil)
+    @x = x
+    @y = y
+    @z = z
+  end
+
+  attr_reader :x, :y, :z
+  
+  def set(x, y, z=nil)
+    @x = x
+    @y = y
+    @z = z
+  end
+end
+
+
 def vec(x, y, z=nil)
-  return [:vector, x, y, z]
+  return Vector.new(x, y, z)
 end
 
 
@@ -34,20 +58,30 @@ class ANLApp
 
   def push(anl_module)
     @module_list << anl_module
-    @current_module = anl_module
-  end
-
-  def chain(anl_module_class, anl_module_symbol=nil)
-    mod = nil
-    instance_eval %{
-      mod = #{anl_module_class}.new
-    }
-    @module_list << mod
-    sym = anl_module_symbol ? anl_module_symbol : anl_module_class
+    sym = anl_module.module_name.to_sym
     unless @module_hash.has_key? sym
       @module_hash[sym] = mod
     end
-    @current_module = mod
+    @current_module = anl_module
+  end
+
+  def chain(anl_module_class, module_name=nil, module_version=nil)
+    mod = nil
+    if module_version
+      instance_eval %{
+        mod = #{anl_module_class}.new(module_name, module_version)
+      }
+    elsif module_name
+      instance_eval %{
+        mod = #{anl_module_class}.new(module_name)
+      }
+    else
+      instance_eval %{
+        mod = #{anl_module_class}.new
+      }
+    end
+
+    push(mod)
   end
 
   def expose_module(anl_module_symbol)
@@ -65,18 +99,18 @@ class ANLApp
   def setp(name, value)
     mod = @current_module
     set_param =
-      if value.class == Array
+      if value.class == Vector
+        if value.z
+          lambda { mod.set_vector(name, value.x, value.y, value.z) }
+        else
+          lambda { mod.set_vector(name, value.x, value.y) }
+        end
+      elsif value.class == Array
         if value.empty?
           lambda { mod.clear_array(name) }
         else
           f = value.first
-          if f == :vector
-            if value[3]
-              lambda { mod.set_vector(name, value[1], value[2], value[3]) }
-            else
-              lambda { mod.set_vector(name, value[1], value[2]) }
-            end
-          elsif f.class == String
+          if f.class == String
             lambda { mod.set_svec(name, value) }
           elsif f.class == Float
             lambda { mod.set_fvec(name, value) }
@@ -354,3 +388,4 @@ class ANLApp
     out.close if file_name
   end
 end
+
