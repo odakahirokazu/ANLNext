@@ -60,7 +60,7 @@ class ANLApp
     @module_list << anl_module
     sym = anl_module.module_name.to_sym
     unless @module_hash.has_key? sym
-      @module_hash[sym] = mod
+      @module_hash[sym] = anl_module
     end
     @current_module = anl_module
   end
@@ -349,10 +349,10 @@ class ANLApp
               param.value_string.to_f.to_s
             when '2-vector'
               x, y = param.value_string.strip.split(/\s+/)
-              x.to_f.to_s+", "+y.to_f.to_s
+              'vec('+x.to_f.to_s+', '+y.to_f.to_s+')'
             when '3-vector'
               x, y, z = param.value_string.strip.split(/\s+/)
-              x.to_f.to_s+', '+y.to_f.to_s+', '+z.to_f.to_s
+              'vec('+x.to_f.to_s+', '+y.to_f.to_s+', '+z.to_f.to_s+')'
             else
               param.value_string
             end
@@ -388,4 +388,3 @@ class ANLApp
     out.close if file_name
   end
 end
-
