@@ -2,6 +2,7 @@
 #include "ANLException.hh"
 
 #include <sstream>
+#include <climits>
 
 namespace anl {
 

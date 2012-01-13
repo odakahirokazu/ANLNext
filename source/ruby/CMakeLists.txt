@@ -30,7 +30,7 @@ swig_link_libraries(anl ${RUBY_LIBRARY} ANLNext)
 set_target_properties(anl
  PROPERTIES
   PREFIX ""
-  SUFFIX ".bundle"
+  SUFFIX ${RUBY_BINDING_SUFFIX}
   LIBRARY_OUTPUT_DIRECTORY ${AN_TOP_BUILD}/lib/ruby
 )
 

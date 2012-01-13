@@ -1,5 +1,15 @@
 cmake_minimum_required(VERSION 2.8)
 
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+  set(LINUX_FLAG true)
+  set(RUBY_BINDING_SUFFIX ".so")
+else ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+  set(LINUX_FLAG false) # Mac
+  set(RUBY_BINDING_SUFFIX ".bundle")
+endif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+
+set(READLINE_LIB readline)
+
 if (USE_TVector)
   set(ROOTSYS $ENV{ROOTSYS})
   # set(ROOTDIR "/root")
@@ -24,7 +34,13 @@ if (USE_G4Vector)
   add_definitions(-DANL_USE_HEPVECTOR)
   set(CLHEP_BASE_DIR $ENV{G4INSTALL})
   set(CLHEP_INC_DIR ${CLHEP_BASE_DIR}/include/Geant4)
-  set(CLHEP_LIB_DIR ${CLHEP_BASE_DIR}/lib)
+  
+  if (LINUX_FLAG)
+    set(CLHEP_LIB_DIR ${CLHEP_BASE_DIR}/lib64)
+  else (LINUX_FLAG)
+    set(CLHEP_LIB_DIR ${CLHEP_BASE_DIR}/lib)
+  endif (LINUX_FLAG)
+  
   set(CLHEP_LIB G4clhep)
 endif (USE_G4Vector)
 
@@ -43,8 +59,9 @@ add_library(ANLNext SHARED
   src/EvsManager.cc
   src/VModuleParameter.cc
   )
+
 target_link_libraries(ANLNext
-  ${ROOT_LIB} ${CLHEP_LIB} edit termcap)
+  ${ROOT_LIB} ${CLHEP_LIB} ${READLINE_LIB})
 
 set_property(TARGET ANLNext
   PROPERTY LIBRARY_OUTPUT_DIRECTORY ${AN_TOP_BUILD}/lib)
