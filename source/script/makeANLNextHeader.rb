@@ -12,6 +12,8 @@ File::open(headerFileName, 'w') { |headerFile|
     while line = f.gets
       next if line[0, 1] == '#'
       line.chomp!
+      pos = line.rindex('::')
+      line = line[(pos+2)..-1] if pos
       headerFile.print "#include \"" + line +  ".hh\"\n"
     end
   }
