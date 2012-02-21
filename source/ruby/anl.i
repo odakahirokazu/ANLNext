@@ -116,7 +116,9 @@ class ANLVModule
              const std::string& version = "0.0");
   ANLVModule(const ANLVModule& r);
   virtual ~ANLVModule();
-  
+
+  virtual ANLStatus mod_prepare();
+
   std::string module_name();
   std::string module_version();
   std::vector<std::string> get_alias();

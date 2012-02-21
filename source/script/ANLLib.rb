@@ -50,6 +50,7 @@ class ANLApp
     @n_loop = n_loop
     @display_frequency = display_frequency
     @set_param_list = []
+    @set_module_list = []
     @is_startup = false
   end
   
@@ -150,6 +151,7 @@ class ANLApp
 
   def set_parameters(anl_module_symbol, parameters={}, &set_param)
     mod = expose_module(anl_module_symbol)
+    @set_module_list << mod
     parameters.each{|name, value|
       setp(name, value)
     }
@@ -227,6 +229,10 @@ class ANLApp
 
     @set_param_list.each{|s| s.call }
     set_param.call if block_given?
+    @set_module_list.each{|mod|
+      status = mod.mod_prepare()
+      status == Anl::AS_OK or raise mod.name+" :: mod_prepare() returned "+status.to_s
+    }
     
     status = anl.InteractiveCom()
     status == Anl::AS_OK or raise "InteractiveCom() returned "+status.to_s
