@@ -204,8 +204,8 @@ public:
     _value_enable[type] = enableArray;
   }
   
-  bool value_enable(int i, mapped_1_type) const { return true; }
-  bool value_enable(int i, mapped_pair_type) const { return true; }
+  bool value_enable(int, mapped_1_type) const { return true; }
+  bool value_enable(int, mapped_pair_type) const { return true; }
   bool value_enable(int i, mapped_tuple_type) const
   {
     if (i>0) {
