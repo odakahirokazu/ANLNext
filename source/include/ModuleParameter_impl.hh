@@ -98,7 +98,7 @@ template <typename T>
 void ModuleParameter<T>::set_value_impl(call_type val,
                                         std::random_access_iterator_tag)
 {
-  typedef typename T::iterator iter_type;
+  typedef typename T::const_iterator iter_type;
   typedef typename std::iterator_traits<iter_type>::value_type value_type;
 
   const size_t n = val.size();
@@ -118,7 +118,7 @@ template <typename T>
 void ModuleParameter<T>::set_value_impl(call_type val,
                                         std::forward_iterator_tag)
 {
-  typedef typename T::iterator iter_type;
+  typedef typename T::const_iterator iter_type;
   typedef typename std::iterator_traits<iter_type>::value_type value_type;
 
   for (iter_type it=val.begin(); it!=val.end(); ++it) {
@@ -126,7 +126,7 @@ void ModuleParameter<T>::set_value_impl(call_type val,
     ModuleParameter<value_type> tmpParam(&tmp, "");
     tmpParam.set_unit(unit(), unit_name());
     tmpParam.set_expression(expression());
-    tmpParam.set_value(tmp);
+    tmpParam.set_value(*it);
     _ptr->push_back(tmp);
   }
 }

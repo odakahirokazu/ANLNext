@@ -10,12 +10,12 @@ include_directories(${RUBY_INCLUDE_PATH})
 # add_definitions(-DHAVE_STRUCT_TIMESPEC -DHAVE_STRUCT_TIMEZONE)
 
 # compile option (Debug) 
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_C_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_DEBUG "-W -g")
+set(CMAKE_C_FLAGS_DEBUG "-W -g")
 
 # compile option (Release)
-set(CMAKE_CXX_FLAGS_RELEASE "-W -O2")
-set(CMAKE_C_FLAGS_RELEASE "-W -O2")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+set(CMAKE_C_FLAGS_RELEASE "-O2")
 
 set(CMAKE_SWIG_FLAGS "")
 

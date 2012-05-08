@@ -88,6 +88,7 @@ public:
   virtual void set_value(const std::vector<int>& v);
   virtual void set_value(const std::vector<double>& v);
   virtual void set_value(const std::vector<std::string>& v);
+  virtual void set_value(const std::list<std::string>& v);
   virtual void set_value(double x, double y);
   virtual void set_value(double x, double y, double z);
 

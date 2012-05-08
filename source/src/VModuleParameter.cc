@@ -114,6 +114,14 @@ void VModuleParameter::set_value(const std::vector<std::string>& v)
 }
 
 
+void VModuleParameter::set_value(const std::list<std::string>& v)
+{
+  std::ostringstream oss;
+  oss << "list: " << v.front() << " ... "<< "[list<string>]";
+  throw_type_match_exception(oss.str());
+}
+
+
 void VModuleParameter::set_value(double x, double y)
 {
   std::ostringstream oss;

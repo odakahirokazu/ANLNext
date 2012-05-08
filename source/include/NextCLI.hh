@@ -91,7 +91,7 @@ void CLread(const std::string& text, T* ptr)
 
 template<typename T>
 void CLread(const std::string& text, T* ptr,
-            double unit=1.0, const std::string& unit_name="")
+            double unit, const std::string& unit_name)
 {
   ModuleParameter<T> param(ptr, text, unit, unit_name);
   param.ask();

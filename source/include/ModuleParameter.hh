@@ -198,8 +198,8 @@ private:
   void set_value_impl(call_type val, std::random_access_iterator_tag);
   void set_value_impl(call_type val, std::forward_iterator_tag);
 
-  void set_value2(double x, double y) {}
-  void set_value3(double x, double y, double z) {}
+  void set_value2(double , double ) {}
+  void set_value3(double , double , double ) {}
   
   template <bool b0>
   void clear_array_impl(const boost::integral_constant<bool, b0>&)
