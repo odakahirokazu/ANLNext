@@ -17,8 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLNext_hh
-#define ANLNext_hh
+#ifndef ANL_ANLNext_H
+#define ANL_ANLNext_H 1
 
 #define ANL_ANALYZE_INTERRUPT 1
 #define ANL_INITIALIZE_INTERRUPT 1
@@ -58,10 +58,10 @@ struct ANLToLower
 
 /**
  * The ANL Next manager class.
+ *
  * @author Hirokazu Odaka
- * @date June, 2010
+ * @date 2010-06-xx
  */
-
 class ANLNext : private boost::noncopyable
 {
 public:
@@ -115,6 +115,6 @@ private:
   std::vector<ANLModuleCounter> m_Counter;
 };
 
-} // namespace anl
+}
 
-#endif // ANLNext_hh
+#endif /* ANL_ANLNext_H */

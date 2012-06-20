@@ -18,12 +18,13 @@
  *************************************************************************/
 
 /**
+ * This program provide the same functions (but renamed) as the ANL CLI.
  * @file NextCLI.hh
  * @author Hirokazu Odaka
  */
 
-#ifndef NextCLI_hh
-#define NextCLI_hh
+#ifndef ANL_NextCLI_H
+#define ANL_NextCLI_H 1
 
 #if ANL_USE_TVECTOR
 #include "TVector2.h"
@@ -115,4 +116,4 @@ void CLread_seq(const std::string& text, T* ptr,
 
 }
 
-#endif // NextCLI_hh
+#endif /* ANL_NextCLI_H */

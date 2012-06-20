@@ -17,8 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef WrapANLPlus_hh
-#define WrapANLPlus_hh
+#ifndef ANL_WrapANLPlus_H
+#define ANL_WrapANLPlus_H 1
 
 #include "ANLVModule.hh"
 
@@ -136,4 +136,4 @@ inline ANLStatus WrapANLPuls::mod_exit()
 
 }
 
-#endif // WrapANLPlus_hh
+#endif /* ANL_WrapANLPlus_H */

@@ -17,8 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLType_hh
-#define ANLType_hh
+#ifndef ANL_ANLType_H
+#define ANL_ANLType_H 1
 
 #include <string>
 #include <vector>
@@ -69,4 +69,4 @@ struct type_info<std::vector<std::string> >
 
 }
 
-#endif // ANLType_hh
+#endif /* ANL_ANLType_H */

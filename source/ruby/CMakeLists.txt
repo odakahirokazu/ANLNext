@@ -23,7 +23,7 @@ set(CMAKE_SWIG_FLAGS "")
 link_directories(${AN_TOP_BUILD}/lib)
 
 set_source_files_properties(anl.i PROPERTIES CPLUSPLUS ON)
-set_source_files_properties(anl.i PROPERTIES SWIG_FLAGS "-includeall")
+# set_source_files_properties(anl.i PROPERTIES SWIG_FLAGS "-includeall")
 swig_add_module(anl ruby anl.i)
 swig_link_libraries(anl ${RUBY_LIBRARY} ANLNext)
 

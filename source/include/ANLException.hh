@@ -17,10 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-// Hirokazu Odaka
-
-#ifndef ANLException_hh
-#define ANLException_hh
+#ifndef ANL_ANLException_H
+#define ANL_ANLException_H 1
 
 #include <stdexcept>
 #include <string>
@@ -35,6 +33,12 @@ typedef boost::error_info<struct tag_ANLEventID, int> ANLErrEventIDInfo;
 
 class ANLVModule;
 
+/**
+ * Exception class for the ANL Next framework.
+ * 
+ * @author Hirokazu Odaka
+ * @date 2010-06-xx
+ */
 struct ANLException : boost::exception, std::exception
 {
   ANLException() {}
@@ -47,4 +51,4 @@ struct ANLException : boost::exception, std::exception
 
 }
 
-#endif // ANLException_hh
+#endif /* ANL_ANLException_H */

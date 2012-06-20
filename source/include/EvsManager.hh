@@ -17,8 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef EvsManager_hh
-#define EvsManager_hh
+#ifndef ANL_EvsManager_H
+#define ANL_EvsManager_H 1
 
 #include <map>
 #include <string>
@@ -33,9 +33,10 @@ typedef EvsMap::iterator EvsMapIter;
 /**
  * The Evs (event selection) management class.
  * This class provides a flag that can be accessed from any ANL module for event selection.
+ *
  * @author Hirokazu Odaka
+ * @date 2010-06-xx
  */
-
 class EvsManager
 {
 public:
@@ -112,4 +113,4 @@ inline void EvsManager::EvsReset(const std::string& key)
 
 }
 
-#endif
+#endif /* ANL_EvsManager_H */

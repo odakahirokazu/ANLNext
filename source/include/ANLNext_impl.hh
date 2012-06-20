@@ -17,8 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLNext_impl_hh
-#define ANLNext_impl_hh
+#ifndef ANL_ANLNext_impl_H
+#define ANL_ANLNext_impl_H 1
 
 #include "ANLNext.hh"
 #include "ANLVModule.hh"
@@ -56,4 +56,4 @@ ANLStatus ANLNext::routine_modfn(T func, const std::string& func_id)
 
 }
 
-#endif // ANLNext_impl_hh
+#endif /* ANL_ANLNext_impl_H */

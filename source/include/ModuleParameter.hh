@@ -17,8 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ModuleParameter_hh
-#define ModuleParameter_hh
+#ifndef ANL_ModuleParameter_H
+#define ANL_ModuleParameter_H 1
 
 #include "VModuleParameter.hh"
 
@@ -335,4 +335,4 @@ private:
 #include "ModuleParameter_spec.hh"
 #include "ModuleParameter_map.hh"
 
-#endif // ModuleParameter_hh
+#endif /* ANL_ModuleParameter_H */

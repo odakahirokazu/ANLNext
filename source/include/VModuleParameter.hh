@@ -17,8 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef VModuleParameter_hh
-#define VModuleParameter_hh
+#ifndef ANL_VModuleParameter_H
+#define ANL_VModuleParameter_H 1
 
 #include <iostream>
 #include <string>
@@ -38,12 +38,12 @@ namespace anl
 
 /**
  * A virtual class for an ANL module parameter.
+ *
  * @author Hirokazu Odaka
- * @date June, 2010
+ * @date 2010-06-xx
  * @date 2011-07-12
  * @date 2011-12-28
  */
-
 class VModuleParameter
 {
 public:
@@ -156,4 +156,4 @@ std::istream& operator>>(std::istream& is, anl::VModuleParameter& p)
   return is;
 }
 
-#endif // VModuleParameter_hh
+#endif /* ANL_VModuleParameter_H */

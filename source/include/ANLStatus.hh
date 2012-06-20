@@ -17,10 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-// Hirokazu Odaka
-
-#ifndef ANLStatus_hh
-#define ANLStatus_hh
+#ifndef ANL_ANLStatus_H
+#define ANL_ANLStatus_H 1
 
 namespace anl
 {
@@ -32,4 +30,4 @@ enum ANLStatus {AS_OK,
                 AS_QUIT_ERR};
 }
 
-#endif
+#endif /* ANL_ANLStatus_H */

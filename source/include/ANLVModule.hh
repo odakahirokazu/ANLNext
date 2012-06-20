@@ -17,8 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLVModule_hh
-#define ANLVModule_hh
+#ifndef ANL_ANLVModule_H
+#define ANL_ANLVModule_H 1
 
 #include <iostream>
 #include <string>
@@ -49,10 +49,10 @@ class EvsManager;
 
 /**
  * A virtual class for an ANL Next module.
+ *
  * @author Hirokazu Odaka
- * @date June, 2010
+ * @date 2010-06-xx
  */
-
 class ANLVModule
 {
 public:
@@ -437,4 +437,4 @@ void ANLVModule::GetANLModuleIFNC(const std::string& name, T *ptr)
 
 }
 
-#endif // ANLVModule_hh
+#endif /* ANL_ANLVModule_H */

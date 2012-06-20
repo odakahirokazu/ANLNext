@@ -17,10 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-// Hirokazu Odaka
-
-#ifndef ANLAccess_hh
-#define ANLAccess_hh
+#ifndef ANL_ANLAccess_H
+#define ANL_ANLAccess_H 1
 
 #include <string>
 #include <map>
@@ -32,6 +30,12 @@ namespace anl
 
 class ANLVModule;
 
+/**
+ * Interface to access other ANL modules.
+ * 
+ * @author Hirokazu Odaka
+ * @date 2010-06-xx
+ */
 class ANLAccess
 {
 public:
@@ -77,4 +81,4 @@ bool ANLAccess::Exist(const std::string& name)
 
 }
 
-#endif // ANLAccess_hh
+#endif /* ANL_ANLAccess_H */
