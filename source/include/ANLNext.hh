@@ -21,6 +21,8 @@
 #define ANLNext_hh
 
 #define ANL_ANALYZE_INTERRUPT 1
+#define ANL_INITIALIZE_INTERRUPT 1
+#define ANL_EXIT_INTERRUPT 1
 
 #include <iostream>
 #include <string>

@@ -26,7 +26,7 @@
 #include <algorithm>
 #include <boost/format.hpp>
 
-#if ANL_ANALYZE_INTERRUPT
+#if ANL_ANALYZE_INTERRUPT || ANL_INITIALIZE_INTERRUPT || ANL_EXIT_INTERRUPT
 #include <signal.h>
 #endif
 
@@ -96,6 +96,19 @@ ANLStatus ANLNext::Startup() throw(ANLException)
 
 ANLStatus ANLNext::Initialize() throw(ANLException)
 {
+#if ANL_INITIALIZE_INTERRUPT
+  struct sigaction sa;
+  struct sigaction sa_org;
+  std::memset(&sa, 0, sizeof(sa));
+  std::memset(&sa_org, 0, sizeof(sa_org));
+  sa.sa_handler = SIG_DFL;
+  sa.sa_flags |= SA_RESTART;
+  if( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
+    std::cout << "sigaction(2) error!" << std::endl;
+    return AS_QUIT_ERR;
+  }
+#endif
+
   show_analysis();
   print_parameters();
   reset_counter();
@@ -110,6 +123,14 @@ ANLStatus ANLNext::Initialize() throw(ANLException)
   std::cout << "ANLNext: initialization done." << std::endl;
   
  final:
+  std::cout << std::endl;
+#if ANL_INITIALIZE_INTERRUPT
+  if( sigaction(SIGINT, &sa_org, 0) != 0 ) {
+    std::cout << "sigaction(2) error!" << std::endl;
+    return AS_QUIT_ERR;
+  }
+#endif
+  
   return status;
 }
 
@@ -125,7 +146,7 @@ ANLStatus ANLNext::Analyze(int num_event, int display_freq) throw(ANLException)
   sa.sa_flags |= SA_RESTART;
   if( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
-    return AS_QUIT;
+    return AS_QUIT_ERR;
   }
 #endif
 
@@ -151,22 +172,35 @@ ANLStatus ANLNext::Analyze(int num_event, int display_freq) throw(ANLException)
   }
 
  final:
+  std::cout << std::endl;
+  print_summary();
 
 #if ANL_ANALYZE_INTERRUPT
   if( sigaction(SIGINT, &sa_org, 0) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
-    return AS_QUIT;
+    return AS_QUIT_ERR;
   }
 #endif
-
-  std::cout << std::endl;
-  print_summary();
+  
   return status;
 }
 
 
 ANLStatus ANLNext::Exit() throw(ANLException)
 {
+#if ANL_EXIT_INTERRUPT
+  struct sigaction sa;
+  struct sigaction sa_org;
+  std::memset(&sa, 0, sizeof(sa));
+  std::memset(&sa_org, 0, sizeof(sa_org));
+  sa.sa_handler = SIG_DFL;
+  sa.sa_flags |= SA_RESTART;
+  if( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
+    std::cout << "sigaction(2) error!" << std::endl;
+    return AS_QUIT_ERR;
+  }
+#endif
+
   ANLStatus status = AS_OK;
   status = routine_exit();
   if (status != AS_OK) {
@@ -177,6 +211,13 @@ ANLStatus ANLNext::Exit() throw(ANLException)
   m_Evs->PrintSummary();
 
   std::cout << "\nANLNext: exiting..." << std::endl;
+
+#if ANL_EXIT_INTERRUPT
+  if( sigaction(SIGINT, &sa_org, 0) != 0 ) {
+    std::cout << "sigaction(2) error!" << std::endl;
+    return AS_QUIT_ERR;
+  }
+#endif
   
   return status;
 }
