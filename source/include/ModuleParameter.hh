@@ -74,7 +74,6 @@ struct param_call_type<T, true>
  * @author Hirokazu Odaka
  * @date 2011-07-12
  */
-
 template <typename T>
 class ModuleParameter : public VModuleParameter
 {
@@ -120,6 +119,8 @@ public:
     set_value_impl(val, container_truth_type(), arithmetic_truth_type(), float_truth_type());
   }
 
+  using VModuleParameter::set_value;
+  
   void clear_array()
   {
     clear_array_impl(container_truth_type());

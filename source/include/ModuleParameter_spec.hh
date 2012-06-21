@@ -36,6 +36,7 @@ public:
   std::string type_name() const { return "2-vector"; }
   
   void set_value(double x, double y) { _ptr->Set(x*unit(), y*unit()); }
+  using VModuleParameter::set_value;
   
   void output(std::ostream& os) const
   {
@@ -72,6 +73,7 @@ public:
   
   void set_value(double x, double y, double z)
   { _ptr->SetXYZ(x*unit(), y*unit(), z*unit()); }
+  using VModuleParameter::set_value;
   
   void output(std::ostream& os) const
   {
@@ -111,6 +113,8 @@ public:
   std::string type_name() const { return "2-vector"; }
 
   void set_value(double x, double y) { _ptr->set(x*unit(), y*unit()); }
+  using VModuleParameter::set_value;
+
   void output(std::ostream& os) const
   {
     os << _ptr->x()/unit() << " " << _ptr->y()/unit();
@@ -145,6 +149,7 @@ public:
 
   void set_value(double x, double y, double z)
   { _ptr->set(x*unit(), y*unit(), z*unit()); }
+  using VModuleParameter::set_value;
   
   void output(std::ostream& os) const
   {
