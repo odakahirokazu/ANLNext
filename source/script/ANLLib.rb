@@ -86,11 +86,15 @@ class ANLApp
   end
 
   def expose_module(anl_module_symbol)
-    @current_module = @module_hash[anl_module_symbol]
+    @current_module = get_module(anl_module_symbol)
   end
 
   def get_module(anl_module_symbol)
-    @module_hash[anl_module_symbol]
+    mod = @module_hash[anl_module_symbol]
+    if mod==nil
+      raise 'Module symbol '+anl_module_symbol.to_s+' is not registered.'
+    end
+    return mod
   end
 
   def text(description)
