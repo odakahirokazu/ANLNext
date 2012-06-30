@@ -32,15 +32,9 @@ endif (USE_HepVector)
 if (USE_G4Vector)
   ### use Geant4-CLHEP (Geant4.9.5 or later)
   add_definitions(-DANL_USE_HEPVECTOR)
-  set(CLHEP_BASE_DIR $ENV{G4INSTALL})
-  set(CLHEP_INC_DIR ${CLHEP_BASE_DIR}/include/Geant4)
-  
-  if (LINUX_FLAG)
-    set(CLHEP_LIB_DIR ${CLHEP_BASE_DIR}/lib64)
-  else (LINUX_FLAG)
-    set(CLHEP_LIB_DIR ${CLHEP_BASE_DIR}/lib)
-  endif (LINUX_FLAG)
-  
+  find_package(Geant4 REQUIRED)
+  include(${Geant4_USE_FILE})
+  set(CLHEP_INC_DIR ${Geant4_INCLUDE_DIRS})
   set(CLHEP_LIB G4clhep)
 endif (USE_G4Vector)
 
