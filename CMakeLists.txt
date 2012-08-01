@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(ANLNext)
 
-find_package( Boost 1.47.0 )
+find_package(Boost 1.48.0 Required)
 
 ### Definition of installation path
 set(AN_INSTALL_PREFIX $ENV{HOME})
