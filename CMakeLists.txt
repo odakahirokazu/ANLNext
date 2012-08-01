@@ -1,43 +1,37 @@
-### CMakeLists.txt for ANL Next
+####### CMakeLists.txt for ANL Next
 
 cmake_minimum_required(VERSION 2.8)
 
+### Initial definition of cmake variables
+set(CMAKE_INSTALL_PREFIX $ENV{HOME} CACHE PATH "install prefix")
+set(CMAKE_BUILD_TYPE Release CACHE STRING "build type")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -W -Wall" CACHE STRING "CXX_FLAGS for debug")
+set(CMAKE_C_FLAGS_DEBUG "-g -W -Wall" CACHE STRING "C_FLAGS for debug")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -W -Wall" CACHE STRING "CXX_FLAGS for release")
+set(CMAKE_C_FLAGS_RELEASE "-O2 -W -Wall" CACHE STRING "C_FLAGS for release")
+
+### Definition of project
 project(ANLNext)
+find_package(Boost 1.48.0 REQUIRED)
+set(CMAKE_MODULE_PATH ${ANLNext_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
-find_package(Boost 1.48.0 Required)
+message("-- Install destination prefix: ${CMAKE_INSTALL_PREFIX}")
 
-### Definition of installation path
-set(AN_INSTALL_PREFIX $ENV{HOME})
-set(AN_BIN_INSTALL_PATH ${AN_INSTALL_PREFIX}/bin)
-set(AN_LIB_INSTALL_PATH ${AN_INSTALL_PREFIX}/lib)
-
-message("\"make install\" will install executables and dynamic libraries to ${AN_BIN_INSTALL_PATH} and ${AN_LIB_INSTALL_PATH}")
-
-set(AN_TOP ${CMAKE_CURRENT_SOURCE_DIR})
-set(AN_TOP_BUILD ${CMAKE_CURRENT_BINARY_DIR})
-
-set(CMAKE_MODULE_PATH ${AN_TOP}/cmake ${CMAKE_MODULE_PATH})
-
+### options
+option(USE_Ruby "enable Ruby binding" ON)
+option(USE_Exe "enable standalone executables" OFF)
 option(USE_TVector "enable ROOT vector" OFF)
 option(USE_HepVector "enable CLHEP vector" OFF)
 option(USE_G4Vector "enable G4-CLHEP vector" OFF)
-option(USE_Ruby "enable Ruby binding" ON)
-option(USE_All "enable all libraries" OFF)
+option(USE_ALL "use all libraries" OFF)
 
-if(USE_All)
+if(USE_ALL)
   set(USE_TVector ON)
   set(USE_G4Vector ON)
-endif(USE_All)
+endif(USE_ALL)
 
-### build type
-set(CMAKE_BUILD_TYPE Release)
-
-### compile option (Debug) 
-set(CMAKE_CXX_FLAGS_DEBUG "-g -W -Wall")
-set(CMAKE_C_FLAGS_DEBUG "-g -W -Wall")
-
-### compile option (Release)
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -W -Wall")
-set(CMAKE_C_FLAGS_RELEASE "-O2 -W -Wall")
-
+### subdirecties
 add_subdirectory(source)
+add_subdirectory(cmake)
+
+### END

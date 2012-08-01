@@ -1,12 +1,6 @@
-cmake_minimum_required(VERSION 2.8)
-
-if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-  set(LINUX_FLAG true)
-  set(RUBY_BINDING_SUFFIX ".so")
-else ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-  set(LINUX_FLAG false) # Mac
-  set(RUBY_BINDING_SUFFIX ".bundle")
-endif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+####### definition of the target
+set(TARGET_LIBRARY ANLNext)
+#######
 
 set(READLINE_LIB readline)
 
@@ -45,7 +39,8 @@ include_directories(
   )
 
 link_directories(${ROOT_LIB_DIR} ${CLHEP_LIB_DIR})
-add_library(ANLNext SHARED
+
+add_library(${TARGET_LIBRARY} SHARED
   src/ANLNext.cc
   src/ANLNext_interactive.cc
   src/ANLVModule.cc
@@ -54,15 +49,19 @@ add_library(ANLNext SHARED
   src/VModuleParameter.cc
   )
 
-target_link_libraries(ANLNext
+target_link_libraries(${TARGET_LIBRARY}
   ${ROOT_LIB} ${CLHEP_LIB} ${READLINE_LIB})
 
-set_property(TARGET ANLNext
-  PROPERTY LIBRARY_OUTPUT_DIRECTORY ${AN_TOP_BUILD}/lib)
+install(TARGETS ${TARGET_LIBRARY}
+  LIBRARY
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
-install(TARGETS ANLNext LIBRARY DESTINATION ${AN_LIB_INSTALL_PATH})
+install(DIRECTORY include/
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/include/anl
+  FILES_MATCHING PATTERN "*.hh")
 
 if(USE_Ruby)
   add_subdirectory(ruby)
-  install(FILES script/ANLLib.rb DESTINATION ${AN_LIB_INSTALL_PATH}/ruby)
+  install(FILES script/ANLLib.rb
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/ruby)
 endif(USE_Ruby)

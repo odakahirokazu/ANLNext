@@ -1,37 +1,43 @@
+########################################################
+set(TARGET_EXT_LIBRARY anl)
+set(SWIG_IF_FILE ${TARGET_EXT_LIBRARY}.i)
+########################################################
+
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 
 find_package(Ruby)
 include_directories(${RUBY_INCLUDE_PATH})
-# include_directories(${RUBY_HDR_DIR})
-# message("Ruby header directory: ${RUBY_HDR_DIR}")
 
-# workaround Ruby 1.9.2
-# add_definitions(-DHAVE_STRUCT_TIMESPEC -DHAVE_STRUCT_TIMEZONE)
-
-# compile option (Debug) 
+### compile option (Debug) 
 set(CMAKE_CXX_FLAGS_DEBUG "-W -g")
 set(CMAKE_C_FLAGS_DEBUG "-W -g")
 
-# compile option (Release)
+### compile option (Release)
 set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 set(CMAKE_C_FLAGS_RELEASE "-O2")
 
 set(CMAKE_SWIG_FLAGS "")
 
-#include_directories(/usr/local/include /usr/include)
-link_directories(${AN_TOP_BUILD}/lib)
+set_source_files_properties(${SWIG_IF_FILE} PROPERTIES CPLUSPLUS ON)
+# set_source_files_properties(${SWIG_IF_FILE} PROPERTIES SWIG_FLAGS "-includeall")
+swig_add_module(${TARGET_EXT_LIBRARY} ruby ${SWIG_IF_FILE})
+swig_link_libraries(${TARGET_EXT_LIBRARY} ${RUBY_LIBRARY} ANLNext)
 
-set_source_files_properties(anl.i PROPERTIES CPLUSPLUS ON)
-# set_source_files_properties(anl.i PROPERTIES SWIG_FLAGS "-includeall")
-swig_add_module(anl ruby anl.i)
-swig_link_libraries(anl ${RUBY_LIBRARY} ANLNext)
+if(APPLE)
+  set(RUBY_BINDING_SUFFIX ".bundle")
+else(APPLE)
+  set(RUBY_BINDING_SUFFIX ".so")
+endif(APPLE)
 
-set_target_properties(anl
- PROPERTIES
+set_target_properties(${TARGET_EXT_LIBRARY}
+  PROPERTIES
   PREFIX ""
-  SUFFIX ${RUBY_BINDING_SUFFIX}
-  LIBRARY_OUTPUT_DIRECTORY ${AN_TOP_BUILD}/lib/ruby
-)
+  SUFFIX ${RUBY_BINDING_SUFFIX})
 
-install(TARGETS anl LIBRARY DESTINATION ${AN_LIB_INSTALL_PATH}/ruby)
+install(TARGETS ${TARGET_EXT_LIBRARY}
+  LIBRARY
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/ruby)
+
+install(FILES ${SWIG_IF_FILE}
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/include/anl/ruby)

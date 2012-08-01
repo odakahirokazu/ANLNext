@@ -112,9 +112,11 @@ If you want to use vector libraries of ROOT and CLHEP (in Geant4), perform below
 
 (5) Install
 
-By default, "make install" will install binaries and libraries into the user's home directory, such as ${HOME}/bin or ${HOME}/lib.
-
 % make install
+
+By default, "make install" will install binaries and libraries into the user's home directory, such as ${HOME}/bin or ${HOME}/lib. You can change it by setting CMAKE_INSTALL_PREFIX:
+
+% cmake .. -DCMAKE_INSTALL_PREFIX=/path/to/install
 
 (6) Set environment variable ANLNEXT_TOP as a path to the source tree. For example, add to .bashrc the line below:
 

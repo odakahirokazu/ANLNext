@@ -23,5 +23,5 @@ foreach(app ${app_list})
   
   set_property(TARGET ${app} PROPERTY
     RUNTIME_OUTPUT_DIRECTORY ${ANL_BIN_DIR})
-  install(TARGETS ${app} RUNTIME DESTINATION ${AN_BIN_INSTALL_PATH})
+  install(TARGETS ${app} RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX})
 endforeach(app)
