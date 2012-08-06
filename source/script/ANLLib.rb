@@ -203,14 +203,6 @@ class ANLApp
     status = anl.Prepare()
     status == Anl::AS_OK or raise "Prepare() returned "+status.to_s
 
-    if @display_frequency==0
-      if @n_loop>0
-        @display_frequency = n/100
-      else
-        @display_frequency = 10000
-      end
-    end
-  
     status = anl.Initialize()
     status == Anl::AS_OK or raise "Initialize() returned "+status.to_s
 
