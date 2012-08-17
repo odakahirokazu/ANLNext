@@ -40,7 +40,7 @@ struct type_info<int>
 template <>
 struct type_info<double>
 {
-  static std::string name() { return "float"; }
+  static std::string name() { return "double"; }
 };
 
 template <>
@@ -58,7 +58,7 @@ struct type_info<std::vector<int> >
 template <>
 struct type_info<std::vector<double> >
 {
-  static std::string name() { return "vector of float"; }
+  static std::string name() { return "vector of double"; }
 };
 
 template <>
