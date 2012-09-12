@@ -1,42 +1,60 @@
 cmake_minimum_required(VERSION 2.8)
 
+### Initial definition of cmake variables
+set(CMAKE_INSTALL_PREFIX $ENV{HOME} CACHE PATH "install prefix")
+set(CMAKE_BUILD_TYPE Release CACHE STRING "build type")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -W -Wall" CACHE STRING "CXX_FLAGS for debug")
+set(CMAKE_C_FLAGS_DEBUG "-g -W -Wall" CACHE STRING "C_FLAGS for debug")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -W -Wall" CACHE STRING "CXX_FLAGS for release")
+set(CMAKE_C_FLAGS_RELEASE "-O3 -W -Wall" CACHE STRING "C_FLAGS for release")
+
+### Definition of project
 project(MyPackage)
 
 set(MY_LIBRARY MyPackage)
+set(USE_RUBY ON)
 
-### Definition of installation path
-set(AN_INSTALL_PREFIX $ENV{HOME})
-set(AN_BIN_INSTALL_PATH ${AN_INSTALL_PREFIX}/bin)
-set(AN_LIB_INSTALL_PATH ${AN_INSTALL_PREFIX}/lib)
+### External libraries
+### BOOST ###
+find_package(BOOST 1.48.0 REQUIRED)
+set(BOOST_INC_DIR ${Boost_INCLUDE_DIRS})
+set(BOOST_LIB_DIR ${Boost_LIBRARY_DIRS})
+if(NOT (Boost_VERSION VERSION_LESS 105000))
+  find_package(BOOST 1.50.0 COMPONENTS system REQUIRED)
+  if(Boost_system_LIBRARY)
+    set(BOOST_LIB ${Boost_system_LIBRARY})
+  else(Boost_system_LIBRARY)
+    if(Boost_USE_MULTITHREADED)
+      set(BOOST_LIB boost_system-mt)
+    else()
+      set(BOOST_LIB boost_system)
+    endif()
+  endif(Boost_system_LIBRARY)
+endif()
 
-message("\"make install\" will install executables and dynamic libraries to ${AN_BIN_INSTALL_PATH} and ${AN_LIB_INSTALL_PATH}")
-
-set(ANLNEXT_DIR $ENV{ANLNEXT_TOP}/source)
-# set(CMAKE_MODULE_PATH cmake ${CMAKE_MODULE_PATH})
-
-option(USE_Ruby "enable Ruby binding" ON)
-# option(USE_Exe "enable standalone executables" OFF)
-
-### build type
-set(CMAKE_BUILD_TYPE Release)
-
-### compile option (Debug) 
-set(CMAKE_CXX_FLAGS_DEBUG "-g -W -Wall")
-set(CMAKE_C_FLAGS_DEBUG "-g -W -Wall")
-
-### compile option (Release)
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -W -Wall")
-set(CMAKE_C_FLAGS_RELEASE "-O2 -W -Wall")
+### ANL ###
+if(NOT DEFINED ANLNEXT_INSTALL)
+  if($ENV{ANLNEXT_INSTALL})
+    set(ANLNEXT_INSTALL $ENV{ANLNEXT_INSTALL})
+  else($ENV{ANLNEXT_INSTALL})
+    set(ANLNEXT_INSTALL $ENV{HOME})
+  endif($ENV{ANLNEXT_INSTALL})
+endif(NOT DEFINED ANLNEXT_INSTALL)
+set(ANLNEXT_INC_DIR ${ANLNEXT_INSTALL}/include/anl)
+set(ANLNEXT_LIB_DIR ${ANLNEXT_INSTALL}/lib)
+set(ANLNEXT_LIB ANLNext)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ANLNEXT_LIB_DIR}/anl)
+message("-- ANLNEXT_INSTALL = ${ANLNEXT_INSTALL}")
 
 # add_definitions(-DANL_USE_TVECTOR -DANL_USE_HEPVECTOR)
 
 include_directories(
   include
-  ${ANLNEXT_DIR}/include
+  ${ANLNEXT_INC_DIR}
   )
 
 link_directories(
-  ${AN_LIB_INSTALL_PATH}
+  ${ANLNEXT_LIB_DIR}
   )
 
 set(ANL_MODULES
@@ -51,12 +69,8 @@ target_link_libraries(${MY_LIBRARY}
   ANLNext
   )
 
-install(TARGETS ${MY_LIBRARY} LIBRARY DESTINATION ${AN_LIB_INSTALL_PATH})
+install(TARGETS ${MY_LIBRARY} LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
-# if(USE_Exe)
-#   add_subdirectory(executable)
-# endif(USE_Exe)
-
-if(USE_Ruby)
+if(USE_RUBY)
   add_subdirectory(ruby)
-endif(USE_Ruby)
+endif(USE_RUBY)

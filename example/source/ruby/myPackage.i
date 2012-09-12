@@ -16,7 +16,7 @@
 class MyModule : public anl::ANLVModule
 {
 public:
-  MyModule(const std::string& module_name="MyModule",
-           const std::string& module_version="1.0");
+  MyModule(const std::string& name="MyModule",
+           const std::string& version="1.0");
   ~MyModule();
 };

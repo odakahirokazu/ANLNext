@@ -42,7 +42,7 @@
     <p>For easy installation, this package uses CMake to generate building tools such as Makefile.</p>
 
     <h4>(3) <a href="http://www.boost.org/">Boost C++ library</a></h4>
-    <p>[version 1.47.0 or later]</p>
+    <p>[version 1.48.0 or later]</p>
     <p>Because ANL Next uses "header-only" libraries of Boost, you do not need to build the library. Just uncompress the Boost package and place it to location you want to install. Then, register its location to header including path of C++ compiler. For example, add to .bashrc the line below:</p>
     <pre class="example">% export CPLUS_INCLUDE_PATH=${CPLUS_INCLUDE_PATH}:pass/to/boost</pre>
 
@@ -74,20 +74,24 @@
 
     <p>(4) Perform cmake to generate Makefiles. Give the directory of the source tree to "cmake" command. There are several options.</p>
     <ul>
-      <li>USE_TVector [Default=OFF]: enable ROOT vector.</li>
-      <li>USE_HepVector [Default=OFF]: enable CLHEP vector.</li>
-      <li>USE_G4Vector [Default=OFF]: enable Geant4-CLHEP vector. Use this option for Geant4 version 9.5 or later.</li>
-      <li>USE_Ruby [Default=ON]: enable Ruby binding.</li>
+      <li>ANL_USE_RUBY [Default=ON]: enable Ruby binding.</li>
+      <!--li>ANL_USE_EXE [Default=OFF]: enable standalone executable.</li-->
+      <li>ANL_USE_TVECTOR [Default=OFF]: enable ROOT vector.</li>
+      <li>ANL_USE_HEPVECTOR [Default=OFF]: enable CLHEP vector.</li>
+      <li>ANL_USE_G4VECTOR [Default=OFF]: enable Geant4-CLHEP vector. Use this option for Geant4 version 9.5 or later.</li>
+      <li>ANL_INSTALL_HEADERS [Default=ON]: install all header files.</li>
+      <li>ANL_INSTALL_CMAKE_FILES [Default=ON]: install all cmake files.</li>
+      <!--li>ANL_INSTALL_CMAKE_FILES [Default=ON]: install all cmake files.</li-->
     </ul>
     <pre class="example">% cmake .. [options]</pre>
     <p id="cmake_example_option_vector">If you want to use vector libraries of ROOT and CLHEP (Geant4 included), perform below:</p>
-    <pre class="example">% cmake .. -DUSE_TVector=ON -DUSE_G4Vector=ON</pre>
+    <pre class="example">% cmake .. -DANL_USE_TVECTOR=ON -DANL_USE_G4VECTOR=ON</pre>
     <p>4) Make</p>
     <pre class="example">% make</pre>
     <p>5) Install. By default, "make install" will install binaries and libraries into the user's home directory, such as ${HOME}/bin or ${HOME}/lib.</p>
     <pre class="example">% make install</pre>
-    <p>6) Set environment variable ANLNEXT_TOP as a path to the source tree. For example, add to .bashrc the line below:</p>
-    <pre class="example">% export ANLNEXT_TOP=/path/to/ANLNEXT</pre>
+    <!--<p>6) Set environment variable ANLNEXT_TOP as a path to the source tree. For example, add to .bashrc the line below:</p>
+    <pre class="example">% export ANLNEXT_TOP=/path/to/ANLNEXT</pre>-->
 
     <h2>3. Getting Started</h2>
     <h3>3.1 For Application Users</h3>
