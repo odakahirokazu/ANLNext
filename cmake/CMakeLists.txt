@@ -1,4 +1,6 @@
-if(USE_Exe)
-  install(FILES gen_anl.cmake
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/anl)
-endif(USE_Exe)
+if(ANL_USE_EXE)
+  if(ANL_INSTALL_CMAKE_FILES)
+    install(FILES gen_anl.cmake
+      DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/anl)
+  endif(ANL_INSTALL_CMAKE_FILES)
+endif(ANL_USE_EXE)

@@ -4,7 +4,7 @@ set(TARGET_LIBRARY ANLNext)
 
 set(READLINE_LIB readline)
 
-if (USE_TVector)
+if(ANL_USE_TVECTOR)
   set(ROOTSYS $ENV{ROOTSYS})
   # set(ROOTDIR "/root")
   set(ROOTDIR "")
@@ -12,25 +12,25 @@ if (USE_TVector)
   set(ROOT_LIB_DIR ${ROOTSYS}/lib${ROOTDIR})
   set(ROOT_LIB Core Physics)
   add_definitions(-DANL_USE_TVECTOR)
-endif (USE_TVector)
+endif(ANL_USE_TVECTOR)
 
-if (USE_HepVector)
+if(ANL_USE_HEPVECTOR)
   ### use system-CLHEP
   add_definitions(-DANL_USE_HEPVECTOR)
   set(CLHEP_BASE_DIR $ENV{CLHEP_BASE_DIR})
   set(CLHEP_INC_DIR ${CLHEP_BASE_DIR}/include)
   set(CLHEP_LIB_DIR ${CLHEP_BASE_DIR}/lib)
   set(CLHEP_LIB CLHEP)
-endif (USE_HepVector)
+endif(ANL_USE_HEPVECTOR)
 
-if (USE_G4Vector)
+if(ANL_USE_G4VECTOR)
   ### use Geant4-CLHEP (Geant4.9.5 or later)
   add_definitions(-DANL_USE_HEPVECTOR)
   find_package(Geant4 REQUIRED)
   include(${Geant4_USE_FILE})
   set(CLHEP_INC_DIR ${Geant4_INCLUDE_DIRS})
   set(CLHEP_LIB G4clhep)
-endif (USE_G4Vector)
+endif(ANL_USE_G4VECTOR)
 
 include_directories(
   include
@@ -56,12 +56,14 @@ install(TARGETS ${TARGET_LIBRARY}
   LIBRARY
   DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
-install(DIRECTORY include/
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/include/anl
-  FILES_MATCHING PATTERN "*.hh")
+if(ANL_INSTALL_HEADERS)
+  install(DIRECTORY include/
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/anl
+    FILES_MATCHING PATTERN "*.hh")
+endif(ANL_INSTALL_HEADERS)
 
-if(USE_Ruby)
+if(ANL_USE_RUBY)
   add_subdirectory(ruby)
   install(FILES script/ANLLib.rb
     DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/ruby)
-endif(USE_Ruby)
+endif(ANL_USE_RUBY)
