@@ -143,6 +143,7 @@ class ANLVModule
 
   void expose_parameter(const std::string& name);
   
+  %rename(set_param) set_parameter(const std::string& name, bool val);
   %rename(set_param) set_parameter(const std::string& name, int val);
   %rename(set_param) set_parameter(const std::string& name, double val);
   %rename(set_param) set_parameter(const std::string& name, const std::string& val);
@@ -153,6 +154,7 @@ class ANLVModule
   %rename(set_svec) set_parameter(const std::string&,
 				  const std::vector<std::string>&);
 
+  void set_parameter(const std::string& name, bool val);
   void set_parameter(const std::string& name, int val);
   void set_parameter(const std::string& name, double val);
   void set_parameter(const std::string& name, const std::string& val);

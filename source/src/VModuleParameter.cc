@@ -66,7 +66,15 @@ VModuleParameter::VModuleParameter(const std::string& name,
 }
 
 
-void VModuleParameter::set_value(int v) 
+void VModuleParameter::set_value(bool v)
+{
+  std::ostringstream oss;
+  oss << v << " " << "[bool]";
+  throw_type_match_exception(oss.str());
+}
+
+
+void VModuleParameter::set_value(int v)
 {
   std::ostringstream oss;
   oss << v << " " << "[int]";

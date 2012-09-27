@@ -32,6 +32,12 @@ struct type_info
 };
 
 template <>
+struct type_info<bool>
+{
+  static std::string name() { return "bool"; }
+};
+
+template <>
 struct type_info<int>
 {
   static std::string name() { return "int"; }

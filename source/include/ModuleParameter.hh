@@ -55,22 +55,10 @@
 namespace anl
 {
 
-template <typename T, bool integer, bool floating>
+template <typename T>
 struct param_call_type
 {
   typedef typename boost::call_traits<T>::param_type type;
-};
-
-template <typename T, bool integer>
-struct param_call_type<T, integer, true>
-{
-  typedef double type;
-};
-
-template <typename T>
-struct param_call_type<T, true, false>
-{
-  typedef int type;
 };
 
 
@@ -82,15 +70,10 @@ struct param_call_type<T, true, false>
 template <typename T>
 class ModuleParameter : public VModuleParameter
 {
-#if 0
-  typedef boost::integral_constant<bool,
-                                   boost::icl::is_container<T>::value> container_truth_type;
-#else
   typedef boost::integral_constant<bool,
                                    boost::icl::is_container<T>::value
                                    && !boost::is_same<T, std::string>::value> container_truth_type;
-#endif
-
+  
   typedef boost::integral_constant<bool,
                                    boost::is_arithmetic<T>::value> arithmetic_truth_type;
     
@@ -100,9 +83,7 @@ class ModuleParameter : public VModuleParameter
   typedef boost::integral_constant<bool,
                                    boost::is_integral<T>::value> int_truth_type;
 
-  typedef typename param_call_type<T,
-                                   int_truth_type::value,
-                                   float_truth_type::value>::type call_type;
+  typedef typename param_call_type<T>::type call_type;
   
 public:
   ModuleParameter(T* ptr, const std::string& name);

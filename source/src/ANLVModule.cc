@@ -218,6 +218,9 @@ void ANLVModule::EvsReset(const std::string& key)
 
 // instantiation of function templates
 template
+void ANLVModule::set_parameter(const std::string& name, bool val);
+
+template
 void ANLVModule::set_parameter(const std::string& name, int val);
 
 template
@@ -238,6 +241,9 @@ void ANLVModule::set_parameter(const std::string& name,
 template
 void ANLVModule::set_parameter(const std::string& name,
                                const std::vector<std::string>& val);
+
+template
+void ANLVModule::set_map_value(const std::string& name, bool val);
 
 template
 void ANLVModule::set_map_value(const std::string& name, int val);

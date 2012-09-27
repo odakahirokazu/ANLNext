@@ -82,6 +82,7 @@ public:
   
   virtual bool ask() { return ask_base(); }
   
+  virtual void set_value(bool v);
   virtual void set_value(int v);
   virtual void set_value(double v);
   virtual void set_value(const std::string& v);
@@ -107,6 +108,7 @@ public:
   { return boost::shared_ptr<VModuleParameter>(); }
   virtual void add_map_value(boost::shared_ptr<VModuleParameter> /* param */) {}
   virtual void enable_map_value(int /* type */, const std::vector<int>& /* enables */) {}
+  virtual void set_map_value(const std::string& /* name */, bool /* val */) {}
   virtual void set_map_value(const std::string& /* name */, int /* val */) {}
   virtual void set_map_value(const std::string& /* name */, double /* val */) {}
   virtual void set_map_value(const std::string& /* name */, const std::string& /* val */) {}
