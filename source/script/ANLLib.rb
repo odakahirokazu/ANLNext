@@ -66,6 +66,15 @@ class ANLApp
     @current_module = anl_module
   end
 
+  def insert(index, anl_module)
+    @module_list.insert(index, anl_module)
+    sym = anl_module.module_name.to_sym
+    unless @module_hash.has_key? sym
+      @module_hash[sym] = anl_module
+    end
+    @current_module = anl_module
+  end
+
   def chain(anl_module_class, module_name=nil, module_version=nil)
     mod = nil
     if module_version
@@ -95,6 +104,14 @@ class ANLApp
       raise 'Module symbol '+anl_module_symbol.to_s+' is not registered.'
     end
     return mod
+  end
+
+  def index(anl_module_symbol)
+    @module_list.index{|mod| mod.module_name.to_sym==anl_module_symbol }
+  end
+
+  def rindex(anl_module_symbol)
+    @module_list.rindex{|mod| mod.module_name.to_sym==anl_module_symbol }
   end
 
   def text(description)
@@ -155,7 +172,7 @@ class ANLApp
 
   def set_parameters(anl_module_symbol, parameters={}, &set_param)
     mod = expose_module(anl_module_symbol)
-    @set_module_list << mod
+    @set_module_list << mod unless @set_module_list.include? mod
     parameters.each{|name, value|
       setp(name, value)
     }
