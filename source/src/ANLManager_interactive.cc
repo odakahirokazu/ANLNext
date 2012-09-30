@@ -17,8 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-#include "ANLNext.hh"
-#include "ANLVModule.hh"
+#include "ANLManager.hh"
+#include "BasicModule.hh"
 
 #include <sstream>
 #include <iomanip>
@@ -46,7 +46,7 @@ const char* prompt(EditLine *e)
 
 using namespace anl;
 
-ANLStatus ANLNext::InteractiveCom() throw(ANLException)
+ANLStatus ANLManager::InteractiveCom() throw(ANLException)
 {
   ANLStatus status = AS_OK;
   
@@ -59,7 +59,7 @@ ANLStatus ANLNext::InteractiveCom() throw(ANLException)
   EditLine *el;
   History *anlHistory;
   HistEvent event;
-  el = el_init("ANLNext_Com", stdin, stdout, stderr);
+  el = el_init("ANL_Com", stdin, stdout, stderr);
   el_set(el, EL_PROMPT, &prompt);
   el_set(el, EL_EDITOR, "emacs");
 
@@ -218,7 +218,7 @@ ANLStatus ANLNext::InteractiveCom() throw(ANLException)
 }
 
 
-void ANLNext::InteractiveComHelp()
+void ANLManager::InteractiveComHelp()
 {
   std::cout << "-------------------------------------------------------\n"
             << "  help              : show this help\n"
@@ -237,7 +237,7 @@ void ANLNext::InteractiveComHelp()
 }
 
 
-ANLStatus ANLNext::InteractiveModifyParam(int n)
+ANLStatus ANLManager::InteractiveModifyParam(int n)
 {
   ANLStatus status = AS_OK;
   if (n==0) {
@@ -260,7 +260,7 @@ ANLStatus ANLNext::InteractiveModifyParam(int n)
     }
   }
   else if (0<n && n<=static_cast<int>(m_Modules.size())) {
-    ANLVModule* mo = m_Modules[n-1];
+    BasicModule* mo = m_Modules[n-1];
     std::cout << mo->module_name()
               << " mod_com()" << std::endl;
     status = mo->mod_com();
@@ -283,7 +283,7 @@ ANLStatus ANLNext::InteractiveModifyParam(int n)
 }
 
 
-void ANLNext::InteractivePrintParam(int n)
+void ANLManager::InteractivePrintParam(int n)
 {
   if (n==0) {
     for (AMIter mod=m_Modules.begin(); mod!=m_Modules.end(); ++mod) {
@@ -293,7 +293,7 @@ void ANLNext::InteractivePrintParam(int n)
     }
   }
   else if (0<n && n<=static_cast<int>(m_Modules.size())) {
-    ANLVModule* mo = m_Modules[n-1];
+    BasicModule* mo = m_Modules[n-1];
     std::cout << mo->module_name() << " parameters" << std::endl;
     mo->print_parameters();
   }
@@ -303,7 +303,7 @@ void ANLNext::InteractivePrintParam(int n)
 }
 
 
-void ANLNext::InteractiveModuleSwitch(int n, bool module_sw)
+void ANLManager::InteractiveModuleSwitch(int n, bool module_sw)
 {
   if (n==0) {
     for (AMIter mod=m_Modules.begin(); mod!=m_Modules.end(); ++mod) {
@@ -318,7 +318,7 @@ void ANLNext::InteractiveModuleSwitch(int n, bool module_sw)
     }
   }
   else if (0<n && n<=static_cast<int>(m_Modules.size())) {
-    ANLVModule* mo = m_Modules[n-1];
+    BasicModule* mo = m_Modules[n-1];
     if (module_sw) {
       mo->on();
       std::cout << mo->module_name() << " turned on." << std::endl;
@@ -334,7 +334,7 @@ void ANLNext::InteractiveModuleSwitch(int n, bool module_sw)
 }
 
 
-ANLStatus ANLNext::InteractiveAna() throw(ANLException)
+ANLStatus ANLManager::InteractiveAna() throw(ANLException)
 {
   ANLStatus status = AS_OK;
 
@@ -348,7 +348,7 @@ ANLStatus ANLNext::InteractiveAna() throw(ANLException)
   History *anlHistory;
   HistEvent event;
 
-  el = el_init("ANLNext_Ana", stdin, stdout, stderr);
+  el = el_init("ANL_Ana", stdin, stdout, stderr);
   el_set(el, EL_PROMPT, &prompt);
   el_set(el, EL_EDITOR, "emacs");
 
@@ -430,7 +430,7 @@ ANLStatus ANLNext::InteractiveAna() throw(ANLException)
 }
 
 
-void ANLNext::InteractiveAnaHelp()
+void ANLManager::InteractiveAnaHelp()
 {
   std::cout << "-------------------------------------------------------\n"
             << "  help              : show this help\n"

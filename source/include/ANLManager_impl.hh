@@ -17,20 +17,20 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_ANLNext_impl_H
-#define ANL_ANLNext_impl_H 1
+#ifndef ANL_ANLManager_impl_H
+#define ANL_ANLManager_impl_H 1
 
-#include "ANLNext.hh"
-#include "ANLVModule.hh"
+#include "ANLManager.hh"
+#include "BasicModule.hh"
 #include "ANLException.hh"
 
 namespace anl
 {
 
 template<typename T>
-ANLStatus ANLNext::routine_modfn(T func, const std::string& func_id)
+ANLStatus ANLManager::routine_modfn(T func, const std::string& func_id)
 {
-  std::cout << "ANLNext: " << func_id << " routine started." << std::endl;
+  std::cout << "ANLManager: " << func_id << " routine started." << std::endl;
 
   ANLStatus status = AS_OK;
   AMIter const mod_end = m_Modules.end();
@@ -40,7 +40,7 @@ ANLStatus ANLNext::routine_modfn(T func, const std::string& func_id)
     try {
       status = ((*mod)->*func)();
       if (status != AS_OK ) {
-        std::cout << "ANLNext: " << func_id << " routine stopped.\n"
+        std::cout << "ANLManager: " << func_id << " routine stopped.\n"
                   << (*mod)->module_name() << "::mod_" << func_id
                   << " return " << status << std::endl;
         break;
@@ -56,4 +56,4 @@ ANLStatus ANLNext::routine_modfn(T func, const std::string& func_id)
 
 }
 
-#endif /* ANL_ANLNext_impl_H */
+#endif /* ANL_ANLManager_impl_H */

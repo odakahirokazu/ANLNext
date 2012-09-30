@@ -22,7 +22,7 @@
 
 using namespace anl;
 
-ANLException::ANLException(const ANLVModule* mod)
+ANLException::ANLException(const BasicModule* mod)
 {
   *this << ANLErrInfo(std::string("ANL Module: ") + mod->module_name());
 }
@@ -34,7 +34,7 @@ ANLException::ANLException(const std::string& msg)
 }
 
 
-void ANLException::setModule(const ANLVModule* mod)
+void ANLException::setModule(const BasicModule* mod)
 {
   *this << ANLErrInfo(std::string("ANL Module: ") + mod->module_name());
 }

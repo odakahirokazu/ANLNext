@@ -17,8 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_ANLNext_H
-#define ANL_ANLNext_H 1
+#ifndef ANL_ANLManager_H
+#define ANL_ANLManager_H 1
 
 #define ANL_ANALYZE_INTERRUPT 1
 #define ANL_INITIALIZE_INTERRUPT 1
@@ -39,7 +39,7 @@ namespace anl
 {
 
 class EvsManager;
-class ANLVModule;
+class BasicModule;
 
 struct ANLModuleCounter
 {
@@ -62,16 +62,16 @@ struct ANLToLower
  * @author Hirokazu Odaka
  * @date 2010-06-xx
  */
-class ANLNext : private boost::noncopyable
+class ANLManager : private boost::noncopyable
 {
 public:
-  ANLNext();
-  ~ANLNext(); // non-virtual destructor
+  ANLManager();
+  ~ANLManager(); // non-virtual destructor
 
   /**
    * set ANL modules
    */
-  void SetModules(std::vector<ANLVModule*> modules) throw(ANLException);
+  void SetModules(std::vector<BasicModule*> modules) throw(ANLException);
 
   ANLStatus Startup() throw(ANLException);
   ANLStatus Initialize() throw(ANLException);
@@ -110,11 +110,11 @@ private:
   ANLStatus routine_modfn(T func, const std::string& func_id);
 
 private:
-  std::vector<ANLVModule*> m_Modules;
+  std::vector<BasicModule*> m_Modules;
   EvsManager* m_Evs;
   std::vector<ANLModuleCounter> m_Counter;
 };
 
 }
 
-#endif /* ANL_ANLNext_H */
+#endif /* ANL_ANLManager_H */

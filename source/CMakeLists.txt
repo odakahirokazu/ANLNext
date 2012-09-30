@@ -41,8 +41,9 @@ include_directories(
 link_directories(${ROOT_LIB_DIR} ${CLHEP_LIB_DIR})
 
 add_library(${TARGET_LIBRARY} SHARED
-  src/ANLNext.cc
-  src/ANLNext_interactive.cc
+  src/ANLManager.cc
+  src/ANLManager_interactive.cc
+  src/BasicModule.cc
   src/ANLVModule.cc
   src/ANLException.cc
   src/EvsManager.cc

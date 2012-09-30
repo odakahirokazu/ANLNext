@@ -28,7 +28,7 @@
 namespace anl
 {
 
-class ANLVModule;
+class BasicModule;
 
 /**
  * Interface to access other ANL modules.
@@ -39,23 +39,23 @@ class ANLVModule;
 class ANLAccess
 {
 public:
-  const ANLVModule* GetModule(const std::string& name)
+  const BasicModule* GetModule(const std::string& name)
   { return GetModuleNC(name); }
   
-  ANLVModule* GetModuleNC(const std::string& name);
+  BasicModule* GetModuleNC(const std::string& name);
 
-  void RegisterModule(const std::string& name, ANLVModule* module);
+  void RegisterModule(const std::string& name, BasicModule* module);
 
   bool Exist(const std::string& name);
 
 private:
-  typedef std::map<std::string, ANLVModule*> ANLModuleMap;
+  typedef std::map<std::string, BasicModule*> ANLModuleMap;
   ANLModuleMap module_map;
 };
 
 
 inline
-ANLVModule* ANLAccess::GetModuleNC(const std::string& name)
+BasicModule* ANLAccess::GetModuleNC(const std::string& name)
 {
   ANLModuleMap::iterator it = module_map.find(name);
   if (it == module_map.end()) {
@@ -67,7 +67,7 @@ ANLVModule* ANLAccess::GetModuleNC(const std::string& name)
 
 
 inline
-void ANLAccess::RegisterModule(const std::string& name, ANLVModule* module)
+void ANLAccess::RegisterModule(const std::string& name, BasicModule* module)
 {
   module_map[name] = module;
 }

@@ -1,13 +1,18 @@
-# = ANLLib
-# Author:: Hirokazu Odaka
-# 
-# This is a class library written in Ruby for the ANL Next framework
+# ANLLib
+# Class library written in Ruby for the ANL Next framework.
+#
+# @author: Hirokazu Odaka
 #
 
 require 'anl'
 require 'rexml/document'
 
 
+# Get a list of parameters registered in the given module.
+#
+# @param [ANLModule] anl_module 
+# @return [Array] list of parameters registered in the given module.
+#
 def parameter_list(anl_module)
   l = []
   i = anl_module.ModParamBegin
@@ -20,6 +25,8 @@ def parameter_list(anl_module)
 end
 
 
+# Class of two- or three-dimensional vector.
+#
 class Vector
   def initialize(x, y, z=nil)
     @x = x
@@ -37,26 +44,45 @@ class Vector
 end
 
 
+# A utility method to make a Vector object.
+#
+# @param [Float] x first component of the vector.
+# @param [Float] y second component of the vector.
+# @param [Float] z third component of the vector.
+# @return [Vector] a Vector object (x, y, z)
+#
 def vec(x, y, z=nil)
   return Vector.new(x, y, z)
 end
 
 
+# Class of an ANL Application.
+# @author Hirokazu Odaka
+#
 class ANLApp
-  def initialize(module_list = [], n_loop = -1, display_frequency = 1000)
+  # Initialization method.
+  #
+  # @param [Array] module_list a list of ANL modules.
+  #
+  def initialize(module_list = [])
     @module_list = module_list
     @module_hash = {}
     @current_module = nil
-    @n_loop = n_loop
-    @display_frequency = display_frequency
+    @n_loop = -1
+    @display_frequency = 1000
     @set_param_list = []
     @set_module_list = []
     @is_startup = false
   end
   
-  attr_writer :module_list, :n_loop, :display_frequency
   attr_reader :n_loop, :display_frequency, :is_startup
+  attr_writer :module_list, :n_loop, :display_frequency
 
+  # Push an ANL module to the module chain.
+  #
+  # @param [ANLModule] anl_module ANL module to be pushed.
+  # @return [ANLModule] ANL module pushed.
+  #
   def push(anl_module)
     @module_list << anl_module
     sym = anl_module.module_name.to_sym
@@ -66,6 +92,12 @@ class ANLApp
     @current_module = anl_module
   end
 
+  # Insert an ANL module to the module chain at a specified position.
+  #
+  # @param [Fixnum] index position.
+  # @param [ANLModule] anl_module ANL module to be inserted.
+  # @return [ANLModule] ANL module inserted.
+  #
   def insert(index, anl_module)
     @module_list.insert(index, anl_module)
     sym = anl_module.module_name.to_sym
@@ -75,13 +107,15 @@ class ANLApp
     @current_module = anl_module
   end
 
-  def chain(anl_module_class, module_name=nil, module_version=nil)
+  # Push an ANL module that is specified by a symbol to the module chain.
+  #
+  # @param [Symbol] anl_module_class ANL module to be pushed.
+  # @param [String] module_name ANL module name.
+  # @return [ANLModule] ANL module pushed.
+  #
+  def chain(anl_module_class, module_name=nil)
     mod = nil
-    if module_version
-      instance_eval %{
-        mod = #{anl_module_class}.new(module_name, module_version)
-      }
-    elsif module_name
+    if module_name
       instance_eval %{
         mod = #{anl_module_class}.new(module_name)
       }
@@ -94,10 +128,21 @@ class ANLApp
     push(mod)
   end
 
+  # Get an ANL module by module symbol and set it to the current module.
+  #
+  # @param [Symbol] anl_module_symbol ANL module.
+  # @return [ANLModule] ANL module.
+  #
   def expose_module(anl_module_symbol)
     @current_module = get_module(anl_module_symbol)
   end
 
+  # Get an ANL module by module symbol.
+  # This method does not change the current module.
+  #
+  # @param [Symbol] anl_module_symbol ANL module.
+  # @return [ANLModule] ANL module.
+  #
   def get_module(anl_module_symbol)
     mod = @module_hash[anl_module_symbol]
     if mod==nil
@@ -106,18 +151,45 @@ class ANLApp
     return mod
   end
 
+  # Get position of the first ANL module which has the specified name
+  # in the analysis chain.
+  #
+  # @param [Symbol] anl_module_symbol ANL module.
+  # @return [Fixnum] Position.
+  #
   def index(anl_module_symbol)
     @module_list.index{|mod| mod.module_name.to_sym==anl_module_symbol }
   end
 
+  # Get position of the last ANL module which has the specified name
+  # in the analysis chain.
+  #
+  # @param [Symbol] anl_module_symbol ANL module.
+  # @return [Fixnum] Position.
+  #
   def rindex(anl_module_symbol)
     @module_list.rindex{|mod| mod.module_name.to_sym==anl_module_symbol }
   end
 
+  # Set a text describing the current module.
+  #
+  # @param [String] description a text description for the current module.
+  #
   def text(description)
     @current_module.set_module_description(description)
+    return
   end
 
+  # Set a parameter of the current module.
+  # Before the ANL startup session, this method reserves parameter setting,
+  # and acctual setting to the ANL module object is performed after the
+  # startup session.
+  # If this method is called after the startup session, parameter setting is
+  # performed immediately.
+  #
+  # @param [String] name name of the parameter.
+  # @param value value to be set.
+  #
   def setp(name, value)
     mod = @current_module
     set_param =
@@ -151,8 +223,21 @@ class ANLApp
     else
       @set_param_list << set_param
     end
+    
+    return
   end
 
+  # Set a map-type parameter of the current module.
+  # Before the ANL startup session, this method reserves parameter setting,
+  # and acctual setting to the ANL module object is performed after the
+  # startup session.
+  # If this method is called after the startup session, parameter setting is
+  # performed immediately.
+  #
+  # @param [String] map_name name of the parameter.
+  # @param [String] key key of the map content, or name of inserted object.
+  # @param [Hash] map_values list of (key, value) pairs of the parameter.
+  #
   def insert_map(map_name, key, map_values)
     mod = @current_module
     set_param = lambda{
@@ -168,8 +253,22 @@ class ANLApp
     else
       @set_param_list << set_param
     end
+
+    return
   end
 
+  # Utility method to set parameters of the current module.
+  # Before the ANL startup session, this method reserves parameter setting,
+  # and acctual setting to the ANL module object is performed after the
+  # startup session.
+  # If this method is called after the startup session, parameter setting is
+  # performed immediately.
+  #
+  # @param [Symbol] anl_module_symbol Symbol of ANL module.
+  # @param [Hash] parameters list of parameters (name, value).
+  # @yield [mod] a block can be given for additional process.
+  # @yieldparam mod the current module is given.
+  #
   def set_parameters(anl_module_symbol, parameters={}, &set_param)
     mod = expose_module(anl_module_symbol)
     @set_module_list << mod unless @set_module_list.include? mod
@@ -177,8 +276,16 @@ class ANLApp
       setp(name, value)
     }
     set_param.call(mod) if block_given?
+
+    return
   end
-  
+
+  # Set loop number and display frequency.
+  #
+  # @param [Fixnum] n_loop number of loop. -1 for infinite loop.
+  # @param [Fixnum] display_frequency frequency of displaying loop ID
+  #     to STDOUT.
+  #
   def set_loop(n_loop=nil, display_frequency=nil)
     if n_loop
       @n_loop = n_loop
@@ -197,6 +304,8 @@ class ANLApp
     end
   end
 
+  # Execute the ANL startup session.
+  #
   def startup()
     @anl = Anl::ANLNext.new
     vec = Anl::ModuleVector.new(@module_list)
@@ -207,6 +316,14 @@ class ANLApp
     return @anl
   end
 
+  # Run the ANL analysis.
+  #
+  # @param [Fixnum] n_loop number of loop. -1 for infinite loop.
+  # @param [Fixnum] display_frequency frequency of displaying loop ID
+  #     to STDOUT.
+  # @yield [mod] a block can be given for additional process.
+  # @yieldparam mod the current module is given.
+  #
   def run(n_loop=nil, display_frequency=nil, &set_param)
     set_loop(n_loop, display_frequency)
     
@@ -235,9 +352,15 @@ class ANLApp
     puts "  ### ANL NEXT Exception ###  "
     puts ""
     puts ex
+    raise
   end
   
-  def runInteractive(&set_param)
+  # Start the ANL interactive session for running the ANL analysis.
+  #
+  # @yield [mod] a block can be given for additional process.
+  # @yieldparam mod the current module is given.
+  #
+  def run_interactive(&set_param)
     anl = startup()
 
     @set_param_list.each{|s| s.call }
@@ -262,6 +385,8 @@ class ANLApp
     puts ex
   end
 
+  # Print all parameters of all the module in the analysis chain.
+  #
   def print_all_param()
     anl = startup()
     @module_list.each{|m|
@@ -271,6 +396,11 @@ class ANLApp
     }
   end
 
+  # Make a XML document describing module parameters.
+  #
+  # @param [STRING] file_name output XML file name. If nil, output to STDOUT.
+  # @param [STRING] category
+  #
   def make_doc(file_name = nil, category="")
     doc = REXML::Document.new
     doc << REXML::XMLDecl.new('1.0', 'UTF-8')
@@ -331,6 +461,8 @@ class ANLApp
     end
   end
 
+  # Make a Ruby run script template for this ANL chain.
+  #
   def make_script(file_name = nil, include_text="",
                   n_loop=10000, display_frequency=1000)
     out = file_name ? File::open(file_name, 'w') : STDOUT

@@ -1,7 +1,8 @@
 %module anl
 %{
-#include "ANLNext.hh"
+#include "ANLManager.hh"
 #include "VModuleParameter.hh"
+#include "BasicModule.hh"
 #include "ANLVModule.hh"
 #include "ANLException.hh"
 
@@ -13,13 +14,13 @@ using namespace anl;
 %include "std_vector.i"
 %include "std_list.i"
 
-%template(ModuleVector) std::vector<anl::ANLVModule*>;
+%template(ModuleVector) std::vector<anl::BasicModule*>;
 
-%template(VectorI)   std::vector<int>;
-%template(VectorD)   std::vector<double>;
+%template(VectorI) std::vector<int>;
+%template(VectorD) std::vector<double>;
 %template(VectorStr) std::vector<std::string>;
 
-%template(ListI)   std::list<int>;
+%template(ListI) std::list<int>;
 
 namespace boost
 {
@@ -81,11 +82,11 @@ typedef ModParamList::iterator ModParamIter;
 typedef std::list<boost::shared_ptr<VModuleParameter> >::const_iterator ModParamConstIter;
 
 
-class ANLNext
+class ANLManager
 {
  public:
-  ANLNext();
-  ~ANLNext();
+  ANLManager();
+  ~ANLManager();
   
   %exception{
     try {
@@ -96,7 +97,7 @@ class ANLNext
     }
   }
   
-  void SetModules(std::vector<anl::ANLVModule*> modules);
+  void SetModules(std::vector<anl::BasicModule*> modules);
   ANLStatus Startup();
   ANLStatus Initialize();
   ANLStatus Analyze(int num_event, int display_freq);
@@ -109,16 +110,16 @@ class ANLNext
 };
 
  
-class ANLVModule
+class BasicModule
 {
  public:
-  ANLVModule(const std::string& name = "ANLVModule",
-             const std::string& version = "0.0");
-  ANLVModule(const ANLVModule& r);
-  virtual ~ANLVModule();
+  BasicModule();
+  BasicModule(const BasicModule& r);
+  virtual ~BasicModule();
 
   virtual ANLStatus mod_prepare();
 
+  std::string module_id();
   std::string module_name();
   std::string module_version();
   std::vector<std::string> get_alias();
@@ -148,25 +149,25 @@ class ANLVModule
   %rename(set_param) set_parameter(const std::string& name, double val);
   %rename(set_param) set_parameter(const std::string& name, const std::string& val);
   %rename(set_ivec) set_parameter(const std::string&,
-				  const std::vector<int>&);
+                                  const std::vector<int>&);
   %rename(set_fvec) set_parameter(const std::string&,
-				  const std::vector<double>&);
+                                  const std::vector<double>&);
   %rename(set_svec) set_parameter(const std::string&,
-				  const std::vector<std::string>&);
+                                  const std::vector<std::string>&);
 
   void set_parameter(const std::string& name, bool val);
   void set_parameter(const std::string& name, int val);
   void set_parameter(const std::string& name, double val);
   void set_parameter(const std::string& name, const std::string& val);
   void set_parameter(const std::string& name,
-		     const std::vector<int>& val);
+                     const std::vector<int>& val);
   void set_parameter(const std::string& name,
-		     const std::vector<double>& val);
+                     const std::vector<double>& val);
   void set_parameter(const std::string& name,
-		     const std::vector<std::string>& val);
-
+                     const std::vector<std::string>& val);
+  
   void clear_array(const std::string& name);
-
+  
   void set_vector(const std::string& name, double x, double y);
   void set_vector(const std::string& name, double x, double y, double z);
 
@@ -189,12 +190,21 @@ class ANLVModule
       $self->expose_parameter(map_name);
       $self->set_map_key(key);
       if (rb_block_given_p()) {
-	VALUE r = swig::from<anl::ANLVModule*>(self);
-	rb_yield(r);
+        VALUE r = swig::from<anl::BasicModule*>(self);
+        rb_yield(r);
       }
       $self->insert_map();
     }
   }
+};
+
+
+class ANLVModule : public BasicModule
+{
+ public:
+  ANLVModule(const std::string& name="ANLVModule", const std::string& version="0.1");
+  ANLVModule(const ANLVModule& r);
+  virtual ~ANLVModule();
 };
 
 }

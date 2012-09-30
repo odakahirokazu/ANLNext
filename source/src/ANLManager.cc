@@ -17,8 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-#include "ANLNext.hh"
-#include "ANLVModule.hh"
+#include "ANLManager.hh"
+#include "BasicModule.hh"
 #include "EvsManager.hh"
 #include "ANLAccess.hh"
 
@@ -30,24 +30,24 @@
 #include <signal.h>
 #endif
 
-#include "ANLNext_impl.hh"
+#include "ANLManager_impl.hh"
 
 using namespace anl;
 
-ANLNext::ANLNext()
+ANLManager::ANLManager()
 {
   m_Evs = new EvsManager;
   m_Evs->Initialize();
 }
 
 
-ANLNext::~ANLNext()
+ANLManager::~ANLManager()
 {
   delete m_Evs;
 }
 
 
-void ANLNext::SetModules(std::vector<ANLVModule*> modules) throw(ANLException)
+void ANLManager::SetModules(std::vector<BasicModule*> modules) throw(ANLException)
 {
   m_Modules = modules;
   
@@ -60,7 +60,7 @@ void ANLNext::SetModules(std::vector<ANLVModule*> modules) throw(ANLException)
     
     for (AMIter r = m_Modules.begin(); r != m_Modules.end(); ++r) {
       std::string name;
-      name = (*r)->module_name();
+      name = (*r)->module_id();
       if ( (*mod)->accessible(name) ) {
         anlAccess.RegisterModule(name, *r);
       }
@@ -82,7 +82,7 @@ void ANLNext::SetModules(std::vector<ANLVModule*> modules) throw(ANLException)
 }
 
 
-ANLStatus ANLNext::Startup() throw(ANLException)
+ANLStatus ANLManager::Startup() throw(ANLException)
 {
   std::cout << '\n'
             << "      ***********************************\n"
@@ -94,7 +94,7 @@ ANLStatus ANLNext::Startup() throw(ANLException)
 }
 
 
-ANLStatus ANLNext::Initialize() throw(ANLException)
+ANLStatus ANLManager::Initialize() throw(ANLException)
 {
 #if ANL_INITIALIZE_INTERRUPT
   struct sigaction sa;
@@ -120,7 +120,7 @@ ANLStatus ANLNext::Initialize() throw(ANLException)
   status = routine_his();
   if (status != AS_OK) goto final;
   
-  std::cout << "ANLNext: initialization done." << std::endl;
+  std::cout << "ANLManager: initialization done." << std::endl;
   
  final:
   std::cout << std::endl;
@@ -135,7 +135,7 @@ ANLStatus ANLNext::Initialize() throw(ANLException)
 }
 
 
-ANLStatus ANLNext::Analyze(int num_event, int display_freq) throw(ANLException)
+ANLStatus ANLManager::Analyze(int num_event, int display_freq) throw(ANLException)
 {
 #if ANL_ANALYZE_INTERRUPT
   struct sigaction sa;
@@ -151,20 +151,20 @@ ANLStatus ANLNext::Analyze(int num_event, int display_freq) throw(ANLException)
 #endif
 
   ANLStatus status = AS_OK;
-  std::cout << "ANLNext: start bgnrun routine." << std::endl;
+  std::cout << "ANLManager: start bgnrun routine." << std::endl;
   status = routine_bgnrun();
   if (status != AS_OK) {
     goto final;
   }
 
-  std::cout << "ANLNext: start analysis." << std::endl;
+  std::cout << "ANLManager: start analysis." << std::endl;
   status = process_analysis(num_event, display_freq);
   if (status != AS_OK) {
     print_summary();
     goto final;
   }
 
-  std::cout << "ANLNext: start endrun routine." << std::endl;
+  std::cout << "ANLManager: start endrun routine." << std::endl;
   status = routine_endrun();
   if (status != AS_OK) {
     print_summary();
@@ -186,7 +186,7 @@ ANLStatus ANLNext::Analyze(int num_event, int display_freq) throw(ANLException)
 }
 
 
-ANLStatus ANLNext::Exit() throw(ANLException)
+ANLStatus ANLManager::Exit() throw(ANLException)
 {
 #if ANL_EXIT_INTERRUPT
   struct sigaction sa;
@@ -210,7 +210,7 @@ ANLStatus ANLNext::Exit() throw(ANLException)
   std::cout << std::endl;
   m_Evs->PrintSummary();
 
-  std::cout << "\nANLNext: exiting..." << std::endl;
+  std::cout << "\nANLManager: exiting..." << std::endl;
 
 #if ANL_EXIT_INTERRUPT
   if( sigaction(SIGINT, &sa_org, 0) != 0 ) {
@@ -223,18 +223,18 @@ ANLStatus ANLNext::Exit() throw(ANLException)
 }
 
 
-ANLStatus ANLNext::Prepare() throw(ANLException)
+ANLStatus ANLManager::Prepare() throw(ANLException)
 {
   return routine_prepare();
 }
 
 
-int ANLNext::getModuleNumber(const std::string& name, bool strict)
+int ANLManager::getModuleNumber(const std::string& id, bool strict)
 {
   int modNumber = -1;
   if (strict) {
     for (size_t i=0; i<m_Modules.size(); ++i) {
-      if (m_Modules[i]->module_name()==name) {
+      if (m_Modules[i]->module_id()==id) {
         if (modNumber==-1) {
           modNumber = i+1;
         }
@@ -246,9 +246,9 @@ int ANLNext::getModuleNumber(const std::string& name, bool strict)
   }
   else {
     for (size_t i=0; i<m_Modules.size(); ++i) {
-      std::string name2(name);
+      std::string name2(id);
       std::transform(name2.begin(), name2.end(), name2.begin(), ANLToLower());
-      std::string moduleNameLower(m_Modules[i]->module_name());
+      std::string moduleNameLower(m_Modules[i]->module_id());
       std::transform(moduleNameLower.begin(), moduleNameLower.end(),
                      moduleNameLower.begin(), ANLToLower());
       if (moduleNameLower.find(name2)==0) {
@@ -265,7 +265,7 @@ int ANLNext::getModuleNumber(const std::string& name, bool strict)
 }
 
 
-void ANLNext::show_analysis()
+void ANLManager::show_analysis()
 {
   std::cout << '\n'
             << "      ***********************************\n"
@@ -286,7 +286,11 @@ void ANLNext::show_analysis()
     for(size_t i = 0; i < m_Modules.size(); i++) {
       std::cout
         << std::right << std::setw(4) << i+1 << "    "
-        << std::left << std::setw(40) << m_Modules[i]->module_name() << "  "
+        << std::left << std::setw(40) << m_Modules[i]->module_name();
+      if (m_Modules[i]->module_id() != m_Modules[i]->module_name()) {
+        std::cout << '/' << m_Modules[i]->module_id();
+      }
+      std::cout << "  "
         << std::left << std::setw(9) << m_Modules[i]->module_version() << "  "
         << std::left << std::setw(8) << (m_Modules[i]->is_on() ? "ON" : "OFF")
         << '\n';
@@ -296,7 +300,7 @@ void ANLNext::show_analysis()
 }
 
 
-void ANLNext::print_parameters()
+void ANLManager::print_parameters()
 {
   std::cout << '\n'
             << "      ***********************************\n"
@@ -306,14 +310,14 @@ void ANLNext::print_parameters()
   
   AMIter const mod_end = m_Modules.end();
   for (AMIter mod = m_Modules.begin(); mod != mod_end; ++mod) {
-    std::cout << "--- " << (*mod)->module_name() << " ---"<< std::endl;
+    std::cout << "--- " << (*mod)->module_id() << " ---"<< std::endl;
     (*mod)->print_parameters();
     std::cout << std::endl;
   }
 }
 
 
-void ANLNext::reset_counter()
+void ANLManager::reset_counter()
 {
   for (size_t i=0; i<m_Counter.size(); i++) {
     m_Counter[i].entry = 0;
@@ -325,7 +329,7 @@ void ANLNext::reset_counter()
 }
 
 
-ANLStatus ANLNext::process_analysis(int num_event, int display_freq)
+ANLStatus ANLManager::process_analysis(int num_event, int display_freq)
 {
   ANLStatus status = AS_OK;
   int iEvent = 0;
@@ -353,7 +357,7 @@ ANLStatus ANLNext::process_analysis(int num_event, int display_freq)
           status = (*mod)->mod_ana();
         }
         catch (const ANLException& ex) {
-          ex << ANLErrModFnInfo( (*mod)->module_name() + "::mod_ana" );
+          ex << ANLErrModFnInfo( (*mod)->module_id() + "::mod_ana" );
           ex << ANLErrEventIDInfo(iEvent);
           throw;
         }
@@ -402,7 +406,7 @@ ANLStatus ANLNext::process_analysis(int num_event, int display_freq)
 }
 
 
-void ANLNext::print_summary()
+void ANLManager::print_summary()
 {
   const size_t n = m_Modules.size();
   std::cout << "      ***********************************\n"
@@ -411,8 +415,12 @@ void ANLNext::print_summary()
             << "               PUT: " << m_Counter[0].entry << '\n'
             << "                |\n";
   for (size_t i=0; i<n; i++) {
-    std::string moduleID = m_Modules[i]->module_name() +
-      "  version  " + m_Modules[i]->module_version();
+    
+    std::string moduleID = m_Modules[i]->module_name();
+    if (m_Modules[i]->module_id() != m_Modules[i]->module_name()) {
+      moduleID += "/" + m_Modules[i]->module_id();
+    }
+    moduleID += "  version  " + m_Modules[i]->module_version();
     std::cout << boost::format("     [%3d]  %-40s") % i % moduleID;
     if (m_Counter[i].quit>1) { std::cout << "  ---> Quit"; }
     std::cout <<  '\n';
@@ -427,43 +435,43 @@ void ANLNext::print_summary()
 }
 
 
-ANLStatus ANLNext::routine_startup()
+ANLStatus ANLManager::routine_startup()
 {
-  return routine_modfn(&ANLVModule::mod_startup, "startup");
+  return routine_modfn(&BasicModule::mod_startup, "startup");
 }
 
 
-ANLStatus ANLNext::routine_prepare()
+ANLStatus ANLManager::routine_prepare()
 {
-  return routine_modfn(&ANLVModule::mod_prepare, "prepare");
+  return routine_modfn(&BasicModule::mod_prepare, "prepare");
 }
 
 
-ANLStatus ANLNext::routine_init()
+ANLStatus ANLManager::routine_init()
 {
-  return routine_modfn(&ANLVModule::mod_init, "init");
+  return routine_modfn(&BasicModule::mod_init, "init");
 }
 
 
-ANLStatus ANLNext::routine_his()
+ANLStatus ANLManager::routine_his()
 {
-  return routine_modfn(&ANLVModule::mod_his, "his");
+  return routine_modfn(&BasicModule::mod_his, "his");
 }
 
 
-ANLStatus ANLNext::routine_bgnrun()
+ANLStatus ANLManager::routine_bgnrun()
 {
-  return routine_modfn(&ANLVModule::mod_bgnrun, "bgnrun");
+  return routine_modfn(&BasicModule::mod_bgnrun, "bgnrun");
 }
 
 
-ANLStatus ANLNext::routine_endrun()
+ANLStatus ANLManager::routine_endrun()
 {
-  return routine_modfn(&ANLVModule::mod_endrun, "endrun");
+  return routine_modfn(&BasicModule::mod_endrun, "endrun");
 }
 
 
-ANLStatus ANLNext::routine_exit()
+ANLStatus ANLManager::routine_exit()
 {
-  return routine_modfn(&ANLVModule::mod_exit, "exit");
+  return routine_modfn(&BasicModule::mod_exit, "exit");
 }

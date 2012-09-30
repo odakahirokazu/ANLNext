@@ -31,7 +31,7 @@ typedef boost::error_info<struct tag_ANLErr, std::string> ANLErrInfo;
 typedef boost::error_info<struct tag_ANLModFn, std::string> ANLErrModFnInfo;
 typedef boost::error_info<struct tag_ANLEventID, int> ANLErrEventIDInfo;
 
-class ANLVModule;
+class BasicModule;
 
 /**
  * Exception class for the ANL Next framework.
@@ -42,10 +42,10 @@ class ANLVModule;
 struct ANLException : boost::exception, std::exception
 {
   ANLException() {}
-  explicit ANLException(const ANLVModule* mod);
+  explicit ANLException(const BasicModule* mod);
   explicit ANLException(const std::string& msg);
 
-  void setModule(const ANLVModule* mod);
+  void setModule(const BasicModule* mod);
   const std::string print() const { return diagnostic_information(*this); }
 };
 
