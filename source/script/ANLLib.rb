@@ -307,7 +307,7 @@ class ANLApp
   # Execute the ANL startup session.
   #
   def startup()
-    @anl = Anl::ANLNext.new
+    @anl = Anl::ANLManager.new
     vec = Anl::ModuleVector.new(@module_list)
     @anl.SetModules(vec)
     status = @anl.Startup()
