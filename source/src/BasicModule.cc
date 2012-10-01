@@ -22,7 +22,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include "EvsManager.hh"
-#include "ANLNext.hh"
+#include "ANLManager.hh"
 
 using namespace anl;
 
