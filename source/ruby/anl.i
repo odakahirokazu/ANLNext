@@ -5,8 +5,6 @@
 #include "BasicModule.hh"
 #include "ANLVModule.hh"
 #include "ANLException.hh"
-
-using namespace anl;
 %}
 
 %include "exception.i"
@@ -92,7 +90,7 @@ class ANLManager
     try {
       $action
 	}
-    catch (const ANLException& ex) {
+    catch (const anl::ANLException& ex) {
       SWIG_exception(SWIG_RuntimeError, ex.print().c_str());
     }
   }
