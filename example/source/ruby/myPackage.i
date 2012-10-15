@@ -1,6 +1,6 @@
 %module myPackage
 %{
-#include "ANLVModule.hh"
+#include "BasicModule.hh"
 
 // include headers of my modules
 #include "MyModule.hh"
@@ -13,10 +13,9 @@
 
 // interface to my modules
 
-class MyModule : public anl::ANLVModule
+class MyModule : public anl::BasicModule
 {
 public:
-  MyModule(const std::string& name="MyModule",
-           const std::string& version="1.0");
+  MyModule();
   ~MyModule();
 };

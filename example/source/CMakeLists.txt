@@ -16,11 +16,11 @@ set(USE_RUBY ON)
 
 ### External libraries
 ### BOOST ###
-find_package(BOOST 1.48.0 REQUIRED)
+find_package(Boost 1.48.0 REQUIRED)
 set(BOOST_INC_DIR ${Boost_INCLUDE_DIRS})
 set(BOOST_LIB_DIR ${Boost_LIBRARY_DIRS})
 if(NOT (Boost_VERSION VERSION_LESS 105000))
-  find_package(BOOST 1.50.0 COMPONENTS system REQUIRED)
+  find_package(Boost 1.50.0 COMPONENTS system REQUIRED)
   if(Boost_system_LIBRARY)
     set(BOOST_LIB ${Boost_system_LIBRARY})
   else(Boost_system_LIBRARY)

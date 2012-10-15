@@ -6,17 +6,20 @@
  *
  */
 
-#ifndef MyModule_hh
-#define MyModule_hh
+#ifndef MyModule_H
+#define MyModule_H 1
 
-#include "ANLVModule.hh"
+#include "BasicModule.hh"
 
-class MyModule : public anl::ANLVModule
+
+class MyModule : public anl::BasicModule
 {
 public:
-  MyModule(const std::string& name="MyModule",
-           const std::string& version="1.0");
+  MyModule();
   ~MyModule();
+
+  std::string module_name() const { return "MyModule"; }
+  std::string module_version() const { return "1.0"; }
   
   anl::ANLStatus mod_startup();
   anl::ANLStatus mod_init();
@@ -29,4 +32,4 @@ public:
 private:
 };
 
-#endif
+#endif /* MyModule_H */

@@ -2,9 +2,7 @@
 
 using namespace anl;
 
-MyModule::MyModule(const std::string& module_name,
-                   const std::string& module_version)
-  : anl::ANLVModule(module_name, module_version)
+MyModule::MyModule()
 {
 }
 
