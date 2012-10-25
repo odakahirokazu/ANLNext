@@ -7,7 +7,11 @@ find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 
 find_package(Ruby)
-include_directories(${RUBY_INCLUDE_PATH})
+include_directories(
+  ../include
+  ${BOOST_INC_DIR}
+  ${RUBY_INCLUDE_PATH}
+)
 
 ### compile option (Debug) 
 set(CMAKE_CXX_FLAGS_DEBUG "-W -g")

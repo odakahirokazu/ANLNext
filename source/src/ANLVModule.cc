@@ -31,6 +31,7 @@ ANLVModule::ANLVModule(const std::string& name, const std::string& version)
 
 
 ANLVModule::ANLVModule(const ANLVModule& r)
+  : BasicModule(r)
 {
   m_ModuleName = r.m_ModuleName +
     "#" + boost::lexical_cast<std::string>(copy_id());

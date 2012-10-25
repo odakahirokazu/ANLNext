@@ -3,6 +3,7 @@ set(TARGET_LIBRARY ANLNext)
 #######
 
 set(READLINE_LIB readline)
+set(BOOST_INC_DIR ${Boost_INCLUDE_DIRS})
 
 if(ANL_USE_TVECTOR)
   set(ROOTSYS $ENV{ROOTSYS})
@@ -36,6 +37,7 @@ include_directories(
   include
   ${CLHEP_INC_DIR}
   ${ROOT_INC_DIR}
+  ${BOOST_INC_DIR}
   )
 
 link_directories(${ROOT_LIB_DIR} ${CLHEP_LIB_DIR})
