@@ -61,11 +61,19 @@ struct param_call_type
   typedef typename boost::call_traits<T>::param_type type;
 };
 
+/* this template specialization is a workaround for 32-bit Linux. */
+template <>
+struct param_call_type<double>
+{
+  typedef double type;
+};
+
 
 /**
  * A class template for an ANL module parameter.
  * @author Hirokazu Odaka
  * @date 2011-07-12
+ * @date 2012-12-12
  */
 template <typename T>
 class ModuleParameter : public VModuleParameter
