@@ -7,10 +7,23 @@ find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 
 find_package(Ruby)
+set(RUBY_LINK_FLAGS " ")
+if(${RUBY_VERSION} VERSION_GREATER 1.9.0)
+  set(RUBY_INCLUDE_DIRS ${RUBY_HDR_DIR})
+  set(RUBY_LIBRARY "")
+  if(APPLE)
+    set(RUBY_LINK_FLAGS "-Wl,-undefined,dynamic_lookup -Wl,-multiply_defined,suppress -Wl,-flat_namespace")
+  endif()
+endif()
+
+message("-- Ruby include: ${RUBY_INCLUDE_DIRS}")
+message("-- Ruby library: ${RUBY_LIBRARY}")
+
+
 include_directories(
   ../include
   ${BOOST_INC_DIR}
-  ${RUBY_INCLUDE_PATH}
+  ${RUBY_INCLUDE_DIRS}
 )
 
 ### compile option (Debug) 
@@ -25,6 +38,7 @@ set(CMAKE_SWIG_FLAGS "")
 
 set_source_files_properties(${SWIG_IF_FILE} PROPERTIES CPLUSPLUS ON)
 # set_source_files_properties(${SWIG_IF_FILE} PROPERTIES SWIG_FLAGS "-includeall")
+add_definitions(-DHAVE_STRUCT_TIMESPEC -DHAVE_SIGNBIT)
 swig_add_module(${TARGET_EXT_LIBRARY} ruby ${SWIG_IF_FILE})
 swig_link_libraries(${TARGET_EXT_LIBRARY} ${RUBY_LIBRARY} ANLNext)
 
@@ -37,7 +51,9 @@ endif(APPLE)
 set_target_properties(${TARGET_EXT_LIBRARY}
   PROPERTIES
   PREFIX ""
-  SUFFIX ${RUBY_BINDING_SUFFIX})
+  SUFFIX ${RUBY_BINDING_SUFFIX}
+  LINK_FLAGS ${RUBY_LINK_FLAGS}
+)
 
 install(TARGETS ${TARGET_EXT_LIBRARY}
   LIBRARY
