@@ -4,11 +4,12 @@ set(TARGET_LIBRARY ANLNext)
 
 set(READLINE_LIB readline)
 set(BOOST_INC_DIR ${Boost_INCLUDE_DIRS})
+set(BOOST_LIB boost_thread-mt boost_system-mt boost_chrono-mt)
 
 if(ANL_USE_TVECTOR)
   set(ROOTSYS $ENV{ROOTSYS})
-  # set(ROOTDIR "/root")
-  set(ROOTDIR "")
+  set(ROOTDIR "/root")
+  # set(ROOTDIR "")
   set(ROOT_INC_DIR ${ROOTSYS}/include${ROOTDIR})
   set(ROOT_LIB_DIR ${ROOTSYS}/lib${ROOTDIR})
   set(ROOT_LIB Core Physics)
@@ -53,7 +54,7 @@ add_library(${TARGET_LIBRARY} SHARED
   )
 
 target_link_libraries(${TARGET_LIBRARY}
-  ${ROOT_LIB} ${CLHEP_LIB} ${READLINE_LIB})
+  ${BOOST_LIB} ${ROOT_LIB} ${CLHEP_LIB} ${READLINE_LIB})
 
 install(TARGETS ${TARGET_LIBRARY}
   LIBRARY

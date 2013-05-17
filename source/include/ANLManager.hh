@@ -75,13 +75,16 @@ public:
 
   ANLStatus Startup() throw(ANLException);
   ANLStatus Initialize() throw(ANLException);
-  ANLStatus Analyze(int num_event, int display_freq) throw(ANLException);
+  ANLStatus Analyze(int num_event, bool thread_mode=true) throw(ANLException);
   ANLStatus Exit() throw(ANLException);
   
   ANLStatus Prepare() throw(ANLException);
 
   ANLStatus InteractiveCom() throw(ANLException);
   ANLStatus InteractiveAna() throw(ANLException);
+
+  void SetDisplayFrequency(int v) { m_DisplayFrequency = v; }
+  int DisplayFrequency() const { return m_DisplayFrequency; }
   
 private:
   ANLStatus routine_startup();
@@ -95,7 +98,7 @@ private:
   void show_analysis();
   void print_parameters();
   void reset_counter();
-  ANLStatus process_analysis(int num_event, int display_freq);
+  ANLStatus process_analysis(int num_event);
   void print_summary();
 
   int getModuleNumber(const std::string& name, bool strict=true);
@@ -109,10 +112,17 @@ private:
   template<typename T>
   ANLStatus routine_modfn(T func, const std::string& func_id);
 
+  // thread mode
+private:
+  void __void_process_analysis(int num_event, ANLStatus* status);
+  void interactive_session();
+
 private:
   std::vector<BasicModule*> m_Modules;
   EvsManager* m_Evs;
   std::vector<ANLModuleCounter> m_Counter;
+  int m_DisplayFrequency;
+  bool m_Interrupt;
 };
 
 }

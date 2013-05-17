@@ -73,11 +73,14 @@ class ANLApp
     @set_param_list = []
     @set_module_list = []
     @is_startup = false
+    @thread_mode = true
   end
   
-  attr_reader :n_loop, :display_frequency, :is_startup
-  attr_writer :module_list, :n_loop, :display_frequency
-
+  attr_accessor :n_loop, :display_frequency, :thread_mode
+  attr_reader :is_startup
+  attr_writer :module_list
+  
+  
   # Push an ANL module to the module chain.
   #
   # @param [ANLModule] anl_module ANL module to be pushed.
@@ -287,23 +290,15 @@ class ANLApp
   #     to STDOUT.
   #
   def set_loop(n_loop=nil, display_frequency=nil)
-    if n_loop
-      @n_loop = n_loop
-      if display_frequency
-        @display_frequency = display_frequency
-      else
-        @display_frequency = n_loop/100
-      end
+    @n_loop = n_loop || -1
+    @display_frequency = display_frequency
+    if @n_loop < 0
+      @display_frequency ||= 10000
     else
-      @n_loop = -1
-      if display_frequency
-        @display_frequency = display_frequency
-      else
-        @display_frequency = 1000
-      end
+      @display_frequency ||= 10**((Math.log10(n_loop)-1.5).to_i)
     end
   end
-
+  
   # Execute the ANL startup session.
   #
   def startup()
@@ -341,9 +336,13 @@ class ANLApp
     status == Anl::AS_OK or raise "Initialize() returned "+status.to_s
 
     puts "\nAnalysis Begin  | Time: " + Time.now.to_s
-    status = anl.Analyze(@n_loop, @display_frequency)
+    $stdout.flush
+    anl.SetDisplayFrequency(@display_frequency)
+    status = anl.Analyze(@n_loop, @thread_mode)
+    
     status == Anl::AS_OK or raise "Analyze() returned "+status.to_s
     puts "Analysis End    | Time: " + Time.now.to_s
+    $stdout.flush
     
     status = anl.Exit()
     status == Anl::AS_OK or raise "Exit() returned "+status.to_s

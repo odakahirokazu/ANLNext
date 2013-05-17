@@ -94,16 +94,20 @@ class ANLManager
       SWIG_exception(SWIG_RuntimeError, ex.print().c_str());
     }
   }
+
+  void SetDisplayFrequency(int v);
+  int DisplayFrequency() const;
   
   void SetModules(std::vector<anl::BasicModule*> modules);
   ANLStatus Startup();
   ANLStatus Initialize();
-  ANLStatus Analyze(int num_event, int display_freq);
+  ANLStatus Analyze(int num_event, bool thread_mode=true);
   ANLStatus Exit();
   ANLStatus Prepare();
 
   ANLStatus InteractiveCom();
   ANLStatus InteractiveAna();
+
   %exception;
 };
 
