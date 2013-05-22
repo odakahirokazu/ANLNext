@@ -31,6 +31,7 @@
 #include "ModuleParameter.hh"
 #include "ANLException.hh"
 #include "ANLAccess.hh"
+#include "ANLMacro.hh"
 
 #if ANL_USE_TVECTOR
 #include "TVector2.h"
@@ -53,17 +54,18 @@ class EvsManager;
  * @author Hirokazu Odaka
  * @date 2010-06-xx
  * @date 2010-09-18
+ * @date 2013-05-22
  */
 class BasicModule
 {
+  DEFINE_ANL_MODULE(BasicModule, 0.0);
 public:
   BasicModule();
   BasicModule(const BasicModule& r);
-
   virtual ~BasicModule() {}
 
-  virtual std::string module_name()  const { return "BasicModule"; }
-  virtual std::string module_version() const { return "0.0"; }
+  std::string module_name() const { return __module_name__(); }
+  std::string module_version() const { return __module_version__(); }
   
   void set_module_id(const std::string& v);
   std::string module_id() const { return (this->*m_ModuleIDMethod)(); }

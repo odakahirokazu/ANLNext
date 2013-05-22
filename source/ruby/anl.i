@@ -3,7 +3,6 @@
 #include "ANLManager.hh"
 #include "VModuleParameter.hh"
 #include "BasicModule.hh"
-#include "ANLVModule.hh"
 #include "ANLException.hh"
 %}
 
@@ -198,15 +197,6 @@ class BasicModule
       $self->insert_map();
     }
   }
-};
-
-
-class ANLVModule : public BasicModule
-{
- public:
-  ANLVModule(const std::string& name="ANLVModule", const std::string& version="0.1");
-  ANLVModule(const ANLVModule& r);
-  virtual ~ANLVModule();
 };
 
 }

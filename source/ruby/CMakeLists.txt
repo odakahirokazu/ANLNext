@@ -3,6 +3,14 @@ set(TARGET_EXT_LIBRARY anl)
 set(SWIG_IF_FILE ${TARGET_EXT_LIBRARY}.i)
 ########################################################
 
+# compile option (Debug) 
+set(CMAKE_CXX_FLAGS_DEBUG "-W -g")
+set(CMAKE_C_FLAGS_DEBUG "-W -g")
+
+# compile option (Release)
+set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+set(CMAKE_C_FLAGS_RELEASE "-O2")
+
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 
