@@ -14,12 +14,10 @@
 
 class MyModule : public anl::BasicModule
 {
+  DEFINE_ANL_MODULE(MyModule, 1.0);
 public:
   MyModule();
   ~MyModule();
-
-  std::string module_name() const { return "MyModule"; }
-  std::string module_version() const { return "1.0"; }
   
   anl::ANLStatus mod_startup();
   anl::ANLStatus mod_init();
@@ -30,6 +28,7 @@ public:
   anl::ANLStatus mod_exit();
 
 private:
+  int myParameter;
 };
 
 #endif /* MyModule_H */

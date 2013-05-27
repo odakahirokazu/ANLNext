@@ -14,6 +14,7 @@ MyModule::~MyModule()
 
 ANLStatus MyModule::mod_startup()
 {
+  register_parameter(&myParameter, "MyParameter");
   return AS_OK;
 }
 
