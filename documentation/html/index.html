@@ -35,73 +35,98 @@
     <p>See <a href="https://github.com/odakahirokazu/ANLNext#readme">README</a> on the github repository.</p>
     
     <h2>3. Getting Started</h2>
-    <h3>3.1 For Application Users</h3>
-    <h3>3.2 Structure of an ANL Module</h3>
-    
-    <h2>4. How to Make Your Own Applications</h2>
-    <p>By using this framework, you can easily construct your own applications. If you want a new application containing only existing modules, you can quickly start with writing a Ruby script that defines an "analysis chain" descibing an order of the ANL modules and sets parameters passed to the modules (4.1). This enviroment provides you with powerful and flexible scripting framework. If you want to develop analysis software which applies your original algorithm, you need to develop a new ANL module (4.2).</p>
+    <p>By using this framework, you can easily construct your own applications. If you want a new application containing only existing modules, you can quickly start with writing a Ruby script that defines an "analysis chain" descibing an order of the ANL modules and sets parameters passed to the modules. This enviroment provides you with powerful and flexible scripting framework.</p>
 
-    <h3>4.3 Use of Ruby Interface</h3>
+    <h3>3.1 How to write a Ruby script operating an ANL application</h3>
     <p>The ANL Next framework provides Ruby binding. This feature makes the framework flexible and powerful.</p>
     <p>To use the extension libarary, it is necessary to "require" ANL libraries.</p>
     <pre class="example">
-require 'comptonSoft' # One of Ruby extension libararies.
-require 'ANLLib' # Utility library for the ANL-Ruby binding
+require 'ANLLib'      <span class="code_comment"># ANL Next library</span>
+require 'comptonSoft' <span class="code_comment"># One of Ruby extension libararies using ANL Next</span>
+
+include ComptonSoft   <span class="code_comment"># need to include the module</span>
     </pre>
-    <p>At the begenning, we define an analysis chain composed of ANL modules.</p>
+    <p>At the begenning, we need to define an analysis chain, which specifies the order of ANL modules.</p>
     <pre class="example">
+<span class="code_comment"># create an ANL application.</span>
 anl = ANLApp.new
+
+<span class="code_comment"># define an analysis chain.</span>
 anl.chain :SaveData
 anl.chain :CSHitCollection
-anl.chain :ConstructDetector_Sim
-anl.chain :SetNoiseLevel
-anl.chain :ReadGDML
-anl.chain :AHStdPhysicsList_ANL
-anl.chain :PlaneWaveRectanglePrimaryGen
-anl.chain :Geant4Body
-anl.chain :NextPickUpData
-anl.chain :MakeDetectorHit
+anl.chain :ConstructDetector
+anl.chain :ConstructChannelTable
+anl.chain :ReadDetectorHitTree
+anl.chain :AnalyzeHit
 anl.chain :EventSelection
 anl.chain :HitTree_Sim
     </pre>
 
     <p>Then, we set parameters of the modules. If you do not set parameters here, default values will be assigned.</p>
     <pre class="example">
-dbDir = "../database/"
 anl.set_parameters :SaveData, {
-  'Output file' => "sim_compton_camera.root"
+  "Output file" =&gt; "output.root",
 }
 
-anl.set_parameters :ConstructDetector_Sim, {
-  'Detector configuration file' => dbDir+'detector_config_sgd.xml',
-  'Simulation parameter file' => dbDir+'sdlist_sgd.xml',
+anl.set_parameters :ConstructDetector, {
+  "Detector configuration file" =&gt; "database/detector_configuration_HXI.xml",
+}
+
+anl.set_parameters :EventSelection, {
+  "Detector group file" =&gt; "database/detector_group_HXI.txt",
+  "Remove veto events?" =&gt; true,
+  "Range of fluorescence lines" =&gt; 1.0,
 }
     </pre>
     <p>If an ANL module has a map parameter, you can insert a new map element in this way:</p>
     <pre class="example">
-anl.set_parameters :SetNoiseLevel
-anl.insert_map 'Noise level map', 'Si', {
-  'Detector type' => 1,
-  'Noise parameter 00' => 1.5,
-  'Noise parameter 01' => 0.0,
-  'Noise parameter 02' => 0.003,
+anl.set_parameters :AnalyzeHit
+anl.insert_map "Analysis map", "CdTe", {
+  "Detector type" =&gt; 2,
+  "Analysis mode" =&gt; 4,
+  "Threshold (cathode)" =&gt; 5.0,
+  "Threshold (anode)" =&gt; 5.0,
 }
-anl.insert_map 'Noise level map', 'CdTe', {
-  'Detector type' => 1,
-  'Noise parameter 00' => 1.6,
-  'Noise parameter 01' => 0.0,
-  'Noise parameter 02' => 0.01,
+anl.insert_map "Analysis map", "Si", {
+  "Detector type" =&gt; 2,
+  "Analysis mode" =&gt; 4,
+  "Threshold (cathode)" =&gt; 3.0,
+  "Threshold (anode)" =&gt; 5.0,
+}
+anl.insert_map "Analysis map", "BGOTop", {
+  "Detector type" =&gt; 3,
+  "Analysis mode" =&gt; 0,
+  "Threshold" =&gt; 100.0,
 }
     </pre>
-
+    
     <p>After setting the parameter, just run the ANL. The number of the analysis loop can be passed through the first argument. The second argument is optional for setting the display frequency.</p>
     <pre class="example">
-anl.run(10000)
+anl.run(100000)
+    </pre>
+    <p>If you need to set infinite loop, set -1 as the loop number. The second argument is the display frequency (optional).</p>
+    <pre class="example">
+anl.run(-1, 100000)
     </pre>
 
+    <h3>3.2 ANL model</h3>
+    <p>...</p>
+
+    <h2>4. How to Develop Your Applications</h2>
+    <p>If you want to develop analysis software which applies your original algorithm, you need to develop a new ANL module. You can find a simple example of your own ANL application in "example" directory.</p>
     
-    <h3>4.2 Development of an ANL Module</h3>
-    <p>TBD</p>
+    <h3>4.1 Development of an ANL Module</h3>
+
+    <h4>Structure of ANL module</h4>
+
+    <h4>Methods defined in an ANL module</h4>
+
+    <h4>Registering parameters</h4>
+
+    <h3>4.2 Data Sharing between ANL Modules</h3>
+    
+    <h4>Event selection flag (EVS)</h4>
+
     <h4>Accessing information in other modules</h4>
     <p>You can access other modules via GetANLModule() method.</p>
     <pre class="example"><span class="code_comment">// Declaration of a const pointer to a module you want to access.</span>
@@ -115,7 +140,7 @@ GetANLModule("YourModule", ym);
 int yourParam = ym->getYourParam();
 </pre>
 
-    <h4>Accessing information in other modules</h4>
+    <h4>Access to other modules without "const"</h4>
     <p>GetANLModuleNC() gives non-const pointer of a module. NC stands for non-const.</p>
     <pre class="example"><span class="code_comment">// Declaration of a pointer to a module you want to access.</span>
 YourModule* ym;
@@ -128,8 +153,13 @@ ym->setMode(mode);
 ym->doSomething();
 </pre>
     
+    <h3>4.2 Ruby binding</h3>
 
-    <h2>Class Library Reference</h2>
+    <h3>4.3 Build settting</h3>
+
+    <h3>4.4 Run</h3>
+
+    <h2><a href="doxygen/index.html">Class Library Reference</a></h2>
     
     <div>
       <hr />
