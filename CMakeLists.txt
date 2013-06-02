@@ -12,7 +12,7 @@ set(CMAKE_C_FLAGS_RELEASE "-O3 -W -Wall" CACHE STRING "C_FLAGS for release")
 
 ### Definition of project
 project(ANLNext)
-find_package(Boost 1.48.0 REQUIRED)
+find_package(Boost 1.53.0 REQUIRED)
 set(CMAKE_MODULE_PATH ${ANLNext_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 message("-- Install destination prefix: ${CMAKE_INSTALL_PREFIX}")
