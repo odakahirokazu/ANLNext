@@ -52,7 +52,7 @@ ASCA and Suzaku X-ray observatories.
 
 http://www.astro.isas.jaxa.jp/~odaka/anlnext/
 
-### (3) Git Hub
+### (3) GitHub
 
 https://github.com/odakahirokazu/ANLNext/
 
