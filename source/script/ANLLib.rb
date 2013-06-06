@@ -294,8 +294,10 @@ class ANLApp
     @display_frequency = display_frequency
     if @n_loop < 0
       @display_frequency ||= 10000
+    elsif @n_loop < 100
+      @display_frequency ||= 1
     else
-      @display_frequency ||= 10**((Math.log10(n_loop)-1.5).to_i)
+      @display_frequency ||= 10**((Math.log10(@n_loop)-1.5).to_i)
     end
   end
   
