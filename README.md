@@ -60,11 +60,11 @@ https://github.com/odakahirokazu/ANLNext/
  3. Supported System
 ----------------------------------------------------------------
 
-- Mac OS X
-- (Linux): possible to run on Linux
+- Mac OS X: the author's standard environment
+- (Linux): possible to run on linux.
 
 
- 4. Required software
+ 4. Required Software
 ----------------------------------------------------------------
 
 ### (1) C++ compliler
@@ -126,8 +126,8 @@ There are several options:
 - `ANL_INSTALL_CMAKE_FILES` (Default=ON): install all cmake files.
 
 By default, the install destination is set to `${HOME}`. So `make install` will
-install binaries and libraries into the user's home directory, such as
-`${HOME}/bin` or `${HOME}/lib`. You can change it by setting
+install headers and libraries into the user's home directory, such as
+`${HOME}/include` or `${HOME}/lib`. You can change it by setting
 `CMAKE_INSTALL_PREFIX`.
 
 ### (3) Make and install
@@ -135,5 +135,22 @@ install binaries and libraries into the user's home directory, such as
     unix> make
     unix> make install
 
+NOTE: you can use `make -jN` (N: number of parallel complilation processes)
+instead of `make` for faster build.
+
+### (4) Set environment variables
+
+If you installed ANL Next into the $HOME directory (default destination), you
+need to set the following environment variables:  
+(example for bash/zsh)
+
+    export DYLD_LIBRARY_PATH=${HOME}/lib:${DYLD_LIBRARY_PATH}
+    export RUBYLIB=${HOME}/lib/ruby:${RUBYLIB}
+
+Or, you may need to set the following envrionment variables:
+
+    export ANLNEXT_INSTALL=/path/to/install
+    export DYLD_LIBRARY_PATH=${ANLNEXT_INSTALL}/lib:${DYLD_LIBRARY_PATH}
+    export RUBYLIB=${ANLNEXT_INSTALL}/lib/ruby:${RUBYLIB}
 
 ----------------------------------------------------------------

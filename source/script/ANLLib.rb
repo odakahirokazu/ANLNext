@@ -318,18 +318,19 @@ class ANLApp
   # @param [Fixnum] n_loop number of loop. -1 for infinite loop.
   # @param [Fixnum] display_frequency frequency of displaying loop ID
   #     to STDOUT.
-  # @yield [mod] a block can be given for additional process.
-  # @yieldparam mod the current module is given.
+  # @yield [self] a block can be given for additional process.
+  # @yieldparam self
   #
-  def run(n_loop=nil, display_frequency=nil, &set_param)
+  def run(n_loop=nil, display_frequency=nil)
     set_loop(n_loop, display_frequency)
+
+    yield self if block_given?
     
     anl = startup()
     
     while s = @set_param_list.shift
       s.call
     end
-    set_param.call if block_given?
 
     status = anl.Prepare()
     status == Anl::AS_OK or raise "Prepare() returned "+status.to_s
