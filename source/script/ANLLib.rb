@@ -88,7 +88,7 @@ class ANLApp
   #
   def push(anl_module)
     @module_list << anl_module
-    sym = anl_module.module_name.to_sym
+    sym = anl_module.module_id.to_sym
     unless @module_hash.has_key? sym
       @module_hash[sym] = anl_module
     end
@@ -103,7 +103,7 @@ class ANLApp
   #
   def insert(index, anl_module)
     @module_list.insert(index, anl_module)
-    sym = anl_module.module_name.to_sym
+    sym = anl_module.module_id.to_sym
     unless @module_hash.has_key? sym
       @module_hash[sym] = anl_module
     end
@@ -113,21 +113,12 @@ class ANLApp
   # Push an ANL module that is specified by a symbol to the module chain.
   #
   # @param [Symbol] anl_module_class ANL module to be pushed.
-  # @param [String] module_name ANL module name.
+  # @param [String] module_id ANL module ID.
   # @return [ANLModule] ANL module pushed.
   #
-  def chain(anl_module_class, module_name=nil)
-    mod = nil
-    if module_name
-      instance_eval %{
-        mod = #{anl_module_class}.new(module_name)
-      }
-    else
-      instance_eval %{
-        mod = #{anl_module_class}.new
-      }
-    end
-
+  def chain(anl_module_class, module_id=nil)
+    mod = Module::const_get(anl_module_class).new
+    mod.set_module_id(module_id.to_s) if module_id
     push(mod)
   end
 
@@ -137,7 +128,7 @@ class ANLApp
   # @return [ANLModule] ANL module.
   #
   def expose_module(anl_module_symbol)
-    @current_module = get_module(anl_module_symbol)
+    @current_module = get_module(anl_module_symbol.to_sym)
   end
 
   # Get an ANL module by module symbol.
@@ -161,7 +152,7 @@ class ANLApp
   # @return [Fixnum] Position.
   #
   def index(anl_module_symbol)
-    @module_list.index{|mod| mod.module_name.to_sym==anl_module_symbol }
+    @module_list.index{|mod| mod.module_id.to_sym==anl_module_symbol }
   end
 
   # Get position of the last ANL module which has the specified name
@@ -171,7 +162,7 @@ class ANLApp
   # @return [Fixnum] Position.
   #
   def rindex(anl_module_symbol)
-    @module_list.rindex{|mod| mod.module_name.to_sym==anl_module_symbol }
+    @module_list.rindex{|mod| mod.module_id.to_sym==anl_module_symbol }
   end
 
   # Set a text describing the current module.
@@ -392,7 +383,7 @@ class ANLApp
   def print_all_param()
     anl = startup()
     @module_list.each{|m|
-      puts "--- "+m.module_name+" ---"
+      puts "--- "+m.module_id+" ---"
       m.print_parameters
       puts ''
     }
@@ -486,7 +477,7 @@ class ANLApp
     @module_list.each{|mod|
       mapList = []
       
-      out.puts 'anl.set_parameters :'+mod.module_name+', {'
+      out.puts 'anl.set_parameters :'+mod.module_id+', {'
       parameter_list(mod).each {|param|
         type = param.type_name
         if type=='map'

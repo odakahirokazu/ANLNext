@@ -312,21 +312,23 @@ void ANLManager::show_analysis()
   else {
     std::cout
       << " ID " << "    "
-      << "            Module Name               " << "  " 
+      << "                Module Name                  " << "  " 
       << " Version " << "  " << " ON/OFF \n"
-      << "--------------------------------------------------------------------"
+      << "----------------------------------------------------------------------------"
       << std::endl;
     for(size_t i = 0; i < m_Modules.size(); i++) {
-      std::cout
-        << std::right << std::setw(4) << i+1 << "    "
-        << std::left << std::setw(40) << m_Modules[i]->module_name();
+      std::cout << std::right << std::setw(4) << i+1 << "    ";
+      std::string moduleID(m_Modules[i]->module_id());
       if (m_Modules[i]->module_id() != m_Modules[i]->module_name()) {
-        std::cout << '/' << m_Modules[i]->module_id();
+        moduleID += " (" + m_Modules[i]->module_name() + ")";
       }
+      std::cout << std::left << std::setw(48) << moduleID;
       std::cout << "  "
-        << std::left << std::setw(9) << m_Modules[i]->module_version() << "  "
-        << std::left << std::setw(8) << (m_Modules[i]->is_on() ? "ON" : "OFF")
-        << '\n';
+                << std::left << std::setw(9) << m_Modules[i]->module_version()
+                << "  "
+                << std::left << std::setw(8)
+                << (m_Modules[i]->is_on() ? "ON" : "OFF")
+                << '\n';
     }
   }
   std::cout << std::right << std::setw(0) << std::endl;

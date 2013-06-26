@@ -120,10 +120,13 @@ class BasicModule
 
   virtual ANLStatus mod_prepare();
 
-  std::string module_id();
-  std::string module_name();
-  std::string module_version();
-  std::vector<std::string> get_alias();
+  std::string module_name() const;
+  std::string module_version() const;
+  
+  void set_module_id(const std::string& v);
+  std::string module_id() const;
+  
+  std::vector<std::string> get_alias() const;
   void add_alias(const std::string& name);
 
   std::string module_description() const;
