@@ -153,6 +153,7 @@ void VModuleParameter::print(std::ostream& os) const
      << unit_name()
      << ((unit_name()!="") ? "] " : "")
      << ": " << *this;
+  if (_hidden) { os << " (hidden)"; }
 }
 
 

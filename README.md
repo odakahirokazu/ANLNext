@@ -1,7 +1,7 @@
 ANL Next
 ================================================================
 
-- Version: 1.3
+- Version: 1.4.1
 - Author: Hirokazu Odaka
 
 
@@ -35,9 +35,11 @@ an analysis chain and set parameters to the ANL modules. The application build
 by ANL Next are as fast as C++ code, and as flexible as Ruby code.
 
 This framework is originated from the ANL++ framework (by Shin Watanabe), which
-is C++ implementation of ANL. ANL is a fundamental framework of event-by-event
-analysis, which has been used for data processing of X-ray detectors on board
-ASCA and Suzaku X-ray observatories.
+is C++ implementation of ANL. The original ANL was a data analysis framework
+developed by the PEP-4 TPC collaboration at the Lawrence Berkeley Laboratory
+in 1980s. It has been improved on data sharing methods between ANL modules in
+1990s by T. Takahashi, H. Kubo, Y. Ishisaki, et al., and maintenaced for data
+processing of X-ray detectors onboard the ASCA and Suzaku X-ray observatories.
 
 
  2. Information

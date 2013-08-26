@@ -56,6 +56,21 @@ def vec(x, y, z=nil)
 end
 
 
+# Convert ANL status interger to string.
+#
+# @param [Int] i ANL status ID
+# @return [String] ANL status
+def show_status(i)
+  {
+    Anl::AS_OK => "AS_OK",
+    Anl::AS_SKIP => "AS_SKIP",
+    Anl::AS_SKIP_ERR => "AS_SKIP_ERR",
+    Anl::AS_QUIT => "AS_QUIT",
+    Anl::AS_QUIT_ERR => "AS_QUIT_ERR",
+  }[i] or "unknown status"
+end
+
+
 # Class of an ANL Application.
 # @author Hirokazu Odaka
 #
@@ -324,22 +339,22 @@ class ANLApp
     end
 
     status = anl.Prepare()
-    status == Anl::AS_OK or raise "Prepare() returned "+status.to_s
+    status == Anl::AS_OK or raise "Prepare() returned "+show_status(status)
 
     status = anl.Initialize()
-    status == Anl::AS_OK or raise "Initialize() returned "+status.to_s
+    status == Anl::AS_OK or raise "Initialize() returned "+show_status(status)
 
     puts "\nAnalysis Begin  | Time: " + Time.now.to_s
     $stdout.flush
     anl.SetDisplayFrequency(@display_frequency)
     status = anl.Analyze(@n_loop, @thread_mode)
     
-    status == Anl::AS_OK or raise "Analyze() returned "+status.to_s
+    status == Anl::AS_OK or raise "Analyze() returned "+show_status(status)
     puts "Analysis End    | Time: " + Time.now.to_s
     $stdout.flush
     
     status = anl.Exit()
-    status == Anl::AS_OK or raise "Exit() returned "+status.to_s
+    status == Anl::AS_OK or raise "Exit() returned "+show_status(status)
   rescue RuntimeError => ex
     puts ""
     puts "  ### ANL NEXT Exception ###  "
@@ -360,17 +375,17 @@ class ANLApp
     set_param.call if block_given?
     @set_module_list.each{|mod|
       status = mod.mod_prepare()
-      status == Anl::AS_OK or raise mod.name+" :: mod_prepare() returned "+status.to_s
+      status == Anl::AS_OK or raise mod.name+" :: mod_prepare() returned "+show_status(status)
     }
     
     status = anl.InteractiveCom()
-    status == Anl::AS_OK or raise "InteractiveCom() returned "+status.to_s
+    status == Anl::AS_OK or raise "InteractiveCom() returned "+show_status(status)
 
     status = anl.InteractiveAna()
-    status == Anl::AS_OK or raise "InteractiveAna() returned "+status.to_s
+    status == Anl::AS_OK or raise "InteractiveAna() returned "+show_status(status)
     
     status = anl.Exit()
-    status == Anl::AS_OK or raise "Exit() returned "+status.to_s
+    status == Anl::AS_OK or raise "Exit() returned "+show_status(status)
   rescue RuntimeError => ex
     puts ""
     puts "  ### ANL NEXT Exception ###  "
