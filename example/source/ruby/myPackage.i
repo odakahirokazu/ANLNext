@@ -7,8 +7,7 @@
 
 %}
 
-%include "std_vector.i"
-%include "anl.i"
+%import "anl.i"
 
 
 // interface to my modules
