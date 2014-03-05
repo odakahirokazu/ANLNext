@@ -48,10 +48,12 @@ message("-- ANLNEXT_INSTALL = ${ANLNEXT_INSTALL}")
 include_directories(
   include
   ${ANLNEXT_INC_DIR}
+  ${BOOST_INC_DIR}
   )
 
 link_directories(
   ${ANLNEXT_LIB_DIR}
+  ${BOOST_LIB_DIR}
   )
 
 set(ANL_MODULES
@@ -63,6 +65,7 @@ add_library(${MY_LIBRARY} SHARED
 )
 
 target_link_libraries(${MY_LIBRARY}
+  ${BOOST_LIB}
   ANLNext
   )
 

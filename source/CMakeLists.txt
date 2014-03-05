@@ -4,6 +4,7 @@ set(TARGET_LIBRARY ANLNext)
 
 set(READLINE_LIB readline)
 set(BOOST_INC_DIR ${Boost_INCLUDE_DIRS})
+set(BOOST_LIB_DIR ${Boost_LIBRARY_DIRS})
 set(BOOST_LIB boost_thread-mt boost_system-mt boost_chrono-mt)
 
 if(ANL_USE_TVECTOR)
@@ -46,7 +47,7 @@ include_directories(
   ${BOOST_INC_DIR}
   )
 
-link_directories(${ROOT_LIB_DIR} ${CLHEP_LIB_DIR})
+link_directories(${BOOST_LIB_DIR} ${ROOT_LIB_DIR} ${CLHEP_LIB_DIR})
 
 add_library(${TARGET_LIBRARY} SHARED
   src/ANLManager.cc
