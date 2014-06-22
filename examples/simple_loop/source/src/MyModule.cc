@@ -2,7 +2,8 @@
 
 using namespace anl;
 
-MyModule::MyModule()
+MyModule::MyModule() :
+  myParameter1(1), myParameter2(2), myParameter3(3)
 {
 }
 
@@ -14,7 +15,9 @@ MyModule::~MyModule()
 
 ANLStatus MyModule::mod_startup()
 {
-  register_parameter(&myParameter, "MyParameter");
+  register_parameter(&myParameter1, "MyParameter1");
+  register_parameter(&myParameter2, "MyParameter2");
+  register_parameter(&myParameter3, "MyParameter3");
   return AS_OK;
 }
 

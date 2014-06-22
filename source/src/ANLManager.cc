@@ -311,8 +311,8 @@ void ANLManager::show_analysis()
   }
   else {
     std::cout
-      << " ID " << "    "
-      << "                Module Name                  " << "  " 
+      << " #  " << "    "
+      << "              Module ID                      " << "  " 
       << " Version " << "  " << " ON/OFF \n"
       << "----------------------------------------------------------------------------"
       << std::endl;
@@ -460,7 +460,7 @@ void ANLManager::print_summary()
       moduleID += "/" + m_Modules[i]->module_id();
     }
     moduleID += "  version  " + m_Modules[i]->module_version();
-    std::cout << boost::format("     [%3d]  %-40s") % i % moduleID;
+    std::cout << boost::format("     [%3d]  %-40s") % (i+1) % moduleID;
     if (m_Counter[i].quit>1) { std::cout << "  ---> Quit"; }
     std::cout <<  '\n';
     std::cout << "    " << std::setw(10) << m_Counter[i].entry << "  |"

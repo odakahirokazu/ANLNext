@@ -1,5 +1,5 @@
 ########################################################
-set(TARGET_EXT_LIBRARY anl)
+set(TARGET_EXT_LIBRARY ANL)
 set(SWIG_IF_FILE ${TARGET_EXT_LIBRARY}.i)
 set(RUBY_EXT_INCLUDE_DIRS ../include ${BOOST_INC_DIR})
 set(RUBY_EXT_LIBRARY_DIRS )

@@ -1,6 +1,6 @@
 *~
 .DS_Store
 build/
-example/build/
 documentation/html/doxygen/
 documentation/doxygen/tag/
+*.root

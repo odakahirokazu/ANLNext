@@ -1,4 +1,4 @@
-%module anl
+%module ANL
 %{
 #include "ANLManager.hh"
 #include "VModuleParameter.hh"

@@ -1,7 +1,7 @@
 ANL Next
 ========================================
 
-- Version: 1.4.2
+- Version: 1.5.0
 - Author: Hirokazu Odaka
 
 
@@ -58,20 +58,31 @@ https://github.com/odakahirokazu/ANLNext/
 
 #### Test environmemt
 
-- Mac OS X 10.9.2
-- Apple LLVM version 5.0 (clang-500.2.79) (based on LLVM 3.3svn)
-- Ruby 2.0.0-p353
+- Mac OS X 10.9.3
+- Apple LLVM version 5.1 (clang-503.0.40) (based on LLVM 3.4svn)
+- ruby 2.0.0p481 (2014-05-08 revision 45883)
 - Boost 1.55.0
 
 ### API Reference
 
 http://www.astro.isas.jaxa.jp/~odaka/anlnext/doxygen/
 
+### Applications using ANL Next
+
+- ComptonSoft
+- MONACO
+- HXISGDDataReceiver
+
+### Licence
+
+ANL Next is distributed under the GNU General Public License version 3.
+
 
 ANL model
 ----------------------------------------
 
 (now writing...)
+![ANL model](./documentation/anlmodel.svg)
 
 
 Installation
@@ -173,91 +184,191 @@ enviroment provides you with powerful and flexible scripting framework.
 
 ### How to write a Ruby script operating an ANL application
 
-The ANL Next framework provides Ruby binding. This feature makes the framework
-flexible and powerful. To use the extension libarary, it is necessary to
-*require* ANL libraries.
+You can see the simplest example of ANL application in
+[examples/simple_loop](./examples/simple_loop). This application performs loop
+in which nothing happens. To build it, you can use cmake:
+
+    $ cd examples/simple_loop
+    $ mkdir build
+    $ cd build
+    $ cmake ../source -DCMAKE_INSTALL_PREFIX=/path/to/install
+    $ make
+    $ make install
+
+To run this application, see [run/run_anl_example.rb](./examples/simple_loop/run/run_anl_example.rb).
+To use the extension libarary, it is necessary to *require* ANL libraries.
 
 ```ruby
 require 'ANLLib' # ANL Next library
-require 'comptonSoft' # One of Ruby extension libararies using ANL Next
-
-include ComptonSoft # need to include the module
+require 'myPackage' # Ruby extension library using ANL Next
 ```
 
-At the begenning, we need to define an analysis chain, which specifies the
-order of ANL modules.
+At the beginning, you need to define your own application class which should
+be derived from *ANL::ANLApp* class. Then, you can define the analysis chain
+in *setup()* method. In this method, you specify the order of ANL modules in
+the analysis chain, and set parameters of the modules. To push a module to
+the analysis chain, you can use *chain()* method. Just after *chain()*, you can
+set parameters by using *with_parameters()*.
 
 ```ruby
-# create an ANL application.
-anl = ANLApp.new
+# Define your own application class derived from ANL::ANLApp.
+class MyApp < ANL::ANLApp
+  # Define an analysis chain in setup() method.
+  def setup()
+    chain MyPackage::MyModule
+    with_parameters(MyParameter1: 10,
+                    MyParameter2: 20,
+                    MyParameter3: 30)
 
-# define an analysis chain.
-anl.chain :SaveData
-anl.chain :CSHitCollection
-anl.chain :ConstructDetector
-anl.chain :ConstructChannelTable
-anl.chain :ReadDetectorHitTree
-anl.chain :AnalyzeHit
-anl.chain :EventSelection
-anl.chain :HitTree_Sim
+    # If you need to add the same type of module, you should set another name
+    # via the second argument.
+    chain MyPackage::MyModule, :MyModule2
+    with_parameters(MyParameter2: 21)
+  end
+end
 ```
 
-Then, we set parameters of the modules. If you do not set parameters here,
-default values will be assigned.
-```ruby
-anl.set_parameters :SaveData, {
-  "Output file" => "output.root",
-}
+*chain()* method takes two parameters: module class and module ID. If module ID
+is not specified, the class name is used for the module ID. The module ID should
+be unique in a single analysis chain. If you need to add the same type of
+module, it is necessary to set another module ID via the second argument.
 
-anl.set_parameters :ConstructDetector, {
-  "Detector configuration file" => "database/detector_configuration_HXI.xml",
-}
-
-anl.set_parameters :EventSelection, {
-  "Detector group file" => "database/detector_group_HXI.txt",
-  "Remove veto events?" => true,
-  "Range of fluorescence lines" => 1.0,
-}
-```
-
-If an ANL module has a map parameter, you can insert a new map element in
-this way:
+After setting the parameter, just instantiate the application and run. The
+number of the analysis loop can be passed through the first argument. The
+second argument is optional for setting the display frequency.
 
 ```ruby
-anl.set_parameters :AnalyzeHit
-anl.insert_map "Analysis map", "CdTe", {
-  "Detector type" => 2,
-  "Analysis mode" => 4,
-  "Threshold (cathode)" => 5.0,
-  "Threshold (anode)" => 5.0,
-}
-anl.insert_map "Analysis map", "Si", {
-  "Detector type" => 2,
-  "Analysis mode" => 4,
-  "Threshold (cathode)" => 3.0,
-  "Threshold (anode)" => 5.0,
-}
-anl.insert_map "Analysis map", "BGOTop", {
-  "Detector type" => 3,
-  "Analysis mode" => 0,
-  "Threshold" => 100.0,
-}
-```
-    
-After setting the parameter, just run the ANL. The number of the analysis loop
-can be passed through the first argument. The second argument is optional for
-setting the display frequency.
-
-```ruby
-anl.run(100000)
+app = MyApp.new
+app.run(100000)
 ```
 
 If you need to set infinite loop, set -1 as the loop number. The second
 argument is the display frequency (optional).
 
 ```ruby
-anl.run(-1, 100000)
+app.run(-1, 100000)
 ```
+
+After the run, you will get the below message. From this message, you find the
+definition of the analysis chain and module parameters, which are shown before
+the analysis phase. After the analysis phase finishes, you get information on
+the status of the analysis chain.
+
+```
+$ ./run_anl_example.rb 
+
+      ***********************************
+      ****          ANL Next         ****
+      ***********************************
+
+ANLManager: startup routine started.
+ANLManager: prepare routine started.
+
+      ***********************************
+      ****      Analysis chain      *****
+      ***********************************
+
+ #                    Module ID                         Version    ON/OFF 
+----------------------------------------------------------------------------
+   1    MyModule                                          1.0        ON      
+   2    MyModule2 (MyModule)                              1.0        ON      
+
+
+      ***********************************
+      ****     Module parameters     ****
+      ***********************************
+
+--- MyModule ---
+MyParameter1 : 10
+MyParameter2 : 20
+MyParameter3 : 30
+
+--- MyModule2 ---
+MyParameter1 : 1
+MyParameter2 : 21
+MyParameter3 : 3
+
+ANLManager: init routine started.
+ANLManager: his routine started.
+ANLManager: initialization done.
+
+
+Analysis Begin  | Time: 2014-06-19 16:02:51 +0100
+ANLManager: start bgnrun routine.
+ANLManager: bgnrun routine started.
+ANLManager: start analysis (with thread mode on).
+You can quit the analysis routine by input 'q'.
+Event :          0
+Event :     100000
+Event :     200000
+Event :     300000
+Event :     400000
+Event :     500000
+Event :     600000
+Event :     700000
+Event :     800000
+Event :     900000
+ANLManager: start endrun routine.
+ANLManager: endrun routine started.
+
+      ***********************************
+      ****      Analysis chain      *****
+      ***********************************
+               PUT: 1000000
+                |
+     [  1]  MyModule  version  1.0                  
+       1000000  |  OK: 1000000  SKIP: 0  ERR: 0
+     [  2]  MyModule/MyModule2  version  1.0        
+       1000000  |  OK: 1000000  SKIP: 0  ERR: 0
+               GET: 1000000
+
+
+Analysis End    | Time: 2014-06-19 16:02:52 +0100
+ANLManager: exit routine started.
+
+***** Results of Event Selection *****
+    Number of EVS :        0
+
+ANLManager: exiting...
+```
+
+### A more practical example
+
+You can find a more practical example in
+[examples/simple_loop](./examples/simple_loop). Below is a Ruby script to run
+this application. It has three ANL modules: *SaveData*, *GenerateEvents*, and
+*FillHistogram*. *SaveData* is a utility module to save analysis products to a
+ROOT file. It does nothing in the analysis phase. *GenerateEvents* generates
+an event data that have a property of energy by a some simulation based on a
+random number. *FillHistogram* gets generated event information and then makes
+histograms of the energy of the events. This example is a minimal application
+that has a practical function, telling us how an ANL application works.
+
+```ruby
+require 'ANLLib'
+require 'testHistogram'
+
+class MyApp < ANL::ANLApp
+  def setup()
+    chain TestHistogram::SaveData
+    with_parameters(filename: "output.root")
+
+    chain TestHistogram::GenerateEvents
+    with_parameters(energy: 120.0,
+                    detector1_sigma: 1.0,
+                    detector2_sigma: 5.0)
+
+    chain TestHistogram::FillHistogram
+    with_parameters(nbin: 128,
+                    energy_min: 80.0,
+                    energy_max: 150.0)
+  end
+end
+
+a = MyApp.new
+a.run(1000000, 100000)
+```
+
 
 
 Development of Your Applications
@@ -318,5 +429,15 @@ ym->doSomething();
 #### Build settting
 
 #### Run
+
+
+Frequently Asked Questions
+----------------------------------------
+
+### Differences from ANL/ANL++
+
+#### How can I use BNK?
+
+
 
 ****************************************

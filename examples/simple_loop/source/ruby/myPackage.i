@@ -7,7 +7,7 @@
 
 %}
 
-%import "anl.i"
+%import "ANL.i"
 
 
 // interface to my modules

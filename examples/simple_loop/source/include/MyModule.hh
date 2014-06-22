@@ -28,7 +28,9 @@ public:
   anl::ANLStatus mod_exit();
 
 private:
-  int myParameter;
+  int myParameter1;
+  int myParameter2;
+  int myParameter3;
 };
 
 #endif /* MyModule_H */
