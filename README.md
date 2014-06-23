@@ -82,7 +82,7 @@ ANL model
 ----------------------------------------
 
 (now writing...)
-![ANL model](./documentation/anlmodel.svg)
+![ANL model](./documentation/anlmodel.png)
 
 
 Installation
