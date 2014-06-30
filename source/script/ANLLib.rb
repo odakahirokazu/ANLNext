@@ -87,21 +87,20 @@ module ANL
     # @param [Array] module_list a list of ANL modules.
     #
     def initialize()
-      @module_list = []
-      @module_hash = {}
-      @current_module = nil
-      @n_loop = -1
-      @display_frequency = 1000
-      @set_param_list = []
-      @set_module_list = []
-      @startup_done = false
-      @thread_mode = true
-      @namespace_list = [Object]
+      @anlapp_module_list = []
+      @anlapp_module_hash = {}
+      @anlapp_current_module = nil
+      @anlapp_set_param_list = []
+      @anlapp_set_module_list = []
+      @anlapp_namespace_list = [Object]
+      @anlapp_startup_done = false
+      @anlapp_thread_mode = true
     end
 
-    attr_accessor :n_loop, :display_frequency
-    attr_accessor :thread_mode
-    attr_reader :startup_done
+    # Accessors to internal information (instance variables).
+    def thread_mode() @anlapp_thread_mode; end
+    def thread_mode=(mode) @anlapp_thread_mode=mode; end
+    def startup_done?(); @anlapp_startup_done; end
 
     # Setup analysis chain and set parameters.
     # By default, this method does nothing.
@@ -117,7 +116,7 @@ module ANL
     # @param [Module] ns namespace to be added to the search list.
     #
     def add_namespace(ns)
-      @namespace_list << ns
+      @anlapp_namespace_list << ns
     end
 
     # Push an ANL module to the module chain.
@@ -127,13 +126,12 @@ module ANL
     #
     def push(anl_module)
       module_id = anl_module.module_id.to_sym
-      if @module_hash.has_key? module_id
+      if @anlapp_module_hash.has_key? module_id
         raise "ANL module #{module_id} is already registered."
       end
-
-      @module_hash[module_id] = anl_module
-      @module_list << anl_module
-      @current_module = anl_module
+      @anlapp_module_hash[module_id] = anl_module
+      @anlapp_module_list << anl_module
+      @anlapp_current_module = anl_module
     end
 
     # Insert an ANL module to the module chain at a specified position.
@@ -144,13 +142,12 @@ module ANL
     #
     def insert(index, anl_module)
       module_id = anl_module.module_id.to_sym
-      if @module_hash.has_key? module_id
+      if @anlapp_module_hash.has_key? module_id
         raise "ANL module #{module_id} is already registered."
       end
-
-      @module_hash[module_id] = anl_module
-      @module_list.insert(index, anl_module)
-      @current_module = anl_module
+      @anlapp_module_hash[module_id] = anl_module
+      @anlapp_module_list.insert(index, anl_module)
+      @anlapp_current_module = anl_module
     end
 
     # Push an ANL module that is specified by a symbol to the module chain.
@@ -162,7 +159,7 @@ module ANL
     def chain(anl_module_class, module_id=nil)
       if anl_module_class.class==String || anl_module_class.class==Symbol
         class_found = false
-        @namespace_list.each do |ns|
+        @anlapp_namespace_list.each do |ns|
           if ns.const_defined? anl_module_class
             anl_module_class = ns.const_get(anl_module_class)
             class_found = true
@@ -184,7 +181,7 @@ module ANL
     def expose_module(module_id)
       mod = get_module(module_id)
       if mod
-        @current_module = mod
+        @anlapp_current_module = mod
       else
         raise "ANL module #{module_id} is not registered."
       end
@@ -198,7 +195,7 @@ module ANL
     # @return [ANLModule] ANL module.
     #
     def get_module(module_id)
-      @module_hash[module_id]
+      @anlapp_module_hash[module_id]
     end
 
     # Get position of the first ANL module which has the specified name
@@ -208,7 +205,7 @@ module ANL
     # @return [Fixnum] Position.
     #
     def index(module_id)
-      @module_list.index{|mod| mod.module_id.to_sym==module_id }
+      @anlapp_module_list.index{|mod| mod.module_id.to_sym==module_id }
     end
 
     # Get position of the last ANL module which has the specified name
@@ -218,7 +215,7 @@ module ANL
     # @return [Fixnum] Position.
     #
     def rindex(module_id)
-      @module_list.rindex{|mod| mod.module_id.to_sym==module_id }
+      @anlapp_module_list.rindex{|mod| mod.module_id.to_sym==module_id }
     end
 
     # Set a text describing the current module.
@@ -226,7 +223,7 @@ module ANL
     # @param [String] description a text description for the current module.
     #
     def text(description)
-      @current_module.set_module_description(description)
+      @anlapp_current_module.set_module_description(description)
       return
     end
 
@@ -241,7 +238,7 @@ module ANL
     # @param value value to be set.
     #
     def setp(name, value)
-      mod = @current_module
+      mod = @anlapp_current_module
       set_param =
         if value.class == Vector
           if value.z
@@ -268,10 +265,10 @@ module ANL
           lambda{ mod.set_param(name, value) }
         end
 
-      if @startup_done
+      if @anlapp_startup_done
         set_param.call
       else
-        @set_param_list << set_param
+        @anlapp_set_param_list << set_param
       end
 
       return
@@ -289,7 +286,7 @@ module ANL
     # @param [Hash] map_values list of (key, value) pairs of the parameter.
     #
     def insert_map(map_name, key, map_values)
-      mod = @current_module
+      mod = @anlapp_current_module
       set_param = lambda do
         mod.param_map_insert(map_name, key) do |v|
           map_values.each do |value_name, value|
@@ -298,10 +295,10 @@ module ANL
         end
       end
 
-      if @startup_done
+      if @anlapp_startup_done
         set_param.call
       else
-        @set_param_list << set_param
+        @anlapp_set_param_list << set_param
       end
 
       return
@@ -336,8 +333,10 @@ module ANL
     # @yieldparam mod the current module is given.
     #
     def with_parameters(parameters=nil, &set_param)
-      mod = @current_module
-      @set_module_list << mod unless @set_module_list.include? mod
+      mod = @anlapp_current_module
+      unless @anlapp_set_module_list.include? mod
+        @anlapp_set_module_list << mod
+      end
       if parameters
         parameters.each{|name, value| setp(name.to_s, value) }
       end
@@ -354,25 +353,26 @@ module ANL
       with_parameters(initializer.parameters, &initializer.set_param_func)
     end
 
-    # Set loop number and display frequency.
+    # Proposed display frequency based on the number of loops.
+    # This method is private.
     #
-    # @param [Fixnum] n_loop number of loop. -1 for infinite loop.
-    # @param [Fixnum] display_frequency frequency of displaying loop ID
-    #     to STDOUT.
+    # @param [Fixnum] num_loop number of loops. -1 for infinite loops.
+    # @return [Fixnum] frequency of displaying loop ID to STDOUT.
     #
-    def set_loop(n_loop=nil, display_frequency=nil)
-      @n_loop = n_loop || -1
-      @display_frequency = display_frequency
-      if @n_loop < 0
-        @display_frequency ||= 10000
-      elsif @n_loop < 100
-        @display_frequency ||= 1
+    def proposed_display_frequency(num_loop)
+      if num_loop < 0
+        display_frequency = 10000
+      elsif num_loop < 100
+        display_frequency = 1
       else
-        @display_frequency ||= 10**((Math.log10(@n_loop)-1.5).to_i)
+        display_frequency = 10**((Math.log10(num_loop)-1.5).to_i)
       end
+      return display_frequency
     end
+    private :proposed_display_frequency
 
     # Check ANL status. If it is not OK, raise an exception.
+    # This method is private.
     #
     # param[Fixnum] status ANL status.
     # param[String] function name of ANL routine.
@@ -383,40 +383,39 @@ module ANL
       end
       true
     end
+    private :check_status
 
     # Execute the ANL startup session.
     #
     def startup()
-      @anl = ANL::ANLManager.new
-      vec = ANL::ModuleVector.new(@module_list)
-      @anl.SetModules(vec)
-      status = @anl.Startup()
+      @anlapp_anl = ANL::ANLManager.new
+      vec = ANL::ModuleVector.new(@anlapp_module_list)
+      @anlapp_anl.SetModules(vec)
+      status = @anlapp_anl.Startup()
       check_status(status, "Startup()")
-      @startup_done = true
-      return @anl
+      @anlapp_startup_done = true
+      return @anlapp_anl
     end
 
     # Run the ANL analysis.
     #
-    # @param [Fixnum] n_loop number of loop. -1 for infinite loop.
+    # @param [Fixnum] num_loop number of loops. :all or -1 for infinite loops.
     # @param [Fixnum] display_frequency frequency of displaying loop ID
     #     to STDOUT.
     # @yield [self] a block can be given for additional process.
     # @yieldparam self
     #
-    def run(n_loop=nil, display_frequency=nil)
+    def run(num_loop, display_frequency=nil)
       setup()
 
-      if n_loop == :all
-        n_loop = -1
-      end
-      set_loop(n_loop, display_frequency)
+      if num_loop == :all; num_loop = -1; end
+      display_frequency ||= proposed_display_frequency(num_loop)
 
       yield self if block_given?
 
       anl = startup()
 
-      while s = @set_param_list.shift
+      while s = @anlapp_set_param_list.shift
         s.call
       end
 
@@ -429,8 +428,8 @@ module ANL
       puts ""
       puts "Analysis Begin  | Time: " + Time.now.to_s
       $stdout.flush
-      anl.SetDisplayFrequency(@display_frequency)
-      status = anl.Analyze(@n_loop, @thread_mode)
+      anl.SetDisplayFrequency(display_frequency)
+      status = anl.Analyze(num_loop, @anlapp_thread_mode)
       check_status(status, "Analyze()")
       puts ""
       puts "Analysis End    | Time: " + Time.now.to_s
@@ -455,9 +454,9 @@ module ANL
       setup()
       anl = startup()
 
-      @set_param_list.each{|s| s.call }
+      @anlapp_set_param_list.each{|s| s.call }
       set_param.call if block_given?
-      @set_module_list.each{|mod|
+      @anlapp_set_module_list.each{|mod|
         status = mod.mod_prepare()
         check_status(status, "#{mod.module_id}::mod_prepare()")
       }
@@ -481,7 +480,7 @@ module ANL
     #
     def print_all_param()
       anl = startup()
-      @module_list.each{|m|
+      @anlapp_module_list.each{|m|
         puts "--- "+m.module_id+" ---"
         m.print_parameters
         puts ''
@@ -498,7 +497,7 @@ module ANL
       doc << REXML::XMLDecl.new('1.0', 'UTF-8')
       node = doc.add_element("anlmodules") #, {"xmlns" => "http://www.w3.org/2010/ANLNext"})
       node.add_element("category").add_text category
-      @module_list.each{|mod|
+      @anlapp_module_list.each{|mod|
         o = node.add_element("module")
         o.add_element("name").add_text mod.module_name
         o.add_element("version").add_text mod.module_version
@@ -567,14 +566,14 @@ module ANL
       out.puts "require 'ANLLib'"
       out.puts "require '#{package}'"
       out.puts ''
-      out.puts 'n_loop = 100000'
+      out.puts 'num_loop = 100000'
       out.puts 'display_frequency = 1000'
       out.puts ''
       out.puts "class #{app_name} < ANL::ANLApp"
       out.puts "  def setup()"
       out.puts "    add_namespace #{namespace}"
       out.puts ""
-      @module_list.each do |mod|
+      @anlapp_module_list.each do |mod|
         out.puts '    chain :'+mod.module_name
         with_parameters_string = '    with_parameters('+ mod.parameter_list.select{|param|
           param.type_name != 'map'
@@ -629,7 +628,7 @@ module ANL
       out.puts "end"
       out.puts ""
       out.puts "anl = #{app_name}.new"
-      out.puts "anl.run(n_loop, display_frequency)"
+      out.puts "anl.run(num_loop, display_frequency)"
       out.close if filename
     end
   end

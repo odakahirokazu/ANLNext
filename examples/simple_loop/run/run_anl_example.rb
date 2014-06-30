@@ -20,4 +20,4 @@ class MyApp < ANL::ANLApp
 end
 
 a = MyApp.new
-a.run(1000000, 100000)
+a.run(1000000)
