@@ -148,11 +148,10 @@ void VModuleParameter::set_value(double x, double y, double z)
 
 void VModuleParameter::print(std::ostream& os) const
 {
-  os << name() << " "
-     << ((unit_name()!="") ? "[" : "")
+  os << name() << ": " << *this
+     << ((unit_name()!="") ? " [" : "")
      << unit_name()
-     << ((unit_name()!="") ? "] " : "")
-     << ": " << *this;
+     << ((unit_name()!="") ? "]" : "");
   if (_hidden) { os << " (hidden)"; }
 }
 

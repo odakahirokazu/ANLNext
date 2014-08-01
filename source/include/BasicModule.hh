@@ -351,7 +351,7 @@ void BasicModule::set_parameter(const std::string& name, T val) throw(ANLExcepti
   
   BOOST_THROW_EXCEPTION( ANLException(this) <<
                          ANLErrInfo(std::string("Parameter is not found: ")
-                                    +name) );
+                                    +name+" / "+module_id()) );
 }
 
 
@@ -367,7 +367,7 @@ void BasicModule::clear_array(const std::string& name) throw(ANLException)
   
   BOOST_THROW_EXCEPTION( ANLException(this) <<
                          ANLErrInfo(std::string("Parameter is not found: ")
-                                    +name) );
+                                    +name+" / "+module_id()) );
 }
 
 
@@ -384,7 +384,7 @@ void BasicModule::set_vector(const std::string& name,
   
   BOOST_THROW_EXCEPTION( ANLException(this) <<
                          ANLErrInfo(std::string("Parameter is not found: ")
-                                    +name) );
+                                    +name+" / "+module_id()) );
 }
 
 
@@ -401,7 +401,7 @@ void BasicModule::set_vector(const std::string& name,
 
   BOOST_THROW_EXCEPTION( ANLException(this) <<
                          ANLErrInfo(std::string("Parameter is not found: ")
-                                    +name) );
+                                    +name+" / "+module_id()) );
 }
 
 

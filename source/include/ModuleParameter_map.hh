@@ -163,7 +163,7 @@ public:
 
     os << '\n';
     for (iter_type it=_ptr->begin(); it!=_ptr->end(); ++it) {
-      os << "  " << _key_name << " : " << it->first << '\n';
+      os << "  " << _key_name << ": " << it->first << '\n';
       mapped_type tmpValue = it->second;
       set_mapped<MappedIndex>(&tmpValue, value_catagory(), tuple_index_type());
       output_mapped<MappedIndex>(os, value_catagory(), tuple_index_type());
