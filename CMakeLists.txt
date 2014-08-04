@@ -1,7 +1,5 @@
 ####### CMakeLists.txt for ANL Next
-
 cmake_minimum_required(VERSION 2.8)
-cmake_policy(SET CMP0042 OLD)
 
 ### Initial definition of cmake variables
 set(CMAKE_INSTALL_PREFIX $ENV{HOME} CACHE PATH "install prefix")
@@ -10,6 +8,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -W -Wall" CACHE STRING "CXX_FLAGS for debug")
 set(CMAKE_C_FLAGS_DEBUG "-g -W -Wall" CACHE STRING "C_FLAGS for debug")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -W -Wall" CACHE STRING "CXX_FLAGS for release")
 set(CMAKE_C_FLAGS_RELEASE "-O3 -W -Wall" CACHE STRING "C_FLAGS for release")
+set(CMAKE_MACOSX_RPATH 0)
 
 ### Definition of project
 project(ANLNext)
