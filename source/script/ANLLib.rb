@@ -521,7 +521,7 @@ module ANL
     #
     def check_status(status, function_name)
       unless status == ANL::AS_OK
-        raise "#{function_name} returned #{show_status(status)}."
+        raise "#{function_name} returned #{ANL.show_status(status)}."
       end
       true
     end
