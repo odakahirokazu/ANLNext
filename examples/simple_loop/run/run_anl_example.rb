@@ -9,15 +9,32 @@ class MyApp < ANL::ANLApp
   def setup()
     chain MyPackage::MyModule
     with_parameters(MyParameter1: 10,
-                    MyParameter2: 20,
-                    MyParameter3: 30)
+                    MyParameter2: 20.5,
+                    MyParameter3: "Hello",
+                    MyVector1: [1, 2, 3, 4, 5],
+                    MyVector2: [1.3, 4.0, 11.2, 3.2],
+                    MyVector3: ["Hakuba", "Niseko", "Appi"])
+
+    chain MyPackage::MyMapModule
+    with_parameters()
+    insert_to_map :my_map, "Si1",   {ID: 1, type: "strip", x: 0.0, y: 0.0}
+    insert_to_map :my_map, "Si2",   {ID: 2, type: "strip", x: 0.0, y: 2.0}
+    insert_to_map :my_map, "CdTe1", {ID: 3, type: "pixel", x: -0.2, y: 4.0}
+    insert_to_map :my_map, "CdTe2", {ID: 4, type: "pixel", x: -0.2, y: 6.0}
+
+    chain MyPackage::MyVectorModule
+    with_parameters()
+    push_to_vector :my_vector, {ID: 1, type: "strip", x: 0.0, y: 0.0}
+    push_to_vector :my_vector, {ID: 3, type: "pixel", x: -0.2, y: 4.0}
+    push_to_vector :my_vector, {ID: 4, type: "pixel", x: -0.2, y: 6.0}
 
     # If you need to add the same type of module, you should set another name
     # via the second argument.
     chain MyPackage::MyModule, :MyModule2
-    with_parameters(MyParameter2: 21)
+    with_parameters(MyParameter2: 102.1,
+                    MyVector3: ["Jupiter", "Venus", "Mars", "Saturn"])
   end
 end
 
 a = MyApp.new
-a.run(1000000)
+a.run(1000000, 100000)

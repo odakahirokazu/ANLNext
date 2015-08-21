@@ -24,6 +24,7 @@
 #define ANL_INITIALIZE_INTERRUPT 1
 #define ANL_EXIT_INTERRUPT 1
 
+#include <cstddef>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -34,7 +35,6 @@
 #include "ANLStatus.hh"
 #include "ANLException.hh"
 
-
 namespace anl
 {
 
@@ -43,11 +43,11 @@ class BasicModule;
 
 struct ANLModuleCounter
 {
-  int entry;
-  int ok;
-  int err;
-  int skip;
-  int quit;
+  long int entry;
+  long int ok;
+  long int err;
+  long int skip;
+  long int quit;
 };
 
 struct ANLToLower
@@ -55,12 +55,12 @@ struct ANLToLower
   char operator() (char c) { return std::tolower(c); }
 };
 
-
 /**
  * The ANL Next manager class.
  *
  * @author Hirokazu Odaka
  * @date 2010-06-xx
+ * @date 2015-08-15 | version 1.7
  */
 class ANLManager : private boost::noncopyable
 {
@@ -75,7 +75,7 @@ public:
 
   ANLStatus Startup() throw(ANLException);
   ANLStatus Initialize() throw(ANLException);
-  ANLStatus Analyze(int num_event, bool thread_mode=true) throw(ANLException);
+  ANLStatus Analyze(long int num_events, bool thread_mode=false) throw(ANLException);
   ANLStatus Exit() throw(ANLException);
   
   ANLStatus Prepare() throw(ANLException);
@@ -83,8 +83,8 @@ public:
   ANLStatus InteractiveCom() throw(ANLException);
   ANLStatus InteractiveAna() throw(ANLException);
 
-  void SetDisplayFrequency(int v) { m_DisplayFrequency = v; }
-  int DisplayFrequency() const { return m_DisplayFrequency; }
+  void SetDisplayFrequency(long int v) { displayFrequency_ = v; }
+  long int DisplayFrequency() const { return displayFrequency_; }
   
 private:
   ANLStatus routine_startup();
@@ -98,7 +98,7 @@ private:
   void show_analysis();
   void print_parameters();
   void reset_counter();
-  ANLStatus process_analysis(int num_event);
+  ANLStatus process_analysis(long int num_events);
   void print_summary();
 
   int getModuleNumber(const std::string& name, bool strict=true);
@@ -114,17 +114,17 @@ private:
 
   // thread mode
 private:
-  void __void_process_analysis(int num_event, ANLStatus* status);
+  void __void_process_analysis(long int num_events, ANLStatus* status);
   void interactive_session();
 
 private:
-  std::vector<BasicModule*> m_Modules;
-  EvsManager* m_Evs;
-  std::vector<ANLModuleCounter> m_Counter;
-  int m_DisplayFrequency;
-  bool m_Interrupt;
+  std::vector<BasicModule*> modules_;
+  std::unique_ptr<EvsManager> evsManager_;
+  std::vector<ANLModuleCounter> counters_;
+  long int displayFrequency_;
+  bool interrupted_;
 };
 
-}
+} /* namespace anl */
 
 #endif /* ANL_ANLManager_H */

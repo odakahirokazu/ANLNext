@@ -44,7 +44,8 @@ const char* prompt(EditLine *e)
 #endif
 }
 
-using namespace anl;
+namespace anl
+{
 
 ANLStatus ANLManager::InteractiveCom() throw(ANLException)
 {
@@ -217,7 +218,6 @@ ANLStatus ANLManager::InteractiveCom() throw(ANLException)
   return status;
 }
 
-
 void ANLManager::InteractiveComHelp()
 {
   std::cout << "-------------------------------------------------------\n"
@@ -236,12 +236,11 @@ void ANLManager::InteractiveComHelp()
             << std::endl;
 }
 
-
 ANLStatus ANLManager::InteractiveModifyParam(int n)
 {
   ANLStatus status = AS_OK;
   if (n==0) {
-    for (AMIter mod=m_Modules.begin(); mod!=m_Modules.end(); ++mod) {
+    for (AMIter mod=modules_.begin(); mod!=modules_.end(); ++mod) {
       if ((*mod)->is_off()) continue;
       std::cout << (*mod)->module_name() << " mod_com()" << std::endl;
       status = (*mod)->mod_com();
@@ -259,8 +258,8 @@ ANLStatus ANLManager::InteractiveModifyParam(int n)
       std::cout << std::endl;
     }
   }
-  else if (0<n && n<=static_cast<int>(m_Modules.size())) {
-    BasicModule* mo = m_Modules[n-1];
+  else if (0<n && n<=static_cast<int>(modules_.size())) {
+    BasicModule* mo = modules_[n-1];
     std::cout << mo->module_name()
               << " mod_com()" << std::endl;
     status = mo->mod_com();
@@ -282,18 +281,17 @@ ANLStatus ANLManager::InteractiveModifyParam(int n)
   return status;
 }
 
-
 void ANLManager::InteractivePrintParam(int n)
 {
   if (n==0) {
-    for (AMIter mod=m_Modules.begin(); mod!=m_Modules.end(); ++mod) {
+    for (AMIter mod=modules_.begin(); mod!=modules_.end(); ++mod) {
       std::cout << (*mod)->module_name() << " parameters" << std::endl;
       (*mod)->print_parameters();
       std::cout << std::endl;
     }
   }
-  else if (0<n && n<=static_cast<int>(m_Modules.size())) {
-    BasicModule* mo = m_Modules[n-1];
+  else if (0<n && n<=static_cast<int>(modules_.size())) {
+    BasicModule* mo = modules_[n-1];
     std::cout << mo->module_name() << " parameters" << std::endl;
     mo->print_parameters();
   }
@@ -302,11 +300,10 @@ void ANLManager::InteractivePrintParam(int n)
   } 
 }
 
-
 void ANLManager::InteractiveModuleSwitch(int n, bool module_sw)
 {
   if (n==0) {
-    for (AMIter mod=m_Modules.begin(); mod!=m_Modules.end(); ++mod) {
+    for (AMIter mod=modules_.begin(); mod!=modules_.end(); ++mod) {
       if (module_sw) {
         (*mod)->on();
         std::cout << (*mod)->module_name() << " turned on." << std::endl;  
@@ -317,8 +314,8 @@ void ANLManager::InteractiveModuleSwitch(int n, bool module_sw)
       }
     }
   }
-  else if (0<n && n<=static_cast<int>(m_Modules.size())) {
-    BasicModule* mo = m_Modules[n-1];
+  else if (0<n && n<=static_cast<int>(modules_.size())) {
+    BasicModule* mo = modules_[n-1];
     if (module_sw) {
       mo->on();
       std::cout << mo->module_name() << " turned on." << std::endl;
@@ -332,7 +329,6 @@ void ANLManager::InteractiveModuleSwitch(int n, bool module_sw)
     std::cout << "input argument is out of range." << std::endl;
   }
 }
-
 
 ANLStatus ANLManager::InteractiveAna() throw(ANLException)
 {
@@ -429,7 +425,6 @@ ANLStatus ANLManager::InteractiveAna() throw(ANLException)
   return status;
 }
 
-
 void ANLManager::InteractiveAnaHelp()
 {
   std::cout << "-------------------------------------------------------\n"
@@ -442,3 +437,5 @@ void ANLManager::InteractiveAnaHelp()
             << "-------------------------------------------------------\n"
             << std::endl;
 }
+
+} /* namespace anl */

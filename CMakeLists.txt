@@ -12,15 +12,13 @@ set(CMAKE_MACOSX_RPATH 0)
 
 ### Definition of project
 project(ANLNext)
-find_package(Boost 1.53.0 REQUIRED)
+add_definitions("-std=c++11")
 set(CMAKE_MODULE_PATH ${ANLNext_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 message("-- Install destination prefix: ${CMAKE_INSTALL_PREFIX}")
 
 ### options
 ## library options
-option(ANL_USE_RUBY "enable Ruby binding" ON)
-option(ANL_USE_EXE "enable standalone executables" OFF)
 option(ANL_USE_TVECTOR "enable ROOT vector" OFF)
 option(ANL_USE_HEPVECTOR "enable CLHEP vector" OFF)
 option(ANL_USE_G4VECTOR "enable Geant4-CLHEP vector" OFF)

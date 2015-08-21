@@ -20,14 +20,27 @@
 #ifndef ANL_ANLStatus_H
 #define ANL_ANLStatus_H 1
 
+#include <ostream>
+
 namespace anl
 {
 
-enum ANLStatus {AS_OK,
-                AS_SKIP,
-                AS_SKIP_ERR,
-                AS_QUIT,
-                AS_QUIT_ERR};
-}
+/**
+ * scoped enum indicating a status of an ANL module.
+ * @date 2014-12-10
+ */
+enum class ANLStatus { AS_OK, AS_SKIP, AS_SKIP_ERR, AS_QUIT, AS_QUIT_ERR };
+
+std::string ANLStatusToString(ANLStatus status);
+
+constexpr ANLStatus AS_OK       = ANLStatus::AS_OK;
+constexpr ANLStatus AS_SKIP     = ANLStatus::AS_SKIP;
+constexpr ANLStatus AS_SKIP_ERR = ANLStatus::AS_SKIP_ERR;
+constexpr ANLStatus AS_QUIT     = ANLStatus::AS_QUIT;
+constexpr ANLStatus AS_QUIT_ERR = ANLStatus::AS_QUIT_ERR;
+
+} /* namespace anl */
+
+std::ostream& operator<< (std::ostream& os, anl::ANLStatus status);
 
 #endif /* ANL_ANLStatus_H */

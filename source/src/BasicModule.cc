@@ -24,58 +24,59 @@
 #include "EvsManager.hh"
 #include "ANLManager.hh"
 
-using namespace anl;
+namespace anl
+{
 
-int BasicModule::m_CopyID = 0;
-
+int BasicModule::CopyID__ = 0;
 
 BasicModule::BasicModule()
-  : m_ModuleID(""),
-    m_ModuleDescription(""),
-    m_ModuleOn(true), m_Evs(0), m_CurrentParameter(),
-    m_RequireFullAccess(true)
+  : moduleID_(""),
+    moduleDescription_(""),
+    moduleOn_(true), evsManager_(0), currentParameter_(),
+    requiringFullAccess_(true)
 {
-  m_MyCopyID = m_CopyID;
-  m_CopyID++;
+  myCopyID_ = CopyID__;
+  CopyID__++;
 
-  m_ModuleIDMethod = &BasicModule::module_name;
+  moduleIDMethod_ = &BasicModule::module_name;
 }
-
 
 BasicModule::BasicModule(const BasicModule& r)
-  : m_ModuleID(r.m_ModuleID),
-    m_Alias(r.m_Alias),
-    m_ModuleDescription(r.m_ModuleDescription),
-    m_ModuleOn(r.m_ModuleOn), m_Evs(r.m_Evs), m_ANLAccess(r.m_ANLAccess),
-    m_AccessibleModule(r.m_AccessibleModule), m_RequireFullAccess(true)
+  : moduleID_(r.moduleID_),
+    aliases_(r.aliases_),
+    moduleDescription_(r.moduleDescription_),
+    moduleOn_(r.moduleOn_),
+    evsManager_(r.evsManager_),
+    moduleAccess_(r.moduleAccess_),
+    accessibleModules_(r.accessibleModules_),
+    requiringFullAccess_(true)
 {
-  m_MyCopyID = m_CopyID;
-  m_CopyID++;
+  myCopyID_ = CopyID__;
+  CopyID__++;
   
-  m_ModuleID = r.module_id()+"#"+boost::lexical_cast<std::string>(m_MyCopyID);
-  m_ModuleIDMethod = &BasicModule::get_module_id;
+  moduleID_ = r.module_id()+"#"+boost::lexical_cast<std::string>(myCopyID_);
+  moduleIDMethod_ = &BasicModule::get_module_id;
 }
 
+BasicModule::~BasicModule() = default;
 
 void BasicModule::set_module_id(const std::string& module_id)
 {
-  m_ModuleID = module_id;
-  m_ModuleIDMethod = &BasicModule::get_module_id;
+  moduleID_ = module_id;
+  moduleIDMethod_ = &BasicModule::get_module_id;
 }
-
 
 void BasicModule::print_parameters()
 {
-  for (ModParamIter it=ModParamBegin(); it!=ModParamEnd(); ++it) {
+  for (ModuleParamIter it=ModuleParamBegin(); it!=ModuleParamEnd(); ++it) {
     (*it)->print(std::cout);
     std::cout << std::endl;
   }
 }
 
-
 void BasicModule::ask_parameters()
 {
-  for (ModParamIter it=ModParamBegin(); it!=ModParamEnd(); ++it) {
+  for (ModuleParamIter it=ModuleParamBegin(); it!=ModuleParamEnd(); ++it) {
     if ((*it)->is_hidden()) continue;
     
     (*it)->ask();
@@ -92,19 +93,17 @@ void BasicModule::ask_parameters()
   }
 }
 
-
 bool BasicModule::accessible(const std::string& name) 
 {
-  return m_RequireFullAccess || m_AccessibleModule.count(name);
+  return requiringFullAccess_ || accessibleModules_.count(name);
 }
-
 
 void BasicModule::unregister_parameter(const std::string& name)
 {
-  ModParamIter it=ModParamBegin();
-  while (it != ModParamEnd()) {
+  ModuleParamIter it=ModuleParamBegin();
+  while (it != ModuleParamEnd()) {
     if (name == (*it)->name()) {
-      it = m_ModuleParameters.erase(it);
+      it = moduleParameters_.erase(it);
     }
     else {
       ++it;
@@ -112,25 +111,23 @@ void BasicModule::unregister_parameter(const std::string& name)
   }
 }
 
-
 void BasicModule::hide_parameter(const std::string& name, bool hidden)
 {
-  for (ModParamIter it=ModParamBegin(); it!=ModParamEnd(); ++it) {
+  for (ModuleParamIter it=ModuleParamBegin(); it!=ModuleParamEnd(); ++it) {
     if (name == (*it)->name()) {
-      if (!hidden) { m_CurrentParameter = *it; }
+      if (!hidden) { currentParameter_ = *it; }
       (*it)->set_hidden(hidden);
       break;
     }
   }
 }
 
-
 void BasicModule::ask_parameter(const std::string& name,
                                const std::string& question)
 {
-  for (ModParamIter it=ModParamBegin(); it!=ModParamEnd(); ++it) {
+  for (ModuleParamIter it=ModuleParamBegin(); it!=ModuleParamEnd(); ++it) {
     if (name == (*it)->name()) {
-      m_CurrentParameter = *it;
+      currentParameter_ = *it;
       
       if (question!="") {
         (*it)->set_question(question);
@@ -152,54 +149,45 @@ void BasicModule::ask_parameter(const std::string& name,
   }
 }
 
-
 void BasicModule::require_module_access(const std::string& name)
 {
-  m_AccessibleModule.insert(name);
+  accessibleModules_.insert(name);
 }
-
 
 void BasicModule::require_full_access(bool v)
 {
-  m_RequireFullAccess = v;
+  requiringFullAccess_ = v;
 }
-
 
 void BasicModule::EvsDef(const std::string& key)
 {
-  m_Evs->EvsDef(key);
+  evsManager_->define(key);
 }
-
 
 void BasicModule::EvsUndef(const std::string& key)
 {
-  m_Evs->EvsUndef(key);
+  evsManager_->undefine(key);
 }
-
 
 bool BasicModule::EvsIsDef(const std::string& key) const
 {
-  return m_Evs->EvsIsDef(key);
+  return evsManager_->isDefined(key);
 }
-
 
 bool BasicModule::Evs(const std::string& key) const
 {
-  return m_Evs->Evs(key);
+  return evsManager_->get(key);
 }
-
 
 void BasicModule::EvsSet(const std::string& key)
 {
-  m_Evs->EvsSet(key);
+  evsManager_->set(key);
 }
-
 
 void BasicModule::EvsReset(const std::string& key)
 {
-  m_Evs->EvsReset(key);
+  evsManager_->reset(key);
 }
-
 
 // instantiation of function templates
 template
@@ -228,14 +216,16 @@ void BasicModule::set_parameter(const std::string& name,
                                const std::vector<std::string>& val);
 
 template
-void BasicModule::set_map_value(const std::string& name, bool val);
+void BasicModule::set_value_element(const std::string& name, bool val);
 
 template
-void BasicModule::set_map_value(const std::string& name, int val);
+void BasicModule::set_value_element(const std::string& name, int val);
 
 template
-void BasicModule::set_map_value(const std::string& name, double val);
+void BasicModule::set_value_element(const std::string& name, double val);
 
 template
-void BasicModule::set_map_value(const std::string& name,
-                                const std::string& val);
+void BasicModule::set_value_element(const std::string& name,
+                                    const std::string& val);
+
+} /* namespace anl */

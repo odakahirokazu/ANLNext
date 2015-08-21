@@ -26,46 +26,16 @@
 namespace anl
 {
 
-struct value_category_scalar {};
-struct value_category_pair {};
-struct value_category_tuple {};
-
-template <typename T>
-struct size_of_value
-{
-  typedef value_category_scalar type;
-  constexpr static std::size_t value = 1;
-};
-
-template <typename T1, typename T2>
-struct size_of_value<std::pair<T1, T2>>
-{
-  typedef value_category_pair type;
-  constexpr static std::size_t value = 2;
-};
-
-template <typename... Ts>
-struct size_of_value<std::tuple<Ts...>>
-{
-  typedef value_category_tuple type;
-  typedef std::tuple<Ts...> tuple_type;
-  constexpr static std::size_t value = std::tuple_size<tuple_type>::value;
-};
-
-
 /**
  * A class template for an ANL module parameter. Partial specialization.
  * @author Hirokazu Odaka
- * @date 2011-07-12
- * @date 2012-12-12
- * @date 2014-12-09 | use variadic template.
+ * @date 2014-12-09
  */
-template <typename T>
-class ModuleParameter<std::map<std::string, T>> : public VModuleParameter
+template <typename... Ts>
+class ModuleParameter<std::vector<std::tuple<Ts...>>> : public VModuleParameter
 {
-  typedef std::map<std::string, T> container_type;
-  typedef std::string key_type;
-  typedef T value_type;
+  typedef std::vector<std::tuple<Ts...>> container_type;
+  typedef std::tuple<Ts...> value_type;
   typedef typename container_type::iterator iter_type;
   typedef typename size_of_value<value_type>::type value_category;
  
@@ -73,28 +43,20 @@ class ModuleParameter<std::map<std::string, T>> : public VModuleParameter
   typedef std::integral_constant<std::size_t, ValueSize> ValueEnd_t;
 
 public:
-  ModuleParameter(container_type* ptr, const std::string& name,
-                  const std::string& key_name,
-                  const std::string& key_default)
-    : VModuleParameter(name), ptr_(ptr),
-      key_name_(key_name), buffer_key_(key_default),
-      first_input_(true)
+  ModuleParameter(container_type* ptr, const std::string& name)
+    : VModuleParameter(name), ptr_(ptr), first_input_(true)
   {
-    set_default_string(key_default);
   }
   
   ModuleParameter(container_type* ptr, const std::string& name,
-                  const std::string& key_name,
-                  const std::string& key_default,
                   const std::vector<ModuleParam_sptr>& values_info)
     : VModuleParameter(name), ptr_(ptr),
-      key_name_(key_name), buffer_key_(key_default), value_info_(values_info),
+      value_info_(values_info),
       first_input_(true)
   {
-    set_default_string(key_default);
   }
 
-  std::string type_name() const { return "map"; }
+  std::string type_name() const { return "vector"; }
 
   bool first_input()
   {
@@ -108,9 +70,10 @@ public:
   void output(std::ostream& os) const
   {
     os << '\n';
+    std::size_t index = 0;
     for (iter_type it=ptr_->begin(); it!=ptr_->end(); ++it) {
-      os << "  " << key_name_ << ": " << it->first << '\n';
-      value_type tmpValue = it->second;
+      os << "  index: " << index++ << '\n';
+      value_type tmpValue = *it;
       set_value<0>(&tmpValue, value_category());
       output_value<0>(os, value_category());
     }
@@ -119,8 +82,6 @@ public:
   
   void input(std::istream&) {}
   
-  std::string map_key_name() const { return key_name_; }
-  void set_map_key(const std::string& key) { buffer_key_ = key; }
   std::size_t num_value_elements() const { return value_info_.size(); }
   std::shared_ptr<VModuleParameter const> get_value_element(std::size_t i) const
   { return value_info_[i]; }
@@ -129,37 +90,6 @@ public:
   void set_default_value_element()
   {
     get_value<0>(&default_value_, value_category());
-  }
-
-  void enable_value_elements(int type, const std::vector<std::size_t>& enables)
-  {
-    std::array<std::size_t, ValueSize> enableArray;
-    for (std::size_t i=0; i<ValueSize; ++i) {
-      enableArray[i] = 0;
-    }
-    for (std::size_t k=0; k<enables.size(); ++k) {
-      const std::size_t ena = enables[k];
-      if (ena < ValueSize) {
-        enableArray[ena] = 1;
-      }
-    }
-    value_enable_[type] = enableArray;
-  }
-  
-  bool value_enable(std::size_t, value_category_scalar) const { return true; }
-  bool value_enable(std::size_t, value_category_pair) const { return true; }
-  bool value_enable(std::size_t i, value_category_tuple) const
-  {
-    if (i>0) {
-      int type = 0;
-      value_info_[0]->get(&type);
-      typename decltype(value_enable_)::const_iterator it
-        = value_enable_.find(type);
-      if (it!=value_enable_.end() && (it->second)[i]==0) {
-        return false;
-      }
-    }
-    return true;
   }
 
   void set_value_element(const std::string& name, int val)
@@ -175,7 +105,7 @@ public:
   {
     value_type tmpValue;
     get_value<0>(&tmpValue, value_category());
-    ptr_->insert(std::make_pair(buffer_key_, tmpValue));
+    ptr_->push_back(tmpValue);
     
     set_value<0>(&default_value_, value_category());
   }
@@ -183,7 +113,8 @@ public:
   bool ask()
   {
     std::cout << "Define table of " << name() << ":" << std::endl;
-    ModuleParameter<std::string> tmpKeyParam(&buffer_key_, key_name_);
+    std::string buffer = "OK";
+    ModuleParameter<std::string> tmpKeyParam(&buffer, "continue");
     tmpKeyParam.set_question(name()+" (OK for exit)");
     
     ptr_->clear();
@@ -191,21 +122,19 @@ public:
 
     while (1) {
       tmpKeyParam.ask();
-      if (buffer_key_=="ok" || buffer_key_=="OK") break;
+      if (buffer=="ok" || buffer=="OK") break;
       
       set_value<0>(&default_value_, value_category());
       
       const std::size_t NumValue = value_info_.size();
       for (std::size_t i=0; i<NumValue; ++i) {
-        if (value_enable(i, value_category())) {
-          value_info_[i]->ask();
-        }
+        value_info_[i]->ask();
       }
       
       value_type tmpValue;
       get_value<0>(&tmpValue, value_category());
-      ptr_->insert(std::make_pair(buffer_key_, tmpValue));
-      buffer_key_ = "OK";
+      ptr_->push_back(tmpValue);
+      buffer = "OK";
     }
     return true;
   }
@@ -305,9 +234,7 @@ private:
   void output_value(std::ostream& os, value_category_tuple,
                     std::integral_constant<std::size_t, Index>) const
   {
-    if (value_enable(Index, value_category_tuple())) {
-      os << "    "; value_info_[Index]->print(os); os << '\n';
-    }
+    os << "    "; value_info_[Index]->print(os); os << '\n';
     typedef std::integral_constant<std::size_t, Index+1> NextIndex_t;
     output_value<Index+1>(os, value_category_tuple(), NextIndex_t());
   }
@@ -339,12 +266,8 @@ private:
 
 private:
   container_type* ptr_;
-  std::string key_name_;
-  std::string buffer_key_;
   value_type default_value_;
   std::vector<ModuleParam_sptr> value_info_;
-  std::map<int, std::array<std::size_t, ValueSize>> value_enable_;
-  // std::map<int, std::array<std::string, ValueSize>> value_question_;
   bool first_input_;
 };
 

@@ -17,23 +17,64 @@
  *                                                                       *
  *************************************************************************/
 
-#include "ANLVModule.hh"
+#ifndef ANL_ModuleAccess_H
+#define ANL_ModuleAccess_H 1
 
-#include <boost/lexical_cast.hpp>
+#include <string>
+#include <map>
+#include "ANLException.hh"
 
-using namespace anl;
-
-
-ANLVModule::ANLVModule(const std::string& name, const std::string& version)
-  : m_ModuleName(name), m_ModuleVersion(version)
+namespace anl
 {
+
+class BasicModule;
+
+/**
+ * Interface to access other ANL modules.
+ * 
+ * @author Hirokazu Odaka
+ * @date 2010-06-xx
+ */
+class ModuleAccess
+{
+public:
+  const BasicModule* getModule(const std::string& name)
+  { return getModuleNC(name); }
+  
+  BasicModule* getModuleNC(const std::string& name);
+
+  void registerModule(const std::string& name, BasicModule* module);
+
+  bool exist(const std::string& name);
+
+private:
+  typedef std::map<std::string, BasicModule*> ANLModuleMap;
+  ANLModuleMap moduleMap_;
+};
+
+inline
+BasicModule* ModuleAccess::getModuleNC(const std::string& name)
+{
+  ANLModuleMap::iterator it = moduleMap_.find(name);
+  if (it == moduleMap_.end()) {
+    BOOST_THROW_EXCEPTION( ANLException()
+                           << ANLErrInfo(std::string("No module: ")+name) );
+  }
+  return it->second;
 }
 
-
-ANLVModule::ANLVModule(const ANLVModule& r)
-  : BasicModule(r)
+inline
+void ModuleAccess::registerModule(const std::string& name, BasicModule* module)
 {
-  m_ModuleName = r.m_ModuleName +
-    "#" + boost::lexical_cast<std::string>(copy_id());
-  m_ModuleVersion = r.m_ModuleVersion;
+  moduleMap_[name] = module;
 }
+
+inline
+bool ModuleAccess::exist(const std::string& name)
+{
+  return static_cast<bool>(moduleMap_.count(name));
+}
+
+} /* namespace anl */
+
+#endif /* ANL_ModuleAccess_H */

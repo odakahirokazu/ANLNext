@@ -21,8 +21,11 @@ FillHistogram::~FillHistogram()
 ANLStatus FillHistogram::mod_startup()
 {
   register_parameter(&_nbin, "nbin");
-  register_parameter(&_energy0, "energy_min");
-  register_parameter(&_energy1, "energy_max");
+  set_parameter_description("Number of bins");
+  register_parameter(&_energy0, "energy_min", 1.0, "keV");
+  set_parameter_description("Lower bound of the histograms");
+  register_parameter(&_energy1, "energy_max", 1.0, "keV");
+  set_parameter_description("Upper bound of the histograms");
 
   return AS_OK;
 }

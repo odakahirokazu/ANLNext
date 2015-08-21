@@ -2,7 +2,6 @@
 #include <cstdio>
 #include <iostream>
 
-
 using namespace anl;
 
 SaveData::SaveData() :
@@ -10,13 +9,12 @@ SaveData::SaveData() :
 {
 }
 
-
 ANLStatus SaveData::mod_startup()
 {
   register_parameter(&m_FileName, "filename");
+  set_parameter_description("Output file name");
   return AS_OK;
 }
-
 
 ANLStatus SaveData::mod_init()
 {
@@ -28,7 +26,6 @@ ANLStatus SaveData::mod_init()
   
   return AS_OK;
 }
-
 
 ANLStatus SaveData::mod_exit()
 {

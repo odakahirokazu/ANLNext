@@ -16,8 +16,8 @@ module ANL
     #
     def parameter_list()
       l = []
-      i = self.ModParamBegin
-      e = self.ModParamEnd
+      i = self.ModuleParamBegin
+      e = self.ModuleParamEnd
       while i != e
         l << i.value
         i.next
@@ -52,11 +52,11 @@ module ANL
   # @return [String] ANL status
   def show_status(i)
     {
-      ANL::AS_OK => "AS_OK",
-      ANL::AS_SKIP => "AS_SKIP",
-      ANL::AS_SKIP_ERR => "AS_SKIP_ERR",
-      ANL::AS_QUIT => "AS_QUIT",
-      ANL::AS_QUIT_ERR => "AS_QUIT_ERR",
+      ANL::ANLStatus_AS_OK => "AS_OK",
+      ANL::ANLStatus_AS_SKIP => "AS_SKIP",
+      ANL::ANLStatus_AS_SKIP_ERR => "AS_SKIP_ERR",
+      ANL::ANLStatus_AS_QUIT => "AS_QUIT",
+      ANL::ANLStatus_AS_QUIT_ERR => "AS_QUIT_ERR",
     }[i] or "unknown status"
   end
   module_function :show_status
@@ -116,8 +116,9 @@ module ANL
     anlapp_methods = [
       :thread_mode, :thread_mode=, :add_namespace,
       :push, :insert, :chain, :expose_module, :get_module, :index, :rindex,
-      :insert_map, :set_parameters, :with_parameters, :chain_with_parameters,
-      :startup, :print_all_param, :make_doc, :make_script
+      :insert_to_map, :push_to_vector,
+      :set_parameters, :with_parameters, :chain_with_parameters,
+      :startup, :print_all_param, :make_doc
     ]
     def_delegators :@_anlapp_analysis_chain, *anlapp_methods
     alias :with :with_parameters
@@ -183,6 +184,16 @@ module ANL
       end
 
       define_method(getter_name){ instance_variable_get(variable_name) }
+    end
+
+    def make_script(output: nil,
+                    package: "myPackage",
+                    namespace: "MyPackage")
+      app_name = self.class.to_s
+      @_anlapp_analysis_chain.make_script(output: output,
+                                          package: package,
+                                          namespace: namespace,
+                                          app_name: app_name)
     end
   end
 
@@ -407,12 +418,50 @@ module ANL
     # @param [String] key key of the map content, or name of inserted object.
     # @param [Hash] map_values list of (key, value) pairs of the parameter.
     #
-    def insert_map(map_name, key, map_values)
+    def insert_to_map(map_name, key, map_values)
       mod = @current_module
       set_param = lambda do
-        mod.param_map_insert(map_name.to_s, key.to_s) do |v|
+        mod.insert_to_map(map_name.to_s, key.to_s) do |v|
           map_values.each do |value_name, value|
-            v.set_map_value(value_name.to_s, value)
+            v.set_value_element(value_name.to_s, value)
+          end
+        end
+      end
+
+      set_param_or_raise = lambda do
+        begin
+          set_param.call
+        rescue
+          puts "Set parameter exception: #{map_name}/#{key} in module #{mod.module_id}"
+          raise
+        end
+      end
+
+      if @startup_done
+        set_param_or_raise.call
+      else
+        @set_param_list << set_param_or_raise
+      end
+
+      return
+    end
+
+    # Set a vector-type parameter of the current module.
+    # Before the ANL startup session, this method reserves parameter setting,
+    # and acctual setting to the ANL module object is performed after the
+    # startup session.
+    # If this method is called after the startup session, parameter setting is
+    # performed immediately.
+    #
+    # @param [String] vector_name name of the parameter.
+    # @param [Hash] values list of (key, value) pairs of the parameter.
+    #
+    def push_to_vector(vector_name, values)
+      mod = @current_module
+      set_param = lambda do
+        mod.push_to_vector(vector_name.to_s) do |v|
+          values.each do |value_name, value|
+            v.set_value_element(value_name.to_s, value)
           end
         end
       end
@@ -520,7 +569,7 @@ module ANL
     # param[String] function name of ANL routine.
     #
     def check_status(status, function_name)
-      unless status == ANL::AS_OK
+      unless status == ANL::ANLStatus_AS_OK
         raise "#{function_name} returned #{ANL.show_status(status)}."
       end
       true
@@ -621,63 +670,76 @@ module ANL
 
     # Make a XML document describing module parameters.
     #
-    # @param [STRING] filename output XML filename. If nil, output to STDOUT.
-    # @param [STRING] category
+    # @param [STRING] output output XML filename. If nil, output to STDOUT.
+    # @param [STRING] namespace
     #
-    def make_doc(filename = nil, category="")
+    def make_doc(output: nil, namespace: "ANL")
       doc = REXML::Document.new
       doc << REXML::XMLDecl.new('1.0', 'UTF-8')
       node = doc.add_element("anlmodules") #, {"xmlns" => "http://www.w3.org/2010/ANLNext"})
-      node.add_element("category").add_text category
-      @module_list.each{|mod|
+      node.add_element("namespace").add_text namespace
+      @module_list.each do |mod|
         o = node.add_element("module")
         o.add_element("name").add_text mod.module_name
         o.add_element("version").add_text mod.module_version
         o.add_element("text").add_text mod.module_description
         ps = o.add_element("parameters")
-        mod.parameter_list.each {|param|
+        mod.parameter_list.each do |param|
           type = param.type_name
-          map_type = (type=="map") ? "map" : ""
+          container_type = ""
+          if type=="map" || type=="vector"
+            container_type = type.to_sym
+          end
 
-          p = ps.add_element("param", {"map_type" => map_type})
+          p = ps.add_element("param", {"container_type" => container_type})
           p.add_element("name").add_text param.name
           p.add_element("type").add_text type
           p.add_element("unit").add_text param.unit_name
-          if type=="vector of string" || type=="list of string"
+          if type=="vector<string>" || type=="list<string>"
             p.add_element("default_value").add_text param.default_string
           else
             p.add_element("default_value").add_text param.value_string
           end
           p.add_element("description").add_text param.description
 
-          if map_type=="map"
-            p = ps.add_element("param", {"map_type" => "key"})
+          if container_type == :map
+            p = ps.add_element("param", {"container_type" => "key"})
             p.add_element("name").add_text param.map_key_name
             p.add_element("type").add_text "string"
             p.add_element("unit").add_text ""
             p.add_element("default_value").add_text param.default_string
             p.add_element("description").add_text ""
 
-            param.num_map_value.times{|i|
-              mapValue = param.get_map_value(i)
-              p = ps.add_element("param", {"map_type" => "value"})
-              p.add_element("name").add_text mapValue.name
-              p.add_element("type").add_text mapValue.type_name
-              p.add_element("unit").add_text mapValue.unit_name
-              p.add_element("default_value").add_text mapValue.value_string
-              p.add_element("description").add_text mapValue.description
-            }
+            param.num_value_elements.times do |i|
+              value = param.get_value_element(i)
+              p = ps.add_element("param", {"container_type" => "value"})
+              p.add_element("name").add_text value.name
+              p.add_element("type").add_text value.type_name
+              p.add_element("unit").add_text value.unit_name
+              p.add_element("default_value").add_text value.value_string
+              p.add_element("description").add_text value.description
+            end
+          elsif container_type == :vector
+            param.num_value_elements.times do |i|
+              value = param.get_value_element(i)
+              p = ps.add_element("param", {"container_type" => "value"})
+              p.add_element("name").add_text value.name
+              p.add_element("type").add_text value.type_name
+              p.add_element("unit").add_text value.unit_name
+              p.add_element("default_value").add_text value.value_string
+              p.add_element("description").add_text value.description
+            end
           end
-        }
-      }
+        end
+      end
 
       formatter = REXML::Formatters::Pretty.new
       formatter.compact = true
-      if filename
-        File::open(filename, 'w') {|fo|
+      if output
+        File::open(output, 'w') do |fo|
           formatter.write(doc, fo)
           fo.puts ''
-        }
+        end
       else
         formatter.write(doc, STDOUT)
         puts ''
@@ -686,14 +748,16 @@ module ANL
 
     # Make a Ruby run script template for this ANL chain.
     #
-    # @param [STRING] filename output script filename. If nil, output to STDOUT.
+    # @param [STRING] output output script filename. If nil, output to STDOUT.
     # @param [STRING] package name of the Ruby extension library.
     # @param [STRING] namespace namespace of the Ruby extension module.
-    # @param [STRING] app_name name of your original app.
+    # @param [STRING] app_name class name of the application
     #
-    def make_script(filename = nil, package="myPackage", namespace="MyPackage",
-                    app_name="MyApp")
-      out = filename ? File::open(filename, 'w') : STDOUT
+    def make_script(output: nil,
+                    package: "myPackage",
+                    namespace: "MyPackage",
+                    app_name: "MyApp")
+      out = output ? File::open(output, 'w') : STDOUT
       out.puts '#!/usr/bin/env ruby'
       out.puts "require 'ANLLib'"
       out.puts "require '#{package}'"
@@ -708,16 +772,18 @@ module ANL
       @module_list.each do |mod|
         out.puts '    chain :'+mod.module_name
         with_parameters_string = '    with_parameters('+ mod.parameter_list.select{|param|
-          param.type_name != 'map'
+          param.type_name != 'map' && param.type_name != 'vector'
         }.map do |param|
           type = param.type_name
           default_string =
             case type
-            when 'vector of string', 'list of string'
+            when 'vector<string>', 'list<string>'
               '["'+param.default_string+'"]'
+            when 'vector<int>', 'vector<double>'
+              '[]'
             when 'string'
               '"'+param.value_string+'"'
-            when 'float'
+            when 'double'
               param.value_string.to_f.to_s
             when '2-vector'
               x, y = param.value_string.strip.split(/\s+/)
@@ -736,23 +802,46 @@ module ANL
           param.type_name == 'map'
         }.each do |param|
           default_string = param.default_string
-          out.puts 'anl.insert_map "'+param.name+'", "'+default_string+'", {'
-          param.num_map_value.times do |i|
-            mapValue = param.get_map_value(i)
+          out.puts '    insert_to_map "'+param.name+'", "'+default_string+'", {'
+          param.num_value_elements.times do |i|
+            mapValue = param.get_value_element(i)
             type = mapValue.type_name
             default_string =
-            case type
-            when 'string'
-              '"'+mapValue.value_string+'"'
-            when 'float'
-              mapValue.value_string.to_f.to_s
-            else
-              mapValue.value_string
-            end
-            out.puts '  "'+mapValue.name+'" => '+default_string+","
+              case type
+              when 'string'
+                '"'+mapValue.value_string+'"'
+              when 'double'
+                mapValue.value_string.to_f.to_s
+              else
+                mapValue.value_string
+              end
+            out.puts '      "'+mapValue.name+'" => '+default_string+","
           end
-          out.puts '}'
+          out.puts '    }'
         end
+
+        mod.parameter_list.select{|param|
+          param.type_name == 'vector'
+        }.each do |param|
+          default_string = param.default_string
+          out.puts '    push_to_vector "'+param.name+'", {'
+          param.num_value_elements.times do |i|
+            mapValue = param.get_value_element(i)
+            type = mapValue.type_name
+            default_string =
+              case type
+              when 'string'
+                '"'+mapValue.value_string+'"'
+              when 'double'
+                mapValue.value_string.to_f.to_s
+              else
+                mapValue.value_string
+              end
+            out.puts '      "'+mapValue.name+'" => '+default_string+","
+          end
+          out.puts '    }'
+        end
+
         out.puts ''
       end
 
@@ -761,9 +850,199 @@ module ANL
       out.puts ""
       out.puts "anl = #{app_name}.new"
       out.puts "anl.run(num_loop, display_frequency)"
-      out.close if filename
+      out.close if output
     end
   end
+
+
+  # Class of a SWIG Interface to ANL module class.
+  # This produces one Ruby class interface to be processed by SWIG.
+  #
+  class SWIGClass
+    def initialize(name='', manual=false, option=nil)
+      @name = name
+      @manual = manual
+      @option = option
+      @include_path = ['../include']
+    end
+
+    attr_reader :name, :manual, :option
+    attr_writer :include_path
+
+    def puts_include()
+      puts "#ifdef "+@option if @option
+      puts '#include "'+@name+'.hh"'
+      puts "#endif" if @option
+    end
+
+    def interface()
+      puts "#ifdef "+@option if @option
+      if @manual
+        File::open(@name+".i") {|fin|
+          print fin.read
+        }
+        puts ''
+      else
+        extract_interface
+      end
+      puts "#endif" if @option
+      puts ""
+    end
+
+    def extract_interface()
+      c = @name
+      dirIndex = @include_path.index do |dir|
+        File::exist?(dir+"/"+c+".hh")
+      end
+      fileName = @include_path[dirIndex]+"/"+c+".hh"
+      File.open(fileName) do |fin|
+        className = nil
+        classOpen = nil
+        constructor = nil
+        constructor2 = nil
+
+        fin.each_line do |l|
+          if !className && l=~/^class\s+(\w+)(\s+|\:)/
+            className = $1
+            puts l.sub(/,.+/, '')
+            if l.include? '{'
+              classOpen = true
+            end
+            next
+          end
+
+          if className
+            if !classOpen
+              puts l
+              if l.include? '{'
+                classOpen = true
+                puts 'public:'
+              end
+            else
+              if l.include?(className+'(')
+                puts l
+                constructor = true
+              elsif constructor
+                puts l
+              end
+
+              if constructor
+                constructor = nil if !constructor2 && l.include?(';')
+                constructor2 = true if l.include?('{')
+                if constructor2 && l.include?('}')
+                  constructor = nil
+                  constructor2 = nil
+                end
+              end
+
+              if l.include?('};')
+                puts l
+                puts ''
+                classOpen = nil
+                className = nil
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+
+
+  # Class of a SWIG Interface to a list of ANL modules.
+  # This produces one Ruby extension module interface to be processed by SWIG.
+  #
+  class SWIGModule
+    def initialize(name, classList, namespace=nil)
+      @name = name
+      @classList = classList
+      @namespace = namespace
+      @includeFiles = []
+      @importModules = []
+      @includeModules = []
+    end
+
+    attr_reader :name
+    attr_accessor :includeFiles, :importModules, :includeModules
+
+    def print_interface(using_namespace=true)
+      puts '%module '+@name
+      puts '%{'
+      @classList.each{|sc| sc.puts_include }
+      puts ""
+      @includeFiles.each{|s| puts '#include "'+s+'"' }
+      puts ''
+      puts '%}'
+      puts ''
+      @includeModules.each{|s| puts '%include "'+s+'"' }
+      puts ''
+      @importModules.each{|s| puts '%import "'+s+'"' }
+      puts ''
+      puts 'namespace '+@namespace+' {' if @namespace
+      puts ''
+      @classList.each{|sc| sc.interface }
+      puts '}' if @namespace
+    end
+
+    def print_class_list()
+      puts 'namespace '+@namespace+' {' if @namespace
+      @classList.each{|s| puts 'class '+s.name+';' }
+      puts '}' if @namespace
+    end
+  end
+
+
+  # ParallelRun utility
+  #
+  begin
+    require 'parallel'
+
+    class ParallelRun
+      include Parallel
+
+      def initialize()
+        @num_processes = Parallel.processor_count
+        @make_log_name = nil
+        @log_name = nil
+      end
+
+      attr_accessor :num_processes
+
+      def set_log(filename=nil, &block)
+        if filename==nil && block_given?
+          @make_log_name = block
+        else
+          @log_name = filename
+        end
+      end
+
+      def run1(list)
+        yield list.shift
+      end
+
+      def run(list)
+        until list.empty?
+          Parallel.map(list.shift(@num_processes),
+                       :in_processes => @num_processes) do |run|
+            if @log_name
+              log_file = @log_name % run
+            else
+              log_file = @make_log_name.(run)
+            end
+            File.open(log_file, 'w') do |fo|
+              STDOUT.reopen(fo); STDOUT.sync = true
+              STDERR.reopen(fo); STDERR.sync = true
+              yield run
+            end
+          end
+        end
+      end
+    end
+  rescue LoadError
+    # do nothing
+  end
+
+
 end # module ANL
 
 

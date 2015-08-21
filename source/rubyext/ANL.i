@@ -19,7 +19,7 @@
 
 %template(ListI) std::list<int>;
 
-namespace boost
+namespace std
 {
   template<class T> class shared_ptr {
   public:
@@ -27,14 +27,15 @@ namespace boost
   };
 }
 
-%template(SPtrModParam) boost::shared_ptr<anl::VModuleParameter>;
-%template(SPtrModParamConst) boost::shared_ptr<anl::VModuleParameter const>;
-%template(ListModParam) std::list<boost::shared_ptr<anl::VModuleParameter> >;
-
-%include ANLStatus.hh
+%template(SPtrModParam) std::shared_ptr<anl::VModuleParameter>;
+%template(SPtrModParamConst) std::shared_ptr<anl::VModuleParameter const>;
+%template(ListModParam) std::list<std::shared_ptr<anl::VModuleParameter> >;
 
 namespace anl
 {
+
+enum class ANLStatus { AS_OK, AS_SKIP, AS_SKIP_ERR, AS_QUIT, AS_QUIT_ERR };
+
 
 class ANLException
 {
@@ -64,19 +65,17 @@ class VModuleParameter
   std::string type_name() const;
   
   std::string map_key_name() const;
-  size_t num_map_value() const;
-  boost::shared_ptr<VModuleParameter const> get_map_value(size_t i) const;
+  size_t num_value_elements() const;
+  std::shared_ptr<VModuleParameter const> get_value_element(std::size_t i) const;
 
   void print(std::ostream& os) const;
   std::string value_string() const;
 };
 
-typedef boost::shared_ptr<VModuleParameter> ModParam;
-typedef boost::shared_ptr<VModuleParameter const> ModParamConst;
-typedef std::list<ModParam> ModParamList;
-typedef ModParamList::iterator ModParamIter;
-//typedef ModParamList::const_iterator ModParamConstIter;
-typedef std::list<boost::shared_ptr<VModuleParameter> >::const_iterator ModParamConstIter;
+typedef std::shared_ptr<VModuleParameter> ModuleParam_sptr;
+typedef std::list<ModuleParam> ModuleParamList;
+typedef ModuleParamList::iterator ModuleParamIter;
+typedef std::list<std::shared_ptr<VModuleParameter> >::const_iterator ModuleParamConstIter;
 
 
 class ANLManager
@@ -94,13 +93,13 @@ class ANLManager
     }
   }
 
-  void SetDisplayFrequency(int v);
+  void SetDisplayFrequency(long int v);
   int DisplayFrequency() const;
   
   void SetModules(std::vector<anl::BasicModule*> modules);
   ANLStatus Startup();
   ANLStatus Initialize();
-  ANLStatus Analyze(int num_event, bool thread_mode=true);
+  ANLStatus Analyze(long int num_events, bool thread_mode=true);
   ANLStatus Exit();
   ANLStatus Prepare();
 
@@ -176,20 +175,20 @@ class BasicModule
   void set_vector(const std::string& name, double x, double y, double z);
 
   void set_map_key(const std::string& key);
-  void set_map_value(const std::string& name, int val);
-  void set_map_value(const std::string& name, double val);
-  void set_map_value(const std::string& name, const std::string& val);
-  void insert_map();
+  void set_value_element(const std::string& name, int val);
+  void set_value_element(const std::string& name, double val);
+  void set_value_element(const std::string& name, const std::string& val);
+  void insert_to_container();
 
   %exception;
 
   void print_parameters();
 
-  ModParamConstIter ModParamBegin() const;
-  ModParamConstIter ModParamEnd() const;
+  ModuleParamConstIter ModuleParamBegin() const;
+  ModuleParamConstIter ModuleParamEnd() const;
 
   %extend {
-    void param_map_insert(const std::string map_name, const std::string& key)
+    void insert_to_map(const std::string& map_name, const std::string& key)
     {
       $self->expose_parameter(map_name);
       $self->set_map_key(key);
@@ -197,7 +196,17 @@ class BasicModule
         VALUE r = swig::from<anl::BasicModule*>(self);
         rb_yield(r);
       }
-      $self->insert_map();
+      $self->insert_to_container();
+    }
+
+    void push_to_vector(const std::string& vector_name)
+    {
+      $self->expose_parameter(vector_name);
+      if (rb_block_given_p()) {
+        VALUE r = swig::from<anl::BasicModule*>(self);
+        rb_yield(r);
+      }
+      $self->insert_to_container();
     }
   }
 };

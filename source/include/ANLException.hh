@@ -46,9 +46,10 @@ struct ANLException : boost::exception, std::exception
   explicit ANLException(const std::string& msg);
 
   void setModule(const BasicModule* mod);
-  const std::string print() const { return diagnostic_information(*this); }
+  const std::string print() const
+  { return diagnostic_information(*this); }
 };
 
-}
+} /* namespace anl */
 
 #endif /* ANL_ANLException_H */

@@ -3,9 +3,15 @@ set(TARGET_LIBRARY ANLNext)
 #######
 
 set(READLINE_LIB readline)
+
+# BOOST
+find_package(Boost 1.56.0 REQUIRED COMPONENTS system chrono thread)
 set(BOOST_INC_DIR ${Boost_INCLUDE_DIRS})
 set(BOOST_LIB_DIR ${Boost_LIBRARY_DIRS})
-set(BOOST_LIB boost_thread-mt boost_system-mt boost_chrono-mt)
+set(BOOST_LIB ${Boost_LIBRARIES})
+message("-- BOOST_INC_DIR: ${BOOST_INC_DIR}")
+message("-- BOOST_LIB_DIR: ${BOOST_LIB_DIR}")
+message("-- BOOST_LIB: ${BOOST_LIB}")
 
 if(ANL_USE_TVECTOR)
   set(ROOTSYS $ENV{ROOTSYS})
@@ -50,12 +56,13 @@ include_directories(
 link_directories(${BOOST_LIB_DIR} ${ROOT_LIB_DIR} ${CLHEP_LIB_DIR})
 
 add_library(${TARGET_LIBRARY} SHARED
-  src/ANLManager.cc
-  src/ANLManager_interactive.cc
-  src/BasicModule.cc
+  src/ANLStatus.cc
   src/ANLException.cc
   src/EvsManager.cc
   src/VModuleParameter.cc
+  src/BasicModule.cc
+  src/ANLManager.cc
+  src/ANLManager_interactive.cc
   )
 
 target_link_libraries(${TARGET_LIBRARY}
@@ -71,8 +78,6 @@ if(ANL_INSTALL_HEADERS)
     FILES_MATCHING PATTERN "*.hh")
 endif(ANL_INSTALL_HEADERS)
 
-if(ANL_USE_RUBY)
-  add_subdirectory(ruby)
-  install(FILES script/ANLLib.rb
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/ruby)
-endif(ANL_USE_RUBY)
+add_subdirectory(rubyext)
+install(FILES scripts/ANLLib.rb
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/ruby)

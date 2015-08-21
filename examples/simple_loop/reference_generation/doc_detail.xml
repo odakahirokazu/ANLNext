@@ -1,0 +1,144 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<anlmodules>
+  <namespace>MyPackage</namespace>
+  <module>
+    <name>MyModule</name>
+    <version>1.0</version>
+    <text></text>
+    <parameters>
+      <param container_type=''>
+        <name>MyParameter1</name>
+        <type>int</type>
+        <unit></unit>
+        <default_value>1</default_value>
+        <description></description>
+      </param>
+      <param container_type=''>
+        <name>MyParameter2</name>
+        <type>double</type>
+        <unit></unit>
+        <default_value>2</default_value>
+        <description></description>
+      </param>
+      <param container_type=''>
+        <name>MyParameter3</name>
+        <type>string</type>
+        <unit></unit>
+        <default_value>test</default_value>
+        <description></description>
+      </param>
+      <param container_type=''>
+        <name>MyVector1</name>
+        <type>vector&lt;int&gt;</type>
+        <unit></unit>
+        <default_value></default_value>
+        <description></description>
+      </param>
+      <param container_type=''>
+        <name>MyVector2</name>
+        <type>vector&lt;double&gt;</type>
+        <unit></unit>
+        <default_value></default_value>
+        <description></description>
+      </param>
+      <param container_type=''>
+        <name>MyVector3</name>
+        <type>vector&lt;string&gt;</type>
+        <unit></unit>
+        <default_value></default_value>
+        <description></description>
+      </param>
+    </parameters>
+  </module>
+  <module>
+    <name>MyMapModule</name>
+    <version>1.0</version>
+    <text></text>
+    <parameters>
+      <param container_type='map'>
+        <name>my_map</name>
+        <type>map</type>
+        <unit></unit>
+        <default_value> </default_value>
+        <description></description>
+      </param>
+      <param container_type='key'>
+        <name>name</name>
+        <type>string</type>
+        <unit></unit>
+        <default_value>Si</default_value>
+        <description></description>
+      </param>
+      <param container_type='value'>
+        <name>ID</name>
+        <type>int</type>
+        <unit></unit>
+        <default_value>0</default_value>
+        <description></description>
+      </param>
+      <param container_type='value'>
+        <name>type</name>
+        <type>string</type>
+        <unit></unit>
+        <default_value>pixel</default_value>
+        <description></description>
+      </param>
+      <param container_type='value'>
+        <name>x</name>
+        <type>double</type>
+        <unit></unit>
+        <default_value>0</default_value>
+        <description></description>
+      </param>
+      <param container_type='value'>
+        <name>y</name>
+        <type>double</type>
+        <unit></unit>
+        <default_value>0</default_value>
+        <description></description>
+      </param>
+    </parameters>
+  </module>
+  <module>
+    <name>MyVectorModule</name>
+    <version>1.0</version>
+    <text></text>
+    <parameters>
+      <param container_type='vector'>
+        <name>my_vector</name>
+        <type>vector</type>
+        <unit></unit>
+        <default_value> </default_value>
+        <description></description>
+      </param>
+      <param container_type='value'>
+        <name>ID</name>
+        <type>int</type>
+        <unit></unit>
+        <default_value>0</default_value>
+        <description></description>
+      </param>
+      <param container_type='value'>
+        <name>type</name>
+        <type>string</type>
+        <unit></unit>
+        <default_value>pixel</default_value>
+        <description></description>
+      </param>
+      <param container_type='value'>
+        <name>x</name>
+        <type>double</type>
+        <unit></unit>
+        <default_value>0</default_value>
+        <description></description>
+      </param>
+      <param container_type='value'>
+        <name>y</name>
+        <type>double</type>
+        <unit></unit>
+        <default_value>0</default_value>
+        <description></description>
+      </param>
+    </parameters>
+  </module>
+</anlmodules>

@@ -25,10 +25,19 @@
 
 namespace anl
 {
-template <typename T>
+template <typename... Ts>
 struct type_info
 {
   static std::string name() { return ""; }
+};
+
+template <typename T, typename... Ts>
+struct type_info<T, Ts...>
+{
+  static std::string name()
+  {
+    return type_info<T>::name() + ", " + type_info<Ts...>::name();
+  }
 };
 
 template <>
@@ -56,23 +65,23 @@ struct type_info<std::string>
 };
 
 template <>
-struct type_info<std::vector<int> >
+struct type_info<std::vector<int>>
 {
-  static std::string name() { return "vector of int"; }
+  static std::string name() { return "vector<int>"; }
 };
 
 template <>
-struct type_info<std::vector<double> >
+struct type_info<std::vector<double>>
 {
-  static std::string name() { return "vector of double"; }
+  static std::string name() { return "vector<double>"; }
 };
 
 template <>
-struct type_info<std::vector<std::string> >
+struct type_info<std::vector<std::string>>
 {
-  static std::string name() { return "vector of string"; }
+  static std::string name() { return "vector<string>"; }
 };
 
-}
+} /* namespace anl */
 
 #endif /* ANL_ANLType_H */

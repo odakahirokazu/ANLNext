@@ -17,39 +17,29 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_ANLVModule_H
-#define ANL_ANLVModule_H 1
+#include "ANLStatus.hh"
+#include <string>
 
-#include "BasicModule.hh"
-
-
-namespace anl
+std::string anl::ANLStatusToString(anl::ANLStatus status)
 {
-
-/**
- * A virtual class for an ANL Next module.
- *
- * @author Hirokazu Odaka
- * @date 2010-06-xx
- * @date 2012-09-29
- */
-class ANLVModule : public BasicModule
-{
-public:
-  explicit ANLVModule(const std::string& name="ANLVModule",
-                      const std::string& version="0.1");
-  ANLVModule(const ANLVModule& r);
-
-  virtual ~ANLVModule() {}
-
-  std::string module_name()    const { return m_ModuleName; }
-  std::string module_version() const { return m_ModuleVersion; }
-
-private:
-  std::string m_ModuleName;
-  std::string m_ModuleVersion;
-};
-
+  switch (status) {
+    case anl::ANLStatus::AS_OK:
+      return "AS_OK";
+    case anl::ANLStatus::AS_SKIP:
+      return "AS_SKIP";
+    case anl::ANLStatus::AS_SKIP_ERR:
+      return "AS_SKIP_ERR";
+    case anl::ANLStatus::AS_QUIT:
+      return "AS_QUIT";
+    case anl::ANLStatus::AS_QUIT_ERR:
+      return "AS_QUIT_ERR";
+    default:
+      return "AS_UNDEFINED";
+  }
 }
 
-#endif /* ANL_ANLVModule_H */
+std::ostream& operator<< (std::ostream& os, anl::ANLStatus status)
+{
+  os << anl::ANLStatusToString(status);
+  return os;
+}

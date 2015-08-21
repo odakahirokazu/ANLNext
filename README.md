@@ -1,7 +1,7 @@
 ANL Next
 ========================================
 
-- Version: 1.6.0
+- Version: 1.7.0
 - Author: Hirokazu Odaka
 
 
@@ -51,17 +51,30 @@ processing of X-ray detectors onboard the ASCA and Suzaku X-ray observatories.
 
 https://github.com/odakahirokazu/ANLNext/
 
-### Supported Platform
+### Platforms
 
-- Mac OS X
-- Linux (not frequently tested)
+- Mac (the author's main enviroment for development and testing)
+- Linux
 
-#### Test environmemt
+#### Test environmemt (Mac)
 
-- Mac OS X 10.9.3
-- Apple LLVM version 5.1 (clang-503.0.40) (based on LLVM 3.4svn)
-- ruby 2.0.0p481 (2014-05-08 revision 45883)
-- Boost 1.55.0
+- MacBook Pro (Late 2013)
+- OS X 10.10.5
+- Apple LLVM version 6.1.0 (clang-602.0.53) (based on LLVM 3.6.0svn)
+- cmake version 3.3.1
+- ruby 2.2.2p95 (2015-04-13 revision 50295) [x86\_64-darwin14]
+- SWIG Version 3.0.7
+- Boost 1.58.0
+
+#### Test environmemt (Linux)
+
+- a virtual machine (Parallels Desktop) on Mac
+- ubuntu 14.04 LST
+- gcc version 4.8.4 (Ubuntu 4.8.4-2ubuntu1 14.04)
+- cmake version 2.8.12.2
+- ruby 2.2.3p173 (2015-08-18 revision 51636) [x86\_64-linux]
+- SWIG Version 3.0.7
+- Boost 1.58.0
 
 ### API Reference
 
@@ -93,10 +106,10 @@ Installation
 #### (1) C++ compliler
 
 #### (2) [Boost C++ library](http://www.boost.org/)
-*version 1.55.0 or later*
+*version 1.56.0 or later*
 
 #### (3) [CMake](http://www.cmake.org/)
-*version 2.8.11 or later*
+*version 3.0 or later*
 
 This package uses CMake (Cross platform make) for easy installation.
 
@@ -111,7 +124,7 @@ used in the world, and is easy to learn like Python. This is optional but very
 useful for productive data analysis.
 
 #### (5) [SWIG](http://www.swig.org/)
-*version 2.0.9 or later*
+*version 3.0 or later*
 
 As SWIG (Simplified Wrapper and Interface Generator) provides an easy way to
 generate extended libraries of various scripting languages, ANL Next uses SWIG
@@ -122,7 +135,7 @@ for making Ruby binding of itself.
 
 #### (1) Obtain ANL Next
 
-    $ git clone git://github.com/odakahirokazu/ANLNext.git
+    $ git clone https://github.com/odakahirokazu/ANLNext.git
 
 #### (2) Perform CMake
 

@@ -14,4 +14,6 @@ end
 a = MyApp.new
 a.setup
 a.startup
-a.make_script("run_app.rb", "testHistogram", "TestHistogram", "TestApp")
+a.make_script(output: "run_app.rb",
+              package: "testHistogram",
+              namespace: "TestHistogram")

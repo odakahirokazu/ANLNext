@@ -17,30 +17,165 @@
  *                                                                       *
  *************************************************************************/
 
+#include <tuple>
+
 namespace anl
 {
+
+#define ANL_USE_SINGLE_TUPLE_PARAMETER 1
+#if ANL_USE_SINGLE_TUPLE_PARAMETER
+template <typename... Ts>
+class ModuleParameter<std::tuple<Ts...>> : public VModuleParameter
+{
+  typedef std::tuple<Ts...> tuple_type;
+public:
+  ModuleParameter(tuple_type* ptr, const std::string& name)
+    : VModuleParameter(name), ptr_(ptr)
+  {}
+  
+  ModuleParameter(tuple_type* ptr, const std::string& name,
+                  double unit, const std::string& unit_name)
+    : VModuleParameter(name, unit, unit_name), ptr_(ptr)
+  {}
+
+  std::string type_name() const
+  {
+    std::string t("tuple<");
+    t += type_info<Ts...>::name();
+    t += ">";
+    return t;
+  }
+
+  void set_value(Ts... values)
+  {
+    set_value_tuple_impl<0>(values...);
+  }
+  
+  using VModuleParameter::set_value;
+  
+  void output(std::ostream& os) const
+  {
+    output_tuple_impl<0, Ts...>(os);
+  }
+  
+  void input(std::istream& is)
+  {
+    input_tuple_impl<0, Ts...>(is);
+  }
+
+private:
+  template <int I>
+  void set_value_tuple_impl() {}
+
+  template <int I, typename T0, typename... TRest>
+  void set_value_tuple_impl(T0 value, TRest... values)
+  {
+    typedef boost::integral_constant<bool,
+                                     boost::is_floating_point<T0>::value> float_truth_type;
+    set_value_tuple_one<I>(value, float_truth_type());
+    set_value_tuple_impl<I+1>(values...);
+  }
+  
+  template <int I, bool B, typename T0>
+  void set_value_tuple_one(T0 value, const boost::integral_constant<bool, B>&)
+  {
+    // non-floating point
+    std::get<I>(*ptr_) = value;
+  }
+
+  template <int I, typename T0>
+  void set_value_tuple_one(T0 value, const boost::true_type&)
+  {
+    // floating point
+    std::get<I>(*ptr_) = value * unit();
+  }
+
+  template <int I>
+  void output_tuple_impl(std::ostream&) const {}
+
+  template <int I, typename T0, typename... TRest>
+  void output_tuple_impl(std::ostream& os) const
+  {
+    typedef boost::integral_constant<bool,
+                                     boost::is_floating_point<T0>::value> float_truth_type;
+    output_tuple_one<I, T0>(os, float_truth_type());
+    os << " ";
+    output_tuple_impl<I+1, TRest...>(os);
+  }
+
+  template <int I, typename T0, bool B>
+  void output_tuple_one(std::ostream& os,
+                        const boost::integral_constant<bool, B>&) const
+  {
+    // non-floating point
+    os << std::get<I>(*ptr_);
+  }
+
+  template <int I, typename T0>
+  void output_tuple_one(std::ostream& os,
+                        const boost::true_type&) const
+  {
+    // floating point
+    os << std::get<I>(*ptr_)/unit();
+  }
+
+  template <int I>
+  void input_tuple_impl(std::istream&) {}
+
+  template <int I, typename T0, typename... TRest>
+  void input_tuple_impl(std::istream& is)
+  {
+    typedef boost::integral_constant<bool,
+                                     boost::is_floating_point<T0>::value> float_truth_type;
+    input_tuple_one<I, T0>(is, float_truth_type());
+    input_tuple_impl<I+1, TRest...>(is);
+  }
+
+  template <int I, typename T0, bool B>
+  void input_tuple_one(std::istream& is,
+                       const boost::integral_constant<bool, B>&)
+  {
+    // non-floating point
+    is >> std::get<I>(*ptr_);
+  }
+
+  template <int I, typename T0>
+  void input_tuple_one(std::istream& is,
+                       const boost::true_type&)
+  {
+    // floating point
+    is >> std::get<I>(*ptr_);
+    if (is) {
+      std::get<I>(*ptr_) *= unit();
+    }
+  }
+
+private:
+  std::tuple<Ts...>* ptr_;
+};
+#endif
 
 #ifdef ANL_USE_TVECTOR
 template <> class ModuleParameter<TVector2> : public VModuleParameter
 {
 public:
   ModuleParameter(TVector2* ptr, const std::string& name)
-    : VModuleParameter(name), _ptr(ptr)
+    : VModuleParameter(name), ptr_(ptr)
   {}
   
   ModuleParameter(TVector2* ptr, const std::string& name,
                   double unit, const std::string& unit_name)
-    : VModuleParameter(name, unit, unit_name), _ptr(ptr)
+    : VModuleParameter(name, unit, unit_name), ptr_(ptr)
   {}
 
   std::string type_name() const { return "2-vector"; }
   
-  void set_value(double x, double y) { _ptr->Set(x*unit(), y*unit()); }
+  void set_value(double x, double y) { ptr_->Set(x*unit(), y*unit()); }
   using VModuleParameter::set_value;
   
   void output(std::ostream& os) const
   {
-    os << _ptr->X()/unit() << " " << _ptr->Y()/unit();
+    os << ptr_->X()/unit() << " " << ptr_->Y()/unit();
   }
   
   void input(std::istream& is)
@@ -48,38 +183,37 @@ public:
     double x(0.0), y(0.0);
     is >> x >> y;
     if (is) {
-      _ptr->Set(x*unit(), y*unit());
+      ptr_->Set(x*unit(), y*unit());
     }
   }
 
 private:
-  TVector2* _ptr;
+  TVector2* ptr_;
 };
-
 
 template <> class ModuleParameter<TVector3> : public VModuleParameter
 {
 public:
   ModuleParameter(TVector3* ptr, const std::string& name)
-    : VModuleParameter(name), _ptr(ptr)
+    : VModuleParameter(name), ptr_(ptr)
   {}
   
   ModuleParameter(TVector3* ptr, const std::string& name,
                   double unit, const std::string& unit_name)
-    : VModuleParameter(name, unit, unit_name), _ptr(ptr)
+    : VModuleParameter(name, unit, unit_name), ptr_(ptr)
   {}
 
   std::string type_name() const { return "3-vector"; }
   
   void set_value(double x, double y, double z)
-  { _ptr->SetXYZ(x*unit(), y*unit(), z*unit()); }
+  { ptr_->SetXYZ(x*unit(), y*unit(), z*unit()); }
   using VModuleParameter::set_value;
   
   void output(std::ostream& os) const
   {
-    os << _ptr->X()/unit() << " "
-       << _ptr->Y()/unit() << " "
-       << _ptr->Z()/unit();
+    os << ptr_->X()/unit() << " "
+       << ptr_->Y()/unit() << " "
+       << ptr_->Z()/unit();
   }
 
   void input(std::istream& is)
@@ -87,75 +221,73 @@ public:
     double x(0.0), y(0.0), z(0.0);
     is >> x >> y >> z;
     if (is) {
-      _ptr->SetXYZ(x*unit(), y*unit(), z*unit());
+      ptr_->SetXYZ(x*unit(), y*unit(), z*unit());
     }
   }
 
 private:
-  TVector3* _ptr;
+  TVector3* ptr_;
 };
-#endif
-
+#endif /* ANL_USE_TVECTOR */
 
 #ifdef ANL_USE_HEPVECTOR
 template <> class ModuleParameter<CLHEP::Hep2Vector> : public VModuleParameter
 {
 public:
   ModuleParameter(CLHEP::Hep2Vector* ptr, const std::string& name)
-    : VModuleParameter(name), _ptr(ptr)
+    : VModuleParameter(name), ptr_(ptr)
   {}
   
   ModuleParameter(CLHEP::Hep2Vector* ptr, const std::string& name,
                   double unit, const std::string& unit_name)
-    : VModuleParameter(name, unit, unit_name), _ptr(ptr)
+    : VModuleParameter(name, unit, unit_name), ptr_(ptr)
   {}
   
   std::string type_name() const { return "2-vector"; }
 
-  void set_value(double x, double y) { _ptr->set(x*unit(), y*unit()); }
+  void set_value(double x, double y) { ptr_->set(x*unit(), y*unit()); }
   using VModuleParameter::set_value;
 
   void output(std::ostream& os) const
   {
-    os << _ptr->x()/unit() << " " << _ptr->y()/unit();
+    os << ptr_->x()/unit() << " " << ptr_->y()/unit();
   }
   void input(std::istream& is)
   {
     double x(0.0), y(0.0);
     is >> x >> y;
     if (is) {
-      _ptr->set(x*unit(), y*unit());
+      ptr_->set(x*unit(), y*unit());
     }
   }
  
 private:
-  CLHEP::Hep2Vector* _ptr;
+  CLHEP::Hep2Vector* ptr_;
 };
-
 
 template <> class ModuleParameter<CLHEP::Hep3Vector> : public VModuleParameter
 {
 public:
   ModuleParameter(CLHEP::Hep3Vector* ptr, const std::string& name)
-    : VModuleParameter(name), _ptr(ptr)
+    : VModuleParameter(name), ptr_(ptr)
   {}
   
   ModuleParameter(CLHEP::Hep3Vector* ptr, const std::string& name,
                   double unit, const std::string& unit_name)
-    : VModuleParameter(name, unit, unit_name), _ptr(ptr)
+    : VModuleParameter(name, unit, unit_name), ptr_(ptr)
   {}
   
   std::string type_name() const { return "3-vector"; }
 
   void set_value(double x, double y, double z)
-  { _ptr->set(x*unit(), y*unit(), z*unit()); }
+  { ptr_->set(x*unit(), y*unit(), z*unit()); }
   using VModuleParameter::set_value;
   
   void output(std::ostream& os) const
   {
-    os << _ptr->x()/unit() << " "
-       << _ptr->y()/unit() << " "
-       << _ptr->z()/unit();
+    os << ptr_->x()/unit() << " "
+       << ptr_->y()/unit() << " "
+       << ptr_->z()/unit();
   }
 
   void input(std::istream& is)
@@ -163,13 +295,13 @@ public:
     double x(0.0), y(0.0), z(0.0);
     is >> x >> y >> z;
     if (is) {
-      _ptr->set(x*unit(), y*unit(), z*unit());
+      ptr_->set(x*unit(), y*unit(), z*unit());
     }
   }
 
 private:
-  CLHEP::Hep3Vector* _ptr;
+  CLHEP::Hep3Vector* ptr_;
 };
-#endif
+#endif /* ANL_USE_HEPVECTOR */
 
-}
+} /* namespace anl */

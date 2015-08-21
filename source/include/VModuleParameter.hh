@@ -20,12 +20,13 @@
 #ifndef ANL_VModuleParameter_H
 #define ANL_VModuleParameter_H 1
 
+#include <cstddef>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <list>
 #include <map>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #define ANLNEXT_USE_READLINE 1
 #if ANLNEXT_USE_READLINE
@@ -54,29 +55,29 @@ public:
   VModuleParameter(const std::string& name, const std::string& expression,
                    const std::string& default_string);
 
-  virtual ~VModuleParameter() {}
+  virtual ~VModuleParameter();
   
-  std::string name() const { return _name; }
-  double unit() const { return _unit; }
-  std::string unit_name() const { return _unitname; }
+  std::string name() const { return name_; }
+  double unit() const { return unit_; }
+  std::string unit_name() const { return unit_name_; }
 
-  std::string expression() const { return _expr; }
-  std::string question() const { return _question; }
-  std::string default_string() const { return _default_string; }
+  std::string expression() const { return expr_; }
+  std::string question() const { return question_; }
+  std::string default_string() const { return default_string_; }
 
-  void set_unit(double unit, const std::string& unitname)
-  { _unit = unit; _unitname = unitname; }
+  void set_unit(double unit, const std::string& unit_name)
+  { unit_ = unit; unit_name_ = unit_name; }
   
-  void set_expression(const std::string& v) { _expr = v; }
-  void set_question(const std::string& v) { _question = v; }
-  void set_default_string(const std::string& v) { _default_string = v; }
+  void set_expression(const std::string& v) { expr_ = v; }
+  void set_question(const std::string& v) { question_ = v; }
+  void set_default_string(const std::string& v) { default_string_ = v; }
 
-  void set_hidden(bool v=true) { _hidden = v; }
-  void set_exposed() { _hidden = false; }
-  bool is_hidden() { return _hidden; }
+  void set_hidden(bool v=true) { hidden_ = v; }
+  void set_exposed() { hidden_ = false; }
+  bool is_hidden() { return hidden_; }
 
-  void set_description(const std::string& v) { _description = v; }
-  std::string description() const { return _description; }
+  void set_description(const std::string& v) { description_ = v; }
+  std::string description() const { return description_; }
 
   virtual std::string type_name() const { return ""; }
   
@@ -103,16 +104,18 @@ public:
 
   virtual std::string map_key_name() const { return ""; }
   virtual void set_map_key(const std::string& /* key */) {}
-  virtual size_t num_map_value() const { return 0; }
-  virtual boost::shared_ptr<VModuleParameter const> get_map_value(size_t /* i */) const
-  { return boost::shared_ptr<VModuleParameter>(); }
-  virtual void add_map_value(boost::shared_ptr<VModuleParameter> /* param */) {}
-  virtual void enable_map_value(int /* type */, const std::vector<int>& /* enables */) {}
-  virtual void set_map_value(const std::string& /* name */, bool /* val */) {}
-  virtual void set_map_value(const std::string& /* name */, int /* val */) {}
-  virtual void set_map_value(const std::string& /* name */, double /* val */) {}
-  virtual void set_map_value(const std::string& /* name */, const std::string& /* val */) {}
-  virtual void insert_map() {}
+
+  virtual std::size_t num_value_elements() const { return 0; }
+  virtual std::shared_ptr<VModuleParameter const> get_value_element(std::size_t /* i */) const
+  { return std::shared_ptr<VModuleParameter>(); }
+  virtual void add_value_element(std::shared_ptr<VModuleParameter> /* param */) {}
+  virtual void enable_value_elements(int /* type */, const std::vector<std::size_t>& /* enables */) {}
+  virtual void set_value_element(const std::string& /* name */, bool /* val */) {}
+  virtual void set_value_element(const std::string& /* name */, int /* val */) {}
+  virtual void set_value_element(const std::string& /* name */, double /* val */) {}
+  virtual void set_value_element(const std::string& /* name */, const std::string& /* val */) {}
+
+  virtual void insert_to_container() {}
   
   void print(std::ostream& os) const;
   std::string value_string() const;
@@ -126,22 +129,22 @@ protected:
   void throw_type_match_exception(const std::string& message="");
   
 private:
-  std::string _name;
-  double _unit;
-  std::string _unitname;
-  std::string _expr;
-  std::string _question;
-  std::string _default_string;
-  bool _hidden;
-  std::string _description;
+  std::string name_;
+  double unit_ = 1.0;
+  std::string unit_name_;
+  std::string expr_;
+  std::string question_;
+  std::string default_string_;
+  bool hidden_;
+  std::string description_;
 };
 
-typedef boost::shared_ptr<VModuleParameter> ModParam;
-typedef boost::shared_ptr<VModuleParameter const> ModParamConst;
-typedef std::list<ModParam> ModParamList;
-typedef ModParamList::iterator ModParamIter;
-typedef ModParamList::const_iterator ModParamConstIter;
-}
+typedef std::shared_ptr<VModuleParameter> ModuleParam_sptr;
+typedef std::list<ModuleParam_sptr> ModuleParamList;
+typedef ModuleParamList::iterator ModuleParamIter;
+typedef ModuleParamList::const_iterator ModuleParamConstIter;
+
+} /* namespace anl */
 
 inline
 std::ostream& operator<<(std::ostream& os, const anl::VModuleParameter& p)
@@ -149,7 +152,6 @@ std::ostream& operator<<(std::ostream& os, const anl::VModuleParameter& p)
   p.output(os);
   return os;
 }
-
 
 inline
 std::istream& operator>>(std::istream& is, anl::VModuleParameter& p)

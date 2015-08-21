@@ -6,10 +6,13 @@ require 'myPackage'
 class MyApp < ANL::ANLApp
   def setup()
     chain MyPackage::MyModule
+    chain MyPackage::MyMapModule
+    chain MyPackage::MyVectorModule
   end
 end
 
 a = MyApp.new
 a.setup
 a.startup
-a.make_script("run_app.rb", "myPackage", "MyPackage", "TestApp")
+a.make_doc(output: "doc_detail.xml",
+           namespace: "MyPackage")

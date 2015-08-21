@@ -26,45 +26,46 @@
 namespace anl {
 
 VModuleParameter::VModuleParameter(const std::string& name)
-  : _name(name),
-    _unit(1.0), _unitname(""),
-    _expr(""), _question(""), _default_string(""),
-    _hidden(false),
-    _description("")
+  : name_(name),
+    unit_(1.0), unit_name_(""),
+    expr_(""), question_(""), default_string_(""),
+    hidden_(false),
+    description_("")
 {
 }
-
 
 VModuleParameter::VModuleParameter(const std::string& name,
                                    double unit, const std::string& unit_name)
-  : _name(name),
-    _unit(unit), _unitname(unit_name),
-    _expr(""), _question(""), _default_string(""),
-    _hidden(false)
+  : name_(name),
+    unit_(unit), unit_name_(unit_name),
+    expr_(""), question_(""), default_string_(""),
+    hidden_(false),
+    description_("")
 {
 }
-
 
 VModuleParameter::VModuleParameter(const std::string& name,
                                    const std::string& expression)
-  : _name(name),
-    _unit(1.0), _unitname(""),
-    _expr(expression), _question(""), _default_string(""),
-    _hidden(false)
+  : name_(name),
+    unit_(1.0), unit_name_(""),
+    expr_(expression), question_(""), default_string_(""),
+    hidden_(false),
+    description_("")
 {
 }
-
 
 VModuleParameter::VModuleParameter(const std::string& name,
                                    const std::string& expression,
                                    const std::string& default_string)
-  : _name(name),
-    _unit(1.0), _unitname(""),
-    _expr(expression), _question(""), _default_string(default_string),
-    _hidden(false)
+  : name_(name),
+    unit_(1.0), unit_name_(""),
+    expr_(expression), question_(""), default_string_(default_string),
+    hidden_(false),
+    description_("")
 {
 }
 
+VModuleParameter::~VModuleParameter() = default;
 
 void VModuleParameter::set_value(bool v)
 {
@@ -73,14 +74,12 @@ void VModuleParameter::set_value(bool v)
   throw_type_match_exception(oss.str());
 }
 
-
 void VModuleParameter::set_value(int v)
 {
   std::ostringstream oss;
   oss << v << " " << "[int]";
   throw_type_match_exception(oss.str());
 }
-
 
 void VModuleParameter::set_value(double v)
 {
@@ -89,14 +88,12 @@ void VModuleParameter::set_value(double v)
   throw_type_match_exception(oss.str());
 }
 
-
 void VModuleParameter::set_value(const std::string& v)
 {
   std::ostringstream oss;
   oss << v << " " << "[string]";
   throw_type_match_exception(oss.str());
 }
- 
 
 void VModuleParameter::set_value(const std::vector<int>& v)
 {
@@ -105,14 +102,12 @@ void VModuleParameter::set_value(const std::vector<int>& v)
   throw_type_match_exception(oss.str());
 }
 
-
 void VModuleParameter::set_value(const std::vector<double>& v)
 {
   std::ostringstream oss;
   oss << "vector(" << v.size() << ") " << "[vector<double>]";
   throw_type_match_exception(oss.str());
 }
-
 
 void VModuleParameter::set_value(const std::vector<std::string>& v)
 {
@@ -121,14 +116,12 @@ void VModuleParameter::set_value(const std::vector<std::string>& v)
   throw_type_match_exception(oss.str());
 }
 
-
 void VModuleParameter::set_value(const std::list<std::string>& v)
 {
   std::ostringstream oss;
   oss << "list: " << v.front() << " ... "<< "[list<string>]";
   throw_type_match_exception(oss.str());
 }
-
 
 void VModuleParameter::set_value(double x, double y)
 {
@@ -137,7 +130,6 @@ void VModuleParameter::set_value(double x, double y)
   throw_type_match_exception(oss.str());
 }
 
-
 void VModuleParameter::set_value(double x, double y, double z)
 {
   std::ostringstream oss;
@@ -145,16 +137,14 @@ void VModuleParameter::set_value(double x, double y, double z)
   throw_type_match_exception(oss.str());
 }
 
-
 void VModuleParameter::print(std::ostream& os) const
 {
   os << name() << ": " << *this
      << ((unit_name()!="") ? " [" : "")
      << unit_name()
      << ((unit_name()!="") ? "]" : "");
-  if (_hidden) { os << " (hidden)"; }
+  if (hidden_) { os << " (hidden)"; }
 }
-
 
 std::string VModuleParameter::value_string() const
 {
@@ -162,7 +152,6 @@ std::string VModuleParameter::value_string() const
   oss << *this;
   return oss.str();
 }
-
 
 void VModuleParameter::ask_base_out(std::ostream& ost)
 {
@@ -183,7 +172,6 @@ void VModuleParameter::ask_base_out(std::ostream& ost)
   ost.flush();
 }
 
-
 bool VModuleParameter::ask_base_in(std::istream& ist)
 {  
   char c;
@@ -194,7 +182,6 @@ bool VModuleParameter::ask_base_in(std::istream& ist)
   ist.ignore(INT_MAX, '\n');
   return true;
 }
-
 
 bool VModuleParameter::ask_base()
 {
@@ -223,13 +210,11 @@ bool VModuleParameter::ask_base()
 #endif
 }
 
-
 std::string VModuleParameter::special_message_to_ask()
 {
   std::string message("");
   return message;
 }
-
 
 void VModuleParameter::throw_type_match_exception(const std::string& message)
 {
@@ -239,4 +224,4 @@ void VModuleParameter::throw_type_match_exception(const std::string& message)
                                     + "<= " + message) );
 }
 
-}
+} /* namespace anl */

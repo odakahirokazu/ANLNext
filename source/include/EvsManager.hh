@@ -20,6 +20,7 @@
 #ifndef ANL_EvsManager_H
 #define ANL_EvsManager_H 1
 
+#include <cstdint>
 #include <map>
 #include <string>
 #include <iostream>
@@ -27,8 +28,15 @@
 namespace anl
 {
 
-typedef std::map<std::string, std::pair<int, int> > EvsMap;
-typedef EvsMap::iterator EvsMapIter;
+struct EvsData
+{
+  bool flag = false;
+  uint64_t counts = 0;
+};
+
+typedef std::map<std::string, EvsData> EvsMap;
+typedef EvsMap::iterator EvsIter;
+typedef EvsMap::const_iterator EvsConstIter;
 
 /**
  * The Evs (event selection) management class.
@@ -36,81 +44,85 @@ typedef EvsMap::iterator EvsMapIter;
  *
  * @author Hirokazu Odaka
  * @date 2010-06-xx
+ * @date 2014-12-18
  */
 class EvsManager
 {
 public:
-  EvsManager()  {}
-  ~EvsManager() {}
-  
+  EvsManager() = default;
+  ~EvsManager();
+
+  void initialize();
+
   /**
    * define an Evs flag.
    */
-  void EvsDef(const std::string& key)   { data[key] = std::make_pair(0, 0); }
+  void define(const std::string& key)
+  { data_[key] = EvsData(); }
 
   /**
    * unregister an Evs flag.
    */
-  void EvsUndef(const std::string& key) { data.erase(key); }
-  bool EvsIsDef(const std::string& key) { return data.count(key); }
+  void undefine(const std::string& key) { data_.erase(key); }
+
+  bool isDefined(const std::string& key) const
+  { return data_.count(key); }
 
   /**
    * get an Evs flag value.
    */
-  bool Evs(const std::string& key);
+  bool get(const std::string& key) const;
 
   /**
    * set an Evs flag as true.
    */
-  void EvsSet(const std::string& key);
+  void set(const std::string& key);
 
   /**
    * set an Evs flag as false.
    */
-  void EvsReset(const std::string& key);
+  void reset(const std::string& key);
   
-  void ResetAll();
-  void Initialize() { data.clear(); }
-  void Count();
-  void PrintSummary();
+  void resetAllFlags();
+  void resetAllCounts();
+
+  void count();
+  void printSummary();
 
 private:
-  EvsMap data;
+  EvsMap data_;
 };
 
-
-inline bool EvsManager::Evs(const std::string& key)
+inline bool EvsManager::get(const std::string& key) const
 {
-  EvsMapIter i = data.find(key);
-  if (i==data.end()) {
-    std::cout << "EvsManager:: Undefined key is given: " << key << std::endl;
-    return false; 
+  EvsConstIter it = data_.find(key);
+  if (it==data_.end()) {
+    std::cout << "EvsManager: Undefined key is given: " << key << std::endl;
+    return false;
   }
-  return i->second.first;
+  return it->second.flag;
 }
 
-
-inline void EvsManager::EvsSet(const std::string& key)
+inline void EvsManager::set(const std::string& key)
 {
-  EvsMapIter i = data.find(key);
-  if (i==data.end()) {
-    std::cout << "EvsManager:: Undefined key is given: " << key << std::endl;
+  EvsIter it = data_.find(key);
+  if (it==data_.end()) {
+    std::cout << "EvsManager: Undefined key is given: " << key << std::endl;
+    return;
+  }
+  it->second.flag = true;
+}
+
+inline void EvsManager::reset(const std::string& key)
+{
+  EvsIter it = data_.find(key);
+  if (it==data_.end()) {
+    std::cout << "EvsManager: Undefined key is given: " << key << std::endl;
     return; 
   }
-  i->second.first = true;
+  it->second.flag = false;
 }
 
-
-inline void EvsManager::EvsReset(const std::string& key)
-{
-  EvsMapIter i = data.find(key);
-  if (i==data.end()) {
-    std::cout << "EvsManager:: Undefined key is given: " << key << std::endl;
-    return; 
-  }
-  i->second.first = false;
-}
-
-}
+} /* namespace anl */
 
 #endif /* ANL_EvsManager_H */

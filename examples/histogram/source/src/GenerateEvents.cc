@@ -11,22 +11,21 @@ GenerateEvents::GenerateEvents() :
   _random = new TRandom3();
 }
 
-
 GenerateEvents::~GenerateEvents()
 {
   delete _random;
 }
 
-
 ANLStatus GenerateEvents::mod_startup()
 {
-  register_parameter(&_center, "energy");
-  register_parameter(&_sigma1, "detector1_sigma");
+  register_parameter(&_center, "energy", 1.0, "keV");
+  register_parameter(&_sigma1, "detector1_sigma", 1.0, "keV");
+  set_parameter_description("Energy resolution (1-sigma) of the detector 1");
   register_parameter(&_sigma2, "detector2_sigma");
+  set_parameter_description("Energy resolution (1-sigma) of the detector 2");
 
   return AS_OK;
 }
-
 
 ANLStatus GenerateEvents::mod_init()
 {
@@ -35,7 +34,6 @@ ANLStatus GenerateEvents::mod_init()
 
   return AS_OK;
 }
-
 
 ANLStatus GenerateEvents::mod_ana()
 {

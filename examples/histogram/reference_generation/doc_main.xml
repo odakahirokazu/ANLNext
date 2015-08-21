@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<?xml-stylesheet type="text/xsl" href="anlmodules.xsl" ?>
+
+<anl_doc>
+  <head>
+  	<title>ANL Modules</title>
+	  <meta name="author" content="" />
+	  <meta name="copyright" content="Copyright (c) 2008 the Authors" />
+	  <link rel="stylesheet" href="anlmodules_style.css" type="text/css" />
+  </head>
+
+  <body_header>
+    <div>&gt; <a href="index.html">Home</a> &gt; ANL Modules</div>
+  </body_header>
+
+  <package namespace="MyPackage">
+    <module_info href="doc_detail.xml" />
+  </package>
+</anl_doc>

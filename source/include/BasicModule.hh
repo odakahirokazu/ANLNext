@@ -30,7 +30,7 @@
 #include "ANLStatus.hh"
 #include "ModuleParameter.hh"
 #include "ANLException.hh"
-#include "ANLAccess.hh"
+#include "ModuleAccess.hh"
 #include "ANLMacro.hh"
 
 #if ANL_USE_TVECTOR
@@ -55,6 +55,7 @@ class EvsManager;
  * @date 2010-06-xx
  * @date 2010-09-18
  * @date 2013-05-22
+ * @date 2014-12-18
  */
 class BasicModule
 {
@@ -62,13 +63,13 @@ class BasicModule
 public:
   BasicModule();
   BasicModule(const BasicModule& r);
-  virtual ~BasicModule() {}
+  virtual ~BasicModule();
 
   std::string module_name() const { return __module_name__(); }
   std::string module_version() const { return __module_version__(); }
   
   void set_module_id(const std::string& v);
-  std::string module_id() const { return (this->*m_ModuleIDMethod)(); }
+  std::string module_id() const { return (this->*moduleIDMethod_)(); }
   
   virtual ANLStatus mod_startup()  { return AS_OK; }
   virtual ANLStatus mod_com()      { ask_parameters(); return AS_OK; }
@@ -80,32 +81,32 @@ public:
   virtual ANLStatus mod_endrun()   { return AS_OK; }
   virtual ANLStatus mod_exit()     { return AS_OK; }
 
-  std::vector<std::string> get_alias() const { return m_Alias; }
-  void add_alias(const std::string& name) { m_Alias.push_back(name); }
-  int copy_id() { return m_MyCopyID; }
+  std::vector<std::string> get_alias() const { return aliases_; }
+  void add_alias(const std::string& name) { aliases_.push_back(name); }
+  int copy_id() { return myCopyID_; }
 
-  std::string module_description() const { return m_ModuleDescription; }
-  void set_module_description(const std::string& v) { m_ModuleDescription = v; }
+  std::string module_description() const { return moduleDescription_; }
+  void set_module_description(const std::string& v) { moduleDescription_ = v; }
 
   /**
    * enable this module.
    */
-  void on() { m_ModuleOn = true; }
+  void on() { moduleOn_ = true; }
   
   /**
    * disable this module.
    */
-  void off() { m_ModuleOn = false; }
+  void off() { moduleOn_ = false; }
 
   /**
    * @return true if this module is on.
    */
-  bool is_on() const { return m_ModuleOn; }
+  bool is_on() const { return moduleOn_; }
 
   /**
    * @return true if this module is off.
    */
-  bool is_off() const { return !m_ModuleOn; }
+  bool is_off() const { return !moduleOn_; }
 
   /**
    * expose a module parameter specified by "name" and set it as the current parameter.
@@ -126,19 +127,19 @@ public:
 
   void set_map_key(const std::string& key)
   {
-    m_CurrentParameter->set_map_key(key);
+    currentParameter_->set_map_key(key);
   }
   
   template <typename T>
-  void set_map_value(const std::string& name, T val);
+  void set_value_element(const std::string& name, T val);
 
-  void insert_map() { m_CurrentParameter->insert_map(); }
+  void insert_to_container() { currentParameter_->insert_to_container(); }
   
   void print_parameters();
   void ask_parameters();
 
-  void set_evs_manager(EvsManager* man) { m_Evs = man; }
-  void set_anl_access(const ANLAccess& aa) { m_ANLAccess = aa; }
+  void set_evs_manager(EvsManager* man) { evsManager_ = man; }
+  void set_anl_access(const ModuleAccess& aa) { moduleAccess_ = aa; }
 
   bool accessible(const std::string& name);
   
@@ -165,46 +166,46 @@ protected:
                               const std::string& key_default);
 
   void set_parameter_question(const std::string& q)
-  { m_CurrentParameter->set_question(q); }
+  { currentParameter_->set_question(q); }
   void set_parameter_description(const std::string& q)
-  { m_CurrentParameter->set_description(q); }
+  { currentParameter_->set_description(q); }
   
   void unregister_parameter(const std::string& name);
   void hide_parameter(const std::string& name, bool hidden=true);
   void ask_parameter(const std::string& name, const std::string& question="");
 
   template <typename T>
-  void add_map_value(T* ptr, const std::string& name);
+  void add_value_element(T* ptr, const std::string& name);
   template <typename T>
-  void add_map_value(T* ptr, const std::string& name,
-                     double unit, const std::string& unit_name,
-                     const std::string& question="");
+  void add_value_element(T* ptr, const std::string& name,
+                         double unit, const std::string& unit_name,
+                         const std::string& question="");
   template <typename T>
-  void add_map_value(T* ptr, const std::string& name,
-                     const std::string& expression,
-                     const std::string& question="");
+  void add_value_element(T* ptr, const std::string& name,
+                         const std::string& expression,
+                         const std::string& question="");
   
-  void enable_map_value(int type, const std::vector<int>& enable)
-  { m_CurrentParameter->enable_map_value(type, enable); }
+  void enable_value_elements(int type, const std::vector<std::size_t>& enable)
+  { currentParameter_->enable_value_elements(type, enable); }
   
   void require_module_access(const std::string& name);
   void require_full_access(bool v=true);
   
   template <typename T>
   void GetANLModule(const std::string& name, T *ptr)
-  { *ptr = static_cast<T>(m_ANLAccess.GetModule(name)); }
+  { *ptr = static_cast<T>(moduleAccess_.getModule(name)); }
 
   template <typename T>
   void GetANLModuleNC(const std::string& name, T *ptr)
-  { *ptr = static_cast<T>(m_ANLAccess.GetModuleNC(name)); }
+  { *ptr = static_cast<T>(moduleAccess_.getModuleNC(name)); }
 
   template <typename T>
   const T* GetANLModule(const std::string& name)
-  { return static_cast<const T*>(m_ANLAccess.GetModule(name)); }
+  { return static_cast<const T*>(moduleAccess_.getModule(name)); }
 
   template <typename T>
   T* GetANLModuleNC(const std::string& name)
-  { return static_cast<T*>(m_ANLAccess.GetModuleNC(name)); }
+  { return static_cast<T*>(moduleAccess_.getModuleNC(name)); }
 
   template <typename T>
   void GetANLModuleIF(const std::string& name, T *ptr);
@@ -213,42 +214,45 @@ protected:
   void GetANLModuleIFNC(const std::string& name, T *ptr);
 
   bool ModuleExist(const std::string& name)
-  { return m_ANLAccess.Exist(name); }
+  { return moduleAccess_.exist(name); }
   
   void EvsDef(const std::string& key);
   void EvsUndef(const std::string& key);
   bool EvsIsDef(const std::string& key) const;
-
   bool Evs(const std::string& key) const;
   void EvsSet(const std::string& key);
   void EvsReset(const std::string& key);
 
 public:
-  ModParamConstIter ModParamBegin() const { return m_ModuleParameters.begin(); }
-  ModParamConstIter ModParamEnd() const   { return m_ModuleParameters.end(); }
+  ModuleParamConstIter ModuleParamBegin() const
+  { return moduleParameters_.begin(); }
+  ModuleParamConstIter ModuleParamEnd() const
+  { return moduleParameters_.end(); }
   
 private:
-  ModParamIter ModParamBegin() { return m_ModuleParameters.begin(); }
-  ModParamIter ModParamEnd()   { return m_ModuleParameters.end(); }
+  ModuleParamIter ModuleParamBegin()
+  { return moduleParameters_.begin(); }
+  ModuleParamIter ModuleParamEnd()
+  { return moduleParameters_.end(); }
 
-  std::string get_module_id() const { return m_ModuleID; }
+  std::string get_module_id() const { return moduleID_; }
   
 private:
-  std::string m_ModuleID;
-  std::vector<std::string> m_Alias;
-  std::string m_ModuleDescription;
-  bool m_ModuleOn;
-  EvsManager* m_Evs;
-  ANLAccess m_ANLAccess;
-  ModParamList m_ModuleParameters;
-  ModParam m_CurrentParameter;
-  std::set<std::string> m_AccessibleModule;
-  bool m_RequireFullAccess;
+  std::string moduleID_;
+  std::vector<std::string> aliases_;
+  std::string moduleDescription_;
+  bool moduleOn_;
+  EvsManager* evsManager_;
+  ModuleAccess moduleAccess_;
+  ModuleParamList moduleParameters_;
+  ModuleParam_sptr currentParameter_;
+  std::set<std::string> accessibleModules_;
+  bool requiringFullAccess_;
     
-  int m_MyCopyID;
-  static int m_CopyID;
+  int myCopyID_;
+  static int CopyID__;
 
-  std::string (BasicModule::*m_ModuleIDMethod)() const;
+  std::string (BasicModule::*moduleIDMethod_)() const;
   
 private:
   BasicModule& operator=(const BasicModule& r);
@@ -264,9 +268,9 @@ namespace anl {
 template<typename T>
 void BasicModule::register_parameter(T* ptr, const std::string& name)
 {
-  ModParam p(new ModuleParameter<T>(ptr, name));
-  m_ModuleParameters.push_back(p);
-  m_CurrentParameter = p;
+  ModuleParam_sptr p(new ModuleParameter<T>(ptr, name));
+  moduleParameters_.push_back(p);
+  currentParameter_ = p;
 }
 
 
@@ -274,9 +278,9 @@ template<typename T>
 void BasicModule::register_parameter(T* ptr, const std::string& name,
                                      double unit, const std::string& unit_name)
 {
-  ModParam p(new ModuleParameter<T>(ptr, name, unit, unit_name));
-  m_ModuleParameters.push_back(p);
-  m_CurrentParameter = p;
+  ModuleParam_sptr p(new ModuleParameter<T>(ptr, name, unit, unit_name));
+  moduleParameters_.push_back(p);
+  currentParameter_ = p;
 }
 
 
@@ -284,9 +288,9 @@ template<typename T>
 void BasicModule::register_parameter(T* ptr, const std::string& name,
                                      const std::string& expression)
 {
-  ModParam p(new ModuleParameter<T>(ptr, name, expression));
-  m_ModuleParameters.push_back(p);
-  m_CurrentParameter = p;
+  ModuleParam_sptr p(new ModuleParameter<T>(ptr, name, expression));
+  moduleParameters_.push_back(p);
+  currentParameter_ = p;
 }
 
 
@@ -295,9 +299,9 @@ void BasicModule::register_parameter(T* ptr, const std::string& name,
                                      const std::string& expression,
                                      const std::string& default_string)
 {
-  ModParam p(new ModuleParameter<T>(ptr, name, expression, default_string));
-  m_ModuleParameters.push_back(p);
-  m_CurrentParameter = p;
+  ModuleParam_sptr p(new ModuleParameter<T>(ptr, name, expression, default_string));
+  moduleParameters_.push_back(p);
+  currentParameter_ = p;
 }
 
 
@@ -306,43 +310,43 @@ void BasicModule::register_parameter_map(T* ptr, const std::string& name,
                                          const std::string& key_name,
                                          const std::string& key_default)
 {
-  ModParam p(new ModuleParameter<T>(ptr, name, key_name, key_default));
-  m_ModuleParameters.push_back(p);
-  m_CurrentParameter = p;
+  ModuleParam_sptr p(new ModuleParameter<T>(ptr, name, key_name, key_default));
+  moduleParameters_.push_back(p);
+  currentParameter_ = p;
 }
 
 
 template <typename T>
-void BasicModule::add_map_value(T* ptr, const std::string& name)
+void BasicModule::add_value_element(T* ptr, const std::string& name)
 {
-  ModParam p(new ModuleParameter<T>(ptr, name));
-  m_CurrentParameter->add_map_value(p);
+  ModuleParam_sptr p(new ModuleParameter<T>(ptr, name));
+  currentParameter_->add_value_element(p);
 }
 
 template <typename T>
-void BasicModule::add_map_value(T* ptr, const std::string& name,
-                                double unit, const std::string& unit_name,
-                                const std::string& question)
+void BasicModule::add_value_element(T* ptr, const std::string& name,
+                                    double unit, const std::string& unit_name,
+                                    const std::string& question)
 {
-  ModParam p(new ModuleParameter<T>(ptr, name, unit, unit_name));
+  ModuleParam_sptr p(new ModuleParameter<T>(ptr, name, unit, unit_name));
   p->set_question(question);
-  m_CurrentParameter->add_map_value(p);
+  currentParameter_->add_value_element(p);
 }
 
 template <typename T>
-void BasicModule::add_map_value(T* ptr, const std::string& name,
-                                const std::string& expression,
-                                const std::string& question)
+void BasicModule::add_value_element(T* ptr, const std::string& name,
+                                    const std::string& expression,
+                                    const std::string& question)
 {
-  ModParam p(new ModuleParameter<T>(ptr, name, expression));
+  ModuleParam_sptr p(new ModuleParameter<T>(ptr, name, expression));
   p->set_question(question);
-  m_CurrentParameter->add_map_value(p);
+  currentParameter_->add_value_element(p);
 }
 
 template <typename T>
 void BasicModule::set_parameter(const std::string& name, T val) throw(ANLException)
 {
-  for (ModParamIter it=ModParamBegin(); it!=ModParamEnd(); ++it) {
+  for (ModuleParamIter it=ModuleParamBegin(); it!=ModuleParamEnd(); ++it) {
     if (name == (*it)->name()) {
       (*it)->set_value(val);
       return;
@@ -358,7 +362,7 @@ void BasicModule::set_parameter(const std::string& name, T val) throw(ANLExcepti
 inline
 void BasicModule::clear_array(const std::string& name) throw(ANLException)
 {
-  for (ModParamIter it=ModParamBegin(); it!=ModParamEnd(); ++it) {
+  for (ModuleParamIter it=ModuleParamBegin(); it!=ModuleParamEnd(); ++it) {
     if (name == (*it)->name()) {
       (*it)->clear_array();
       return;
@@ -375,7 +379,7 @@ inline
 void BasicModule::set_vector(const std::string& name,
                              double x, double y) throw(ANLException)
 {
-  for (ModParamIter it=ModParamBegin(); it!=ModParamEnd(); ++it) {
+  for (ModuleParamIter it=ModuleParamBegin(); it!=ModuleParamEnd(); ++it) {
     if (name == (*it)->name()) {
       (*it)->set_value(x, y);
       return;
@@ -392,7 +396,7 @@ inline
 void BasicModule::set_vector(const std::string& name,
                              double x, double y, double z) throw(ANLException)
 {
-  for (ModParamIter it=ModParamBegin(); it!=ModParamEnd(); ++it) {
+  for (ModuleParamIter it=ModuleParamBegin(); it!=ModuleParamEnd(); ++it) {
     if (name == (*it)->name()) {
       (*it)->set_value(x, y, z);
       return;
@@ -406,10 +410,10 @@ void BasicModule::set_vector(const std::string& name,
 
 
 template <typename T>
-void BasicModule::set_map_value(const std::string& name, T val)
+void BasicModule::set_value_element(const std::string& name, T val)
 {
   try {
-    m_CurrentParameter->set_map_value(name, val);
+    currentParameter_->set_value_element(name, val);
   }
   catch (ANLException& e) {
     e.setModule(this);
@@ -422,7 +426,7 @@ template <typename T>
 inline
 void BasicModule::GetANLModuleIF(const std::string& name, T *ptr)
 {
-  *ptr = dynamic_cast<T>(m_ANLAccess.GetModule(name));
+  *ptr = dynamic_cast<T>(moduleAccess_.getModule(name));
   if (ptr==0) {
     BOOST_THROW_EXCEPTION( ANLException(this) <<
                            ANLErrInfo(std::string("Dynamic cast failed: ")
@@ -435,7 +439,7 @@ template <typename T>
 inline
 void BasicModule::GetANLModuleIFNC(const std::string& name, T *ptr)
 {
-  *ptr = dynamic_cast<T>(m_ANLAccess.GetModuleNC(name));
+  *ptr = dynamic_cast<T>(moduleAccess_.getModuleNC(name));
   if (ptr==0) {
     BOOST_THROW_EXCEPTION( ANLException(this) <<
                            ANLErrInfo(std::string("Dynamic cast failed: ")
@@ -443,6 +447,6 @@ void BasicModule::GetANLModuleIFNC(const std::string& name, T *ptr)
   }
 }
 
-}
+} /* namespace anl */
 
 #endif /* ANL_BasicModule_H */

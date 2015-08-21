@@ -20,37 +20,49 @@
 #include "EvsManager.hh"
 #include <iomanip>
 
-using namespace anl;
-
-void EvsManager::ResetAll()
+namespace anl
 {
-  EvsMapIter const iEnd = data.end();
-  for (EvsMapIter i = data.begin(); i!=iEnd; ++i) {
-    i->second.first = false;
+
+EvsManager::~EvsManager() = default;
+
+void EvsManager::initialize()
+{
+  data_.clear();
+}
+
+void EvsManager::resetAllFlags()
+{
+  for (auto& e: data_) {
+    e.second.flag = false;
   }
 }
 
-
-void EvsManager::Count()
+void EvsManager::resetAllCounts()
 {
-  EvsMapIter const iEnd = data.end();
-  for (EvsMapIter i = data.begin(); i!=iEnd; ++i) {
-    if (i->second.first) {
-      ++(i->second.second);
+  for (auto& e: data_) {
+    e.second.counts = 0;
+  }
+}
+
+void EvsManager::count()
+{
+  for (auto& e: data_) {
+    if (e.second.flag) {
+      ++(e.second.counts);
     }
   }
 }
 
-
-void EvsManager::PrintSummary()
+void EvsManager::printSummary()
 {
   std::cout << "***** Results of Event Selection *****\n"
-            << "    Number of EVS : " << std::setw(8) << data.size() << '\n';
-  EvsMapIter const iEnd = data.end();
-  for (EvsMapIter i = data.begin(); i!=iEnd; ++i) {
-    std::cout << std::setw(12) << i->second.second
+            << "    Number of EVS : " << std::setw(8) << data_.size() << '\n';
+  for (auto& e: data_) {
+    std::cout << std::setw(12) << e.second.counts
               << std::setw(0) << " : "
-              << i->first << '\n';
+              << e.first << '\n';
   }
   std::cout.flush();
 }
+
+} /* namespace anl */

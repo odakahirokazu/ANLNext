@@ -11,7 +11,6 @@
 
 #include "BasicModule.hh"
 
-
 class MyModule : public anl::BasicModule
 {
   DEFINE_ANL_MODULE(MyModule, 1.0);
@@ -28,9 +27,12 @@ public:
   anl::ANLStatus mod_exit();
 
 private:
-  int myParameter1;
-  int myParameter2;
-  int myParameter3;
+  int myParameter1_;
+  double myParameter2_;
+  std::string myParameter3_;
+  std::vector<int> myVector1_;
+  std::vector<double> myVector2_;
+  std::vector<std::string> myVector3_;
 };
 
 #endif /* MyModule_H */

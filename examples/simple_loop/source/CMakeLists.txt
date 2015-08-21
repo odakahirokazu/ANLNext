@@ -7,27 +7,24 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -W -Wall" CACHE STRING "CXX_FLAGS for debug")
 set(CMAKE_C_FLAGS_DEBUG "-g -W -Wall" CACHE STRING "C_FLAGS for debug")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -W -Wall" CACHE STRING "CXX_FLAGS for release")
 set(CMAKE_C_FLAGS_RELEASE "-O3 -W -Wall" CACHE STRING "C_FLAGS for release")
+set(CMAKE_MACOSX_RPATH 0)
 
 ### Definition of project
 project(MyPackage)
+add_definitions("-std=c++11")
 
 set(MY_LIBRARY MyPackage)
 set(USE_RUBY ON)
 
 ### External libraries
 ### BOOST ###
-find_package(Boost 1.53.0 COMPONENTS system REQUIRED)
+find_package(Boost 1.56.0 REQUIRED COMPONENTS system chrono thread)
 set(BOOST_INC_DIR ${Boost_INCLUDE_DIRS})
 set(BOOST_LIB_DIR ${Boost_LIBRARY_DIRS})
-if(Boost_system_LIBRARY)
-  set(BOOST_LIB ${Boost_system_LIBRARY})
-else(Boost_system_LIBRARY)
-  if(Boost_USE_MULTITHREADED)
-    set(BOOST_LIB boost_system-mt)
-  else()
-    set(BOOST_LIB boost_system)
-  endif()
-endif(Boost_system_LIBRARY)
+set(BOOST_LIB ${Boost_LIBRARIES})
+message("-- BOOST_INC_DIR: ${BOOST_INC_DIR}")
+message("-- BOOST_LIB_DIR: ${BOOST_LIB_DIR}")
+message("-- BOOST_LIB: ${BOOST_LIB}")
 
 ### ANL ###
 if(NOT DEFINED ANLNEXT_INSTALL)
@@ -58,6 +55,8 @@ link_directories(
 
 set(ANL_MODULES
   src/MyModule.cc
+  src/MyMapModule.cc
+  src/MyVectorModule.cc
   )
 
 add_library(${MY_LIBRARY} SHARED

@@ -31,13 +31,11 @@
 #include <map>
 #include <set>
 #include <iomanip>
-#include <boost/shared_ptr.hpp>
-#include <boost/type_traits.hpp>
+#include <type_traits>
 #include <boost/call_traits.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/icl/type_traits/is_container.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/tuple/tuple.hpp>
 
 #if ANL_USE_TVECTOR
 #include "TVector2.h"
@@ -68,28 +66,28 @@ struct param_call_type<double>
   typedef double type;
 };
 
-
 /**
  * A class template for an ANL module parameter.
  * @author Hirokazu Odaka
  * @date 2011-07-12
  * @date 2012-12-12
+ * @date 2014-12-09 | use variadic template.
  */
 template <typename T>
 class ModuleParameter : public VModuleParameter
 {
-  typedef boost::integral_constant<bool,
-                                   boost::icl::is_container<T>::value
-                                   && !boost::is_same<T, std::string>::value> container_truth_type;
+  typedef std::integral_constant<bool,
+                                 boost::icl::is_container<T>::value
+                                 && !std::is_same<T, std::string>::value> is_container_type;
   
-  typedef boost::integral_constant<bool,
-                                   boost::is_arithmetic<T>::value> arithmetic_truth_type;
+  typedef std::integral_constant<bool,
+                                 std::is_arithmetic<T>::value> is_arithmetic_type;
     
-  typedef boost::integral_constant<bool,
-                                   boost::is_floating_point<T>::value> float_truth_type;
+  typedef std::integral_constant<bool,
+                                 std::is_floating_point<T>::value> is_floating_point_type;
 
-  typedef boost::integral_constant<bool,
-                                   boost::is_integral<T>::value> int_truth_type;
+  typedef std::integral_constant<bool,
+                                 std::is_integral<T>::value> is_integer_type;
 
   typedef typename param_call_type<T>::type call_type;
   
@@ -112,79 +110,79 @@ public:
 
   void set_value(call_type val)
   {
-    set_value_impl(val, container_truth_type(), arithmetic_truth_type(), float_truth_type());
+    set_value_impl(val, is_container_type(), is_arithmetic_type(), is_floating_point_type());
   }
 
   using VModuleParameter::set_value;
   
   void clear_array()
   {
-    clear_array_impl(container_truth_type());
+    clear_array_impl(is_container_type());
   }
   
   void output(std::ostream& os) const
   {
-    output_impl(os, container_truth_type(), arithmetic_truth_type(), float_truth_type());
+    output_impl(os, is_container_type(), is_arithmetic_type(), is_floating_point_type());
   }
   
   void input(std::istream& is)
   {
-    input_impl(is, container_truth_type(), arithmetic_truth_type(), float_truth_type());
+    input_impl(is, is_container_type(), is_arithmetic_type(), is_floating_point_type());
   }
 
   void get(void* const value_ptr) const
   {
-    *static_cast<T* const>(value_ptr) = *_ptr;
+    *static_cast<T* const>(value_ptr) = *ptr_;
   }
   
   void set(const void* const value_ptr)
   {
-    *_ptr = *static_cast<const T* const>(value_ptr);
+    *ptr_ = *static_cast<const T* const>(value_ptr);
   }
 
 protected:
   template <bool b0>
-  bool ask_sequential(const boost::integral_constant<bool, b0>&)
+  bool ask_sequential(const std::integral_constant<bool, b0>&)
   { return ask_base(); }
 
-  bool ask_sequential(const boost::true_type&);
+  bool ask_sequential(const std::true_type&);
 
 private:
   template <bool b0, bool b1, bool b2>
   void set_value_impl(call_type val,
-                      const boost::integral_constant<bool, b0>&,
-                      const boost::integral_constant<bool, b1>&,
-                      const boost::integral_constant<bool, b2>&)
+                      const std::integral_constant<bool, b0>&,
+                      const std::integral_constant<bool, b1>&,
+                      const std::integral_constant<bool, b2>&)
   {
     // non-container, non-number
-    *_ptr = val;
+    *ptr_ = val;
   }
   
   template <bool b0, bool b2>
   void set_value_impl(call_type val,
-                      const boost::integral_constant<bool, b0>&,
-                      const boost::true_type&,
-                      const boost::integral_constant<bool, b2>&)
+                      const std::integral_constant<bool, b0>&,
+                      const std::true_type&,
+                      const std::integral_constant<bool, b2>&)
   {
     // non-container, number, int
-    *_ptr = val;
+    *ptr_ = val;
   }
   
   template <bool b0>
   void set_value_impl(call_type val,
-                      const boost::integral_constant<bool, b0>&,
-                      const boost::true_type&,
-                      const boost::true_type&)
+                      const std::integral_constant<bool, b0>&,
+                      const std::true_type&,
+                      const std::true_type&)
   {
     // non-container, number, float
-    *_ptr = val * unit();
+    *ptr_ = val * unit();
   }
   
   template <bool b1, bool b2>
   void set_value_impl(call_type val,
-                      const boost::true_type&,
-                      const boost::integral_constant<bool, b1>&,
-                      const boost::integral_constant<bool, b2>&)
+                      const std::true_type&,
+                      const std::integral_constant<bool, b1>&,
+                      const std::integral_constant<bool, b2>&)
   {
     // container
     typedef typename T::iterator iter_type;
@@ -199,56 +197,56 @@ private:
   void set_value3(double , double , double ) {}
   
   template <bool b0>
-  void clear_array_impl(const boost::integral_constant<bool, b0>&)
+  void clear_array_impl(const std::integral_constant<bool, b0>&)
   {
     // non-container
   }
   
-  void clear_array_impl(const boost::true_type&)
+  void clear_array_impl(const std::true_type&)
   {
     // container
-    _ptr->clear();
+    ptr_->clear();
   }
   
   template <bool b0, bool b1, bool b2>
   void output_impl(std::ostream& os,
-                   const boost::integral_constant<bool, b0>&,
-                   const boost::integral_constant<bool, b1>&,
-                   const boost::integral_constant<bool, b2>&) const
+                   const std::integral_constant<bool, b0>&,
+                   const std::integral_constant<bool, b1>&,
+                   const std::integral_constant<bool, b2>&) const
   {
     // non-container, non-number
-    os << *_ptr;
+    os << *ptr_;
   }
   
   template <bool b0, bool b2>
   void output_impl(std::ostream& os,
-                   const boost::integral_constant<bool, b0>&,
-                   const boost::true_type&,
-                   const boost::integral_constant<bool, b2>&) const
+                   const std::integral_constant<bool, b0>&,
+                   const std::true_type&,
+                   const std::integral_constant<bool, b2>&) const
   {
     // non-container, number, int
     using std::string;
     if (expression().find("hex")!=string::npos) os << std::hex;
     else if (expression().find("dec")!=string::npos) os << std::dec;
-    os << *_ptr;
+    os << *ptr_;
     os << std::dec;
   }
 
   template <bool b0>
   void output_impl(std::ostream& os,
-                   const boost::integral_constant<bool, b0>&,
-                   const boost::true_type&,
-                   const boost::true_type&) const
+                   const std::integral_constant<bool, b0>&,
+                   const std::true_type&,
+                   const std::true_type&) const
   {
     // non-container, number, float
-    os << *_ptr/unit();
+    os << *ptr_/unit();
   }
   
   template <bool b1, bool b2>
   void output_impl(std::ostream& os,
-                   const boost::true_type&,
-                   const boost::integral_constant<bool, b1>&,
-                   const boost::integral_constant<bool, b2>&) const
+                   const std::true_type&,
+                   const std::integral_constant<bool, b1>&,
+                   const std::integral_constant<bool, b2>&) const
   {
     // container
     typedef typename T::iterator iter_type;
@@ -260,46 +258,46 @@ private:
 
   template <bool b0, bool b1, bool b2>
   void input_impl(std::istream& is,
-                   const boost::integral_constant<bool, b0>&,
-                   const boost::integral_constant<bool, b1>&,
-                   const boost::integral_constant<bool, b2>&)
+                   const std::integral_constant<bool, b0>&,
+                   const std::integral_constant<bool, b1>&,
+                   const std::integral_constant<bool, b2>&)
   {
     // non-container, non-number
-    is >> *_ptr;
+    is >> *ptr_;
   }
   
   template <bool b0, bool b2>
   void input_impl(std::istream& is,
-                  const boost::integral_constant<bool, b0>&,
-                  const boost::true_type&,
-                  const boost::integral_constant<bool, b2>&)
+                  const std::integral_constant<bool, b0>&,
+                  const std::true_type&,
+                  const std::integral_constant<bool, b2>&)
   {
 
     // non-container, number, int
     using std::string;
     if (expression().find("hex")!=string::npos) is >> std::hex;
     else if (expression().find("dec")!=string::npos) is >> std::dec;
-    is >> *_ptr;
+    is >> *ptr_;
     is >> std::dec;
   }
 
   template <bool b0>
   void input_impl(std::istream& is,
-                  const boost::integral_constant<bool, b0>&,
-                  const boost::true_type&,
-                  const boost::true_type&)
+                  const std::integral_constant<bool, b0>&,
+                  const std::true_type&,
+                  const std::true_type&)
   {
     // non-container, number, float
     T val(0.0);
     is >> val;
-    if (is) { *_ptr = val * unit(); }
+    if (is) { *ptr_ = val * unit(); }
   }
   
   template <bool b1, bool b2>
   void input_impl(std::istream& is,
-                  const boost::true_type&,
-                  const boost::integral_constant<bool, b1>&,
-                  const boost::integral_constant<bool, b2>&)
+                  const std::true_type&,
+                  const std::integral_constant<bool, b1>&,
+                  const std::integral_constant<bool, b2>&)
   {
     // container
     typedef typename T::iterator iter_type;
@@ -313,23 +311,24 @@ private:
   std::string special_message_to_ask();
 
   template <bool b> std::string
-  special_message_to_ask_impl(const boost::integral_constant<bool, b>&)
+  special_message_to_ask_impl(const std::integral_constant<bool, b>&)
   { return VModuleParameter::special_message_to_ask(); }
   
-  std::string  special_message_to_ask_impl(const boost::true_type&)
+  std::string  special_message_to_ask_impl(const std::true_type&)
   {
     std::string message("\n  vector length, values... \n");
     return message;
   }
 
 private:
-  T* _ptr;
+  T* ptr_;
 };
 
-}
+} /* namespace anl */
 
 #include "ModuleParameter_impl.hh"
 #include "ModuleParameter_spec.hh"
 #include "ModuleParameter_map.hh"
+#include "ModuleParameter_vector.hh"
 
 #endif /* ANL_ModuleParameter_H */

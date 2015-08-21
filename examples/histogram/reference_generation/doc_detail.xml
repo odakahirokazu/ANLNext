@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<anlmodules>
+  <namespace>TestHistogram</namespace>
+  <module>
+    <name>SaveData</name>
+    <version>2.0</version>
+    <text></text>
+    <parameters>
+      <param container_type=''>
+        <name>filename</name>
+        <type>string</type>
+        <unit></unit>
+        <default_value>output.root</default_value>
+        <description>Output file name</description>
+      </param>
+    </parameters>
+  </module>
+  <module>
+    <name>GenerateEvents</name>
+    <version>1.0</version>
+    <text></text>
+    <parameters>
+      <param container_type=''>
+        <name>energy</name>
+        <type>double</type>
+        <unit>keV</unit>
+        <default_value>59.5</default_value>
+        <description></description>
+      </param>
+      <param container_type=''>
+        <name>detector1_sigma</name>
+        <type>double</type>
+        <unit>keV</unit>
+        <default_value>1</default_value>
+        <description>Energy resolution (1-sigma) of the detector 1</description>
+      </param>
+      <param container_type=''>
+        <name>detector2_sigma</name>
+        <type>double</type>
+        <unit></unit>
+        <default_value>5</default_value>
+        <description>Energy resolution (1-sigma) of the detector 2</description>
+      </param>
+    </parameters>
+  </module>
+  <module>
+    <name>FillHistogram</name>
+    <version>1.0</version>
+    <text></text>
+    <parameters>
+      <param container_type=''>
+        <name>nbin</name>
+        <type>int</type>
+        <unit></unit>
+        <default_value>128</default_value>
+        <description>Number of bins</description>
+      </param>
+      <param container_type=''>
+        <name>energy_min</name>
+        <type>double</type>
+        <unit>keV</unit>
+        <default_value>0</default_value>
+        <description>Lower bound of the histograms</description>
+      </param>
+      <param container_type=''>
+        <name>energy_max</name>
+        <type>double</type>
+        <unit>keV</unit>
+        <default_value>100</default_value>
+        <description>Upper bound of the histograms</description>
+      </param>
+    </parameters>
+  </module>
+</anlmodules>
