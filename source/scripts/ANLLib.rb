@@ -470,7 +470,7 @@ module ANL
         begin
           set_param.call
         rescue
-          puts "Set parameter exception: #{map_name}/#{key} in module #{mod.module_id}"
+          puts "Set parameter exception: #{vector_name} in module #{mod.module_id}"
           raise
         end
       end
