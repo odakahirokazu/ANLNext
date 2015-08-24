@@ -124,7 +124,7 @@ used in the world, and is easy to learn like Python. This is optional but very
 useful for productive data analysis.
 
 #### (5) [SWIG](http://www.swig.org/)
-*version 3.0 or later*
+*version 3.0.7 or later*
 
 As SWIG (Simplified Wrapper and Interface Generator) provides an easy way to
 generate extended libraries of various scripting languages, ANL Next uses SWIG
