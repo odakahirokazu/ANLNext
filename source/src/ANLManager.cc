@@ -385,7 +385,7 @@ ANLStatus ANLManager::process_analysis(long int num_events)
           throw;
         }
 
-        if (status == AS_OK ) {
+        if (status == AS_OK) {
           ++counters_[iModule].ok;
         }
         else {
