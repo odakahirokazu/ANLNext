@@ -1,7 +1,7 @@
 ANL Next
 ========================================
 
-- Version: 1.7.0
+- Version: 1.7.1
 - Author: Hirokazu Odaka
 
 
@@ -59,10 +59,10 @@ https://github.com/odakahirokazu/ANLNext/
 #### Test environmemt (Mac)
 
 - MacBook Pro (Late 2013)
-- OS X 10.10.5
-- Apple LLVM version 6.1.0 (clang-602.0.53) (based on LLVM 3.6.0svn)
-- cmake version 3.3.1
-- ruby 2.2.2p95 (2015-04-13 revision 50295) [x86\_64-darwin14]
+- OS X 10.11
+- Apple LLVM version 7.0.0 (clang-700.0.72)
+- cmake version 3.3.2
+- ruby 2.2.3p173 (2015-08-18 revision 51636) [x86\_64-darwin14]
 - SWIG Version 3.0.7
 - Boost 1.58.0
 
