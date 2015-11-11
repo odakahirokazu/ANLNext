@@ -2,6 +2,7 @@
 
 require 'ANLLib' # ANL Next library
 require 'myPackage'# Ruby extension library using ANL Next
+require 'json'
 
 # Define your own application class derived from ANL::ANLApp.
 class MyApp < ANL::ANLApp
@@ -37,5 +38,14 @@ class MyApp < ANL::ANLApp
 end
 
 a = MyApp.new
-a.write_parameters_to_json "parameters.json"
-a.run(1000000, 100000)
+a.setup
+a.startup
+a.prepare_all_parameters
+a.print_all_parameters
+
+o = a.parameters_to_object
+p o
+
+File.open("parameters2.json", 'w') do |fout|
+  fout.print(JSON.pretty_generate(o))
+end

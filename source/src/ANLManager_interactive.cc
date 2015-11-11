@@ -17,6 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
+#if ANL_ENABLE_INTERACTIVE_MODE
+
 #include "ANLManager.hh"
 #include "BasicModule.hh"
 
@@ -25,23 +27,22 @@
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 
-#define ANLNEXT_USE_READLINE 1
-#if ANLNEXT_USE_READLINE
+#if ANL_USE_READLINE
 #include <readline/readline.h>
 #include <readline/history.h>
-#else
+#else /* ANL_USE_READLINE */
 #include <histedit.h>
-#endif
+#endif /* ANL_USE_READLINE */
 
 
 namespace
 {
-#if !ANLNEXT_USE_READLINE
-const char* prompt(EditLine *e)
+#if !ANL_USE_READLINE
+const char* prompt(EditLine*)
 {
   return "ANL> ";
 }
-#endif
+#endif /* !ANL_USE_READLINE */
 }
 
 namespace anl
@@ -51,10 +52,10 @@ ANLStatus ANLManager::InteractiveCom() throw(ANLException)
 {
   ANLStatus status = AS_OK;
   
-#if ANLNEXT_USE_READLINE
+#if ANL_USE_READLINE
   char *line;
   int count = 0;
-#else
+#else /* ANL_USE_READLINE */
   const char *line;
   int count = 0;
   EditLine *el;
@@ -72,7 +73,7 @@ ANLStatus ANLManager::InteractiveCom() throw(ANLException)
   
   history(anlHistory, &event, H_SETSIZE, 1000);
   el_set(el, EL_HIST, history, anlHistory);
-#endif
+#endif /* ANL_USE_READLINE */
   
   std::string cmd;
   std::istringstream iss;
@@ -80,29 +81,29 @@ ANLStatus ANLManager::InteractiveCom() throw(ANLException)
   std::cout << "\n ** type \"help\" if you need. ** \n" << std::endl;
 
   while (iss.str()=="") {
-#if ANLNEXT_USE_READLINE
+#if ANL_USE_READLINE
     line = readline("ANL> ");
     if (line) count = strlen(line)+1;
     else {
       exit(1);
     }
-#else
+#else /* ANL_USE_READLINE */
     line = el_gets(el, &count);
-#endif
+#endif /* ANL_USE_READLINE */
     
     if (count > 1) {
-#if ANLNEXT_USE_READLINE
+#if ANL_USE_READLINE
       add_history(line);
-#else
+#else /* ANL_USE_READLINE */
       history(anlHistory, &event, H_ENTER, line);
-#endif
+#endif /* ANL_USE_READLINE */
 
       iss.str(line);
       
-#if ANLNEXT_USE_READLINE
+#if ANL_USE_READLINE
       free(line);
       line = 0;
-#endif
+#endif /* ANL_USE_READLINE */
 
       iss >> cmd;
  
@@ -200,21 +201,21 @@ ANLStatus ANLManager::InteractiveCom() throw(ANLException)
       }
     }
     else {
-#if ANLNEXT_USE_READLINE
+#if ANL_USE_READLINE
       free(line);
       line = 0;
-#endif
+#endif /* ANL_USE_READLINE */
     }
     
     iss.str("");
     iss.clear();
   }
   
-#if ANLNEXT_USE_READLINE
-#else
+#if ANL_USE_READLINE
+#else /* ANL_USE_READLINE */
   history_end(anlHistory);
   el_end(el);
-#endif
+#endif /* ANL_USE_READLINE */
   return status;
 }
 
@@ -334,10 +335,10 @@ ANLStatus ANLManager::InteractiveAna() throw(ANLException)
 {
   ANLStatus status = AS_OK;
 
-#if ANLNEXT_USE_READLINE
+#if ANL_USE_READLINE
   int count = 0;
   char *line;
-#else
+#else /* ANL_USE_READLINE */
   int count = 0;
   const char *line;
   EditLine *el;
@@ -356,7 +357,7 @@ ANLStatus ANLManager::InteractiveAna() throw(ANLException)
   
   history(anlHistory, &event, H_SETSIZE, 1000);
   el_set(el, EL_HIST, history, anlHistory);
-#endif
+#endif /* ANL_USE_READLINE */
   
   std::string cmd;
   std::istringstream iss;
@@ -364,25 +365,25 @@ ANLStatus ANLManager::InteractiveAna() throw(ANLException)
   std::cout << "\n ** type \"help\" if you need. ** \n" << std::endl;
 
   while (iss.str()=="") {
-#if ANLNEXT_USE_READLINE
+#if ANL_USE_READLINE
     line = readline("ANL> ");
     count = strlen(line)+1;
-#else
+#else /* ANL_USE_READLINE */
     line = el_gets(el, &count);
-#endif
+#endif /* ANL_USE_READLINE */
 
     if (count > 1) {
-#if ANLNEXT_USE_READLINE
+#if ANL_USE_READLINE
       add_history(line);
-#else
+#else /* ANL_USE_READLINE */
       history(anlHistory, &event, H_ENTER, line);
-#endif
+#endif /* ANL_USE_READLINE */
       iss.str(line);
 
-#if ANLNEXT_USE_READLINE
+#if ANL_USE_READLINE
       free(line);
       line = 0;
-#endif
+#endif /* ANL_USE_READLINE */
 
       iss >> cmd;
       if (cmd == "exit") {
@@ -406,21 +407,21 @@ ANLStatus ANLManager::InteractiveAna() throw(ANLException)
       }
     }
     else {
-#if ANLNEXT_USE_READLINE
+#if ANL_USE_READLINE
       free(line);
       line = 0;
-#endif
+#endif /* ANL_USE_READLINE */
     }
 
     iss.str("");
     iss.clear();
   }
   
-#if ANLNEXT_USE_READLINE
-#else
+#if ANL_USE_READLINE
+#else /* ANL_USE_READLINE */
   history_end(anlHistory);
   el_end(el);
-#endif
+#endif /* ANL_USE_READLINE */
   
   return status;
 }
@@ -439,3 +440,5 @@ void ANLManager::InteractiveAnaHelp()
 }
 
 } /* namespace anl */
+
+#endif /* ANL_ENABLE_INTERACTIVE_MODE */

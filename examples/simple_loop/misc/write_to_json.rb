@@ -37,5 +37,9 @@ class MyApp < ANL::ANLApp
 end
 
 a = MyApp.new
-a.write_parameters_to_json "parameters.json"
-a.run(1000000, 100000)
+a.setup
+manager = a.startup
+a.prepare_all_parameters
+a.print_all_parameters
+
+manager.parameters_to_json("parameters.json")

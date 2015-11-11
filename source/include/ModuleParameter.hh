@@ -36,16 +36,17 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/icl/type_traits/is_container.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/property_tree/ptree.hpp>
 
-#if ANL_USE_TVECTOR
+#ifdef ANL_USE_TVECTOR
 #include "TVector2.h"
 #include "TVector3.h"
-#endif
+#endif /* ANL_USE_TVECTOR */
 
-#if ANL_USE_HEPVECTOR
+#ifdef ANL_USE_HEPVECTOR
 #include "CLHEP/Vector/TwoVector.h"
 #include "CLHEP/Vector/ThreeVector.h"
-#endif
+#endif /* ANL_USE_HEPVECTOR */
 
 #include "ANLException.hh"
 #include "ANLType.hh"
@@ -53,25 +54,13 @@
 namespace anl
 {
 
-template <typename T>
-struct param_call_type
-{
-  typedef typename boost::call_traits<T>::param_type type;
-};
-
-/* this template specialization is a workaround for 32-bit Linux. */
-template <>
-struct param_call_type<double>
-{
-  typedef double type;
-};
-
 /**
  * A class template for an ANL module parameter.
  * @author Hirokazu Odaka
  * @date 2011-07-12
  * @date 2012-12-12
  * @date 2014-12-09 | use variadic template.
+ * @date 2015-11-10 | get_value() methods
  */
 template <typename T>
 class ModuleParameter : public VModuleParameter
@@ -89,7 +78,7 @@ class ModuleParameter : public VModuleParameter
   typedef std::integral_constant<bool,
                                  std::is_integral<T>::value> is_integer_type;
 
-  typedef typename param_call_type<T>::type call_type;
+  typedef typename param_call_traits<T>::type call_type;
   
 public:
   ModuleParameter(T* ptr, const std::string& name);
@@ -110,24 +99,41 @@ public:
 
   void set_value(call_type val)
   {
-    set_value_impl(val, is_container_type(), is_arithmetic_type(), is_floating_point_type());
+    set_value_impl(val,
+                   is_container_type(),
+                   is_arithmetic_type(),
+                   is_floating_point_type());
   }
-
   using VModuleParameter::set_value;
-  
+
   void clear_array()
   {
     clear_array_impl(is_container_type());
   }
   
+  T get_value(call_type dummy) const
+  {
+    return get_value_impl(dummy,
+                          is_container_type(),
+                          is_arithmetic_type(),
+                          is_floating_point_type());
+  }
+  using VModuleParameter::get_value;
+  
   void output(std::ostream& os) const
   {
-    output_impl(os, is_container_type(), is_arithmetic_type(), is_floating_point_type());
+    output_impl(os,
+                is_container_type(),
+                is_arithmetic_type(),
+                is_floating_point_type());
   }
   
   void input(std::istream& is)
   {
-    input_impl(is, is_container_type(), is_arithmetic_type(), is_floating_point_type());
+    input_impl(is,
+               is_container_type(),
+               is_arithmetic_type(),
+               is_floating_point_type());
   }
 
   void get(void* const value_ptr) const
@@ -140,6 +146,16 @@ public:
     *ptr_ = *static_cast<const T* const>(value_ptr);
   }
 
+  boost::property_tree::ptree to_property_tree() const
+  {
+    boost::property_tree::ptree pt;
+    pt.put("name", name());
+    pt.put("type", type_name());
+    put_unit_info_to_property_tree(pt);
+    put_value_info_to_property_tree(pt);
+    return std::move(pt);
+  }
+  
 protected:
   template <bool b0>
   bool ask_sequential(const std::integral_constant<bool, b0>&)
@@ -147,6 +163,16 @@ protected:
 
   bool ask_sequential(const std::true_type&);
 
+  void put_unit_info_to_property_tree(boost::property_tree::ptree& pt) const
+  {
+    put_unit_info_to_property_tree_impl(pt, is_floating_point_type());
+  }
+  
+  void put_value_info_to_property_tree(boost::property_tree::ptree& pt) const
+  {
+    put_value_info_to_property_tree_impl(pt, is_container_type());
+  }
+  
 private:
   template <bool b0, bool b1, bool b2>
   void set_value_impl(call_type val,
@@ -174,7 +200,7 @@ private:
                       const std::true_type&,
                       const std::true_type&)
   {
-    // non-container, number, float
+    // non-container, number, floating-point
     *ptr_ = val * unit();
   }
   
@@ -192,9 +218,6 @@ private:
   
   void set_value_impl(call_type val, std::random_access_iterator_tag);
   void set_value_impl(call_type val, std::forward_iterator_tag);
-
-  void set_value2(double , double ) {}
-  void set_value3(double , double , double ) {}
   
   template <bool b0>
   void clear_array_impl(const std::integral_constant<bool, b0>&)
@@ -208,6 +231,51 @@ private:
     ptr_->clear();
   }
   
+  template <bool b0, bool b1, bool b2>
+  T get_value_impl(call_type,
+                   const std::integral_constant<bool, b0>&,
+                   const std::integral_constant<bool, b1>&,
+                   const std::integral_constant<bool, b2>&) const
+  {
+    // non-container, non-number
+    return *ptr_;
+  }
+  
+  template <bool b0, bool b2>
+  T get_value_impl(call_type,
+                   const std::integral_constant<bool, b0>&,
+                   const std::true_type&,
+                   const std::integral_constant<bool, b2>&) const
+  {
+    // non-container, number, int
+    return *ptr_;
+  }
+  
+  template <bool b0>
+  T get_value_impl(call_type,
+                   const std::integral_constant<bool, b0>&,
+                   const std::true_type&,
+                   const std::true_type&) const
+  {
+    // non-container, number, floating-point
+    return (*ptr_)/unit();
+  }
+  
+  template <bool b1, bool b2>
+  T get_value_impl(call_type dummy,
+                   const std::true_type&,
+                   const std::integral_constant<bool, b1>&,
+                   const std::integral_constant<bool, b2>&) const
+  {
+    // container
+    typedef typename T::iterator iter_type;
+    typedef typename std::iterator_traits<iter_type>::iterator_category IterCategory;
+    return get_value_impl(dummy, IterCategory());
+  }
+  
+  T get_value_impl(call_type dummy, std::random_access_iterator_tag) const;
+  T get_value_impl(call_type dummy, std::forward_iterator_tag) const;
+
   template <bool b0, bool b1, bool b2>
   void output_impl(std::ostream& os,
                    const std::integral_constant<bool, b0>&,
@@ -238,7 +306,7 @@ private:
                    const std::true_type&,
                    const std::true_type&) const
   {
-    // non-container, number, float
+    // non-container, number, floating-point
     os << *ptr_/unit();
   }
   
@@ -287,7 +355,7 @@ private:
                   const std::true_type&,
                   const std::true_type&)
   {
-    // non-container, number, float
+    // non-container, number, floating-point
     T val(0.0);
     is >> val;
     if (is) { *ptr_ = val * unit(); }
@@ -320,6 +388,45 @@ private:
     return message;
   }
 
+  template <bool b0>
+  void put_unit_info_to_property_tree_impl(boost::property_tree::ptree&,
+                                           const std::integral_constant<bool, b0>&) const
+  {
+    // non-floating-point
+  }
+
+  void put_unit_info_to_property_tree_impl(boost::property_tree::ptree& pt,
+                                           const std::true_type&) const
+  {
+    // floating-point
+    pt.put("unit_name", unit_name());
+    pt.put("unit", unit());
+  }
+
+  template <bool b0>
+  void put_value_info_to_property_tree_impl(boost::property_tree::ptree& pt,
+                                            const std::integral_constant<bool, b0>&) const
+  {
+    // non-container
+    T dummy = T();
+    pt.put("value", get_value(dummy));
+  }
+
+  void put_value_info_to_property_tree_impl(boost::property_tree::ptree& pt,
+                                            const std::true_type&) const
+  {
+    // container
+    boost::property_tree::ptree pt_values;
+    T dummy = T();
+    T values = get_value(dummy);
+    for (const auto& v: values) {
+      boost::property_tree::ptree pt_value;
+      pt_value.put("", v);
+      pt_values.push_back(std::make_pair("", pt_value));
+    }
+    pt.add_child("value", pt_values);
+  }
+  
 private:
   T* ptr_;
 };

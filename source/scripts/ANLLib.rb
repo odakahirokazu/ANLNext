@@ -7,6 +7,7 @@
 require 'ANL'
 require 'forwardable'
 require 'rexml/document'
+require 'json'
 
 module ANL
   class BasicModule
@@ -16,16 +17,100 @@ module ANL
     #
     def parameter_list()
       l = []
-      i = self.ModuleParamBegin
-      e = self.ModuleParamEnd
+      i = self.parameter_begin
+      e = self.parameter_end
       while i != e
-        l << i.value
+        l << i.value.__deref__
         i.next
       end
       return l
     end
+
+    alias :get_parameter_original :get_parameter
+    def get_parameter(name)
+      get_parameter_original(name.to_s)
+    end
+
+    def parameters_to_object()
+      o = {}
+      o[:module_id] = module_id()
+      o[:name] = module_name()
+      o[:version] = module_version()
+      o[:parameter_list] = parameter_list.map(&:to_object)
+      return o
+    end
   end
 
+  class VModuleParameter
+    def get_value_auto()
+      case type_name()
+      when "bool"
+        get_value(false)
+      when "int"
+        get_value(0)
+      when "double"
+        get_value(0.0)
+      when "string"
+        get_value('')
+      when "vector<int>"
+        get_value_vector_i([])
+      when "vector<double>"
+        get_value_vector_d([])
+      when "vector<string>"
+        get_value_vector_str([])
+      when "2-vector"
+        get_value(0.0, 0.0)
+      when "3-vector"
+        get_value(0.0, 0.0, 0.0)
+      else
+        nil
+      end
+    end
+
+    def to_object()
+      type = type_name()
+      o = {}
+      o[:name] = name()
+      o[:type] = type
+
+      case type
+      when "double", "vector<double>"
+        o[:unit] = unit()
+        o[:unit_name] = unit_name()
+      end
+
+      case type
+      when "vector"
+        values = []
+        o[:value] = values
+        size_of_container.times do |k|
+          value = []
+          values.push(value)
+          retrieve_from_container(k)
+          num_value_elements.times do |i|
+            element = value_element_info(i)
+            value.push(element.to_object)
+          end
+        end
+      when "map"
+        values = {}
+        o[:value] = values
+        map_key_list.each do |k|
+          value = []
+          values[k] = value
+          retrieve_from_container(k)
+          num_value_elements.times do |i|
+            element = value_element_info(i)
+            value.push(element.to_object)
+          end
+        end
+      else
+        o[:value] = get_value_auto()
+      end
+
+      return o
+    end
+  end
 
   # Class of two- or three-dimensional vector.
   #
@@ -98,6 +183,10 @@ module ANL
       nil
     end
 
+    def write_parameters_to_json(filename)
+      @_anlapp_analysis_chain.parameters_json_filename = filename
+    end
+
     # Run this application.
     #
     # @param [Fixnum] num_loop number of loops. :all or -1 for infinite loops.
@@ -118,7 +207,8 @@ module ANL
       :push, :insert, :chain, :expose_module, :get_module, :index, :rindex,
       :insert_to_map, :push_to_vector,
       :set_parameters, :with_parameters, :chain_with_parameters,
-      :startup, :print_all_param, :make_doc
+      :startup, :prepare_all_parameters,
+      :print_all_parameters, :parameters_to_object, :make_doc,
     ]
     def_delegators :@_anlapp_analysis_chain, *anlapp_methods
     alias :with :with_parameters
@@ -213,11 +303,13 @@ module ANL
       @startup_done = false
       @analysis_done = false
       @thread_mode = true
+      @parameters_json_filename = nil
     end
 
     # Accessors to internal information (instance variables).
     attr_accessor :thread_mode
     attr_accessor :current_module
+    attr_accessor :parameters_json_filename
     def startup_done?(); @startup_done; end
     def analysis_done?(); @analysis_done; end
 
@@ -366,9 +458,9 @@ module ANL
       set_param =
         if value.class == Vector
           if value.z
-            lambda{ mod.set_vector(name, value.x, value.y, value.z) }
+            lambda{ mod.set_parameter(name, value.x, value.y, value.z) }
           else
-            lambda{ mod.set_vector(name, value.x, value.y) }
+            lambda{ mod.set_parameter(name, value.x, value.y) }
           end
         elsif value.class == Array
           if value.empty?
@@ -376,17 +468,17 @@ module ANL
           else
             f = value.first
             if f.class == String
-              lambda{ mod.set_svec(name, value) }
+              lambda{ mod.set_parameter_vector_str(name, value) }
             elsif f.class == Float
-              lambda{ mod.set_fvec(name, value) }
+              lambda{ mod.set_parameter_vector_d(name, value) }
             elsif f.integer?
-              lambda{ mod.set_ivec(name, value) }
+              lambda{ mod.set_parameter_vector_i(name, value) }
             else
               raise "ANLApp#setp(): type invalid (Array of *)."
             end
           end
         else
-          lambda{ mod.set_param(name, value) }
+          lambda{ mod.set_parameter(name, value) }
         end
 
       set_param_or_raise = lambda do
@@ -588,6 +680,12 @@ module ANL
       return @anl
     end
 
+    def prepare_all_parameters()
+      while s = @set_param_list.shift
+        s.call
+      end
+    end
+
     # Run the ANL analysis.
     #
     # @param [Fixnum] num_loop number of loops. :all or -1 for infinite loops.
@@ -599,9 +697,11 @@ module ANL
       display_frequency ||= proposed_display_frequency(num_loop)
 
       anl = startup()
-
-      while s = @set_param_list.shift
-        s.call
+      prepare_all_parameters()
+      if parameters_json_filename()
+        File.open(parameters_json_filename(), 'w') do |fout|
+          fout.print(JSON.pretty_generate(parameters_to_object()))
+        end
       end
 
       status = anl.Prepare()
@@ -636,7 +736,7 @@ module ANL
     def run_interactive()
       anl = startup()
 
-      @set_param_list.each{|s| s.call }
+      prepare_all_parameters()
       @set_module_list.each{|mod|
         status = mod.mod_prepare()
         check_status(status, "#{mod.module_id}::mod_prepare()")
@@ -659,13 +759,16 @@ module ANL
 
     # Print all parameters of all the module in the analysis chain.
     #
-    def print_all_param()
-      anl = startup()
+    def print_all_parameters()
       @module_list.each{|m|
         puts "--- "+m.module_id+" ---"
         m.print_parameters
         puts ''
       }
+    end
+
+    def parameters_to_object()
+      { :application => { :module_list => @module_list.map(&:parameters_to_object) } }
     end
 
     # Make a XML document describing module parameters.
@@ -711,7 +814,7 @@ module ANL
             p.add_element("description").add_text ""
 
             param.num_value_elements.times do |i|
-              value = param.get_value_element(i)
+              value = param.value_element_info(i)
               p = ps.add_element("param", {"container_type" => "value"})
               p.add_element("name").add_text value.name
               p.add_element("type").add_text value.type_name
@@ -721,7 +824,7 @@ module ANL
             end
           elsif container_type == :vector
             param.num_value_elements.times do |i|
-              value = param.get_value_element(i)
+              value = param.value_element_info(i)
               p = ps.add_element("param", {"container_type" => "value"})
               p.add_element("name").add_text value.name
               p.add_element("type").add_text value.type_name
@@ -804,7 +907,7 @@ module ANL
           default_string = param.default_string
           out.puts '    insert_to_map "'+param.name+'", "'+default_string+'", {'
           param.num_value_elements.times do |i|
-            mapValue = param.get_value_element(i)
+            mapValue = param.value_element_info(i)
             type = mapValue.type_name
             default_string =
               case type
@@ -826,7 +929,7 @@ module ANL
           default_string = param.default_string
           out.puts '    push_to_vector "'+param.name+'", {'
           param.num_value_elements.times do |i|
-            mapValue = param.get_value_element(i)
+            mapValue = param.value_element_info(i)
             type = mapValue.type_name
             default_string =
               case type

@@ -22,9 +22,17 @@
 
 #include <string>
 #include <vector>
+#include <boost/call_traits.hpp>
 
 namespace anl
 {
+
+template <typename T>
+struct param_call_traits
+{
+  typedef typename boost::call_traits<T>::param_type type;
+};
+
 template <typename... Ts>
 struct type_info
 {

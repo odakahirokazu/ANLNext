@@ -68,7 +68,7 @@ void BasicModule::set_module_id(const std::string& module_id)
 
 void BasicModule::print_parameters()
 {
-  for (ModuleParamIter it=ModuleParamBegin(); it!=ModuleParamEnd(); ++it) {
+  for (ModuleParamIter it=parameter_begin(); it!=parameter_end(); ++it) {
     (*it)->print(std::cout);
     std::cout << std::endl;
   }
@@ -76,7 +76,7 @@ void BasicModule::print_parameters()
 
 void BasicModule::ask_parameters()
 {
-  for (ModuleParamIter it=ModuleParamBegin(); it!=ModuleParamEnd(); ++it) {
+  for (ModuleParamIter it=parameter_begin(); it!=parameter_end(); ++it) {
     if ((*it)->is_hidden()) continue;
     
     (*it)->ask();
@@ -100,8 +100,8 @@ bool BasicModule::accessible(const std::string& name)
 
 void BasicModule::unregister_parameter(const std::string& name)
 {
-  ModuleParamIter it=ModuleParamBegin();
-  while (it != ModuleParamEnd()) {
+  ModuleParamIter it=parameter_begin();
+  while (it != parameter_end()) {
     if (name == (*it)->name()) {
       it = moduleParameters_.erase(it);
     }
@@ -113,7 +113,7 @@ void BasicModule::unregister_parameter(const std::string& name)
 
 void BasicModule::hide_parameter(const std::string& name, bool hidden)
 {
-  for (ModuleParamIter it=ModuleParamBegin(); it!=ModuleParamEnd(); ++it) {
+  for (ModuleParamIter it=parameter_begin(); it!=parameter_end(); ++it) {
     if (name == (*it)->name()) {
       if (!hidden) { currentParameter_ = *it; }
       (*it)->set_hidden(hidden);
@@ -125,7 +125,7 @@ void BasicModule::hide_parameter(const std::string& name, bool hidden)
 void BasicModule::ask_parameter(const std::string& name,
                                const std::string& question)
 {
-  for (ModuleParamIter it=ModuleParamBegin(); it!=ModuleParamEnd(); ++it) {
+  for (ModuleParamIter it=parameter_begin(); it!=parameter_end(); ++it) {
     if (name == (*it)->name()) {
       currentParameter_ = *it;
       
@@ -187,6 +187,20 @@ void BasicModule::EvsSet(const std::string& key)
 void BasicModule::EvsReset(const std::string& key)
 {
   evsManager_->reset(key);
+}
+
+boost::property_tree::ptree BasicModule::parameters_to_property_tree() const
+{
+  boost::property_tree::ptree pt;
+  pt.put("module_id", module_id());
+  pt.put("name", module_name());
+  pt.put("version", module_version());
+  boost::property_tree::ptree pt_parameters;
+  for (const auto& parameter: moduleParameters_) {
+    pt_parameters.push_back(std::make_pair("", parameter->to_property_tree()));
+  }
+  pt.add_child("parameter_list", std::move(pt_parameters));
+  return std::move(pt);
 }
 
 // instantiation of function templates

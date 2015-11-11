@@ -73,15 +73,15 @@ bool ModuleParameter<T>::ask_sequential(const std::true_type&)
   std::string tmpString(default_string());
   ModuleParameter<std::string> tmpStringParam(&tmpString, name()); 
   tmpStringParam.set_question(name()+" (OK for exit)");
-  value_type tmp;
-  ModuleParameter<value_type> tmpParam(&tmp, name());
+  value_type t;
+  ModuleParameter<value_type> tmpParam(&t, name());
   
   ptr_->clear();
   while (1) {
     tmpStringParam.ask();
     if (tmpString=="ok" || tmpString=="OK") break;
     tmpParam.set_value(boost::lexical_cast<value_type>(tmpString));
-    ptr_->push_back(tmp);
+    ptr_->push_back(t);
     tmpString = "OK";
   }
   return true;
@@ -94,15 +94,15 @@ void ModuleParameter<T>::set_value_impl(call_type val,
   typedef typename T::const_iterator iter_type;
   typedef typename std::iterator_traits<iter_type>::value_type value_type;
 
-  const size_t n = val.size();
+  const std::size_t n = val.size();
   ptr_->resize(n);
-  for (size_t i=0; i<n; ++i) {
-    value_type tmp;
-    ModuleParameter<value_type> tmpParam(&tmp, "");
+  for (std::size_t i=0; i<n; ++i) {
+    value_type t;
+    ModuleParameter<value_type> tmpParam(&t, "");
     tmpParam.set_unit(unit(), unit_name());
     tmpParam.set_expression(expression());
     tmpParam.set_value(val[i]);
-    ptr_->at(i) = tmp;
+    ptr_->at(i) = t;
   }
 }
 
@@ -114,13 +114,55 @@ void ModuleParameter<T>::set_value_impl(call_type val,
   typedef typename std::iterator_traits<iter_type>::value_type value_type;
 
   for (iter_type it=val.begin(); it!=val.end(); ++it) {
-    value_type tmp;
-    ModuleParameter<value_type> tmpParam(&tmp, "");
+    value_type t;
+    ModuleParameter<value_type> tmpParam(&t, "");
     tmpParam.set_unit(unit(), unit_name());
     tmpParam.set_expression(expression());
     tmpParam.set_value(*it);
-    ptr_->push_back(tmp);
+    ptr_->push_back(t);
   }
+}
+
+template <typename T>
+T ModuleParameter<T>::get_value_impl(call_type,
+                                     std::random_access_iterator_tag) const
+{
+  typedef typename T::const_iterator iter_type;
+  typedef typename std::iterator_traits<iter_type>::value_type value_type;
+
+  T rval;
+  const std::size_t n = ptr_->size();
+  rval.resize(n);
+  value_type dummy = value_type();
+
+  for (std::size_t i=0; i<n; ++i) {
+    value_type* t = &((*ptr_)[i]);
+    ModuleParameter<value_type> tmpParam(t, "");
+    tmpParam.set_unit(unit(), unit_name());
+    tmpParam.set_expression(expression());
+    rval[i] = tmpParam.get_value(dummy);
+  }
+  return std::move(rval);
+}
+
+template <typename T>
+T ModuleParameter<T>::get_value_impl(call_type,
+                                     std::forward_iterator_tag) const
+{
+  typedef typename T::const_iterator iter_type;
+  typedef typename std::iterator_traits<iter_type>::value_type value_type;
+
+  T rval;
+  value_type dummy = value_type();
+
+  for (iter_type it=ptr_->begin(); it!=ptr_->end(); ++it) {
+    value_type* t = &(*it);
+    ModuleParameter<value_type> tmpParam(t, "");
+    tmpParam.set_unit(unit(), unit_name());
+    tmpParam.set_expression(expression());
+    rval.push_back(tmpParam.get_value(dummy));
+  }
+  return std::move(rval);
 }
 
 template <typename T>
@@ -151,12 +193,12 @@ void ModuleParameter<T>::input_impl(std::istream& is,
   if (!is) return;
   ptr_->resize(n);
   for (std::size_t i=0; i<n; ++i) {
-    value_type tmp;
-    ModuleParameter<value_type> tmpParam(&tmp, "");
+    value_type t;
+    ModuleParameter<value_type> tmpParam(&t, "");
     tmpParam.set_unit(unit(), unit_name());
     tmpParam.set_expression(expression());
     is >> tmpParam;
-    ptr_->at(i) = tmp;
+    ptr_->at(i) = t;
   }
 }
 
@@ -171,12 +213,12 @@ void ModuleParameter<T>::input_impl(std::istream& is,
   is >> n;
   if (!is) return;
   for (std::size_t i=0; i<n; ++i) {
-    value_type tmp;
-    ModuleParameter<value_type> tmpParam(&tmp, "");
+    value_type t;
+    ModuleParameter<value_type> tmpParam(&t, "");
     tmpParam.set_unit(unit(), unit_name());
     tmpParam.set_expression(expression());
     is >> tmpParam;
-    ptr_->push_back(tmp);
+    ptr_->push_back(t);
   }
 }
 

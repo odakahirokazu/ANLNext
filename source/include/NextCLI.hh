@@ -26,15 +26,15 @@
 #ifndef ANL_NextCLI_H
 #define ANL_NextCLI_H 1
 
-#if ANL_USE_TVECTOR
+#ifdef ANL_USE_TVECTOR
 #include "TVector2.h"
 #include "TVector3.h"
-#endif
+#endif /* ANL_USE_TVECTOR */
 
-#if ANL_USE_HEPVECTOR
+#ifdef ANL_USE_HEPVECTOR
 #include "CLHEP/Vector/TwoVector.h"
 #include "CLHEP/Vector/ThreeVector.h"
-#endif
+#endif /* ANL_USE_HEPVECTOR */
 
 #include "ModuleParameter.hh"
 

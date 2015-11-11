@@ -31,6 +31,7 @@
 #include <map>
 #include <cctype>
 #include <boost/utility.hpp>
+#include <boost/property_tree/ptree.hpp>
 
 #include "ANLStatus.hh"
 #include "ANLException.hh"
@@ -85,6 +86,9 @@ public:
 
   void SetDisplayFrequency(long int v) { displayFrequency_ = v; }
   long int DisplayFrequency() const { return displayFrequency_; }
+
+  boost::property_tree::ptree parameters_to_property_tree() const;
+  void parameters_to_json(const std::string& filename) const;
   
 private:
   ANLStatus routine_startup();
@@ -103,12 +107,14 @@ private:
 
   int getModuleNumber(const std::string& name, bool strict=true);
 
+#if ANL_ENABLE_INTERACTIVE_MODE
   void InteractiveComHelp();
   ANLStatus InteractiveModifyParam(int n);
   void InteractivePrintParam(int n);
   void InteractiveModuleSwitch(int n, bool module_sw);
   void InteractiveAnaHelp();
-  
+#endif /* ANL_ENABLE_INTERACTIVE_MODE */
+
   template<typename T>
   ANLStatus routine_modfn(T func, const std::string& func_id);
 

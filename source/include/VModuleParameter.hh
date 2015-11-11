@@ -28,11 +28,12 @@
 #include <map>
 #include <memory>
 
-#define ANLNEXT_USE_READLINE 1
-#if ANLNEXT_USE_READLINE
+#include <boost/property_tree/ptree.hpp>
+
+#if ANL_USE_READLINE
 #include <readline/readline.h>
 #include <readline/history.h>
-#endif
+#endif /* ANL_USE_READLINE */
 
 namespace anl
 {
@@ -44,6 +45,7 @@ namespace anl
  * @date 2010-06-xx
  * @date 2011-07-12
  * @date 2011-12-28
+ * @date 2015-11-11 | review set/get-value methods.
  */
 class VModuleParameter
 {
@@ -74,7 +76,7 @@ public:
 
   void set_hidden(bool v=true) { hidden_ = v; }
   void set_exposed() { hidden_ = false; }
-  bool is_hidden() { return hidden_; }
+  bool is_hidden() const { return hidden_; }
 
   void set_description(const std::string& v) { description_ = v; }
   std::string description() const { return description_; }
@@ -96,37 +98,64 @@ public:
 
   virtual void clear_array() {}
 
+  virtual bool get_value(bool) const;
+  virtual int get_value(int) const;
+  virtual double get_value(double) const;
+  virtual std::string get_value(const std::string&) const;
+  virtual std::vector<int> get_value(const std::vector<int>&) const;
+  virtual std::vector<double> get_value(const std::vector<double>&) const;
+  virtual std::vector<std::string> get_value(const std::vector<std::string>&) const;
+  virtual std::list<std::string> get_value(const std::list<std::string>&) const;
+  virtual std::vector<double> get_value(double, double) const;
+  virtual std::vector<double> get_value(double, double, double) const;
+
   virtual void output(std::ostream& ) const {}
   virtual void input(std::istream& ) {}
 
-  virtual void get(void* const /* value_ptr */) const {}
-  virtual void set(const void* const /* value_ptr */) {}
+  virtual void get(void* /* value_ptr */) const {}
+  virtual void set(const void* /* value_ptr */) {}
 
   virtual std::string map_key_name() const { return ""; }
   virtual void set_map_key(const std::string& /* key */) {}
 
   virtual std::size_t num_value_elements() const { return 0; }
-  virtual std::shared_ptr<VModuleParameter const> get_value_element(std::size_t /* i */) const
+  virtual std::shared_ptr<VModuleParameter const> value_element_info(std::size_t /* index */) const
   { return std::shared_ptr<VModuleParameter>(); }
   virtual void add_value_element(std::shared_ptr<VModuleParameter> /* param */) {}
   virtual void enable_value_elements(int /* type */, const std::vector<std::size_t>& /* enables */) {}
+
+  virtual std::size_t size_of_container() const { return 0; }
+  virtual void clear_container() {}
+  virtual std::vector<std::string> map_key_list() const { return {}; }
+  virtual void insert_to_container() {}
+  virtual void retrieve_from_container(const std::string& /* key */) const {}
+  virtual void retrieve_from_container(std::size_t /* index */) const {}
+
   virtual void set_value_element(const std::string& /* name */, bool /* val */) {}
   virtual void set_value_element(const std::string& /* name */, int /* val */) {}
   virtual void set_value_element(const std::string& /* name */, double /* val */) {}
   virtual void set_value_element(const std::string& /* name */, const std::string& /* val */) {}
 
-  virtual void insert_to_container() {}
-  
+  virtual bool get_value_element(const std::string& /* name */, bool /* val */) const
+  { return false; }
+  virtual int get_value_element(const std::string& /* name */, int /* val */) const
+  { return 0; }
+  virtual double get_value_element(const std::string& /* name */, double /* val */) const
+  { return 0.0; }
+  virtual std::string get_value_element(const std::string& /* name */, const std::string& /* val */) const
+  { return ""; }
+
   void print(std::ostream& os) const;
   std::string value_string() const;
-  
+  virtual boost::property_tree::ptree to_property_tree() const
+  { return boost::property_tree::ptree(); }
+
 protected:
   virtual bool ask_base();
   virtual void ask_base_out(std::ostream& ost);
   virtual bool ask_base_in(std::istream& ist);
-  std::string special_message_to_ask();
-  
-  void throw_type_match_exception(const std::string& message="");
+  std::string special_message_to_ask() const;
+  void throw_type_match_exception(const std::string& message="") const;
   
 private:
   std::string name_;

@@ -64,10 +64,40 @@ class VModuleParameter
 
   std::string type_name() const;
   
-  std::string map_key_name() const;
-  size_t num_value_elements() const;
-  std::shared_ptr<VModuleParameter const> get_value_element(std::size_t i) const;
+  %rename(get_value_vector_i) get_value(const std::vector<int>&) const;
+  %rename(get_value_vector_d) get_value(const std::vector<double>&) const;
+  %rename(get_value_vector_str) get_value(const std::vector<std::string>&) const;
 
+  bool get_value(bool) const;
+  int get_value(int) const;
+  double get_value(double) const;
+  std::string get_value(const std::string&) const;
+  std::vector<int> get_value(const std::vector<int>&) const;
+  std::vector<double> get_value(const std::vector<double>&) const;
+  std::vector<std::string> get_value(const std::vector<std::string>&) const;
+  // std::list<std::string> get_value(const std::list<std::string>&) const;
+  std::vector<double> get_value(double, double) const;
+  std::vector<double> get_value(double, double, double) const;
+
+  std::string map_key_name() const;
+  std::size_t num_value_elements() const;
+
+  /**
+   * modify return type to normal pointer.
+   * std::shared_ptr<VModuleParameter const> value_element_info(std::size_t index) const;
+   */
+  %extend {
+    const VModuleParameter* value_element_info(std::size_t index) const
+    {
+      return $self->value_element_info(index).get();
+    }
+  }
+  
+  std::size_t size_of_container() const;
+  std::vector<std::string> map_key_list() const;
+  void retrieve_from_container(const std::string& /* key */) const;
+  void retrieve_from_container(std::size_t /* index */) const;
+    
   void print(std::ostream& os) const;
   std::string value_string() const;
 };
@@ -102,6 +132,8 @@ class ANLManager
   ANLStatus Analyze(long int num_events, bool thread_mode=true);
   ANLStatus Exit();
   ANLStatus Prepare();
+
+  void parameters_to_json(const std::string& filename) const;
 
   ANLStatus InteractiveCom();
   ANLStatus InteractiveAna();
@@ -147,16 +179,16 @@ class BasicModule
 
   void expose_parameter(const std::string& name);
   
-  %rename(set_param) set_parameter(const std::string& name, bool val);
-  %rename(set_param) set_parameter(const std::string& name, int val);
-  %rename(set_param) set_parameter(const std::string& name, double val);
-  %rename(set_param) set_parameter(const std::string& name, const std::string& val);
-  %rename(set_ivec) set_parameter(const std::string&,
-                                  const std::vector<int>&);
-  %rename(set_fvec) set_parameter(const std::string&,
-                                  const std::vector<double>&);
-  %rename(set_svec) set_parameter(const std::string&,
-                                  const std::vector<std::string>&);
+  ModuleParamConstIter parameter_begin() const;
+  ModuleParamConstIter parameter_end() const;
+  const VModuleParameter* get_parameter(const std::string& name) const;
+
+  %rename(set_parameter_vector_i)
+  set_parameter(const std::string&, const std::vector<int>&);
+  %rename(set_parameter_vector_d)
+  set_parameter(const std::string&, const std::vector<double>&);
+  %rename(set_parameter_vector_str)
+  set_parameter(const std::string&, const std::vector<std::string>&);
 
   void set_parameter(const std::string& name, bool val);
   void set_parameter(const std::string& name, int val);
@@ -168,11 +200,10 @@ class BasicModule
                      const std::vector<double>& val);
   void set_parameter(const std::string& name,
                      const std::vector<std::string>& val);
-  
+  void set_parameter(const std::string& name, double x, double y);
+  void set_parameter(const std::string& name, double x, double y, double z);
+
   void clear_array(const std::string& name);
-  
-  void set_vector(const std::string& name, double x, double y);
-  void set_vector(const std::string& name, double x, double y, double z);
 
   void set_map_key(const std::string& key);
   void set_value_element(const std::string& name, int val);
@@ -183,9 +214,6 @@ class BasicModule
   %exception;
 
   void print_parameters();
-
-  ModuleParamConstIter ModuleParamBegin() const;
-  ModuleParamConstIter ModuleParamEnd() const;
 
   %extend {
     void insert_to_map(const std::string& map_name, const std::string& key)
@@ -211,4 +239,4 @@ class BasicModule
   }
 };
 
-}
+} /* namespace anl */

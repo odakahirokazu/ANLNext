@@ -1,0 +1,320 @@
+{
+  "application": {
+    "module_list": [
+      {
+        "module_id": "MyModule",
+        "name": "MyModule",
+        "version": "1.0",
+        "parameter_list": [
+          {
+            "name": "MyParameter1",
+            "type": "int",
+            "value": 10
+          },
+          {
+            "name": "MyParameter2",
+            "type": "double",
+            "unit": 1.0,
+            "unit_name": "",
+            "value": 20.5
+          },
+          {
+            "name": "MyParameter3",
+            "type": "string",
+            "value": "Hello"
+          },
+          {
+            "name": "MyVector1",
+            "type": "vector<int>",
+            "value": [
+              1,
+              2,
+              3,
+              4,
+              5
+            ]
+          },
+          {
+            "name": "MyVector2",
+            "type": "vector<double>",
+            "unit": 1.0,
+            "unit_name": "",
+            "value": [
+              1.3,
+              4.0,
+              11.2,
+              3.2
+            ]
+          },
+          {
+            "name": "MyVector3",
+            "type": "vector<string>",
+            "value": [
+              "Hakuba",
+              "Niseko",
+              "Appi"
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "MyMapModule",
+        "name": "MyMapModule",
+        "version": "1.0",
+        "parameter_list": [
+          {
+            "name": "my_map",
+            "type": "map",
+            "value": {
+              "CdTe1": [
+                {
+                  "name": "ID",
+                  "type": "int",
+                  "value": 3
+                },
+                {
+                  "name": "type",
+                  "type": "string",
+                  "value": "pixel"
+                },
+                {
+                  "name": "x",
+                  "type": "double",
+                  "unit": 1.0,
+                  "unit_name": "",
+                  "value": -0.2
+                },
+                {
+                  "name": "y",
+                  "type": "double",
+                  "unit": 1.0,
+                  "unit_name": "",
+                  "value": 4.0
+                }
+              ],
+              "CdTe2": [
+                {
+                  "name": "ID",
+                  "type": "int",
+                  "value": 4
+                },
+                {
+                  "name": "type",
+                  "type": "string",
+                  "value": "pixel"
+                },
+                {
+                  "name": "x",
+                  "type": "double",
+                  "unit": 1.0,
+                  "unit_name": "",
+                  "value": -0.2
+                },
+                {
+                  "name": "y",
+                  "type": "double",
+                  "unit": 1.0,
+                  "unit_name": "",
+                  "value": 6.0
+                }
+              ],
+              "Si1": [
+                {
+                  "name": "ID",
+                  "type": "int",
+                  "value": 1
+                },
+                {
+                  "name": "type",
+                  "type": "string",
+                  "value": "strip"
+                },
+                {
+                  "name": "x",
+                  "type": "double",
+                  "unit": 1.0,
+                  "unit_name": "",
+                  "value": 0.0
+                },
+                {
+                  "name": "y",
+                  "type": "double",
+                  "unit": 1.0,
+                  "unit_name": "",
+                  "value": 0.0
+                }
+              ],
+              "Si2": [
+                {
+                  "name": "ID",
+                  "type": "int",
+                  "value": 2
+                },
+                {
+                  "name": "type",
+                  "type": "string",
+                  "value": "strip"
+                },
+                {
+                  "name": "x",
+                  "type": "double",
+                  "unit": 1.0,
+                  "unit_name": "",
+                  "value": 0.0
+                },
+                {
+                  "name": "y",
+                  "type": "double",
+                  "unit": 1.0,
+                  "unit_name": "",
+                  "value": 2.0
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "module_id": "MyVectorModule",
+        "name": "MyVectorModule",
+        "version": "1.0",
+        "parameter_list": [
+          {
+            "name": "my_vector",
+            "type": "vector",
+            "value": [
+              [
+                {
+                  "name": "ID",
+                  "type": "int",
+                  "value": 1
+                },
+                {
+                  "name": "type",
+                  "type": "string",
+                  "value": "strip"
+                },
+                {
+                  "name": "x",
+                  "type": "double",
+                  "unit": 1.0,
+                  "unit_name": "",
+                  "value": 0.0
+                },
+                {
+                  "name": "y",
+                  "type": "double",
+                  "unit": 1.0,
+                  "unit_name": "",
+                  "value": 0.0
+                }
+              ],
+              [
+                {
+                  "name": "ID",
+                  "type": "int",
+                  "value": 3
+                },
+                {
+                  "name": "type",
+                  "type": "string",
+                  "value": "pixel"
+                },
+                {
+                  "name": "x",
+                  "type": "double",
+                  "unit": 1.0,
+                  "unit_name": "",
+                  "value": -0.2
+                },
+                {
+                  "name": "y",
+                  "type": "double",
+                  "unit": 1.0,
+                  "unit_name": "",
+                  "value": 4.0
+                }
+              ],
+              [
+                {
+                  "name": "ID",
+                  "type": "int",
+                  "value": 4
+                },
+                {
+                  "name": "type",
+                  "type": "string",
+                  "value": "pixel"
+                },
+                {
+                  "name": "x",
+                  "type": "double",
+                  "unit": 1.0,
+                  "unit_name": "",
+                  "value": -0.2
+                },
+                {
+                  "name": "y",
+                  "type": "double",
+                  "unit": 1.0,
+                  "unit_name": "",
+                  "value": 6.0
+                }
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "MyModule2",
+        "name": "MyModule",
+        "version": "1.0",
+        "parameter_list": [
+          {
+            "name": "MyParameter1",
+            "type": "int",
+            "value": 1
+          },
+          {
+            "name": "MyParameter2",
+            "type": "double",
+            "unit": 1.0,
+            "unit_name": "",
+            "value": 102.1
+          },
+          {
+            "name": "MyParameter3",
+            "type": "string",
+            "value": "test"
+          },
+          {
+            "name": "MyVector1",
+            "type": "vector<int>",
+            "value": [
+
+            ]
+          },
+          {
+            "name": "MyVector2",
+            "type": "vector<double>",
+            "unit": 1.0,
+            "unit_name": "",
+            "value": [
+
+            ]
+          },
+          {
+            "name": "MyVector3",
+            "type": "vector<string>",
+            "value": [
+              "Jupiter",
+              "Venus",
+              "Mars",
+              "Saturn"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

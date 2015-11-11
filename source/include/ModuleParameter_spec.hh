@@ -50,7 +50,6 @@ public:
   {
     set_value_tuple_impl<0>(values...);
   }
-  
   using VModuleParameter::set_value;
   
   void output(std::ostream& os) const
@@ -170,8 +169,17 @@ public:
 
   std::string type_name() const { return "2-vector"; }
   
-  void set_value(double x, double y) { ptr_->Set(x*unit(), y*unit()); }
+  void set_value(double x, double y)
+  {
+    ptr_->Set(x*unit(), y*unit());
+  }
   using VModuleParameter::set_value;
+
+  std::vector<double> get_value(double, double) const
+  {
+    return std::vector<double>{ptr_->X()/unit(), ptr_->Y()/unit()};
+  }
+  using VModuleParameter::get_value;
   
   void output(std::ostream& os) const
   {
@@ -185,6 +193,24 @@ public:
     if (is) {
       ptr_->Set(x*unit(), y*unit());
     }
+  }
+
+  boost::property_tree::ptree to_property_tree() const
+  {
+    boost::property_tree::ptree pt;
+    pt.put("name", name());
+    pt.put("type", type_name());
+    pt.put("unit_name", unit_name());
+    pt.put("unit", unit());
+    boost::property_tree::ptree pt_values;
+    std::vector<double> values = get_value(0.0, 0.0);
+    for (const auto& v: values) {
+      boost::property_tree::ptree pt_value;
+      pt_value.put("", v);
+      pt_values.push_back(std::make_pair("", pt_value));
+    }
+    pt.add_child("value", pt_values);
+    return std::move(pt);
   }
 
 private:
@@ -209,6 +235,12 @@ public:
   { ptr_->SetXYZ(x*unit(), y*unit(), z*unit()); }
   using VModuleParameter::set_value;
   
+  std::vector<double> get_value(double, double, double) const
+  {
+    return std::vector<double>{ptr_->X()/unit(), ptr_->Y()/unit(), ptr_->Z()/unit()};
+  }
+  using VModuleParameter::get_value;
+  
   void output(std::ostream& os) const
   {
     os << ptr_->X()/unit() << " "
@@ -223,6 +255,24 @@ public:
     if (is) {
       ptr_->SetXYZ(x*unit(), y*unit(), z*unit());
     }
+  }
+
+  boost::property_tree::ptree to_property_tree() const
+  {
+    boost::property_tree::ptree pt;
+    pt.put("name", name());
+    pt.put("type", type_name());
+    pt.put("unit_name", unit_name());
+    pt.put("unit", unit());
+    boost::property_tree::ptree pt_values;
+    std::vector<double> values = get_value(0.0, 0.0, 0.0);
+    for (const auto& v: values) {
+      boost::property_tree::ptree pt_value;
+      pt_value.put("", v);
+      pt_values.push_back(std::make_pair("", pt_value));
+    }
+    pt.add_child("value", pt_values);
+    return std::move(pt);
   }
 
 private:
@@ -248,10 +298,17 @@ public:
   void set_value(double x, double y) { ptr_->set(x*unit(), y*unit()); }
   using VModuleParameter::set_value;
 
+  std::vector<double> get_value(double, double) const
+  {
+    return std::vector<double>{ptr_->x()/unit(), ptr_->y()/unit()};
+  }
+  using VModuleParameter::get_value;
+
   void output(std::ostream& os) const
   {
     os << ptr_->x()/unit() << " " << ptr_->y()/unit();
   }
+
   void input(std::istream& is)
   {
     double x(0.0), y(0.0);
@@ -261,6 +318,24 @@ public:
     }
   }
  
+  boost::property_tree::ptree to_property_tree() const
+  {
+    boost::property_tree::ptree pt;
+    pt.put("name", name());
+    pt.put("type", type_name());
+    pt.put("unit_name", unit_name());
+    pt.put("unit", unit());
+    boost::property_tree::ptree pt_values;
+    std::vector<double> values = get_value(0.0, 0.0);
+    for (const auto& v: values) {
+      boost::property_tree::ptree pt_value;
+      pt_value.put("", v);
+      pt_values.push_back(std::make_pair("", pt_value));
+    }
+    pt.add_child("value", pt_values);
+    return std::move(pt);
+  }
+
 private:
   CLHEP::Hep2Vector* ptr_;
 };
@@ -282,7 +357,13 @@ public:
   void set_value(double x, double y, double z)
   { ptr_->set(x*unit(), y*unit(), z*unit()); }
   using VModuleParameter::set_value;
-  
+
+  std::vector<double> get_value(double, double, double) const
+  {
+    return std::vector<double>{ptr_->x()/unit(), ptr_->y()/unit(), ptr_->z()/unit()};
+  }
+  using VModuleParameter::get_value;
+
   void output(std::ostream& os) const
   {
     os << ptr_->x()/unit() << " "
@@ -297,6 +378,24 @@ public:
     if (is) {
       ptr_->set(x*unit(), y*unit(), z*unit());
     }
+  }
+
+  boost::property_tree::ptree to_property_tree() const
+  {
+    boost::property_tree::ptree pt;
+    pt.put("name", name());
+    pt.put("type", type_name());
+    pt.put("unit_name", unit_name());
+    pt.put("unit", unit());
+    boost::property_tree::ptree pt_values;
+    std::vector<double> values = get_value(0.0, 0.0, 0.0);
+    for (const auto& v: values) {
+      boost::property_tree::ptree pt_value;
+      pt_value.put("", v);
+      pt_values.push_back(std::make_pair("", pt_value));
+    }
+    pt.add_child("value", pt_values);
+    return std::move(pt);
   }
 
 private:

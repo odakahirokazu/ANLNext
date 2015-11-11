@@ -33,6 +33,7 @@
 
 #include <boost/format.hpp>
 #include <boost/thread.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 #include "BasicModule.hh"
 #include "EvsManager.hh"
@@ -40,11 +41,10 @@
 #include "ANLException.hh"
 #include "ANLManager_impl.hh"
 
-#define ANLNEXT_USE_READLINE 1
-#if ANLNEXT_USE_READLINE
+#if ANL_USE_READLINE
 #include <readline/readline.h>
 #include <readline/history.h>
-#endif
+#endif /* ANL_USE_READLINE */
 
 namespace anl
 {
@@ -175,7 +175,7 @@ ANLStatus ANLManager::Analyze(long int num_events, bool thread_mode) throw(ANLEx
     boost::chrono::seconds wait(1);
     interactiveThread.try_join_for(wait);
     
-#if ANLNEXT_USE_READLINE
+#if ANL_USE_READLINE
     rl_initialize();
     rl_deprep_terminal();
 #endif
@@ -458,6 +458,23 @@ void ANLManager::print_summary()
   std::cout << std::endl;
 }
 
+boost::property_tree::ptree ANLManager::parameters_to_property_tree() const
+{
+  boost::property_tree::ptree pt;
+  boost::property_tree::ptree pt_modules;
+  for (const auto& module: modules_) {
+    pt_modules.push_back(std::make_pair("", module->parameters_to_property_tree()));
+  }
+  pt.add_child("application.module_list", std::move(pt_modules));
+  return std::move(pt);
+}
+
+void ANLManager::parameters_to_json(const std::string& filename) const
+{
+  boost::property_tree::ptree pt = parameters_to_property_tree();
+  write_json(filename.c_str(), pt);
+}
+
 ANLStatus ANLManager::routine_startup()
 {
   return routine_modfn(&BasicModule::mod_startup, "startup");
@@ -501,7 +518,7 @@ void ANLManager::__void_process_analysis(long int num_events, ANLStatus* status)
 
 void ANLManager::interactive_session()
 {
-#if ANLNEXT_USE_READLINE
+#if ANL_USE_READLINE
   std::shared_ptr<char> line;
   while (1) {
     line = std::shared_ptr<char>(readline(""));

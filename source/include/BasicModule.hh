@@ -26,6 +26,10 @@
 #include <list>
 #include <deque>
 #include <set>
+#include <algorithm>
+#include <iterator>
+
+#include <boost/property_tree/ptree.hpp>
 
 #include "ANLStatus.hh"
 #include "ModuleParameter.hh"
@@ -33,15 +37,15 @@
 #include "ModuleAccess.hh"
 #include "ANLMacro.hh"
 
-#if ANL_USE_TVECTOR
+#ifdef ANL_USE_TVECTOR
 #include "TVector2.h"
 #include "TVector3.h"
-#endif
+#endif /* ANL_USE_TVECTOR */
 
-#if ANL_USE_HEPVECTOR
+#ifdef ANL_USE_HEPVECTOR
 #include "CLHEP/Vector/TwoVector.h"
 #include "CLHEP/Vector/ThreeVector.h"
-#endif
+#endif /* ANL_USE_HEPVECTOR */
 
 namespace anl
 {
@@ -56,6 +60,7 @@ class EvsManager;
  * @date 2010-09-18
  * @date 2013-05-22
  * @date 2014-12-18
+ * @date 2015-11-10 | review parameter setter/getter methods
  */
 class BasicModule
 {
@@ -88,6 +93,10 @@ public:
   std::string module_description() const { return moduleDescription_; }
   void set_module_description(const std::string& v) { moduleDescription_ = v; }
 
+  void set_evs_manager(EvsManager* man) { evsManager_ = man; }
+  void set_anl_access(const ModuleAccess& aa) { moduleAccess_ = aa; }
+  bool accessible(const std::string& name);
+
   /**
    * enable this module.
    */
@@ -107,7 +116,7 @@ public:
    * @return true if this module is off.
    */
   bool is_off() const { return !moduleOn_; }
-
+  
   /**
    * expose a module parameter specified by "name" and set it as the current parameter.
    * @param name module parameter name
@@ -115,15 +124,25 @@ public:
   void expose_parameter(const std::string& name)
   { hide_parameter(name, false); }
   
+  ModuleParamConstIter parameter_begin() const
+  { return std::begin(moduleParameters_); }
+  ModuleParamConstIter parameter_end() const
+  { return std::end(moduleParameters_); }
+  ModuleParamConstIter find_parameter(const std::string& name) const throw(ANLException);
+  const VModuleParameter* get_parameter(const std::string& name) const throw(ANLException)
+  {
+    return find_parameter(name)->get();
+  }
+  
   template<typename T>
   void set_parameter(const std::string& name, T val) throw(ANLException);
 
-  void clear_array(const std::string& name) throw(ANLException);
+  void set_parameter(const std::string& name,
+                     double x, double y) throw(ANLException);
+  void set_parameter(const std::string& name,
+                     double x, double y, double z) throw(ANLException);
 
-  void set_vector(const std::string& name,
-                  double x, double y) throw(ANLException);
-  void set_vector(const std::string& name,
-                  double x, double y, double z) throw(ANLException);
+  void clear_array(const std::string& name) throw(ANLException);
 
   void set_map_key(const std::string& key)
   {
@@ -134,15 +153,12 @@ public:
   void set_value_element(const std::string& name, T val);
 
   void insert_to_container() { currentParameter_->insert_to_container(); }
-  
+
   void print_parameters();
   void ask_parameters();
 
-  void set_evs_manager(EvsManager* man) { evsManager_ = man; }
-  void set_anl_access(const ModuleAccess& aa) { moduleAccess_ = aa; }
+  boost::property_tree::ptree parameters_to_property_tree() const;
 
-  bool accessible(const std::string& name);
-  
 protected:
   template <typename T>
   void register_parameter(T* ptr, const std::string& name);
@@ -192,11 +208,11 @@ protected:
   void require_full_access(bool v=true);
   
   template <typename T>
-  void GetANLModule(const std::string& name, T *ptr)
+  void GetANLModule(const std::string& name, T* ptr)
   { *ptr = static_cast<T>(moduleAccess_.getModule(name)); }
 
   template <typename T>
-  void GetANLModuleNC(const std::string& name, T *ptr)
+  void GetANLModuleNC(const std::string& name, T* ptr)
   { *ptr = static_cast<T>(moduleAccess_.getModuleNC(name)); }
 
   template <typename T>
@@ -208,10 +224,10 @@ protected:
   { return static_cast<T*>(moduleAccess_.getModuleNC(name)); }
 
   template <typename T>
-  void GetANLModuleIF(const std::string& name, T *ptr);
+  void GetANLModuleIF(const std::string& name, T* ptr);
 
   template <typename T>
-  void GetANLModuleIFNC(const std::string& name, T *ptr);
+  void GetANLModuleIFNC(const std::string& name, T* ptr);
 
   bool ModuleExist(const std::string& name)
   { return moduleAccess_.exist(name); }
@@ -223,17 +239,12 @@ protected:
   void EvsSet(const std::string& key);
   void EvsReset(const std::string& key);
 
-public:
-  ModuleParamConstIter ModuleParamBegin() const
-  { return moduleParameters_.begin(); }
-  ModuleParamConstIter ModuleParamEnd() const
-  { return moduleParameters_.end(); }
-  
 private:
-  ModuleParamIter ModuleParamBegin()
-  { return moduleParameters_.begin(); }
-  ModuleParamIter ModuleParamEnd()
-  { return moduleParameters_.end(); }
+  ModuleParamIter parameter_begin()
+  { return std::begin(moduleParameters_); }
+  ModuleParamIter parameter_end()
+  { return std::end(moduleParameters_); }
+  ModuleParamIter find_parameter(const std::string& name) throw(ANLException);
 
   std::string get_module_id() const { return moduleID_; }
   
@@ -261,9 +272,6 @@ private:
 
 typedef std::vector<BasicModule*>::iterator AMIter;
 
-}
-
-namespace anl {
 
 template<typename T>
 void BasicModule::register_parameter(T* ptr, const std::string& name)
@@ -272,7 +280,6 @@ void BasicModule::register_parameter(T* ptr, const std::string& name)
   moduleParameters_.push_back(p);
   currentParameter_ = p;
 }
-
 
 template<typename T>
 void BasicModule::register_parameter(T* ptr, const std::string& name,
@@ -283,7 +290,6 @@ void BasicModule::register_parameter(T* ptr, const std::string& name,
   currentParameter_ = p;
 }
 
-
 template<typename T>
 void BasicModule::register_parameter(T* ptr, const std::string& name,
                                      const std::string& expression)
@@ -292,7 +298,6 @@ void BasicModule::register_parameter(T* ptr, const std::string& name,
   moduleParameters_.push_back(p);
   currentParameter_ = p;
 }
-
 
 template<typename T>
 void BasicModule::register_parameter(T* ptr, const std::string& name,
@@ -304,7 +309,6 @@ void BasicModule::register_parameter(T* ptr, const std::string& name,
   currentParameter_ = p;
 }
 
-
 template <typename T>
 void BasicModule::register_parameter_map(T* ptr, const std::string& name,
                                          const std::string& key_name,
@@ -314,7 +318,6 @@ void BasicModule::register_parameter_map(T* ptr, const std::string& name,
   moduleParameters_.push_back(p);
   currentParameter_ = p;
 }
-
 
 template <typename T>
 void BasicModule::add_value_element(T* ptr, const std::string& name)
@@ -343,71 +346,69 @@ void BasicModule::add_value_element(T* ptr, const std::string& name,
   currentParameter_->add_value_element(p);
 }
 
+inline
+ModuleParamIter BasicModule::find_parameter(const std::string& name) throw(ANLException)
+{
+  ModuleParamIter it = std::begin(moduleParameters_);
+  for (; it!=std::end(moduleParameters_); ++it) {
+    if ((*it)->name() == name) {
+      return it;
+    }
+  }
+  if (it == std::end(moduleParameters_)) {
+    BOOST_THROW_EXCEPTION( ANLException(this) <<
+                           ANLErrInfo(std::string("Parameter is not found: ")
+                                      + module_id() + " / " + name));
+  }
+  return it;
+}
+
+inline
+ModuleParamConstIter BasicModule::find_parameter(const std::string& name) const throw(ANLException)
+{
+  ModuleParamConstIter it = std::begin(moduleParameters_);
+  for (; it!=std::end(moduleParameters_); ++it) {
+    if ((*it)->name() == name) {
+      return it;
+    }
+  }
+  if (it == std::end(moduleParameters_)) {
+    BOOST_THROW_EXCEPTION( ANLException(this) <<
+                           ANLErrInfo(std::string("Parameter is not found: ")
+                                      + module_id() + " / " + name));
+  }
+  return it;
+}
+
 template <typename T>
 void BasicModule::set_parameter(const std::string& name, T val) throw(ANLException)
 {
-  for (ModuleParamIter it=ModuleParamBegin(); it!=ModuleParamEnd(); ++it) {
-    if (name == (*it)->name()) {
-      (*it)->set_value(val);
-      return;
-    }
-  }
-  
-  BOOST_THROW_EXCEPTION( ANLException(this) <<
-                         ANLErrInfo(std::string("Parameter is not found: ")
-                                    +name+" / "+module_id()) );
+  ModuleParamIter it = find_parameter(name);
+  (*it)->set_value(val);
 }
-
 
 inline
 void BasicModule::clear_array(const std::string& name) throw(ANLException)
 {
-  for (ModuleParamIter it=ModuleParamBegin(); it!=ModuleParamEnd(); ++it) {
-    if (name == (*it)->name()) {
-      (*it)->clear_array();
-      return;
-    }
-  }
-  
-  BOOST_THROW_EXCEPTION( ANLException(this) <<
-                         ANLErrInfo(std::string("Parameter is not found: ")
-                                    +name+" / "+module_id()) );
+  ModuleParamIter it = find_parameter(name);
+  (*it)->clear_array();
 }
-
 
 inline
-void BasicModule::set_vector(const std::string& name,
-                             double x, double y) throw(ANLException)
+void BasicModule::set_parameter(const std::string& name,
+                                double x, double y) throw(ANLException)
 {
-  for (ModuleParamIter it=ModuleParamBegin(); it!=ModuleParamEnd(); ++it) {
-    if (name == (*it)->name()) {
-      (*it)->set_value(x, y);
-      return;
-    }
-  }
-  
-  BOOST_THROW_EXCEPTION( ANLException(this) <<
-                         ANLErrInfo(std::string("Parameter is not found: ")
-                                    +name+" / "+module_id()) );
+  ModuleParamIter it = find_parameter(name);
+  (*it)->set_value(x, y);
 }
-
 
 inline
-void BasicModule::set_vector(const std::string& name,
-                             double x, double y, double z) throw(ANLException)
+void BasicModule::set_parameter(const std::string& name,
+                                double x, double y, double z) throw(ANLException)
 {
-  for (ModuleParamIter it=ModuleParamBegin(); it!=ModuleParamEnd(); ++it) {
-    if (name == (*it)->name()) {
-      (*it)->set_value(x, y, z);
-      return;
-    }
-  }
-
-  BOOST_THROW_EXCEPTION( ANLException(this) <<
-                         ANLErrInfo(std::string("Parameter is not found: ")
-                                    +name+" / "+module_id()) );
+  ModuleParamIter it = find_parameter(name);
+  (*it)->set_value(x, y, z);
 }
-
 
 template <typename T>
 void BasicModule::set_value_element(const std::string& name, T val)
@@ -421,7 +422,6 @@ void BasicModule::set_value_element(const std::string& name, T val)
   }
 }
 
-
 template <typename T>
 inline
 void BasicModule::GetANLModuleIF(const std::string& name, T *ptr)
@@ -433,7 +433,6 @@ void BasicModule::GetANLModuleIF(const std::string& name, T *ptr)
                                       +name) );
   }
 }
-
 
 template <typename T>
 inline

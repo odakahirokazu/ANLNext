@@ -18,10 +18,9 @@
  *************************************************************************/
 
 #include "VModuleParameter.hh"
-#include "ANLException.hh"
-
 #include <sstream>
 #include <climits>
+#include "ANLException.hh"
 
 namespace anl {
 
@@ -137,6 +136,66 @@ void VModuleParameter::set_value(double x, double y, double z)
   throw_type_match_exception(oss.str());
 }
 
+bool VModuleParameter::get_value(bool) const
+{
+  throw_type_match_exception("bool");
+  return false;
+}
+
+int VModuleParameter::get_value(int) const
+{
+  throw_type_match_exception("int");
+  return 0;
+}
+
+double VModuleParameter::get_value(double) const
+{
+  throw_type_match_exception("double");
+  return 0.0;
+}
+
+std::string VModuleParameter::get_value(const std::string&) const
+{
+  throw_type_match_exception("string");
+  return "";
+}
+
+std::vector<int> VModuleParameter::get_value(const std::vector<int>&) const
+{
+  throw_type_match_exception("vector<int>");
+  return {};
+}
+
+std::vector<double> VModuleParameter::get_value(const std::vector<double>&) const
+{
+  throw_type_match_exception("vector<double>");
+  return {};
+}
+
+std::vector<std::string> VModuleParameter::get_value(const std::vector<std::string>&) const
+{
+  throw_type_match_exception("vector<string>");
+  return {};
+}
+
+std::list<std::string> VModuleParameter::get_value(const std::list<std::string>&) const
+{
+  throw_type_match_exception("list<string>");
+  return {};
+}
+
+std::vector<double> VModuleParameter::get_value(double, double) const
+{
+  throw_type_match_exception("2-vector");
+  return {};
+}
+
+std::vector<double> VModuleParameter::get_value(double, double, double) const
+{
+  throw_type_match_exception("3-vector");
+  return {};
+}
+
 void VModuleParameter::print(std::ostream& os) const
 {
   os << name() << ": " << *this
@@ -185,7 +244,7 @@ bool VModuleParameter::ask_base_in(std::istream& ist)
 
 bool VModuleParameter::ask_base()
 {
-#if ANLNEXT_USE_READLINE
+#if ANL_USE_READLINE
   std::ostringstream ost;
   ask_base_out(ost);
   
@@ -204,19 +263,19 @@ bool VModuleParameter::ask_base()
     line = 0;
     return false;
   }
-#else
+#else /* ANL_USE_READLINE */
   ask_base_out(std::cout);
   return ask_base_in(std::cin);
-#endif
+#endif /* ANL_USE_READLINE */
 }
 
-std::string VModuleParameter::special_message_to_ask()
+std::string VModuleParameter::special_message_to_ask() const
 {
   std::string message("");
   return message;
 }
 
-void VModuleParameter::throw_type_match_exception(const std::string& message)
+void VModuleParameter::throw_type_match_exception(const std::string& message) const
 {
   BOOST_THROW_EXCEPTION( ANLException() <<
                          ANLErrInfo(std::string("type does not match: ")

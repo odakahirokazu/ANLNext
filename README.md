@@ -1,7 +1,7 @@
 ANL Next
 ========================================
 
-- Version: 1.7.1
+- Version: 1.7.2
 - Author: Hirokazu Odaka
 
 
@@ -153,7 +153,6 @@ Perform cmake to generate Makefiles. Give the directory of the source tree to
 There are several options:
 
 - `ANL_USE_RUBY` (Default=ON): enable Ruby binding.
-- `ANL_USE_EXE` (Default=OFF): enable standalone executables.
 - `ANL_USE_TVECTOR` (Default=OFF): enable ROOT vector.
 - `ANL_USE_HEPVECTOR` (Default=OFF): enable CLHEP vector.
 - `ANL_USE_G4VECTOR` (Default=OFF): enable Geant4-CLHEP vector.
