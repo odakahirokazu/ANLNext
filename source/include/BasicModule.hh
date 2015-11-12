@@ -116,6 +116,9 @@ public:
    * @return true if this module is off.
    */
   bool is_off() const { return !moduleOn_; }
+
+  void set_event_loop_index(long int index) { eventIndex_ = index; }
+  long int get_event_loop_index() const { return eventIndex_; }
   
   /**
    * expose a module parameter specified by "name" and set it as the current parameter.
@@ -259,6 +262,7 @@ private:
   ModuleParam_sptr currentParameter_;
   std::set<std::string> accessibleModules_;
   bool requiringFullAccess_;
+  long int eventIndex_;
     
   int myCopyID_;
   static int CopyID__;

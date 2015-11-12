@@ -375,7 +375,8 @@ ANLStatus ANLManager::process_analysis(long int num_events)
     while (mod != mod_end) {
       if ((*mod)->is_on()) {
         ++counters_[iModule].entry;
-        
+        (*mod)->set_event_loop_index(iEvent);
+
         try {
           status = (*mod)->mod_ana();
         }

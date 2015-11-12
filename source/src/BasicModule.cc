@@ -33,7 +33,8 @@ BasicModule::BasicModule()
   : moduleID_(""),
     moduleDescription_(""),
     moduleOn_(true), evsManager_(0), currentParameter_(),
-    requiringFullAccess_(true)
+    requiringFullAccess_(true),
+    eventIndex_(-1)
 {
   myCopyID_ = CopyID__;
   CopyID__++;
