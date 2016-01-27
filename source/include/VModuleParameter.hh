@@ -121,6 +121,8 @@ public:
   virtual std::size_t num_value_elements() const { return 0; }
   virtual std::shared_ptr<VModuleParameter const> value_element_info(std::size_t /* index */) const
   { return std::shared_ptr<VModuleParameter>(); }
+  virtual std::string value_element_name(std::size_t /* index */) const
+  { return ""; }
   virtual void add_value_element(std::shared_ptr<VModuleParameter> /* param */) {}
   virtual void enable_value_elements(int /* type */, const std::vector<std::size_t>& /* enables */) {}
 

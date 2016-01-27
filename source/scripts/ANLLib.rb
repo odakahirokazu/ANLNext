@@ -150,19 +150,32 @@ module ANL
   # Class of ANL module + its parameters
   #
   class ModuleInitializer
-    def initialize(anl_module_class, module_id=nil, parameters=nil)
+    def initialize(anl_module_class, module_id=nil)
       @module_class = anl_module_class
       @module_id = module_id
-      @parameters = parameters
+      @methods_to_play = []
     end
     attr_accessor :module_id
-    attr_reader :module_class, :parameters, :set_param_func
+    attr_reader :module_class
 
-    def with_parameters(parameters=nil, &set_param)
-      @parameters = parameters if parameters
-      @set_param_func = set_param
+    def keep_method(method, args, &block)
+      m = lambda do |receiver|
+        receiver.send(method, *args, &block)
+      end
+      @methods_to_play << m
     end
-    alias :with :with_parameters
+
+    [:with_parameters, :with, :push_to_vector, :insert_to_map].each do |m|
+      define_method(m) do |*args, &block|
+        keep_method(m, args, &block)
+      end
+    end
+
+    def play_methods(receiver)
+      @methods_to_play.each do |m|
+        m.(receiver)
+      end
+    end
   end
 
 
@@ -455,6 +468,19 @@ module ANL
     #
     def setp(name, value)
       mod = @current_module
+
+      if value.class == Hash
+        value.each do |k, vs|
+          vs = [vs] unless vs.class == Array
+          h = {}
+          vs.each_with_index do |v, i|
+            h[i] = v
+          end
+          insert_to_map(name, k, h)
+        end
+        return
+      end
+
       set_param =
         if value.class == Vector
           if value.z
@@ -512,9 +538,17 @@ module ANL
     #
     def insert_to_map(map_name, key, map_values)
       mod = @current_module
+      if mod.is_a? ModuleInitializer
+        mod.insert_to_map(map_name, key, map_values)
+        return
+      end
+
       set_param = lambda do
         mod.insert_to_map(map_name.to_s, key.to_s) do |v|
           map_values.each do |value_name, value|
+            if value_name.integer?
+              value_name = v.get_parameter(map_name).value_element_name(value_name)
+            end
             v.set_value_element(value_name.to_s, value)
           end
         end
@@ -550,9 +584,17 @@ module ANL
     #
     def push_to_vector(vector_name, values)
       mod = @current_module
+      if mod.is_a? ModuleInitializer
+        mod.push_to_vector(vector_name, values)
+        return
+      end
+
       set_param = lambda do
         mod.push_to_vector(vector_name.to_s) do |v|
           values.each do |value_name, value|
+            if value_name.integer?
+              value_name = v.get_parameter(map_name).value_element_name(value_name)
+            end
             v.set_value_element(value_name.to_s, value)
           end
         end
@@ -606,7 +648,7 @@ module ANL
     #
     def with_parameters(parameters=nil, &set_param)
       mod = @current_module
-      if mod.respond_to? :with_parameters
+      if mod.is_a? ModuleInitializer
         mod.with_parameters(parameters, &set_param)
         return
       end
@@ -623,15 +665,17 @@ module ANL
       return
     end
 
+    alias :with :with_parameters
+
     # Utility method to push ANL module and then set parameters.
     #
     def chain_with_parameters(initializer)
       if initializer
         if initializer.respond_to? :each
-          initializer.each{|i| chain_with_parameters(i)}
+          initializer.each{|mi| chain_with_parameters(mi) }
         else
           chain(initializer.module_class, initializer.module_id)
-          with_parameters(initializer.parameters, &initializer.set_param_func)
+          initializer.play_methods(self)
         end
       end
     end

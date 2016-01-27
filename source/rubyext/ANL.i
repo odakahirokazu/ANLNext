@@ -92,6 +92,8 @@ class VModuleParameter
       return $self->value_element_info(index).get();
     }
   }
+
+  std::string value_element_name(std::size_t index) const;
   
   std::size_t size_of_container() const;
   std::vector<std::string> map_key_list() const;
