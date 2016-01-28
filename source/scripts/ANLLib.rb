@@ -546,7 +546,7 @@ module ANL
       set_param = lambda do
         mod.insert_to_map(map_name.to_s, key.to_s) do |v|
           map_values.each do |value_name, value|
-            if value_name.integer?
+            if value_name.is_a? Integer
               value_name = v.get_parameter(map_name).value_element_name(value_name)
             end
             v.set_value_element(value_name.to_s, value)
@@ -592,7 +592,7 @@ module ANL
       set_param = lambda do
         mod.push_to_vector(vector_name.to_s) do |v|
           values.each do |value_name, value|
-            if value_name.integer?
+            if value_name.is_a? Integer
               value_name = v.get_parameter(map_name).value_element_name(value_name)
             end
             v.set_value_element(value_name.to_s, value)
