@@ -1190,6 +1190,56 @@ module ANL
   end
 
 
+  # MPIRun utility
+  #
+  begin
+    require 'mpi'
+
+    class MPIRun
+      def initialize()
+        @make_log_name = nil
+        @log_name = nil
+      end
+
+      def set_log(filename=nil, &block)
+        if filename==nil && block_given?
+          @make_log_name = block
+        else
+          @log_name = filename
+        end
+      end
+
+      def run1()
+        rank = 0
+        yield rank
+      end
+
+      def run()
+        begin
+          MPI.Init
+          world = MPI::Comm::WORLD
+          rank = world.rank
+
+          if @log_name
+            log_file = @log_name % rank
+          else
+            log_file = @make_log_name.(rank)
+          end
+
+          File.open(log_file, 'w') do |fo|
+            STDOUT.reopen(fo); STDOUT.sync = true
+            STDERR.reopen(fo); STDERR.sync = true
+            yield rank
+          end
+        ensure
+          MPI.Finalize
+        end
+      end
+    end
+  rescue LoadError
+    # do nothing
+  end
+
 end # module ANL
 
 
