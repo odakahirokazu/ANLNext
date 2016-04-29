@@ -142,7 +142,7 @@ T ModuleParameter<T>::get_value_impl(call_type,
     tmpParam.set_expression(expression());
     rval[i] = tmpParam.get_value(dummy);
   }
-  return std::move(rval);
+  return rval;
 }
 
 template <typename T>
@@ -162,7 +162,7 @@ T ModuleParameter<T>::get_value_impl(call_type,
     tmpParam.set_expression(expression());
     rval.push_back(tmpParam.get_value(dummy));
   }
-  return std::move(rval);
+  return rval;
 }
 
 template <typename T>

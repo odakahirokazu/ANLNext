@@ -162,7 +162,7 @@ public:
     for (auto& pair: *ptr_) {
       keys.push_back(pair.first);
     }
-    return std::move(keys);
+    return keys;
   }
   
   void insert_to_container()
@@ -262,7 +262,7 @@ public:
       pt_values.push_back(std::make_pair(key, std::move(pt_value)));
     }
     pt.add_child("value", std::move(pt_values));
-    return std::move(pt);
+    return pt;
   }
   
 private:

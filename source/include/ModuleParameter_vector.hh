@@ -172,7 +172,7 @@ public:
       pt_values.push_back(std::make_pair("", std::move(pt_value)));
     }
     pt.add_child("value", std::move(pt_values));
-    return std::move(pt);
+    return pt;
   }
   
 private:
@@ -331,7 +331,21 @@ private:
 
   std::vector<ModuleParam_sptr>::const_iterator
   find_value_info(const std::string& name) const throw(ANLException)
-  { return find_value_info(name); }
+  {
+    std::vector<ModuleParam_sptr>::const_iterator it = std::begin(value_info_);
+    for (; it!=std::end(value_info_); ++it) {
+      if ((*it)->name()==name) {
+        return it;
+      }
+    }
+
+    if (it == std::end(value_info_)) {
+      BOOST_THROW_EXCEPTION( ANLException() <<
+                             ANLErrInfo(std::string("Parameter is not found: ")
+                                        +name) );
+    }
+    return it;
+  }
 
 private:
   container_type* ptr_;

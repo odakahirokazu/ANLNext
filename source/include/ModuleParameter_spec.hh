@@ -210,7 +210,7 @@ public:
       pt_values.push_back(std::make_pair("", pt_value));
     }
     pt.add_child("value", pt_values);
-    return std::move(pt);
+    return pt;
   }
 
 private:
@@ -272,7 +272,7 @@ public:
       pt_values.push_back(std::make_pair("", pt_value));
     }
     pt.add_child("value", pt_values);
-    return std::move(pt);
+    return pt;
   }
 
 private:
@@ -333,7 +333,7 @@ public:
       pt_values.push_back(std::make_pair("", pt_value));
     }
     pt.add_child("value", pt_values);
-    return std::move(pt);
+    return pt;
   }
 
 private:
@@ -395,7 +395,7 @@ public:
       pt_values.push_back(std::make_pair("", pt_value));
     }
     pt.add_child("value", pt_values);
-    return std::move(pt);
+    return pt;
   }
 
 private:

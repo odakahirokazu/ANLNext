@@ -201,7 +201,7 @@ boost::property_tree::ptree BasicModule::parameters_to_property_tree() const
     pt_parameters.push_back(std::make_pair("", parameter->to_property_tree()));
   }
   pt.add_child("parameter_list", std::move(pt_parameters));
-  return std::move(pt);
+  return pt;
 }
 
 // instantiation of function templates

@@ -153,7 +153,7 @@ public:
     pt.put("type", type_name());
     put_unit_info_to_property_tree(pt);
     put_value_info_to_property_tree(pt);
-    return std::move(pt);
+    return pt;
   }
   
 protected:

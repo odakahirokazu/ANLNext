@@ -467,7 +467,7 @@ boost::property_tree::ptree ANLManager::parameters_to_property_tree() const
     pt_modules.push_back(std::make_pair("", module->parameters_to_property_tree()));
   }
   pt.add_child("application.module_list", std::move(pt_modules));
-  return std::move(pt);
+  return pt;
 }
 
 void ANLManager::parameters_to_json(const std::string& filename) const
