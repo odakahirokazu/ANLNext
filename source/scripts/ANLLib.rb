@@ -217,7 +217,8 @@ module ANL
     ### method delegation to the AnalysisChain object.
     anlapp_methods = [
       :thread_mode, :thread_mode=, :add_namespace,
-      :push, :insert, :chain, :expose_module, :get_module, :index, :rindex,
+      :push, :insert, :insert_before, :insert_after, :chain,
+      :expose_module, :get_module, :index, :rindex,
       :insert_to_map, :push_to_vector,
       :set_parameters, :with_parameters, :chain_with_parameters,
       :startup, :prepare_all_parameters,
@@ -377,6 +378,26 @@ module ANL
       @module_hash[module_id] = anl_module
       @module_list.insert(index, anl_module)
       @current_module = anl_module
+    end
+
+    # Insert an ANL module to the module chain just before a specified module.
+    #
+    # @param [ANLModule] anl_module ANL module to be inserted.
+    # @param [Symbol] module_id_target target module
+    # @return [ANLModule] ANL module inserted.
+    #
+    def insert_before(anl_module, module_id_target)
+      insert(index(module_id_target.to_sym), anl_module)
+    end
+
+    # Insert an ANL module to the module chain just after a specified module.
+    #
+    # @param [ANLModule] anl_module ANL module to be inserted.
+    # @param [Symbol] module_id_target target module
+    # @return [ANLModule] ANL module inserted.
+    #
+    def insert_after(anl_module, module_id_target)
+      insert(index(module_id_target.to_sym)+1, anl_module)
     end
 
     # Push an ANL module that is specified by a symbol to the module chain.

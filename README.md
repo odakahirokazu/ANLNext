@@ -1,7 +1,7 @@
 ANL Next
 ========================================
 
-- Version: 1.7.7
+- Version: 1.7.8
 - Author: Hirokazu Odaka
 
 
