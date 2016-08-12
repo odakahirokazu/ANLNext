@@ -1190,7 +1190,7 @@ module ANL
 
       def run(list, testrun: false)
         if testrun
-          run1(list)
+          yield list[0]
         end
 
         until list.empty?
