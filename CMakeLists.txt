@@ -16,7 +16,7 @@ add_definitions("-std=c++11")
 set(CMAKE_MODULE_PATH ${ANLNext_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 message("-- Install destination prefix: ${CMAKE_INSTALL_PREFIX}")
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 ### options
 ## mode options
