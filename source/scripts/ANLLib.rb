@@ -1191,6 +1191,7 @@ module ANL
       def run(list, testrun: false)
         if testrun
           yield list[0]
+          return
         end
 
         until list.empty?
