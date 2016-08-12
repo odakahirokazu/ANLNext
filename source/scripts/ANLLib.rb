@@ -1188,7 +1188,11 @@ module ANL
         yield list.shift
       end
 
-      def run(list)
+      def run(list, testrun: false)
+        if testrun
+          run1(list)
+        end
+
         until list.empty?
           Parallel.map(list.shift(@num_processes),
                        :in_processes => @num_processes) do |run|

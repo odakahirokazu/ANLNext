@@ -1,7 +1,7 @@
 ANL Next
 ========================================
 
-- Version: 1.7.8
+- Version: 1.7.9
 - Author: Hirokazu Odaka
 
 
@@ -43,9 +43,9 @@ processing of X-ray detectors onboard the ASCA and Suzaku X-ray observatories.
 
 ### Contact
 
-- Hirokazu Odaka 
-- ISAS/JAXA
-- odaka(AT)astro.isas.jaxa.jp
+- Hirokazu Odaka
+- KIPAC, Stanford University
+- hodaka(AT)stanford.edu
 
 ### GitHub
 
@@ -58,13 +58,13 @@ https://github.com/odakahirokazu/ANLNext/
 
 #### Test environmemt (Mac)
 
-- MacBook Pro (Late 2013)
-- OS X 10.11.3
-- Apple LLVM version 7.0.2 (clang-700.1.81)
-- cmake version 3.4.2
-- ruby 2.2.3p173 (2015-08-18 revision 51636) [x86\_64-darwin14]
-- SWIG Version 3.0.8
-- Boost 1.60.0
+- iMac 27-inch late 2015
+- OS X El Capitan (10.11.6)
+- Apple LLVM version 7.3.0 (clang-703.0.31)
+- ruby 2.3.1p112 (2016-04-26 revision 54768)
+- ROOT 6.06/06
+- SWIG Version 3.0.10
+- Boost 1.60.0_2
 
 #### Test environmemt (Linux)
 
@@ -109,7 +109,7 @@ Installation
 *version 1.56.0 or later*
 
 #### (3) [CMake](http://www.cmake.org/)
-*version 3.0 or later*
+*version 3.0.8 or later*
 
 This package uses CMake (Cross platform make) for easy installation.
 
