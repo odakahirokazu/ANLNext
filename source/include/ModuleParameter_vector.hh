@@ -22,6 +22,7 @@
 #include <array>
 #include <memory>
 #include <type_traits>
+#include <boost/format.hpp>
 
 namespace anl
 {
@@ -322,9 +323,9 @@ private:
     }
 
     if (it == std::end(value_info_)) {
-      BOOST_THROW_EXCEPTION( ANLException() <<
-                             ANLErrInfo(std::string("Parameter is not found: ")
-                                        +name) );
+      const std::string message
+        = (boost::format("Parameter is not found: %s") % name).str();
+      BOOST_THROW_EXCEPTION( ANLException(message) );
     }
     return it;
   }
@@ -340,9 +341,9 @@ private:
     }
 
     if (it == std::end(value_info_)) {
-      BOOST_THROW_EXCEPTION( ANLException() <<
-                             ANLErrInfo(std::string("Parameter is not found: ")
-                                        +name) );
+      const std::string message
+        = (boost::format("Parameter is not found: %s") % name).str();
+      BOOST_THROW_EXCEPTION( ANLException(message) );
     }
     return it;
   }

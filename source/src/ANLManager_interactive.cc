@@ -131,7 +131,7 @@ ANLStatus ANLManager::InteractiveCom() throw(ANLException)
           }
           catch (const ANLException& ex) {
             std::cout << "Exception!\n"
-                      << *boost::get_error_info<ANLErrInfo>(ex) << std::endl;
+                      << *boost::get_error_info<ANLErrorInfo>(ex) << std::endl;
           }
         }
         else {

@@ -18,24 +18,69 @@
  *************************************************************************/
 
 #include "ANLException.hh"
+#include <boost/format.hpp>
 #include "BasicModule.hh"
 
 namespace anl
 {
 
+int ANLException::VerboseLevel = 1;
+
 ANLException::ANLException(const BasicModule* mod)
 {
-  *this << ANLErrInfo(std::string("ANL Module: ") + mod->module_name());
+  *this << ANLErrorInfoOnModule(mod->module_id());
 }
 
-ANLException::ANLException(const std::string& msg)
+ANLException::ANLException(const std::string& message)
 {
-  *this << ANLErrInfo(msg);
+  *this << ANLErrorInfo(message);
 }
 
-void ANLException::setModule(const BasicModule* mod)
+ANLException::ANLException(const BasicModule* mod,
+                           const std::string& message)
 {
-  *this << ANLErrInfo(std::string("ANL Module: ") + mod->module_name());
+  *this << ANLErrorInfoOnModule(mod->module_id());
+  *this << ANLErrorInfo(message);
+}
+
+void ANLException::setMessage(const std::string& message)
+{
+  *this << ANLErrorInfo(message);
+}
+
+std::string ANLException::getMessage() const
+{
+  const std::string* message = boost::get_error_info<ANLErrorInfo>(*this);
+  if (message==nullptr) {
+    return std::string();
+  }
+  return *message;
+}
+
+void ANLException::setModuleInfo(const BasicModule* mod)
+{
+  *this << ANLErrorInfoOnModule(mod->module_id());
+}
+
+std::string ANLException::toString() const
+{
+  if (VerboseLevel == 1) {
+    std::ostringstream oss;
+    const std::string* message = boost::get_error_info<ANLErrorInfo>(*this);
+    const std::string* method = boost::get_error_info<ANLErrorInfoOnMethod>(*this);
+    const std::string* module = boost::get_error_info<ANLErrorInfoOnModule>(*this);
+    const int64_t* loopIndex = boost::get_error_info<ANLErrorInfoOnLoopIndex>(*this);
+    if (message) { oss << *message << "\n"; }
+    if (module) { oss << "Module ID: " << *module << "\n"; }
+    if (method) { oss << "Method: " << *method << "\n"; }
+    if (loopIndex) { oss << "Loop index: " << *loopIndex << "\n"; }
+    return oss.str();
+  }
+  else if (VerboseLevel >= 2) {
+    return boost::diagnostic_information(*this);
+  }
+
+  return "";
 }
 
 } /* namespace anl */

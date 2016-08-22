@@ -20,6 +20,7 @@
 #include "VModuleParameter.hh"
 #include <sstream>
 #include <climits>
+#include <boost/format.hpp>
 #include "ANLException.hh"
 
 namespace anl {
@@ -277,10 +278,9 @@ std::string VModuleParameter::special_message_to_ask() const
 
 void VModuleParameter::throw_type_match_exception(const std::string& message) const
 {
-  BOOST_THROW_EXCEPTION( ANLException() <<
-                         ANLErrInfo(std::string("type does not match: ")
-                                    + name() + " [" + type_name() + "] "
-                                    + "<= " + message) );
+  const std::string message2
+    = (boost::format("Type does not match: %s [%s] <= %s") % name() % type_name() % message).str();
+  BOOST_THROW_EXCEPTION( ANLException(message2) );
 }
 
 } /* namespace anl */

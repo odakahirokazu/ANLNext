@@ -22,6 +22,7 @@
 #include <array>
 #include <memory>
 #include <type_traits>
+#include <boost/format.hpp>
 
 namespace anl
 {
@@ -60,6 +61,7 @@ struct size_of_value<std::tuple<Ts...>>
  * @date 2012-12-12
  * @date 2014-12-09 | use variadic template.
  * @date 2015-11-10 | rename {set/get/output}_value<I>() to value_info_{set/get/output}().
+ * @date 2016-08-19 | modify exceptions.
  */
 template <typename T>
 class ModuleParameter<std::map<std::string, T>> : public VModuleParameter
@@ -178,9 +180,9 @@ public:
   {
     auto it = ptr_->find(key);
     if (it == ptr_->end()) {
-      BOOST_THROW_EXCEPTION( ANLException() <<
-                             ANLErrInfo(std::string("Map \"") + name()
-                                        + "\" does not have Key: " + key) );
+      const std::string message
+        = (boost::format("Map \"%s\" does not have key: %s") % name() % key).str();
+      BOOST_THROW_EXCEPTION( ANLException(message) );
     }
     value_type value = (*it).second;
     value_info_set<0>(&value, value_category());
@@ -414,9 +416,9 @@ private:
     }
 
     if (it == std::end(value_info_)) {
-      BOOST_THROW_EXCEPTION( ANLException() <<
-                             ANLErrInfo(std::string("Parameter is not found: ")
-                                        +name) );
+      const std::string message
+        = (boost::format("Parameter is not found: %s") % name).str();
+      BOOST_THROW_EXCEPTION( ANLException(message) );
     }
     return it;
   }
@@ -432,9 +434,9 @@ private:
     }
 
     if (it == std::end(value_info_)) {
-      BOOST_THROW_EXCEPTION( ANLException() <<
-                             ANLErrInfo(std::string("Parameter is not found: ")
-                                        +name) );
+      const std::string message
+        = (boost::format("Parameter is not found: %s") % name).str();
+      BOOST_THROW_EXCEPTION( ANLException(message) );
     }
     return it;
   }

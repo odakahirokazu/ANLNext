@@ -49,7 +49,7 @@ find_path(ROOT_LIB_DIR
   NAMES libHist.so libTree.so
   PATHS ${ROOTSYS}/lib/root ${ROOTSYS}/lib)
 set(ROOT_LIB
-  Core Cint RIO Net Hist Graf Graf3d Gpad Tree
+  Core RIO Net Hist Graf Graf3d Gpad Tree
   Rint Postscript Matrix Physics MathCore Thread)
 message("-- ROOTSYS = ${ROOTSYS}")
 message("-- ROOT_INC_DIR = ${ROOT_INC_DIR}")

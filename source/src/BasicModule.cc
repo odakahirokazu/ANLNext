@@ -20,6 +20,7 @@
 #include "BasicModule.hh"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/format.hpp>
 
 #include "EvsManager.hh"
 #include "ANLManager.hh"
@@ -85,11 +86,10 @@ void BasicModule::ask_parameters()
     if (!std::cin) {
       std::cin.clear();
       std::cin.ignore(INT_MAX, '\n');
-      
-      ANLException ex;
-      BOOST_THROW_EXCEPTION( ex <<
-                             ANLErrInfo(std::string("Input error: ")
-                                        + (*it)->name()) );
+
+      std::string message
+        = (boost::format("Input error: %s") % ((*it)->name())).str();
+      BOOST_THROW_EXCEPTION( ANLException(this, message) );
     }
   }
 }
@@ -138,11 +138,10 @@ void BasicModule::ask_parameter(const std::string& name,
       if (!std::cin) {
         std::cin.clear();
         std::cin.ignore(INT_MAX, '\n');
-        
-        ANLException ex;
-        BOOST_THROW_EXCEPTION( ex <<
-                               ANLErrInfo(std::string("Input error: ")
-                                          + (*it)->name()) );
+
+        std::string message
+          = (boost::format("Input error: %s") % ((*it)->name())).str();
+        BOOST_THROW_EXCEPTION( ANLException(this, message) );
       }
       
       break;

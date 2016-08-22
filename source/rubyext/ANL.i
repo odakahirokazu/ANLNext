@@ -37,12 +37,12 @@ namespace anl
 enum class ANLStatus { AS_OK, AS_SKIP, AS_SKIP_ERR, AS_QUIT, AS_QUIT_ERR };
 
 
-class ANLException
+struct ANLException
 {
- public:
+  static int VerboseLevel;
   ANLException();
   ~ANLException();
-  const std::string print();
+  const std::string toString();
 };
 
 
@@ -119,9 +119,9 @@ class ANLManager
   %exception{
     try {
       $action
-	}
+    }
     catch (const anl::ANLException& ex) {
-      SWIG_exception(SWIG_RuntimeError, ex.print().c_str());
+      SWIG_exception(SWIG_RuntimeError, ex.toString().c_str());
     }
   }
 
@@ -173,9 +173,9 @@ class BasicModule
   %exception{
     try {
       $action
-	}
-    catch (const anl::ANLException& ex) {
-      SWIG_exception(SWIG_RuntimeError, ex.print().c_str());
+    }
+    catch (anl::ANLException& ex) {
+      SWIG_exception(SWIG_RuntimeError, ex.toString().c_str());
     }
   }
 

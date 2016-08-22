@@ -350,7 +350,7 @@ void ANLManager::reset_counter()
   }
 }
 
-ANLStatus ANLManager::process_analysis(long int num_events)
+ANLStatus ANLManager::process_analysis(long int num_events) throw(ANLException)
 {
   ANLStatus status = AS_OK;
   long int iEvent = 0;
@@ -380,9 +380,10 @@ ANLStatus ANLManager::process_analysis(long int num_events)
         try {
           status = (*mod)->mod_ana();
         }
-        catch (const ANLException& ex) {
-          ex << ANLErrModFnInfo( (*mod)->module_id() + "::mod_ana" );
-          ex << ANLErrEventIDInfo(iEvent);
+        catch (ANLException& ex) {
+          ex << ANLErrorInfoOnLoopIndex(iEvent);
+          ex << ANLErrorInfoOnMethod( (*mod)->module_name() + "::mod_ana" );
+          ex << ANLErrorInfoOnModule( (*mod)->module_id() );
           throw;
         }
 

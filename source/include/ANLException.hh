@@ -21,15 +21,17 @@
 #define ANL_ANLException_H 1
 
 #include <stdexcept>
+#include <cstdint>
 #include <string>
 #include <boost/exception/all.hpp>
 
 namespace anl
 {
 
-typedef boost::error_info<struct tag_ANLErr, std::string> ANLErrInfo;
-typedef boost::error_info<struct tag_ANLModFn, std::string> ANLErrModFnInfo;
-typedef boost::error_info<struct tag_ANLEventID, int> ANLErrEventIDInfo;
+typedef boost::error_info<struct tag_ANLError, std::string> ANLErrorInfo;
+typedef boost::error_info<struct tag_ANLError_Module, std::string> ANLErrorInfoOnModule;
+typedef boost::error_info<struct tag_ANLError_Method, std::string> ANLErrorInfoOnMethod;
+typedef boost::error_info<struct tag_ANLError_LoopIndex, int64_t> ANLErrorInfoOnLoopIndex;
 
 class BasicModule;
 
@@ -38,18 +40,25 @@ class BasicModule;
  * 
  * @author Hirokazu Odaka
  * @date 2010-06-xx
+ * @date 2016-08-19 | modify design
  */
-struct ANLException : boost::exception, std::exception
+struct ANLException : virtual std::exception, virtual boost::exception
 {
-  ANLException() {}
-  explicit ANLException(const BasicModule* mod);
-  explicit ANLException(const std::string& msg);
+  static int VerboseLevel;
 
-  void setModule(const BasicModule* mod);
-  const std::string print() const
-  { return diagnostic_information(*this); }
+  ANLException() = default;
+  explicit ANLException(const BasicModule* mod);
+  explicit ANLException(const std::string& message);
+  ANLException(const BasicModule* mod,
+               const std::string& message);
+
+  void setModuleInfo(const BasicModule* module);
+  void setMessage(const std::string& message);
+  std::string getMessage() const;
+  std::string toString() const;
 };
 
-} /* namespace anl */
+}
+/* namespace anl */
 
 #endif /* ANL_ANLException_H */

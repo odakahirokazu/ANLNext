@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <iterator>
 
+#include <boost/format.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 #include "ANLStatus.hh"
@@ -360,9 +361,9 @@ ModuleParamIter BasicModule::find_parameter(const std::string& name) throw(ANLEx
     }
   }
   if (it == std::end(moduleParameters_)) {
-    BOOST_THROW_EXCEPTION( ANLException(this) <<
-                           ANLErrInfo(std::string("Parameter is not found: ")
-                                      + module_id() + " / " + name));
+    const std::string message
+      = (boost::format("Parameter is not found: %s / %s") % module_id() % name).str();
+    BOOST_THROW_EXCEPTION( ANLException(this, message) );
   }
   return it;
 }
@@ -377,9 +378,9 @@ ModuleParamConstIter BasicModule::find_parameter(const std::string& name) const 
     }
   }
   if (it == std::end(moduleParameters_)) {
-    BOOST_THROW_EXCEPTION( ANLException(this) <<
-                           ANLErrInfo(std::string("Parameter is not found: ")
-                                      + module_id() + " / " + name));
+    const std::string message
+      = (boost::format("Parameter is not found: %s / %s") % module_id() % name).str();
+    BOOST_THROW_EXCEPTION( ANLException(this, message) );
   }
   return it;
 }
@@ -421,7 +422,7 @@ void BasicModule::set_value_element(const std::string& name, T val)
     currentParameter_->set_value_element(name, val);
   }
   catch (ANLException& e) {
-    e.setModule(this);
+    e.setModuleInfo(this);
     throw;
   }
 }
@@ -432,9 +433,9 @@ void BasicModule::GetANLModuleIF(const std::string& name, T *ptr)
 {
   *ptr = dynamic_cast<T>(moduleAccess_.getModule(name));
   if (ptr==0) {
-    BOOST_THROW_EXCEPTION( ANLException(this) <<
-                           ANLErrInfo(std::string("Dynamic cast failed: ")
-                                      +name) );
+    const std::string message
+      = (boost::format("Dynamic cast failed from ANL Module: %s") % name).str();
+    BOOST_THROW_EXCEPTION( ANLException(this, message) );
   }
 }
 
@@ -444,9 +445,9 @@ void BasicModule::GetANLModuleIFNC(const std::string& name, T *ptr)
 {
   *ptr = dynamic_cast<T>(moduleAccess_.getModuleNC(name));
   if (ptr==0) {
-    BOOST_THROW_EXCEPTION( ANLException(this) <<
-                           ANLErrInfo(std::string("Dynamic cast failed: ")
-                                      +name) );
+    const std::string message
+      = (boost::format("Dynamic cast failed from ANL Module: %s") % name).str();
+    BOOST_THROW_EXCEPTION( ANLException(this, message) );
   }
 }
 

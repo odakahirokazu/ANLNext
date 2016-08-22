@@ -790,10 +790,21 @@ module ANL
       @analysis_done = true
     rescue RuntimeError => ex
       puts ""
-      puts "  ### ANL NEXT Exception ###  "
+      puts "################################################################"
+      puts "#                                                              #"
+      puts "#                       ANL EXCEPTION                          #"
+      puts "#                                                              #"
+      puts "################################################################"
       puts ""
       puts ex
-      raise
+      puts ""
+      puts "################################################################"
+      puts ""
+      puts ""
+
+      if ANL::ANLException.VerboseLevel >= 3
+        raise
+      end
     end
 
     # Start the ANL interactive session for running the ANL analysis.

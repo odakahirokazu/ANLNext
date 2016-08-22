@@ -47,7 +47,8 @@ ANLStatus ANLManager::routine_modfn(T func, const std::string& func_id)
       }
     }
     catch (ANLException& ex) {
-      ex << ANLErrModFnInfo( (*mod)->module_name() + "::mod_" + func_id );
+      ex << ANLErrorInfoOnMethod( (*mod)->module_name() + "::mod_" + func_id );
+      ex << ANLErrorInfoOnModule( (*mod)->module_id() );
       throw;
     }
   }

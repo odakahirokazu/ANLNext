@@ -22,6 +22,7 @@
 
 #include <string>
 #include <map>
+#include <boost/format.hpp>
 #include "ANLException.hh"
 
 namespace anl
@@ -34,6 +35,7 @@ class BasicModule;
  * 
  * @author Hirokazu Odaka
  * @date 2010-06-xx
+ * @date 2016-08-19
  */
 class ModuleAccess
 {
@@ -57,8 +59,9 @@ BasicModule* ModuleAccess::getModuleNC(const std::string& name)
 {
   ANLModuleMap::iterator it = moduleMap_.find(name);
   if (it == moduleMap_.end()) {
-    BOOST_THROW_EXCEPTION( ANLException()
-                           << ANLErrInfo(std::string("No module: ")+name) );
+    const std::string message
+      = (boost::format("Module is not found: %s") % name).str();
+    BOOST_THROW_EXCEPTION( ANLException(message) );
   }
   return it->second;
 }

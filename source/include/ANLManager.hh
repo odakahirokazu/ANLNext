@@ -102,7 +102,7 @@ private:
   void show_analysis();
   void print_parameters();
   void reset_counter();
-  ANLStatus process_analysis(long int num_events);
+  ANLStatus process_analysis(long int num_events) throw(ANLException);
   void print_summary();
 
   int getModuleNumber(const std::string& name, bool strict=true);
