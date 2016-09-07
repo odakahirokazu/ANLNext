@@ -4,4 +4,3 @@ build/
 install/
 documentation/html/doxygen/
 documentation/doxygen/tag/
-*.root
