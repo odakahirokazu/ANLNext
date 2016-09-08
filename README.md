@@ -81,7 +81,7 @@ https://github.com/odakahirokazu/ANLNext/
 
 ### API Reference
 
-http://www.astro.isas.jaxa.jp/~odaka/anlnext/doxygen/
+http://web.stanford.edu/~hodaka/anlnext/doxygen/
 
 ### Applications using ANL Next
 
