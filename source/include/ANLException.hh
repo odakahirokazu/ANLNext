@@ -35,6 +35,10 @@ typedef boost::error_info<struct tag_ANLError_LoopIndex, int64_t> ANLErrorInfoOn
 
 class BasicModule;
 
+struct exception_base : virtual std::exception, virtual boost::exception
+{
+};
+
 /**
  * Exception class for the ANL Next framework.
  * 
@@ -42,7 +46,7 @@ class BasicModule;
  * @date 2010-06-xx
  * @date 2016-08-19 | modify design
  */
-struct ANLException : virtual std::exception, virtual boost::exception
+struct ANLException : virtual exception_base
 {
   static int VerboseLevel;
 
@@ -58,7 +62,6 @@ struct ANLException : virtual std::exception, virtual boost::exception
   std::string toString() const;
 };
 
-}
-/* namespace anl */
+} /* namespace anl */
 
 #endif /* ANL_ANLException_H */

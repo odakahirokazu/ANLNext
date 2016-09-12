@@ -176,7 +176,7 @@ public:
     value_info_set<0>(&default_value_, value_category());
   }
 
-  void retrieve_from_container(const std::string& key) const throw(ANLException)
+  void retrieve_from_container(const std::string& key) const
   {
     auto it = ptr_->find(key);
     if (it == ptr_->end()) {
@@ -406,7 +406,7 @@ private:
   }
 
   std::vector<ModuleParam_sptr>::iterator
-  find_value_info(const std::string& name) throw(ANLException)
+  find_value_info(const std::string& name)
   {
     std::vector<ModuleParam_sptr>::iterator it = std::begin(value_info_);
     for (; it!=std::end(value_info_); ++it) {
@@ -424,7 +424,7 @@ private:
   }
 
   std::vector<ModuleParam_sptr>::const_iterator
-  find_value_info(const std::string& name) const throw(ANLException)
+  find_value_info(const std::string& name) const
   {
     std::vector<ModuleParam_sptr>::const_iterator it = std::begin(value_info_);
     for (; it!=std::end(value_info_); ++it) {

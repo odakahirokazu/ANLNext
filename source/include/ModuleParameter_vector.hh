@@ -313,7 +313,7 @@ private:
   }
 
   std::vector<ModuleParam_sptr>::iterator
-  find_value_info(const std::string& name) throw(ANLException)
+  find_value_info(const std::string& name)
   {
     std::vector<ModuleParam_sptr>::iterator it = std::begin(value_info_);
     for (; it!=std::end(value_info_); ++it) {
@@ -331,7 +331,7 @@ private:
   }
 
   std::vector<ModuleParam_sptr>::const_iterator
-  find_value_info(const std::string& name) const throw(ANLException)
+  find_value_info(const std::string& name) const
   {
     std::vector<ModuleParam_sptr>::const_iterator it = std::begin(value_info_);
     for (; it!=std::end(value_info_); ++it) {

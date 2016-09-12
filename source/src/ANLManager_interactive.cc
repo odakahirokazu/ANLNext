@@ -48,7 +48,7 @@ const char* prompt(EditLine*)
 namespace anl
 {
 
-ANLStatus ANLManager::InteractiveCom() throw(ANLException)
+ANLStatus ANLManager::InteractiveCom()
 {
   ANLStatus status = AS_OK;
   
@@ -331,7 +331,7 @@ void ANLManager::InteractiveModuleSwitch(int n, bool module_sw)
   }
 }
 
-ANLStatus ANLManager::InteractiveAna() throw(ANLException)
+ANLStatus ANLManager::InteractiveAna()
 {
   ANLStatus status = AS_OK;
 

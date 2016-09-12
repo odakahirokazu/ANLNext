@@ -72,17 +72,17 @@ public:
   /**
    * set ANL modules
    */
-  void SetModules(std::vector<BasicModule*> modules) throw(ANLException);
+  void SetModules(std::vector<BasicModule*> modules);
 
-  ANLStatus Startup() throw(ANLException);
-  ANLStatus Initialize() throw(ANLException);
-  ANLStatus Analyze(long int num_events, bool thread_mode=false) throw(ANLException);
-  ANLStatus Exit() throw(ANLException);
+  ANLStatus Startup();
+  ANLStatus Initialize();
+  ANLStatus Analyze(long int num_events, bool thread_mode=false);
+  ANLStatus Exit();
   
-  ANLStatus Prepare() throw(ANLException);
+  ANLStatus Prepare();
 
-  ANLStatus InteractiveCom() throw(ANLException);
-  ANLStatus InteractiveAna() throw(ANLException);
+  ANLStatus InteractiveCom();
+  ANLStatus InteractiveAna();
 
   void SetDisplayFrequency(long int v) { displayFrequency_ = v; }
   long int DisplayFrequency() const { return displayFrequency_; }
@@ -102,7 +102,7 @@ private:
   void show_analysis();
   void print_parameters();
   void reset_counter();
-  ANLStatus process_analysis(long int num_events) throw(ANLException);
+  ANLStatus process_analysis(long int num_events);
   void print_summary();
 
   int getModuleNumber(const std::string& name, bool strict=true);

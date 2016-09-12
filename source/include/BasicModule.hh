@@ -132,22 +132,19 @@ public:
   { return std::begin(moduleParameters_); }
   ModuleParamConstIter parameter_end() const
   { return std::end(moduleParameters_); }
-  ModuleParamConstIter find_parameter(const std::string& name) const throw(ANLException);
-  const VModuleParameter* get_parameter(const std::string& name) const throw(ANLException)
+  ModuleParamConstIter find_parameter(const std::string& name) const;
+  const VModuleParameter* get_parameter(const std::string& name) const
   {
     return find_parameter(name)->get();
   }
   
   template<typename T>
-  void set_parameter(const std::string& name, T val) throw(ANLException);
-
+  void set_parameter(const std::string& name, T val);
   void set_parameter(const std::string& name,
-                     double x, double y) throw(ANLException);
+                     double x, double y);
   void set_parameter(const std::string& name,
-                     double x, double y, double z) throw(ANLException);
-
-  void clear_array(const std::string& name) throw(ANLException);
-
+                     double x, double y, double z);
+  void clear_array(const std::string& name);
   void set_map_key(const std::string& key)
   {
     currentParameter_->set_map_key(key);
@@ -248,7 +245,7 @@ private:
   { return std::begin(moduleParameters_); }
   ModuleParamIter parameter_end()
   { return std::end(moduleParameters_); }
-  ModuleParamIter find_parameter(const std::string& name) throw(ANLException);
+  ModuleParamIter find_parameter(const std::string& name);
 
   std::string get_module_id() const { return moduleID_; }
   
@@ -352,7 +349,7 @@ void BasicModule::add_value_element(T* ptr, const std::string& name,
 }
 
 inline
-ModuleParamIter BasicModule::find_parameter(const std::string& name) throw(ANLException)
+ModuleParamIter BasicModule::find_parameter(const std::string& name)
 {
   ModuleParamIter it = std::begin(moduleParameters_);
   for (; it!=std::end(moduleParameters_); ++it) {
@@ -369,7 +366,7 @@ ModuleParamIter BasicModule::find_parameter(const std::string& name) throw(ANLEx
 }
 
 inline
-ModuleParamConstIter BasicModule::find_parameter(const std::string& name) const throw(ANLException)
+ModuleParamConstIter BasicModule::find_parameter(const std::string& name) const
 {
   ModuleParamConstIter it = std::begin(moduleParameters_);
   for (; it!=std::end(moduleParameters_); ++it) {
@@ -386,14 +383,14 @@ ModuleParamConstIter BasicModule::find_parameter(const std::string& name) const 
 }
 
 template <typename T>
-void BasicModule::set_parameter(const std::string& name, T val) throw(ANLException)
+void BasicModule::set_parameter(const std::string& name, T val)
 {
   ModuleParamIter it = find_parameter(name);
   (*it)->set_value(val);
 }
 
 inline
-void BasicModule::clear_array(const std::string& name) throw(ANLException)
+void BasicModule::clear_array(const std::string& name)
 {
   ModuleParamIter it = find_parameter(name);
   (*it)->clear_array();
@@ -401,7 +398,7 @@ void BasicModule::clear_array(const std::string& name) throw(ANLException)
 
 inline
 void BasicModule::set_parameter(const std::string& name,
-                                double x, double y) throw(ANLException)
+                                double x, double y)
 {
   ModuleParamIter it = find_parameter(name);
   (*it)->set_value(x, y);
@@ -409,7 +406,7 @@ void BasicModule::set_parameter(const std::string& name,
 
 inline
 void BasicModule::set_parameter(const std::string& name,
-                                double x, double y, double z) throw(ANLException)
+                                double x, double y, double z)
 {
   ModuleParamIter it = find_parameter(name);
   (*it)->set_value(x, y, z);

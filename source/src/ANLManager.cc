@@ -58,7 +58,7 @@ ANLManager::ANLManager()
 
 ANLManager::~ANLManager() = default;
 
-void ANLManager::SetModules(std::vector<BasicModule*> modules) throw(ANLException)
+void ANLManager::SetModules(std::vector<BasicModule*> modules)
 {
   modules_ = modules;
   
@@ -92,7 +92,7 @@ void ANLManager::SetModules(std::vector<BasicModule*> modules) throw(ANLExceptio
   reset_counter();
 }
 
-ANLStatus ANLManager::Startup() throw(ANLException)
+ANLStatus ANLManager::Startup()
 {
   std::cout << '\n'
             << "      ***********************************\n"
@@ -103,7 +103,7 @@ ANLStatus ANLManager::Startup() throw(ANLException)
   return routine_startup();
 }
 
-ANLStatus ANLManager::Initialize() throw(ANLException)
+ANLStatus ANLManager::Initialize()
 {
 #if ANL_INITIALIZE_INTERRUPT
   struct sigaction sa;
@@ -143,7 +143,7 @@ ANLStatus ANLManager::Initialize() throw(ANLException)
   return status;
 }
 
-ANLStatus ANLManager::Analyze(long int num_events, bool thread_mode) throw(ANLException)
+ANLStatus ANLManager::Analyze(long int num_events, bool thread_mode)
 {
 #if ANL_ANALYZE_INTERRUPT
   struct sigaction sa;
@@ -211,7 +211,7 @@ ANLStatus ANLManager::Analyze(long int num_events, bool thread_mode) throw(ANLEx
   return status;
 }
 
-ANLStatus ANLManager::Exit() throw(ANLException)
+ANLStatus ANLManager::Exit()
 {
 #if ANL_EXIT_INTERRUPT
   struct sigaction sa;
@@ -247,7 +247,7 @@ ANLStatus ANLManager::Exit() throw(ANLException)
   return status;
 }
 
-ANLStatus ANLManager::Prepare() throw(ANLException)
+ANLStatus ANLManager::Prepare()
 {
   return routine_prepare();
 }
@@ -350,7 +350,7 @@ void ANLManager::reset_counter()
   }
 }
 
-ANLStatus ANLManager::process_analysis(long int num_events) throw(ANLException)
+ANLStatus ANLManager::process_analysis(long int num_events)
 {
   ANLStatus status = AS_OK;
   long int iEvent = 0;
