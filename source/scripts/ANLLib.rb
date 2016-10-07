@@ -1079,6 +1079,7 @@ module ANL
         classOpen = nil
         constructor = nil
         constructor2 = nil
+        numNestedClasses = 0
 
         fin.each_line do |l|
           if !className && l=~/^class\s+(\w+)(\s+|\:)/
@@ -1098,6 +1099,23 @@ module ANL
                 puts 'public:'
               end
             else
+              if l.include?("class")
+                if l.include? '};'
+                  # nested class closed
+                else
+                  numNestedClasses += 1
+                end
+                next
+              end
+
+              if numNestedClasses > 0
+                if l.include? '};'
+                  # nested class closed
+                  numNestedClasses -= 1
+                end
+                next
+              end
+
               if l.include?(className+'(')
                 puts l
                 constructor = true
