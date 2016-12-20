@@ -32,6 +32,7 @@ struct EvsData
 {
   bool flag = false;
   uint64_t counts = 0;
+  uint64_t counts_ok = 0;
 };
 
 typedef std::map<std::string, EvsData> EvsMap;
@@ -45,6 +46,7 @@ typedef EvsMap::const_iterator EvsConstIter;
  * @author Hirokazu Odaka
  * @date 2010-06-xx
  * @date 2014-12-18
+ * @date 2016-12-20 | add count_ok
  */
 class EvsManager
 {
@@ -87,6 +89,7 @@ public:
   void resetAllCounts();
 
   void count();
+  void countCompleted();
   void printSummary();
 
 private:

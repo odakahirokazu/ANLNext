@@ -53,14 +53,25 @@ void EvsManager::count()
   }
 }
 
+void EvsManager::countCompleted()
+{
+  for (auto& e: data_) {
+    if (e.second.flag) {
+      ++(e.second.counts_ok);
+    }
+  }
+}
+
 void EvsManager::printSummary()
 {
   std::cout << "***** Results of Event Selection *****\n"
-            << "    Number of EVS : " << std::setw(8) << data_.size() << '\n';
+            << "    Number of EVS : " << std::setw(8) << data_.size() << '\n'
+            << "                 key                        |     counts     |   completed \n";
   for (auto& e: data_) {
-    std::cout << std::setw(12) << e.second.counts
-              << std::setw(0) << " : "
-              << e.first << '\n';
+    std::cout << std::setw(44) << std::left << e.first << ' '
+              << std::setw(16) << std::right << e.second.counts << ' '
+              << std::setw(16) << std::right << e.second.counts_ok
+              << std::setw(0) << '\n';
   }
   std::cout.flush();
 }

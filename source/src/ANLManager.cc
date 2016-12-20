@@ -399,6 +399,7 @@ ANLStatus ANLManager::process_analysis(long int num_events)
 
     if (status == AS_OK) {
       evsManager_->count();
+      evsManager_->countCompleted();
     }
     else if(status == AS_SKIP) {
       ++counters_[iModule].skip;
