@@ -681,7 +681,11 @@ module ANL
         parameters.each{|name, value| setp(name.to_s, value) }
       end
       if block_given?
-        set_param.(mod)
+        if @startup_done
+          set_param.(mod)
+        else
+          @set_param_list << lambda{ set_param.(mod) }
+        end
       end
       return
     end
