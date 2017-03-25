@@ -26,7 +26,8 @@
 #include <thread>
 
 #if ANL_ANALYZE_INTERRUPT || ANL_INITIALIZE_INTERRUPT || ANL_EXIT_INTERRUPT
-#include <signal.h>
+#include <csignal>
+#include <cstring>
 #endif
 
 #include <unistd.h>
@@ -112,7 +113,7 @@ ANLStatus ANLManager::Initialize()
   std::memset(&sa_org, 0, sizeof(sa_org));
   sa.sa_handler = SIG_DFL;
   sa.sa_flags |= SA_RESTART;
-  if( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
+  if ( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
     return AS_QUIT_ERR;
   }
@@ -134,7 +135,7 @@ ANLStatus ANLManager::Initialize()
  final:
   std::cout << std::endl;
 #if ANL_INITIALIZE_INTERRUPT
-  if( sigaction(SIGINT, &sa_org, 0) != 0 ) {
+  if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
     return AS_QUIT_ERR;
   }
@@ -152,7 +153,7 @@ ANLStatus ANLManager::Analyze(long int num_events, bool thread_mode)
   std::memset(&sa_org, 0, sizeof(sa_org));
   sa.sa_handler = SIG_DFL;
   sa.sa_flags |= SA_RESTART;
-  if( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
+  if ( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
     return AS_QUIT_ERR;
   }
@@ -202,7 +203,7 @@ ANLStatus ANLManager::Analyze(long int num_events, bool thread_mode)
   print_summary();
 
 #if ANL_ANALYZE_INTERRUPT
-  if( sigaction(SIGINT, &sa_org, 0) != 0 ) {
+  if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
     return AS_QUIT_ERR;
   }
@@ -220,7 +221,7 @@ ANLStatus ANLManager::Exit()
   std::memset(&sa_org, 0, sizeof(sa_org));
   sa.sa_handler = SIG_DFL;
   sa.sa_flags |= SA_RESTART;
-  if( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
+  if ( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
     return AS_QUIT_ERR;
   }
@@ -238,7 +239,7 @@ ANLStatus ANLManager::Exit()
   std::cout << "\nANLManager: exiting..." << std::endl;
 
 #if ANL_EXIT_INTERRUPT
-  if( sigaction(SIGINT, &sa_org, 0) != 0 ) {
+  if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
     return AS_QUIT_ERR;
   }
