@@ -1,11 +1,18 @@
 #ifndef ANLNEXT_ANLMacro_H
 #define ANLNEXT_ANLMacro_H 1
 
-#define DEFINE_ANL_MODULE(CLASS_NAME, VERSION)      \
-  virtual std::string __module_name__() const       \
-  { return #CLASS_NAME; }                           \
-  virtual std::string __module_version__() const    \
+#if ANL_USE_OVERRIDE_KEYWORD
+#define DEFINE_ANL_MODULE(CLASS_NAME, VERSION) \
+  std::string __module_name__() const override \
+  { return #CLASS_NAME; } \
+  std::string __module_version__() const override \
   { return #VERSION; }
-
+#else
+#define DEFINE_ANL_MODULE(CLASS_NAME, VERSION) \
+  std::string __module_name__() const \
+  { return #CLASS_NAME; } \
+  std::string __module_version__() const \
+  { return #VERSION; }
+#endif
 
 #endif /* ANLNEXT_ANLMacro_H */

@@ -65,7 +65,12 @@ class EvsManager;
  */
 class BasicModule
 {
-  DEFINE_ANL_MODULE(BasicModule, 0.0);
+private:
+  virtual std::string __module_name__() const
+  { return "BasicModule"; }
+  virtual std::string __module_version__() const
+  { return "0.0"; }
+
 public:
   BasicModule();
   BasicModule(const BasicModule& r);
