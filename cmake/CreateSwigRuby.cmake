@@ -2,8 +2,14 @@
 ### 2013-06-02 | Hirokazu Odaka
 ###
 
+### pre-process
+if (NOT DEFINED TARGET_EXT_LIBRARY_OUTPUT)
+  set(TARGET_EXT_LIBRARY_OUTPUT ${TARGET_EXT_LIBRARY})
+endif()
+
 ### message
 message("-- CreateSwigRuby: ${TARGET_EXT_LIBRARY}")
+message("-- Output name: ${TARGET_EXT_LIBRARY_OUTPUT}")
 message("-- SWIG interface file: ${SWIG_IF_FILE}")
 message("-- INCLUDE_DIRS: ${RUBY_EXT_INCLUDE_DIRS}")
 message("-- LIBRARY_DIRS: ${RUBY_EXT_LIBRARY_DIRS}")
@@ -75,6 +81,7 @@ endif(APPLE)
 
 set_target_properties(${TARGET_EXT_LIBRARY}
   PROPERTIES
+  OUTPUT_NAME ${TARGET_EXT_LIBRARY_OUTPUT}
   PREFIX ""
   SUFFIX ${RUBY_BINDING_SUFFIX}
   LINK_FLAGS ${RUBY_LINK_FLAGS}
