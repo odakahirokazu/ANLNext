@@ -1,7 +1,7 @@
 ANL Next
 ========================================
 
-- Version: 1.8.3
+- Version: 1.8.5
 - Author: Hirokazu Odaka
 
 
@@ -62,11 +62,11 @@ https://github.com/odakahirokazu/ANLNext/
 #### Test environmemt (Mac)
 
 - iMac 27-inch late 2015
-- OS X El Capitan (10.11.6)
-- Apple LLVM version 7.3.0 (clang-703.0.31)
-- ruby 2.3.1p112 (2016-04-26 revision 54768)
-- ROOT 6.06/06
-- SWIG Version 3.0.10
+- macOS Sierra (10.12.5)
+- Apple LLVM version 8.1.0 (clang-802.0.42)
+- ruby 2.3.3p222 (2016-11-21 revision 56859)
+- ROOT 6.08/06
+- SWIG Version 3.0.12
 - Boost 1.60.0_2
 
 #### Test environmemt (Linux)
