@@ -159,7 +159,7 @@ class BasicModule
   void set_module_id(const std::string& v);
   std::string module_id() const;
   
-  std::vector<std::string> get_alias() const;
+  std::vector<std::string> get_aliases_string() const;
   void add_alias(const std::string& name);
 
   std::string module_description() const;

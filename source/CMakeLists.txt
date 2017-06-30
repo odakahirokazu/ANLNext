@@ -81,6 +81,7 @@ add_library(${TARGET_LIBRARY} SHARED
   src/ANLException.cc
   src/EvsManager.cc
   src/VModuleParameter.cc
+  src/ModuleAccess.cc
   src/BasicModule.cc
   src/ANLManager.cc
   src/ANLManager_interactive.cc

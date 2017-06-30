@@ -96,9 +96,10 @@ public:
     set_default_string(key_default);
   }
 
-  std::string type_name() const { return "map"; }
+  std::string type_name() const override
+  { return "map"; }
 
-  void output(std::ostream& os) const
+  void output(std::ostream& os) const override
   {
     os << '\n';
     for (iter_type it=ptr_->begin(); it!=ptr_->end(); ++it) {
@@ -110,21 +111,24 @@ public:
     os.flush();
   }
   
-  void input(std::istream&) {}
+  void input(std::istream&) override {}
   
-  std::string map_key_name() const { return key_name_; }
-  void set_map_key(const std::string& key) { buffer_key_ = key; }
+  std::string map_key_name() const override
+  { return key_name_; }
+  void set_map_key(const std::string& key) override
+  { buffer_key_ = key; }
 
-  std::size_t num_value_elements() const
+  std::size_t num_value_elements() const override
   { return value_info_.size(); }
-  std::shared_ptr<VModuleParameter const> value_element_info(std::size_t index) const
+  std::shared_ptr<VModuleParameter const> value_element_info(std::size_t index) const override
   { return value_info_[index]; }
-  std::string value_element_name(std::size_t index) const
+  std::string value_element_name(std::size_t index) const override
   { return value_info_[index]->name(); }
 
-  void add_value_element(ModuleParam_sptr param) { value_info_.push_back(param); }
+  void add_value_element(ModuleParam_sptr param) override
+  { value_info_.push_back(param); }
 
-  void enable_value_elements(int type, const std::vector<std::size_t>& enables)
+  void enable_value_elements(int type, const std::vector<std::size_t>& enables) override
   {
     std::array<std::size_t, ValueSize> enableArray;
     for (std::size_t i=0; i<ValueSize; ++i) {
@@ -155,10 +159,12 @@ public:
     return true;
   }
 
-  std::size_t size_of_container() const { return ptr_->size(); }
-  void clear_container() { ptr_->clear(); }
+  std::size_t size_of_container() const override
+  { return ptr_->size(); }
+  void clear_container() override
+  { ptr_->clear(); }
 
-  std::vector<std::string> map_key_list() const
+  std::vector<std::string> map_key_list() const override
   {
     std::vector<std::string> keys;
     for (auto& pair: *ptr_) {
@@ -167,7 +173,7 @@ public:
     return keys;
   }
   
-  void insert_to_container()
+  void insert_to_container() override
   {
     value_type tmpValue;
     value_info_get<0>(&tmpValue, value_category());
@@ -176,7 +182,7 @@ public:
     value_info_set<0>(&default_value_, value_category());
   }
 
-  void retrieve_from_container(const std::string& key) const
+  void retrieve_from_container(const std::string& key) const override
   {
     auto it = ptr_->find(key);
     if (it == ptr_->end()) {
@@ -189,31 +195,31 @@ public:
   }
   using VModuleParameter::retrieve_from_container;
 
-  void set_value_element(const std::string& name, bool val)
+  void set_value_element(const std::string& name, bool val) override
   { set_value_element_impl(name, val); }
 
-  void set_value_element(const std::string& name, int val)
+  void set_value_element(const std::string& name, int val) override
   { set_value_element_impl(name, val); }
 
-  void set_value_element(const std::string& name, double val)
+  void set_value_element(const std::string& name, double val) override
   { set_value_element_impl(name, val); }
 
-  void set_value_element(const std::string& name, const std::string& val)
+  void set_value_element(const std::string& name, const std::string& val) override
   { set_value_element_impl(name, val); }
 
-  bool get_value_element(const std::string& name, bool dummy) const
+  bool get_value_element(const std::string& name, bool dummy) const override
   { return get_value_element_impl(name, dummy); }
   
-  int get_value_element(const std::string& name, int dummy) const
+  int get_value_element(const std::string& name, int dummy) const override
   { return get_value_element_impl(name, dummy); }
 
-  double get_value_element(const std::string& name, double dummy) const
+  double get_value_element(const std::string& name, double dummy) const override
   { return get_value_element_impl(name, dummy); }
 
-  std::string get_value_element(const std::string& name, const std::string& dummy) const
+  std::string get_value_element(const std::string& name, const std::string& dummy) const override
   { return get_value_element_impl(name, dummy); }
   
-  bool ask()
+  bool ask() override
   {
     std::cout << "Define table of " << name() << ":" << std::endl;
     ModuleParameter<std::string> tmpKeyParam(&buffer_key_, key_name_);
@@ -243,7 +249,7 @@ public:
     return true;
   }
 
-  boost::property_tree::ptree to_property_tree() const
+  boost::property_tree::ptree to_property_tree() const override
   {
     using boost::property_tree::ptree;
     ptree pt;

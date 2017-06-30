@@ -68,6 +68,15 @@ void BasicModule::set_module_id(const std::string& module_id)
   moduleIDMethod_ = &BasicModule::get_module_id;
 }
 
+std::vector<std::string> BasicModule::get_aliases_string() const
+{
+  std::vector<std::string> v;
+  for (const auto& alias: aliases_) {
+    v.push_back(alias.first);
+  }
+  return v;
+}
+
 void BasicModule::print_parameters()
 {
   for (ModuleParamIter it=parameter_begin(); it!=parameter_end(); ++it) {

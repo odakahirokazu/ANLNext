@@ -17,70 +17,34 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_ModuleAccess_H
-#define ANL_ModuleAccess_H 1
-
-#include <string>
-#include <map>
-#include <iterator>
-#include <boost/format.hpp>
-#include "ANLException.hh"
+#include "ModuleAccess.hh"
 
 namespace anl
 {
 
-class BasicModule;
+ModuleAccess::~ModuleAccess() = default;
 
-/**
- * Interface to access other ANL modules.
- * 
- * @author Hirokazu Odaka
- * @date 2010-06-xx
- * @date 2016-08-19
- * @date 2017-07-29
- */
-class ModuleAccess
+void ModuleAccess::registerModule(const std::string& name,
+                                  BasicModule* module,
+                                  ModuleAccess::ConflictOption conflict)
 {
-public:
-  enum class ConflictOption { error, yield, overwrite };
-
-public:
-  ModuleAccess() = default;
-  ~ModuleAccess();
-
-  const BasicModule* getModule(const std::string& name)
-  { return getModuleNC(name); }
-  
-  BasicModule* getModuleNC(const std::string& name);
-
-  void registerModule(const std::string& name, BasicModule* module,
-                      ConflictOption conflict=ConflictOption::yield);
-
-  bool exist(const std::string& name);
-
-private:
-  using ANLModuleMap = std::map<std::string, BasicModule*>;
-  ANLModuleMap moduleMap_;
-};
-
-inline
-BasicModule* ModuleAccess::getModuleNC(const std::string& name)
-{
-  ANLModuleMap::iterator it = moduleMap_.find(name);
-  if (it == std::end(moduleMap_)) {
-    const std::string message
-      = (boost::format("Module is not found: %s") % name).str();
-    BOOST_THROW_EXCEPTION( ANLException(message) );
+  if (exist(name)) {
+    switch (conflict) {
+      case ConflictOption::yield:
+        break;
+      case ConflictOption::overwrite:
+        moduleMap_[name] = module;
+        break;
+      case ConflictOption::error:
+        const std::string message
+          = (boost::format("Module ID or alias %s already exists.") % name).str();
+        BOOST_THROW_EXCEPTION( ANLException(message) );
+        break;
+    }
   }
-  return it->second;
-}
-
-inline
-bool ModuleAccess::exist(const std::string& name)
-{
-  return (moduleMap_.find(name) != std::end(moduleMap_));
+  else {
+    moduleMap_[name] = module;
+  }
 }
 
 } /* namespace anl */
-
-#endif /* ANL_ModuleAccess_H */
