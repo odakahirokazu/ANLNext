@@ -227,8 +227,7 @@ module ANL
     def_delegators :@_anlapp_analysis_chain, *anlapp_methods
     alias :with :with_parameters
 
-    def self.define_setup_module(basename, module_class=nil,
-                                 array: false, take_parameters: false)
+    def self.define_setup_module(basename, module_class=nil, array: false)
       if array
         setter_name = "add_#{basename}".to_sym
         getter_name = "module_list_of_#{basename}".to_sym
@@ -251,39 +250,38 @@ module ANL
         end
       end
 
-      if module_class
-        if take_parameters
-          define_method(setter_name) do |parameters=nil, &set_param|
-            mi = ModuleInitializer.new(module_class)
-            set_function.(self, variable_name, mi, array)
-            @_anlapp_analysis_chain.current_module = mi
-            mi.with(parameters, &set_param)
-            mi
-          end
+      def resolve_arguments(args)
+        if args.size > 2
+          raise "Too many arguments. The arguments number should be <= 2."
         else
-          define_method(setter_name) do |module_id=nil|
-            mi = ModuleInitializer.new(module_class, module_id)
-            set_function.(self, variable_name, mi, array)
-            @_anlapp_analysis_chain.current_module = mi
-            mi
+          if args[0].kind_of?(String) || args[0].kind_of?(Symbol)
+            module_id = args[0]
+            parameters = args[1]
+          else
+            module_id = nil
+            parameters = args[0]
           end
         end
+        return module_id, parameters
+      end
+
+      if module_class
+        define_method(setter_name) do |*args, &set_param|
+          module_id, parameters = resolve_arguments(args)
+          mi = ModuleInitializer.new(module_class, module_id)
+          set_function.(self, variable_name, mi, array)
+          @_anlapp_analysis_chain.current_module = mi
+          mi.with(parameters, &set_param)
+          mi
+        end
       else
-        if take_parameters
-          define_method(setter_name) do |mod1, parameters=nil, &set_param|
-            mi = ModuleInitializer.new(mod1)
-            set_function.(self, variable_name, mi, array)
-            @_anlapp_analysis_chain.current_module = mi
-            mi.with(parameters, &set_param)
-            mi
-          end
-        else
-          define_method(setter_name) do |mod1, module_id=nil|
-            mi = ModuleInitializer.new(mod1, module_id)
-            set_function.(self, variable_name, mi, array)
-            @_anlapp_analysis_chain.current_module = mi
-            mi
-          end
+        define_method(setter_name) do |mod1, *args, &set_param|
+          module_id, parameters = resolve_arguments(args)
+          mi = ModuleInitializer.new(mod1, module_id)
+          set_function.(self, variable_name, mi, array)
+          @_anlapp_analysis_chain.current_module = mi
+          mi.with(parameters, &set_param)
+          mi
         end
       end
 

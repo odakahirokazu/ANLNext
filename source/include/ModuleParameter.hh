@@ -93,11 +93,12 @@ public:
                   const std::string& expression,
                   const std::string& default_string);
 
-  std::string type_name() const { return type_info<T>::name(); }
+  std::string type_name() const override
+  { return type_info<T>::name(); }
 
-  bool ask();
+  bool ask() override;
 
-  void set_value(call_type val)
+  void set_value(call_type val) override
   {
     set_value_impl(val,
                    is_container_type(),
@@ -106,12 +107,12 @@ public:
   }
   using VModuleParameter::set_value;
 
-  void clear_array()
+  void clear_array() override
   {
     clear_array_impl(is_container_type());
   }
   
-  T get_value(call_type dummy) const
+  T get_value(call_type dummy) const override
   {
     return get_value_impl(dummy,
                           is_container_type(),
@@ -120,7 +121,7 @@ public:
   }
   using VModuleParameter::get_value;
   
-  void output(std::ostream& os) const
+  void output(std::ostream& os) const override
   {
     output_impl(os,
                 is_container_type(),
@@ -128,7 +129,7 @@ public:
                 is_floating_point_type());
   }
   
-  void input(std::istream& is)
+  void input(std::istream& is) override
   {
     input_impl(is,
                is_container_type(),
@@ -136,17 +137,17 @@ public:
                is_floating_point_type());
   }
 
-  void get(void* const value_ptr) const
+  void get(void* const value_ptr) const override
   {
     *static_cast<T* const>(value_ptr) = *ptr_;
   }
   
-  void set(const void* const value_ptr)
+  void set(const void* const value_ptr) override
   {
     *ptr_ = *static_cast<const T* const>(value_ptr);
   }
 
-  boost::property_tree::ptree to_property_tree() const
+  boost::property_tree::ptree to_property_tree() const override
   {
     boost::property_tree::ptree pt;
     pt.put("name", name());

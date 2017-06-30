@@ -20,8 +20,8 @@ public:
   MyVectorModule();
   ~MyVectorModule();
   
-  anl::ANLStatus mod_startup();
-  anl::ANLStatus mod_ana();
+  anl::ANLStatus mod_startup() override;
+  anl::ANLStatus mod_ana() override;
 
 private:
   std::vector<std::tuple<int, std::string, double, double>> myVector_;

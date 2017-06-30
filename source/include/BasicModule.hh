@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <string>
+#include <utility>
 #include <vector>
 #include <list>
 #include <deque>
@@ -92,8 +93,14 @@ public:
   virtual ANLStatus mod_endrun()   { return AS_OK; }
   virtual ANLStatus mod_exit()     { return AS_OK; }
 
-  std::vector<std::string> get_alias() const { return aliases_; }
-  void add_alias(const std::string& name) { aliases_.push_back(name); }
+  std::vector<std::pair<std::string, ModuleAccess::ConflictOption>> get_aliases() const { return aliases_; }
+  std::vector<std::string> get_aliases_string() const;
+  void add_alias(const std::string& name,
+                 ModuleAccess::ConflictOption conflict=ModuleAccess::ConflictOption::error)
+  {
+    aliases_.emplace_back(name, conflict);
+  }
+
   int copy_id() { return myCopyID_; }
 
   std::string module_description() const { return moduleDescription_; }
@@ -256,7 +263,7 @@ private:
   
 private:
   std::string moduleID_;
-  std::vector<std::string> aliases_;
+  std::vector<std::pair<std::string, ModuleAccess::ConflictOption>> aliases_;
   std::string moduleDescription_;
   bool moduleOn_;
   EvsManager* evsManager_;

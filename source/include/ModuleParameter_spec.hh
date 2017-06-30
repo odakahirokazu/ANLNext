@@ -38,7 +38,7 @@ public:
     : VModuleParameter(name, unit, unit_name), ptr_(ptr)
   {}
 
-  std::string type_name() const
+  std::string type_name() const override
   {
     std::string t("tuple<");
     t += type_info<Ts...>::name();
@@ -46,18 +46,18 @@ public:
     return t;
   }
 
-  void set_value(Ts... values)
+  void set_value(Ts... values) override
   {
     set_value_tuple_impl<0>(values...);
   }
   using VModuleParameter::set_value;
   
-  void output(std::ostream& os) const
+  void output(std::ostream& os) const override
   {
     output_tuple_impl<0, Ts...>(os);
   }
   
-  void input(std::istream& is)
+  void input(std::istream& is) override
   {
     input_tuple_impl<0, Ts...>(is);
   }
@@ -167,26 +167,27 @@ public:
     : VModuleParameter(name, unit, unit_name), ptr_(ptr)
   {}
 
-  std::string type_name() const { return "2-vector"; }
+  std::string type_name() const override
+  { return "2-vector"; }
   
-  void set_value(double x, double y)
+  void set_value(double x, double y) override
   {
     ptr_->Set(x*unit(), y*unit());
   }
   using VModuleParameter::set_value;
 
-  std::vector<double> get_value(double, double) const
+  std::vector<double> get_value(double, double) const override
   {
     return std::vector<double>{ptr_->X()/unit(), ptr_->Y()/unit()};
   }
   using VModuleParameter::get_value;
   
-  void output(std::ostream& os) const
+  void output(std::ostream& os) const override
   {
     os << ptr_->X()/unit() << " " << ptr_->Y()/unit();
   }
   
-  void input(std::istream& is)
+  void input(std::istream& is) override
   {
     double x(0.0), y(0.0);
     is >> x >> y;
@@ -195,7 +196,7 @@ public:
     }
   }
 
-  boost::property_tree::ptree to_property_tree() const
+  boost::property_tree::ptree to_property_tree() const override
   {
     boost::property_tree::ptree pt;
     pt.put("name", name());
@@ -229,26 +230,27 @@ public:
     : VModuleParameter(name, unit, unit_name), ptr_(ptr)
   {}
 
-  std::string type_name() const { return "3-vector"; }
+  std::string type_name() const override
+  { return "3-vector"; }
   
-  void set_value(double x, double y, double z)
+  void set_value(double x, double y, double z) override
   { ptr_->SetXYZ(x*unit(), y*unit(), z*unit()); }
   using VModuleParameter::set_value;
   
-  std::vector<double> get_value(double, double, double) const
+  std::vector<double> get_value(double, double, double) const override
   {
     return std::vector<double>{ptr_->X()/unit(), ptr_->Y()/unit(), ptr_->Z()/unit()};
   }
   using VModuleParameter::get_value;
   
-  void output(std::ostream& os) const
+  void output(std::ostream& os) const override
   {
     os << ptr_->X()/unit() << " "
        << ptr_->Y()/unit() << " "
        << ptr_->Z()/unit();
   }
 
-  void input(std::istream& is)
+  void input(std::istream& is) override
   {
     double x(0.0), y(0.0), z(0.0);
     is >> x >> y >> z;
@@ -257,7 +259,7 @@ public:
     }
   }
 
-  boost::property_tree::ptree to_property_tree() const
+  boost::property_tree::ptree to_property_tree() const override
   {
     boost::property_tree::ptree pt;
     pt.put("name", name());
@@ -293,23 +295,25 @@ public:
     : VModuleParameter(name, unit, unit_name), ptr_(ptr)
   {}
   
-  std::string type_name() const { return "2-vector"; }
+  std::string type_name() const override
+  { return "2-vector"; }
 
-  void set_value(double x, double y) { ptr_->set(x*unit(), y*unit()); }
+  void set_value(double x, double y) override
+  { ptr_->set(x*unit(), y*unit()); }
   using VModuleParameter::set_value;
 
-  std::vector<double> get_value(double, double) const
+  std::vector<double> get_value(double, double) const override
   {
     return std::vector<double>{ptr_->x()/unit(), ptr_->y()/unit()};
   }
   using VModuleParameter::get_value;
 
-  void output(std::ostream& os) const
+  void output(std::ostream& os) const override
   {
     os << ptr_->x()/unit() << " " << ptr_->y()/unit();
   }
 
-  void input(std::istream& is)
+  void input(std::istream& is) override
   {
     double x(0.0), y(0.0);
     is >> x >> y;
@@ -318,7 +322,7 @@ public:
     }
   }
  
-  boost::property_tree::ptree to_property_tree() const
+  boost::property_tree::ptree to_property_tree() const override
   {
     boost::property_tree::ptree pt;
     pt.put("name", name());
@@ -352,26 +356,27 @@ public:
     : VModuleParameter(name, unit, unit_name), ptr_(ptr)
   {}
   
-  std::string type_name() const { return "3-vector"; }
+  std::string type_name() const override
+  { return "3-vector"; }
 
-  void set_value(double x, double y, double z)
+  void set_value(double x, double y, double z) override
   { ptr_->set(x*unit(), y*unit(), z*unit()); }
   using VModuleParameter::set_value;
 
-  std::vector<double> get_value(double, double, double) const
+  std::vector<double> get_value(double, double, double) const override
   {
     return std::vector<double>{ptr_->x()/unit(), ptr_->y()/unit(), ptr_->z()/unit()};
   }
   using VModuleParameter::get_value;
 
-  void output(std::ostream& os) const
+  void output(std::ostream& os) const override
   {
     os << ptr_->x()/unit() << " "
        << ptr_->y()/unit() << " "
        << ptr_->z()/unit();
   }
 
-  void input(std::istream& is)
+  void input(std::istream& is) override
   {
     double x(0.0), y(0.0), z(0.0);
     is >> x >> y >> z;
@@ -380,7 +385,7 @@ public:
     }
   }
 
-  boost::property_tree::ptree to_property_tree() const
+  boost::property_tree::ptree to_property_tree() const override
   {
     boost::property_tree::ptree pt;
     pt.put("name", name());

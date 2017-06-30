@@ -18,13 +18,13 @@ public:
   MyModule();
   ~MyModule();
   
-  anl::ANLStatus mod_startup();
-  anl::ANLStatus mod_init();
-  anl::ANLStatus mod_his();
-  anl::ANLStatus mod_bgnrun();
-  anl::ANLStatus mod_ana();
-  anl::ANLStatus mod_endrun();
-  anl::ANLStatus mod_exit();
+  anl::ANLStatus mod_startup() override;
+  anl::ANLStatus mod_init() override;
+  anl::ANLStatus mod_his() override;
+  anl::ANLStatus mod_bgnrun() override;
+  anl::ANLStatus mod_ana() override;
+  anl::ANLStatus mod_endrun() override;
+  anl::ANLStatus mod_exit() override;
 
 private:
   int myParameter1_;

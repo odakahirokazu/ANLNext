@@ -63,30 +63,29 @@ void ANLManager::SetModules(std::vector<BasicModule*> modules)
 {
   modules_ = modules;
   
-  for (AMIter mod = modules_.begin(); mod != modules_.end(); ++mod) {
-    (*mod)->set_evs_manager(evsManager_.get());
+  for (BasicModule* mod: modules_) {
+    mod->set_evs_manager(evsManager_.get());
   }
 
-  for (AMIter mod = modules_.begin(); mod != modules_.end(); ++mod) {
+  for (BasicModule* mod: modules_) {
     ModuleAccess access;
     
-    for (AMIter r = modules_.begin(); r != modules_.end(); ++r) {
-      std::string name;
-      name = (*r)->module_id();
-      if ( (*mod)->accessible(name) ) {
-        access.registerModule(name, *r);
+    for (BasicModule* r: modules_) {
+      const std::string moduleID = r->module_id();
+      if ( mod->accessible(moduleID) ) {
+        access.registerModule(moduleID, r, ModuleAccess::ConflictOption::error);
       }
 
-      std::vector<std::string> alias = (*r)->get_alias();
-      for (std::size_t i=0; i<alias.size(); i++) {
-        name = alias[i];
-        if ( (*mod)->accessible(name) ) {
-          access.registerModule(name, *r);
+      for (const std::pair<std::string, ModuleAccess::ConflictOption>& alias: r->get_aliases()) {
+        if ( mod->accessible(alias.first) ) {
+          if (alias.first != moduleID) {
+            access.registerModule(alias.first, r, alias.second);
+          }
         }
       }
     }
 
-    (*mod)->set_anl_access(access);
+    mod->set_anl_access(access);
   }
   
   counters_.resize(modules_.size());
