@@ -33,11 +33,11 @@ ANLStatus FillHistogram::mod_startup()
 
 ANLStatus FillHistogram::mod_init()
 {
-  GetANLModule("GenerateEvents", &_event);
+  GetModule("GenerateEvents", &_event);
 
   if (ModuleExist("SaveData")) {
     SaveData* saveModule;
-    GetANLModuleNC("SaveData", &saveModule);
+    GetModuleNC("SaveData", &saveModule);
     saveModule->cd();
   }
   

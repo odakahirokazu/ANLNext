@@ -24,6 +24,7 @@
 #include <functional>
 #include <memory>
 #include <thread>
+#include <cctype>
 
 #if ANL_ANALYZE_INTERRUPT || ANL_INITIALIZE_INTERRUPT || ANL_EXIT_INTERRUPT
 #include <csignal>
@@ -52,7 +53,9 @@ namespace anl
 
 ANLManager::ANLManager()
   : evsManager_(new EvsManager),
-    displayFrequency_(-1), interrupted_(false)
+    moduleAccess_(new ModuleAccess),
+    displayFrequency_(-1),
+    interrupted_(false)
 {
   evsManager_->initialize();
 }
@@ -62,34 +65,13 @@ ANLManager::~ANLManager() = default;
 void ANLManager::SetModules(std::vector<BasicModule*> modules)
 {
   modules_ = modules;
-  
+
   for (BasicModule* mod: modules_) {
     mod->set_evs_manager(evsManager_.get());
+    mod->set_module_access(moduleAccess_.get());
   }
 
-  for (BasicModule* mod: modules_) {
-    ModuleAccess access;
-    
-    for (BasicModule* r: modules_) {
-      const std::string moduleID = r->module_id();
-      if ( mod->accessible(moduleID) ) {
-        access.registerModule(moduleID, r, ModuleAccess::ConflictOption::error);
-      }
-
-      for (const std::pair<std::string, ModuleAccess::ConflictOption>& alias: r->get_aliases()) {
-        if ( mod->accessible(alias.first) ) {
-          if (alias.first != moduleID) {
-            access.registerModule(alias.first, r, alias.second);
-          }
-        }
-      }
-    }
-
-    mod->set_anl_access(access);
-  }
-  
-  counters_.resize(modules_.size());
-  reset_counter();
+  reset_counters();
 }
 
 ANLStatus ANLManager::Startup()
@@ -100,7 +82,35 @@ ANLStatus ANLManager::Startup()
             << "      ***********************************\n"
             << std::endl;
 
-  return routine_startup();
+  ANLStatus status = routine_startup();
+  if (status != AS_OK) {
+    goto final;
+  }
+
+  for (BasicModule* mod: modules_) {
+    const std::string moduleID = mod->module_id();
+    moduleAccess_->registerModule(moduleID,
+                                  mod,
+                                  ModuleAccess::ConflictOption::error);
+
+    for (const std::pair<std::string, ModuleAccess::ConflictOption>& alias: mod->get_aliases()) {
+      if (alias.first != moduleID) {
+        moduleAccess_->registerModule(alias.first,
+                                      mod,
+                                      alias.second);
+      }
+    }
+  }
+
+  std::cout << "ANLManager: definition done." << std::endl;
+  
+final:
+  return status;
+}
+
+ANLStatus ANLManager::Prepare()
+{
+  return routine_prepare();
 }
 
 ANLStatus ANLManager::Initialize()
@@ -120,18 +130,22 @@ ANLStatus ANLManager::Initialize()
 
   show_analysis();
   print_parameters();
-  reset_counter();
+  reset_counters();
 
   ANLStatus status = AS_OK;
   status = routine_init();
-  if (status != AS_OK) goto final;
+  if (status != AS_OK) {
+    goto final;
+  }
 
   status = routine_his();
-  if (status != AS_OK) goto final;
+  if (status != AS_OK) {
+    goto final;
+  }
   
   std::cout << "ANLManager: initialization done." << std::endl;
   
- final:
+final:
   std::cout << std::endl;
 #if ANL_INITIALIZE_INTERRUPT
   if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
@@ -186,18 +200,16 @@ ANLStatus ANLManager::Analyze(long int num_events, bool thread_mode)
   }
 
   if (status != AS_OK) {
-    print_summary();
     goto final;
   }
   
   std::cout << "ANLManager: start endrun routine." << std::endl;
   status = routine_endrun();
   if (status != AS_OK) {
-    print_summary();
     goto final;
   }
 
- final:
+final:
   std::cout << std::endl;
   print_summary();
 
@@ -229,13 +241,16 @@ ANLStatus ANLManager::Exit()
   ANLStatus status = AS_OK;
   status = routine_exit();
   if (status != AS_OK) {
-    return status;
+    goto final;
   }
 
+final:
   std::cout << std::endl;
   evsManager_->printSummary();
 
-  std::cout << "\nANLManager: exiting..." << std::endl;
+  std::cout << "\n"
+            << "ANLManager: exiting..."
+            << std::endl;
 
 #if ANL_EXIT_INTERRUPT
   if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
@@ -247,44 +262,31 @@ ANLStatus ANLManager::Exit()
   return status;
 }
 
-ANLStatus ANLManager::Prepare()
+int ANLManager::ModuleIndex(const std::string& module_id, bool strict) const
 {
-  return routine_prepare();
-}
-
-int ANLManager::getModuleNumber(const std::string& id, bool strict)
-{
-  int modNumber = -1;
+  int index = -1;
   if (strict) {
-    for (std::size_t i=0; i<modules_.size(); ++i) {
-      if (modules_[i]->module_id()==id) {
-        if (modNumber==-1) {
-          modNumber = i+1;
-        }
-        else {
-          return -2;
-        }
-      }
+    AMConstIter moduleIter = std::find_if(std::begin(modules_), std::end(modules_),
+                                          [&](const BasicModule* m){ return (m->module_id() == module_id); });
+    if (moduleIter != modules_.cend()) {
+      index = moduleIter - modules_.cbegin();
     }
   }
   else {
-    for (std::size_t i=0; i<modules_.size(); ++i) {
-      std::string name2(id);
-      std::transform(name2.begin(), name2.end(), name2.begin(), ANLToLower());
-      std::string moduleNameLower(modules_[i]->module_id());
-      std::transform(moduleNameLower.begin(), moduleNameLower.end(),
-                     moduleNameLower.begin(), ANLToLower());
-      if (moduleNameLower.find(name2)==0) {
-        if (modNumber==-1) {
-          modNumber = i+1;
-        }
-        else {
-          return -2;
-        }
-      }
+    std::string lower1(module_id);
+    std::transform(lower1.begin(), lower1.end(), lower1.begin(),
+                   [](unsigned char c){ return std::tolower(c);});
+    AMConstIter moduleIter = std::find_if(std::begin(modules_), std::end(modules_),
+                                          [&](const BasicModule* m) {
+                                            std::string lower2(m->module_id());
+                                            std::transform(lower2.begin(), lower2.end(), lower2.begin(),
+                                                           [](unsigned char c){ return std::tolower(c);});
+                                            return (lower2 == lower1); });
+    if (moduleIter != modules_.cend()) {
+      index = moduleIter - modules_.cbegin();
     }
   }
-  return modNumber;
+  return index;
 }
 
 void ANLManager::show_analysis()
@@ -305,8 +307,8 @@ void ANLManager::show_analysis()
       << " Version " << "  " << " ON/OFF \n"
       << "----------------------------------------------------------------------------"
       << std::endl;
-    for (std::size_t i = 0; i < modules_.size(); i++) {
-      std::cout << std::right << std::setw(4) << i+1 << "    ";
+    for (std::size_t i=0; i<modules_.size(); i++) {
+      std::cout << std::right << std::setw(4) << i << "    ";
       std::string moduleID(modules_[i]->module_id());
       if (modules_[i]->module_id() != modules_[i]->module_name()) {
         moduleID += " (" + modules_[i]->module_name() + ")";
@@ -331,70 +333,64 @@ void ANLManager::print_parameters()
             << "      ***********************************\n"
             << std::endl;
   
-  AMIter const mod_end = modules_.end();
-  for (AMIter mod = modules_.begin(); mod != mod_end; ++mod) {
-    std::cout << "--- " << (*mod)->module_id() << " ---"<< std::endl;
-    (*mod)->print_parameters();
+  for (BasicModule* mod: modules_) {
+    std::cout << "--- " << mod->module_id() << " ---"<< std::endl;
+    mod->print_parameters();
     std::cout << std::endl;
   }
 }
 
-void ANLManager::reset_counter()
+void ANLManager::reset_counters()
 {
-  for (std::size_t i=0; i<counters_.size(); i++) {
-    counters_[i].entry = 0;
-    counters_[i].ok = 0;
-    counters_[i].err = 0;
-    counters_[i].skip = 0;
-    counters_[i].quit = 0;
+  counters_.resize(modules_.size());
+  for (LoopCounter& c: counters_) {
+    c.reset();
   }
 }
 
 ANLStatus ANLManager::process_analysis(long int num_events)
 {
   ANLStatus status = AS_OK;
-  long int iEvent = 0;
-  AMIter mod = modules_.begin();
-  AMIter const mod_end = modules_.end();
-  int iModule = 0;
 
-  long int display_freq = DisplayFrequency();
-  if (display_freq < 0) {
-    if (num_events > 0) { display_freq = num_events/100; }
-    else { display_freq = 10000; }
+  const std::vector<BasicModule*>& modules = modules_;
+  const std::size_t NumberOfModules = modules.size();
+
+  long int display_frequency = DisplayFrequency();
+  if (display_frequency < 0) {
+    if (num_events > 0) { display_frequency = num_events/100; }
+    else { display_frequency = 10000; }
   }
 
-  while (iEvent != num_events) {
-    if (display_freq != 0 && iEvent%display_freq == 0) {
+  for (long int iEvent=0; iEvent<num_events; iEvent++) {
+    if (display_frequency != 0 && iEvent%display_frequency == 0) {
       std::cout << "Event : " << std::dec << std::setw(10) << iEvent << std::endl;
       std::cout.width(0);
     }
 
     evsManager_->resetAllFlags();
-    mod = modules_.begin(); iModule = 0;
-    while (mod != mod_end) {
-      if ((*mod)->is_on()) {
-        ++counters_[iModule].entry;
-        (*mod)->set_event_loop_index(iEvent);
+
+    for (std::size_t iModule=0; iModule<NumberOfModules; iModule++) {
+      BasicModule* mod = modules[iModule];
+      if (mod->is_on()) {
+        counters_[iModule].count_up_by_entry();
+        mod->set_event_loop_index(iEvent);
 
         try {
-          status = (*mod)->mod_ana();
+          status = mod->mod_ana();
         }
         catch (ANLException& ex) {
           ex << ANLErrorInfoOnLoopIndex(iEvent);
-          ex << ANLErrorInfoOnMethod( (*mod)->module_name() + "::mod_ana" );
-          ex << ANLErrorInfoOnModule( (*mod)->module_id() );
+          ex << ANLErrorInfoOnMethod( mod->module_name() + "::mod_ana" );
+          ex << ANLErrorInfoOnModule( mod->module_id() );
           throw;
         }
-
-        if (status == AS_OK) {
-          ++counters_[iModule].ok;
-        }
-        else {
+        
+        counters_[iModule].count_up_by_result(status);
+        
+        if (status != AS_OK) {
           break;
         }
       }
-      ++mod; ++iModule;
     }
 
     if (status == AS_OK) {
@@ -402,34 +398,28 @@ ANLStatus ANLManager::process_analysis(long int num_events)
       evsManager_->countCompleted();
     }
     else if(status == AS_SKIP) {
-      ++counters_[iModule].skip;
       evsManager_->count();
     }
-    else if (status == AS_SKIP_ERR) {
-      ++counters_[iModule].skip;
-      ++counters_[iModule].err;
+    else if(status == AS_SKIP_ERR) {
+      ;
     }
     else if (status == AS_QUIT) {
-      ++counters_[iModule].quit;
       evsManager_->count();
       break;
     }
     else if (status == AS_QUIT_ERR) {
-      ++counters_[iModule].quit;
-      ++counters_[iModule].err;
-      break;
-    }
-    else {
       break;
     }
 
-    if (interrupted_) break;
-       
-    ++iEvent;
+    if (interrupted_) {
+      break;
+    }
   }
 
-  if (status==AS_SKIP_ERR || status==AS_QUIT_ERR) return status;
-  
+  if (status==AS_SKIP_ERR || status==AS_QUIT_ERR) {
+    return status;
+  }
+
   return AS_OK;
 }
 
@@ -439,7 +429,7 @@ void ANLManager::print_summary()
   std::cout << "      ***********************************\n"
             << "      ****      Analysis chain      *****\n"
             << "      ***********************************\n"
-            << "               PUT: " << counters_[0].entry << '\n'
+            << "               Put: " << counters_[0].entry() << '\n'
             << "                |\n";
 
   for (std::size_t i=0; i<n; i++) {
@@ -448,16 +438,16 @@ void ANLManager::print_summary()
       moduleID += "/" + modules_[i]->module_id();
     }
     moduleID += "  version  " + modules_[i]->module_version();
-    std::cout << boost::format("     [%3d]  %-40s") % (i+1) % moduleID;
-    if (counters_[i].quit>1) { std::cout << "  ---> Quit"; }
+    std::cout << boost::format("     [%3d]  %-40s") % i % moduleID;
+    if (counters_[i].quit() > 1) { std::cout << "  ---> Quit"; }
     std::cout <<  '\n';
-    std::cout << "    " << std::setw(10) << counters_[i].entry << "  |"
-              << "  OK: " << counters_[i].ok
-              << "  SKIP: " << counters_[i].skip
-              << "  ERR: " << counters_[i].err << '\n';
+    std::cout << "    " << std::setw(10) << counters_[i].entry() << "  |"
+              << "  OK: " << counters_[i].ok()
+              << "  Skip: " << counters_[i].skip()
+              << "  Error: " << counters_[i].error() << '\n';
     std::cout.width(0);
   }
-  std::cout << "               GET: " << counters_[n-1].ok << '\n';
+  std::cout << "               Get: " << counters_[n-1].ok() << '\n';
   std::cout << std::endl;
 }
 

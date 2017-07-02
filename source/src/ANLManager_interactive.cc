@@ -125,7 +125,7 @@ ANLStatus ANLManager::InteractiveCom()
               n = boost::lexical_cast<int>(moduleName);
             }
             else {
-              n = getModuleNumber(moduleName, false);
+              n = ModuleIndex(moduleName, false);
             }
             status = InteractiveModifyParam(n);
           }
@@ -150,7 +150,7 @@ ANLStatus ANLManager::InteractiveCom()
             n = boost::lexical_cast<int>(moduleName);
           }
           else {
-            n = getModuleNumber(moduleName, false);
+            n = ModuleIndex(moduleName, false);
           }
           InteractivePrintParam(n);
         }
@@ -167,7 +167,7 @@ ANLStatus ANLManager::InteractiveCom()
             n = boost::lexical_cast<int>(moduleName);
           }
           else {
-            n = getModuleNumber(moduleName, false);
+            n = ModuleIndex(moduleName, false);
           }
           InteractiveModuleSwitch(n, true);
         }
@@ -184,7 +184,7 @@ ANLStatus ANLManager::InteractiveCom()
             n = boost::lexical_cast<int>(moduleName);
           }
           else {
-            n = getModuleNumber(moduleName, false);
+            n = ModuleIndex(moduleName, false);
           }
           InteractiveModuleSwitch(n, false);
         }
@@ -240,7 +240,7 @@ void ANLManager::InteractiveComHelp()
 ANLStatus ANLManager::InteractiveModifyParam(int n)
 {
   ANLStatus status = AS_OK;
-  if (n==0) {
+  if (n==-1) {
     for (AMIter mod=modules_.begin(); mod!=modules_.end(); ++mod) {
       if ((*mod)->is_off()) continue;
       std::cout << (*mod)->module_name() << " mod_com()" << std::endl;
@@ -259,8 +259,8 @@ ANLStatus ANLManager::InteractiveModifyParam(int n)
       std::cout << std::endl;
     }
   }
-  else if (0<n && n<=static_cast<int>(modules_.size())) {
-    BasicModule* mo = modules_[n-1];
+  else if (0<=n && n<static_cast<int>(modules_.size())) {
+    BasicModule* mo = modules_[n];
     std::cout << mo->module_name()
               << " mod_com()" << std::endl;
     status = mo->mod_com();
@@ -284,15 +284,15 @@ ANLStatus ANLManager::InteractiveModifyParam(int n)
 
 void ANLManager::InteractivePrintParam(int n)
 {
-  if (n==0) {
+  if (n==-1) {
     for (AMIter mod=modules_.begin(); mod!=modules_.end(); ++mod) {
       std::cout << (*mod)->module_name() << " parameters" << std::endl;
       (*mod)->print_parameters();
       std::cout << std::endl;
     }
   }
-  else if (0<n && n<=static_cast<int>(modules_.size())) {
-    BasicModule* mo = modules_[n-1];
+  else if (0<=n && n<static_cast<int>(modules_.size())) {
+    BasicModule* mo = modules_[n];
     std::cout << mo->module_name() << " parameters" << std::endl;
     mo->print_parameters();
   }
@@ -303,7 +303,7 @@ void ANLManager::InteractivePrintParam(int n)
 
 void ANLManager::InteractiveModuleSwitch(int n, bool module_sw)
 {
-  if (n==0) {
+  if (n==-1) {
     for (AMIter mod=modules_.begin(); mod!=modules_.end(); ++mod) {
       if (module_sw) {
         (*mod)->on();
@@ -315,8 +315,8 @@ void ANLManager::InteractiveModuleSwitch(int n, bool module_sw)
       }
     }
   }
-  else if (0<n && n<=static_cast<int>(modules_.size())) {
-    BasicModule* mo = modules_[n-1];
+  else if (0<=n && n<static_cast<int>(modules_.size())) {
+    BasicModule* mo = modules_[n];
     if (module_sw) {
       mo->on();
       std::cout << mo->module_name() << " turned on." << std::endl;

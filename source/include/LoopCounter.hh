@@ -17,42 +17,79 @@
  *                                                                       *
  *************************************************************************/
 
-#include "ModuleAccess.hh"
+#ifndef ANL_LoopCounter_H
+#define ANL_LoopCounter_H 1
+
+#include "ANLStatus.hh"
 
 namespace anl
 {
 
-ModuleAccess::~ModuleAccess() = default;
-
-void ModuleAccess::registerModule(const std::string& name,
-                                  BasicModule* module,
-                                  ModuleAccess::ConflictOption conflict)
+/**
+ * Loop counter
+ *
+ * @author Hirokazu Odaka
+ * @date 2017-07-02 | based on struct ANLModuleCounter
+ */
+class LoopCounter
 {
-  if (exist(name)) {
-    switch (conflict) {
-      case ConflictOption::yield:
-        break;
-      case ConflictOption::overwrite:
-        moduleMap_[name] = module;
-        break;
-      case ConflictOption::remove:
-        moduleMap_.erase(name);
-        break;
-      case ConflictOption::error:
-        const std::string message
-          = (boost::format("Module ID or alias %s already exists.") % name).str();
-        BOOST_THROW_EXCEPTION( ANLException(message) );
-        break;
+public:
+  LoopCounter() = default;
+  ~LoopCounter() = default;
+  LoopCounter(const LoopCounter&) = default;
+  LoopCounter(LoopCounter&&) = default;
+  LoopCounter& operator=(const LoopCounter&) = default;
+  LoopCounter& operator=(LoopCounter&&) = default;
+
+  long int entry() const { return entry_; }
+  long int ok() const { return ok_; }
+  long int error() const { return error_; }
+  long int skip() const { return skip_; }
+  long int quit() const { return quit_; }
+  
+  void reset()
+  {
+    entry_ = 0;
+    ok_ = 0;
+    error_ = 0;
+    skip_ = 0;
+    quit_ = 0;
+  }
+
+  void count_up_by_entry()
+  {
+    ++entry_;
+  }
+
+  void count_up_by_result(ANLStatus status)
+  {
+    if (status == AS_OK) {
+      ++ok_;
+    }
+    else if (status == AS_SKIP) {
+      ++skip_;
+    }
+    else if (status == AS_SKIP_ERR) {
+      ++skip_;
+      ++error_;
+    }
+    else if (status == AS_QUIT) {
+      ++quit_;
+    }
+    else if (status == AS_QUIT_ERR) {
+      ++quit_;
+      ++error_;
     }
   }
-  else {
-    switch (conflict) {
-      case ConflictOption::remove:
-        break;
-      default:
-        moduleMap_[name] = module;
-    }
-  }
-}
+
+private:
+  long int entry_ = 0;
+  long int ok_ = 0;
+  long int error_ = 0;
+  long int skip_ = 0;
+  long int quit_ = 0;
+};
 
 } /* namespace anl */
+
+#endif /* ANL_LoopCounter_H */
