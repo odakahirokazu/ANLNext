@@ -33,8 +33,7 @@ int BasicModule::CopyID__ = 0;
 BasicModule::BasicModule()
   : moduleID_(""),
     moduleDescription_(""),
-    moduleOn_(true), evsManager_(0), currentParameter_(),
-    requiringFullAccess_(true),
+    moduleOn_(true),
     eventIndex_(-1)
 {
   myCopyID_ = CopyID__;
@@ -49,9 +48,7 @@ BasicModule::BasicModule(const BasicModule& r)
     moduleDescription_(r.moduleDescription_),
     moduleOn_(r.moduleOn_),
     evsManager_(r.evsManager_),
-    moduleAccess_(r.moduleAccess_),
-    accessibleModules_(r.accessibleModules_),
-    requiringFullAccess_(true)
+    moduleAccess_(r.moduleAccess_)
 {
   myCopyID_ = CopyID__;
   CopyID__++;
@@ -103,11 +100,6 @@ void BasicModule::ask_parameters()
   }
 }
 
-bool BasicModule::accessible(const std::string& name) 
-{
-  return requiringFullAccess_ || accessibleModules_.count(name);
-}
-
 void BasicModule::unregister_parameter(const std::string& name)
 {
   ModuleParamIter it=parameter_begin();
@@ -156,16 +148,6 @@ void BasicModule::ask_parameter(const std::string& name,
       break;
     }
   }
-}
-
-void BasicModule::require_module_access(const std::string& name)
-{
-  accessibleModules_.insert(name);
-}
-
-void BasicModule::require_full_access(bool v)
-{
-  requiringFullAccess_ = v;
 }
 
 void BasicModule::EvsDef(const std::string& key)

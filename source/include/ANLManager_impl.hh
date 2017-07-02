@@ -33,22 +33,21 @@ ANLStatus ANLManager::routine_modfn(T func, const std::string& func_id)
   std::cout << "ANLManager: " << func_id << " routine started." << std::endl;
 
   ANLStatus status = AS_OK;
-  AMIter const mod_end = modules_.end();
-  for (AMIter mod = modules_.begin(); mod != mod_end; ++mod) {
-    if ((*mod)->is_off()) continue;
+  for (BasicModule* mod: modules_) {
+    if (mod->is_off()) continue;
     
     try {
-      status = ((*mod)->*func)();
+      status = (mod->*func)();
       if (status != AS_OK ) {
         std::cout << "ANLManager: " << func_id << " routine stopped.\n"
-                  << (*mod)->module_name() << "::mod_" << func_id
+                  << mod->module_name() << "::mod_" << func_id
                   << " return " << status << std::endl;
         break;
       }
     }
     catch (ANLException& ex) {
-      ex << ANLErrorInfoOnMethod( (*mod)->module_name() + "::mod_" + func_id );
-      ex << ANLErrorInfoOnModule( (*mod)->module_id() );
+      ex << ANLErrorInfoOnMethod( mod->module_name() + "::mod_" + func_id );
+      ex << ANLErrorInfoOnModule( mod->module_id() );
       throw;
     }
   }

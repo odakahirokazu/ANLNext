@@ -63,6 +63,7 @@ class EvsManager;
  * @date 2013-05-22
  * @date 2014-12-18
  * @date 2015-11-10 | review parameter setter/getter methods
+ * @date 2017-07-20 | do not own ModuleAccess, always fully accessible
  */
 class BasicModule
 {
@@ -107,8 +108,7 @@ public:
   void set_module_description(const std::string& v) { moduleDescription_ = v; }
 
   void set_evs_manager(EvsManager* man) { evsManager_ = man; }
-  void set_anl_access(const ModuleAccess& aa) { moduleAccess_ = aa; }
-  bool accessible(const std::string& name);
+  void set_module_access(const ModuleAccess* aa) { moduleAccess_ = aa; }
 
   /**
    * enable this module.
@@ -217,33 +217,30 @@ protected:
   void enable_value_elements(int type, const std::vector<std::size_t>& enable)
   { currentParameter_->enable_value_elements(type, enable); }
   
-  void require_module_access(const std::string& name);
-  void require_full_access(bool v=true);
-  
   template <typename T>
-  void GetANLModule(const std::string& name, T* ptr)
-  { *ptr = static_cast<T>(moduleAccess_.getModule(name)); }
+  void GetModule(const std::string& name, T* ptr)
+  { *ptr = static_cast<T>(moduleAccess_->getModule(name)); }
 
   template <typename T>
-  void GetANLModuleNC(const std::string& name, T* ptr)
-  { *ptr = static_cast<T>(moduleAccess_.getModuleNC(name)); }
+  void GetModuleNC(const std::string& name, T* ptr)
+  { *ptr = static_cast<T>(moduleAccess_->getModuleNC(name)); }
 
   template <typename T>
-  const T* GetANLModule(const std::string& name)
-  { return static_cast<const T*>(moduleAccess_.getModule(name)); }
+  const T* GetModule(const std::string& name)
+  { return static_cast<const T*>(moduleAccess_->getModule(name)); }
 
   template <typename T>
-  T* GetANLModuleNC(const std::string& name)
-  { return static_cast<T*>(moduleAccess_.getModuleNC(name)); }
+  T* GetModuleNC(const std::string& name)
+  { return static_cast<T*>(moduleAccess_->getModuleNC(name)); }
 
   template <typename T>
-  void GetANLModuleIF(const std::string& name, T* ptr);
+  void GetModuleIF(const std::string& name, T* ptr);
 
   template <typename T>
-  void GetANLModuleIFNC(const std::string& name, T* ptr);
+  void GetModuleIFNC(const std::string& name, T* ptr);
 
   bool ModuleExist(const std::string& name)
-  { return moduleAccess_.exist(name); }
+  { return moduleAccess_->exist(name); }
   
   void EvsDef(const std::string& key);
   void EvsUndef(const std::string& key);
@@ -265,16 +262,14 @@ private:
   std::string moduleID_;
   std::vector<std::pair<std::string, ModuleAccess::ConflictOption>> aliases_;
   std::string moduleDescription_;
-  bool moduleOn_;
-  EvsManager* evsManager_;
-  ModuleAccess moduleAccess_;
+  bool moduleOn_ = true;
+  EvsManager* evsManager_ = nullptr;
+  const ModuleAccess* moduleAccess_ = nullptr;
   ModuleParamList moduleParameters_;
   ModuleParam_sptr currentParameter_;
-  std::set<std::string> accessibleModules_;
-  bool requiringFullAccess_;
-  long int eventIndex_;
+  long int eventIndex_ = -1;
     
-  int myCopyID_;
+  int myCopyID_ = 0;
   static int CopyID__;
 
   std::string (BasicModule::*moduleIDMethod_)() const;
@@ -283,9 +278,8 @@ private:
   BasicModule& operator=(const BasicModule& r);
 };
 
-
-typedef std::vector<BasicModule*>::iterator AMIter;
-
+using AMIter = std::vector<BasicModule*>::iterator;
+using AMConstIter = std::vector<BasicModule*>::const_iterator;
 
 template<typename T>
 void BasicModule::register_parameter(T* ptr, const std::string& name)
@@ -438,9 +432,9 @@ void BasicModule::set_value_element(const std::string& name, T val)
 
 template <typename T>
 inline
-void BasicModule::GetANLModuleIF(const std::string& name, T *ptr)
+void BasicModule::GetModuleIF(const std::string& name, T *ptr)
 {
-  *ptr = dynamic_cast<T>(moduleAccess_.getModule(name));
+  *ptr = dynamic_cast<T>(moduleAccess_->getModule(name));
   if (ptr==0) {
     const std::string message
       = (boost::format("Dynamic cast failed from ANL Module: %s") % name).str();
@@ -450,9 +444,9 @@ void BasicModule::GetANLModuleIF(const std::string& name, T *ptr)
 
 template <typename T>
 inline
-void BasicModule::GetANLModuleIFNC(const std::string& name, T *ptr)
+void BasicModule::GetModuleIFNC(const std::string& name, T *ptr)
 {
-  *ptr = dynamic_cast<T>(moduleAccess_.getModuleNC(name));
+  *ptr = dynamic_cast<T>(moduleAccess_->getModuleNC(name));
   if (ptr==0) {
     const std::string message
       = (boost::format("Dynamic cast failed from ANL Module: %s") % name).str();

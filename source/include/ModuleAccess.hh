@@ -42,21 +42,25 @@ class BasicModule;
 class ModuleAccess
 {
 public:
-  enum class ConflictOption { error, yield, overwrite };
+  enum class ConflictOption { error, yield, overwrite, remove };
 
 public:
   ModuleAccess() = default;
   ~ModuleAccess();
+  ModuleAccess(const ModuleAccess&) = default;
+  ModuleAccess(ModuleAccess&&) = default;
+  ModuleAccess& operator=(const ModuleAccess&) = default;
+  ModuleAccess& operator=(ModuleAccess&&) = default;
 
-  const BasicModule* getModule(const std::string& name)
+  const BasicModule* getModule(const std::string& name) const
   { return getModuleNC(name); }
   
-  BasicModule* getModuleNC(const std::string& name);
+  BasicModule* getModuleNC(const std::string& name) const;
 
   void registerModule(const std::string& name, BasicModule* module,
                       ConflictOption conflict=ConflictOption::yield);
 
-  bool exist(const std::string& name);
+  bool exist(const std::string& name) const;
 
 private:
   using ANLModuleMap = std::map<std::string, BasicModule*>;
@@ -64,9 +68,9 @@ private:
 };
 
 inline
-BasicModule* ModuleAccess::getModuleNC(const std::string& name)
+BasicModule* ModuleAccess::getModuleNC(const std::string& name) const
 {
-  ANLModuleMap::iterator it = moduleMap_.find(name);
+  ANLModuleMap::const_iterator it = moduleMap_.find(name);
   if (it == std::end(moduleMap_)) {
     const std::string message
       = (boost::format("Module is not found: %s") % name).str();
@@ -76,7 +80,7 @@ BasicModule* ModuleAccess::getModuleNC(const std::string& name)
 }
 
 inline
-bool ModuleAccess::exist(const std::string& name)
+bool ModuleAccess::exist(const std::string& name) const
 {
   return (moduleMap_.find(name) != std::end(moduleMap_));
 }

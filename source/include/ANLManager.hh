@@ -29,32 +29,18 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <cctype>
-#include <boost/utility.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 #include "ANLStatus.hh"
 #include "ANLException.hh"
+#include "LoopCounter.hh"
 
 namespace anl
 {
 
 class EvsManager;
+class ModuleAccess;
 class BasicModule;
-
-struct ANLModuleCounter
-{
-  long int entry;
-  long int ok;
-  long int err;
-  long int skip;
-  long int quit;
-};
-
-struct ANLToLower
-{
-  char operator() (char c) { return std::tolower(c); }
-};
 
 /**
  * The ANL Next manager class.
@@ -62,12 +48,18 @@ struct ANLToLower
  * @author Hirokazu Odaka
  * @date 2010-06-xx
  * @date 2015-08-15 | version 1.7
+ * @date 2017-07-02 | version 1.9 | simpler event loop
  */
-class ANLManager : private boost::noncopyable
+class ANLManager
 {
 public:
   ANLManager();
-  ~ANLManager(); // non-virtual destructor
+  virtual ~ANLManager();
+
+  ANLManager(const ANLManager&) = delete;
+  ANLManager(ANLManager&&) = delete;
+  ANLManager& operator=(const ANLManager&) = delete;
+  ANLManager& operator=(ANLManager&&) = delete;
 
   /**
    * set ANL modules
@@ -75,11 +67,10 @@ public:
   void SetModules(std::vector<BasicModule*> modules);
 
   ANLStatus Startup();
+  ANLStatus Prepare();
   ANLStatus Initialize();
   ANLStatus Analyze(long int num_events, bool thread_mode=false);
   ANLStatus Exit();
-  
-  ANLStatus Prepare();
 
   ANLStatus InteractiveCom();
   ANLStatus InteractiveAna();
@@ -101,11 +92,11 @@ private:
 
   void show_analysis();
   void print_parameters();
-  void reset_counter();
+  void reset_counters();
   ANLStatus process_analysis(long int num_events);
   void print_summary();
 
-  int getModuleNumber(const std::string& name, bool strict=true);
+  int ModuleIndex(const std::string& module_id, bool strict=true) const;
 
 #if ANL_ENABLE_INTERACTIVE_MODE
   void InteractiveComHelp();
@@ -125,10 +116,11 @@ private:
 
 private:
   std::vector<BasicModule*> modules_;
+  std::vector<LoopCounter> counters_;
   std::unique_ptr<EvsManager> evsManager_;
-  std::vector<ANLModuleCounter> counters_;
-  long int displayFrequency_;
-  bool interrupted_;
+  std::unique_ptr<ModuleAccess> moduleAccess_;
+  long int displayFrequency_ = -1;
+  bool interrupted_ = false;
 };
 
 } /* namespace anl */
