@@ -46,6 +46,7 @@ namespace anl
  * @date 2011-07-12
  * @date 2011-12-28
  * @date 2015-11-11 | review set/get-value methods.
+ * @date 2017-07-03 | rename get/set to __get__/__set__
  */
 class VModuleParameter
 {
@@ -117,8 +118,8 @@ public:
   virtual void output(std::ostream& ) const {}
   virtual void input(std::istream& ) {}
 
-  virtual void get(void* /* value_ptr */) const {}
-  virtual void set(const void* /* value_ptr */) {}
+  virtual void __get__(void* /* value_ptr */) const {}
+  virtual void __set__(const void* /* value_ptr */) {}
 
   virtual std::string map_key_name() const { return ""; }
   virtual void set_map_key(const std::string& /* key */) {}

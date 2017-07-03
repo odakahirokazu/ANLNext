@@ -250,12 +250,7 @@ protected:
   void EvsReset(const std::string& key);
 
 private:
-  ModuleParamIter parameter_begin()
-  { return std::begin(moduleParameters_); }
-  ModuleParamIter parameter_end()
-  { return std::end(moduleParameters_); }
   ModuleParamIter find_parameter(const std::string& name);
-
   std::string get_module_id() const { return moduleID_; }
   
 private:

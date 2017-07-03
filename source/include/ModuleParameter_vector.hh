@@ -200,14 +200,14 @@ private:
   template <std::size_t Index>
   void value_info_set(value_type* pval, value_category_scalar) const
   {
-    value_info_[0]->set(pval);
+    value_info_[0]->__set__(pval);
   }
 
   template <std::size_t Index>
   void value_info_set(value_type* pval, value_category_pair) const
   {
-    value_info_[0]->set(&(pval->first));
-    value_info_[1]->set(&(pval->second));
+    value_info_[0]->__set__(&(pval->first));
+    value_info_[1]->__set__(&(pval->second));
   }
   
   template <std::size_t Index>
@@ -221,7 +221,7 @@ private:
   void value_info_set(value_type* pval, value_category_tuple,
                       std::integral_constant<std::size_t, Index>) const
   {
-    value_info_[Index]->set(&(std::get<Index>(*pval)));
+    value_info_[Index]->__set__(&(std::get<Index>(*pval)));
     typedef std::integral_constant<std::size_t, Index+1> NextIndex_t;
     value_info_set<Index+1>(pval, value_category_tuple(), NextIndex_t());
   }
@@ -235,14 +235,14 @@ private:
   template <std::size_t Index>
   void value_info_get(value_type* pval, value_category_scalar) const
   {
-    value_info_[0]->get(pval);
+    value_info_[0]->__get__(pval);
   }
 
   template <std::size_t Index>
   void value_info_get(value_type* pval, value_category_pair) const
   {
-    value_info_[0]->get(&(pval->first));
-    value_info_[1]->get(&(pval->second));
+    value_info_[0]->__get__(&(pval->first));
+    value_info_[1]->__get__(&(pval->second));
   }
   
   template <std::size_t Index>
@@ -256,7 +256,7 @@ private:
   void value_info_get(value_type* pval, value_category_tuple,
                       std::integral_constant<std::size_t, Index>) const
   {
-    value_info_[Index]->get(&(std::get<Index>(*pval)));
+    value_info_[Index]->__get__(&(std::get<Index>(*pval)));
     typedef std::integral_constant<std::size_t, Index+1> NextIndex_t;
     value_info_get<Index+1>(pval, value_category_tuple(), NextIndex_t());
   }

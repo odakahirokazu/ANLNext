@@ -76,25 +76,25 @@ std::vector<std::string> BasicModule::get_aliases_string() const
 
 void BasicModule::print_parameters()
 {
-  for (ModuleParamIter it=parameter_begin(); it!=parameter_end(); ++it) {
-    (*it)->print(std::cout);
+  for (const auto& param: moduleParameters_) {
+    param->print(std::cout);
     std::cout << std::endl;
   }
 }
 
 void BasicModule::ask_parameters()
 {
-  for (ModuleParamIter it=parameter_begin(); it!=parameter_end(); ++it) {
-    if ((*it)->is_hidden()) continue;
+  for (const auto& param: moduleParameters_) {
+    if (param->is_hidden()) { continue; }
     
-    (*it)->ask();
+    param->ask();
     
     if (!std::cin) {
       std::cin.clear();
       std::cin.ignore(INT_MAX, '\n');
 
       std::string message
-        = (boost::format("Input error: %s") % ((*it)->name())).str();
+        = (boost::format("Input error: %s") % (param->name())).str();
       BOOST_THROW_EXCEPTION( ANLException(this, message) );
     }
   }
@@ -102,8 +102,8 @@ void BasicModule::ask_parameters()
 
 void BasicModule::unregister_parameter(const std::string& name)
 {
-  ModuleParamIter it=parameter_begin();
-  while (it != parameter_end()) {
+  ModuleParamIter it = std::begin(moduleParameters_);
+  while (it != std::end(moduleParameters_)) {
     if (name == (*it)->name()) {
       it = moduleParameters_.erase(it);
     }
@@ -115,33 +115,33 @@ void BasicModule::unregister_parameter(const std::string& name)
 
 void BasicModule::hide_parameter(const std::string& name, bool hidden)
 {
-  for (ModuleParamIter it=parameter_begin(); it!=parameter_end(); ++it) {
-    if (name == (*it)->name()) {
-      if (!hidden) { currentParameter_ = *it; }
-      (*it)->set_hidden(hidden);
+  for (auto& param: moduleParameters_) {
+    if (param->name() == name) {
+      if (!hidden) { currentParameter_ = param; }
+      param->set_hidden(hidden);
       break;
     }
   }
 }
 
 void BasicModule::ask_parameter(const std::string& name,
-                               const std::string& question)
+                                const std::string& question)
 {
-  for (ModuleParamIter it=parameter_begin(); it!=parameter_end(); ++it) {
-    if (name == (*it)->name()) {
-      currentParameter_ = *it;
+  for (const auto& param: moduleParameters_) {
+    if (param->name() == name) {
+      currentParameter_ = param;
       
       if (question!="") {
-        (*it)->set_question(question);
+        param->set_question(question);
       }
-      (*it)->ask();
+      param->ask();
 
       if (!std::cin) {
         std::cin.clear();
         std::cin.ignore(INT_MAX, '\n');
 
         std::string message
-          = (boost::format("Input error: %s") % ((*it)->name())).str();
+          = (boost::format("Input error: %s") % (param->name())).str();
         BOOST_THROW_EXCEPTION( ANLException(this, message) );
       }
       
