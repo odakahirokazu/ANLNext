@@ -48,8 +48,11 @@ struct exception_base : virtual std::exception, virtual boost::exception
  */
 struct ANLException : virtual exception_base
 {
-  static int VerboseLevel;
+public:
+  static void setVerboseLevel(int v);
+  static int VerboseLevel();
 
+public:
   ANLException() = default;
   explicit ANLException(const BasicModule* mod);
   explicit ANLException(const std::string& message);
@@ -60,6 +63,9 @@ struct ANLException : virtual exception_base
   void setMessage(const std::string& message);
   std::string getMessage() const;
   std::string toString() const;
+
+private:
+  static int __VerboseLevel__;
 };
 
 } /* namespace anl */

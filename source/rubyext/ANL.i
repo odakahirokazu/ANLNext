@@ -39,7 +39,8 @@ enum class ANLStatus { AS_OK, AS_SKIP, AS_SKIP_ERR, AS_QUIT, AS_QUIT_ERR };
 
 struct ANLException
 {
-  static int VerboseLevel;
+  static void setVerboseLevel(int v);
+  static int VerboseLevel();
   ANLException();
   ~ANLException();
   const std::string toString();

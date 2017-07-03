@@ -24,7 +24,17 @@
 namespace anl
 {
 
-int ANLException::VerboseLevel = 1;
+int ANLException::__VerboseLevel__ = 1;
+
+void ANLException::setVerboseLevel(int v)
+{
+  __VerboseLevel__ = v;
+}
+
+int ANLException::VerboseLevel()
+{
+  return __VerboseLevel__;
+}
 
 ANLException::ANLException(const BasicModule* mod)
 {
@@ -64,7 +74,7 @@ void ANLException::setModuleInfo(const BasicModule* mod)
 
 std::string ANLException::toString() const
 {
-  if (VerboseLevel == 1) {
+  if (VerboseLevel() == 1) {
     std::ostringstream oss;
     const std::string* message = boost::get_error_info<ANLErrorInfo>(*this);
     const std::string* method = boost::get_error_info<ANLErrorInfoOnMethod>(*this);
@@ -76,7 +86,7 @@ std::string ANLException::toString() const
     if (loopIndex) { oss << "Loop index: " << *loopIndex << "\n"; }
     return oss.str();
   }
-  else if (VerboseLevel >= 2) {
+  else if (VerboseLevel() >= 2) {
     return boost::diagnostic_information(*this);
   }
 
