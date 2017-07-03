@@ -61,6 +61,7 @@ namespace anl
  * @date 2012-12-12
  * @date 2014-12-09 | use variadic template.
  * @date 2015-11-10 | get_value() methods
+ * @date 2017-07-03 | rename get/set to __get__/__set__
  */
 template <typename T>
 class ModuleParameter : public VModuleParameter
@@ -137,14 +138,14 @@ public:
                is_floating_point_type());
   }
 
-  void get(void* const value_ptr) const override
+  void __get__(void* value_ptr) const override
   {
-    *static_cast<T* const>(value_ptr) = *ptr_;
+    *static_cast<T*>(value_ptr) = *ptr_;
   }
   
-  void set(const void* const value_ptr) override
+  void __set__(const void* value_ptr) override
   {
-    *ptr_ = *static_cast<const T* const>(value_ptr);
+    *ptr_ = *static_cast<const T*>(value_ptr);
   }
 
   boost::property_tree::ptree to_property_tree() const override
