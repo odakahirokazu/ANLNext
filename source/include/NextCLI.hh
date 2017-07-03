@@ -114,6 +114,6 @@ void CLread_seq(const std::string& text, T* ptr,
   param.ask();
 }
 
-}
+} /* namespace anl */
 
 #endif /* ANL_NextCLI_H */

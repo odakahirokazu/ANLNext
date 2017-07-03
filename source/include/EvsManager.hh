@@ -53,6 +53,10 @@ class EvsManager
 public:
   EvsManager() = default;
   ~EvsManager();
+  EvsManager(const EvsManager&) = default;
+  EvsManager(EvsManager&&) = default;
+  EvsManager& operator=(const EvsManager&) = default;
+  EvsManager& operator=(EvsManager&&) = default;
 
   void initialize();
 
