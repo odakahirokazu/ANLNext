@@ -58,6 +58,11 @@ public:
                    const std::string& default_string);
 
   virtual ~VModuleParameter();
+
+  VModuleParameter(const VModuleParameter&) = delete;
+  VModuleParameter(VModuleParameter&&) = delete;
+  VModuleParameter& operator=(const VModuleParameter&) = delete;
+  VModuleParameter& operator=(VModuleParameter&&) = delete;
   
   std::string name() const { return name_; }
   double unit() const { return unit_; }
