@@ -361,7 +361,7 @@ ANLStatus ANLManager::process_analysis(long int num_events)
     else { display_frequency = 10000; }
   }
 
-  for (long int iEvent=0; iEvent<num_events; iEvent++) {
+  for (long int iEvent=0; iEvent!=num_events; iEvent++) {
     if (display_frequency != 0 && iEvent%display_frequency == 0) {
       std::cout << "Event : " << std::dec << std::setw(10) << iEvent << std::endl;
       std::cout.width(0);
