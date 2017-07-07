@@ -106,7 +106,7 @@ public:
   virtual ANLStatus mod_end_run()        { return AS_OK; }
   virtual ANLStatus mod_finalize()       { return AS_OK; }
 
-  virtual ANLStatus mod_comunicate() { ask_parameters(); return AS_OK; }
+  virtual ANLStatus mod_communicate() { ask_parameters(); return AS_OK; }
 
   std::vector<std::pair<std::string, ModuleAccess::ConflictOption>> get_aliases() const { return aliases_; }
   std::vector<std::string> get_aliases_string() const;

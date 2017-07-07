@@ -226,7 +226,7 @@ void ANLManager::interactive_comunication_help()
             << "  show              : show analysis chain\n"
             << "  print MODULE_ID   : show paramters of the module\n"
             << "  mod MODULE_ID     : modify parameters of the module\n"
-            << "                      (enter mod_comunicate() method)\n"
+            << "                      (enter mod_communicate() method)\n"
             << "  on MODULE_ID      : switch on the module\n"
             << "  off MODULE_ID     : switch off the module\n"
             << "  init              : initialize to start analysis\n"
@@ -243,11 +243,11 @@ ANLStatus ANLManager::interactive_modify_param(int n)
   if (n==-1) {
     for (AMIter mod=modules_.begin(); mod!=modules_.end(); ++mod) {
       if ((*mod)->is_off()) continue;
-      std::cout << (*mod)->module_name() << " mod_com()" << std::endl;
-      status = (*mod)->mod_comunicate();
+      std::cout << (*mod)->module_name() << " mod_communicate()" << std::endl;
+      status = (*mod)->mod_communicate();
       if (status != AS_OK) {
         std::cout << (*mod)->module_name()
-                  << " mod_comunicate() returned "
+                  << " mod_communicate() returned "
                   << status << std::endl;
       }
       status = (*mod)->mod_pre_initialize();
@@ -262,11 +262,11 @@ ANLStatus ANLManager::interactive_modify_param(int n)
   else if (0<=n && n<static_cast<int>(modules_.size())) {
     BasicModule* mo = modules_[n];
     std::cout << mo->module_name()
-              << " mod_comunicate()" << std::endl;
-    status = mo->mod_comunicate();
+              << " mod_communicate()" << std::endl;
+    status = mo->mod_communicate();
     if (status != AS_OK) {
       std::cout << mo->module_name()
-                << " mod_comunicate() returned "
+                << " mod_communicate() returned "
                 << status << std::endl;
     }
     status = mo->mod_pre_initialize();
