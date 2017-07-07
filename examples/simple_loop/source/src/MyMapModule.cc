@@ -8,7 +8,7 @@ MyMapModule::MyMapModule()
 
 MyMapModule::~MyMapModule() = default;
 
-ANLStatus MyMapModule::mod_startup()
+ANLStatus MyMapModule::mod_define()
 {
   register_parameter_map(&myMap_, "my_map", "name", "Si");
   add_value_element(&bufferID_, "ID");
@@ -19,7 +19,7 @@ ANLStatus MyMapModule::mod_startup()
   return AS_OK;
 }
 
-ANLStatus MyMapModule::mod_ana()
+ANLStatus MyMapModule::mod_analyze()
 {
   return AS_OK;
 }

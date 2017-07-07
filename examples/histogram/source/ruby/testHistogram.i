@@ -18,19 +18,16 @@ class SaveData : public anl::BasicModule
 {
 public:
   SaveData();
-  ~SaveData();
 };
 
 class GenerateEvents : public anl::BasicModule
 {
 public:
   GenerateEvents();
-  ~GenerateEvents();
 };
 
 class FillHistogram : public anl::BasicModule
 {
 public:
   FillHistogram();
-  ~FillHistogram();
 };

@@ -22,13 +22,15 @@
 
 #define ANL_ANALYZE_INTERRUPT 1
 #define ANL_INITIALIZE_INTERRUPT 1
-#define ANL_EXIT_INTERRUPT 1
+#define ANL_FINALIZE_INTERRUPT 1
 
 #include <cstddef>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <map>
+#include <atomic>
+#include <mutex>
 #include <boost/property_tree/ptree.hpp>
 
 #include "ANLStatus.hh"
@@ -49,6 +51,7 @@ class BasicModule;
  * @date 2010-06-xx
  * @date 2015-08-15 | version 1.7
  * @date 2017-07-02 | version 1.9 | simpler event loop
+ * @date 2017-07-04 | new model
  */
 class ANLManager
 {
@@ -66,34 +69,35 @@ public:
    */
   void SetModules(std::vector<BasicModule*> modules);
 
-  ANLStatus Startup();
-  ANLStatus Prepare();
-  ANLStatus Initialize();
-  ANLStatus Analyze(long int num_events, bool thread_mode=false);
-  ANLStatus Exit();
-
-  ANLStatus InteractiveCom();
-  ANLStatus InteractiveAna();
+  long int NumberOfLoops() const { return numEvents_; }
 
   void SetDisplayFrequency(long int v) { displayFrequency_ = v; }
-  long int DisplayFrequency() const { return displayFrequency_; }
+  long int DisplayFrequency() const;
+
+  virtual ANLStatus Define();
+  virtual ANLStatus PreInitialize();
+  virtual ANLStatus Initialize();
+  virtual ANLStatus Analyze(long int num_events, bool thread_mode=false);
+  virtual ANLStatus Finalize();
+
+  virtual ANLStatus InteractiveComunication();
+  virtual ANLStatus InteractiveAnalysis();
 
   boost::property_tree::ptree parameters_to_property_tree() const;
   void parameters_to_json(const std::string& filename) const;
-  
-private:
-  ANLStatus routine_startup();
-  ANLStatus routine_prepare();
-  ANLStatus routine_init();
-  ANLStatus routine_his();
-  ANLStatus routine_bgnrun();
-  ANLStatus routine_endrun();
-  ANLStatus routine_exit();
+
+protected:
+  virtual ANLStatus routine_define();
+  virtual ANLStatus routine_pre_initialize();
+  virtual ANLStatus routine_initialize();
+  virtual ANLStatus routine_begin_run();
+  virtual ANLStatus routine_end_run();
+  virtual ANLStatus routine_finalize();
 
   void show_analysis();
   void print_parameters();
-  void reset_counters();
-  ANLStatus process_analysis(long int num_events);
+  virtual void reset_counters();
+  virtual ANLStatus process_analysis();
   void print_summary();
 
   int ModuleIndex(const std::string& module_id, bool strict=true) const;
@@ -106,22 +110,41 @@ private:
   void InteractiveAnaHelp();
 #endif /* ANL_ENABLE_INTERACTIVE_MODE */
 
-  template<typename T>
-  ANLStatus routine_modfn(T func, const std::string& func_id);
+private:
+  virtual void duplicateChains() {}
+  virtual void reduceStatistics() {}
 
   // thread mode
 private:
-  void __void_process_analysis(long int num_events, ANLStatus* status);
+  void __void_process_analysis(ANLStatus* status);
   void interactive_session();
 
-private:
+protected:
+  long int numEvents_ = 0;
   std::vector<BasicModule*> modules_;
   std::vector<LoopCounter> counters_;
   std::unique_ptr<EvsManager> evsManager_;
+  std::mutex mutex_;
+  std::atomic<bool> interrupted_{false};
+
+private:
   std::unique_ptr<ModuleAccess> moduleAccess_;
   long int displayFrequency_ = -1;
-  bool interrupted_ = false;
 };
+
+/**
+ * non-member functions
+ */
+
+template<typename T>
+ANLStatus routine_modfn(T func,
+                        const std::string& func_id,
+                        const std::vector<BasicModule*>& modules);
+
+ANLStatus process_one_event(long int iEvent,
+                            const std::vector<BasicModule*>& modules,
+                            std::vector<LoopCounter>& counters,
+                            EvsManager& evsManager);
 
 } /* namespace anl */
 

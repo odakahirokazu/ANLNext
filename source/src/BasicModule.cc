@@ -28,19 +28,18 @@
 namespace anl
 {
 
-int BasicModule::CopyID__ = 0;
-
 BasicModule::BasicModule()
   : moduleID_(""),
     moduleDescription_(""),
     moduleOn_(true),
-    eventIndex_(-1)
+    loopIndex_(-1),
+    copyID_(0),
+    lastCopy_(0)
 {
-  myCopyID_ = CopyID__;
-  CopyID__++;
-
   moduleIDMethod_ = &BasicModule::module_name;
 }
+
+BasicModule::~BasicModule() = default;
 
 BasicModule::BasicModule(const BasicModule& r)
   : moduleID_(r.moduleID_),
@@ -48,16 +47,17 @@ BasicModule::BasicModule(const BasicModule& r)
     moduleDescription_(r.moduleDescription_),
     moduleOn_(r.moduleOn_),
     evsManager_(r.evsManager_),
-    moduleAccess_(r.moduleAccess_)
+    moduleAccess_(r.moduleAccess_),
+    loopIndex_(-1),
+    copyID_(r.lastCopy_+1)
 {
-  myCopyID_ = CopyID__;
-  CopyID__++;
-  
-  moduleID_ = r.module_id()+"#"+boost::lexical_cast<std::string>(myCopyID_);
-  moduleIDMethod_ = &BasicModule::get_module_id;
+  if (moduleID_=="") {
+    moduleIDMethod_ = &BasicModule::module_name;
+  }
+  else {
+    moduleIDMethod_ = &BasicModule::get_module_id;
+  }
 }
-
-BasicModule::~BasicModule() = default;
 
 void BasicModule::set_module_id(const std::string& module_id)
 {

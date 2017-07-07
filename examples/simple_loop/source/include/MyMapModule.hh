@@ -18,10 +18,10 @@ class MyMapModule : public anl::BasicModule
   DEFINE_ANL_MODULE(MyMapModule, 1.0);
 public:
   MyMapModule();
-  ~MyMapModule();
+  virtual ~MyMapModule();
   
-  anl::ANLStatus mod_startup() override;
-  anl::ANLStatus mod_ana() override;
+  anl::ANLStatus mod_define() override;
+  anl::ANLStatus mod_analyze() override;
 
 private:
   std::map<std::string, std::tuple<int, std::string, double, double>> myMap_;

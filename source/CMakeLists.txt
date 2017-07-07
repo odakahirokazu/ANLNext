@@ -85,6 +85,8 @@ add_library(${TARGET_LIBRARY} SHARED
   src/BasicModule.cc
   src/ANLManager.cc
   src/ANLManager_interactive.cc
+  src/ClonedChainSet.cc
+  src/ANLManagerMT.cc
   )
 
 target_link_libraries(${TARGET_LIBRARY}

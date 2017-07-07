@@ -6,60 +6,50 @@
 using namespace anl;
 
 FillHistogram::FillHistogram() :
-  _nbin(128), _energy0(0.0), _energy1(100.0),
-  _spectrum1(0), _spectrum2(0), _spectrum_sum(0),
-  _event(0)
+  nbins_(128), energy0_(0.0), energy1_(100.0)
 {
 }
 
-
-FillHistogram::~FillHistogram()
+ANLStatus FillHistogram::mod_define()
 {
-}
-
-
-ANLStatus FillHistogram::mod_startup()
-{
-  register_parameter(&_nbin, "nbin");
+  register_parameter(&nbins_, "nbin");
   set_parameter_description("Number of bins");
-  register_parameter(&_energy0, "energy_min", 1.0, "keV");
+  register_parameter(&energy0_, "energy_min", 1.0, "keV");
   set_parameter_description("Lower bound of the histograms");
-  register_parameter(&_energy1, "energy_max", 1.0, "keV");
+  register_parameter(&energy1_, "energy_max", 1.0, "keV");
   set_parameter_description("Upper bound of the histograms");
 
   return AS_OK;
 }
 
-
-ANLStatus FillHistogram::mod_init()
+ANLStatus FillHistogram::mod_initialize()
 {
-  GetModule("GenerateEvents", &_event);
+  GetModule("GenerateEvents", &event_);
 
   if (ModuleExist("SaveData")) {
-    SaveData* saveModule;
+    SaveData* saveModule = nullptr;
     GetModuleNC("SaveData", &saveModule);
     saveModule->cd();
   }
   
-  _spectrum1 = new TH1I("spectrum1", "Spectrum 1", _nbin, _energy0, _energy1);
-  _spectrum2 = new TH1I("spectrum2", "Spectrum 2", _nbin, _energy0, _energy1);
-  _spectrum_sum = new TH1I("spectrum_sum", "Spectrum 1+2", _nbin, _energy0, _energy1);
+  spectrum1_ = new TH1I("spectrum1", "Spectrum 1", nbins_, energy0_, energy1_);
+  spectrum2_ = new TH1I("spectrum2", "Spectrum 2", nbins_, energy0_, energy1_);
+  spectrum_sum_ = new TH1I("spectrum_sum", "Spectrum 1+2", nbins_, energy0_, energy1_);
   
   return AS_OK;
 }
 
-
-ANLStatus FillHistogram::mod_ana()
+ANLStatus FillHistogram::mod_analyze()
 {
-  double energy = _event->Energy();
+  const double energy = event_->Energy();
   if (Evs("GenerateEvents:Detector1")) {
-    _spectrum1->Fill(energy);
-    _spectrum_sum->Fill(energy);
+    spectrum1_->Fill(energy);
+    spectrum_sum_->Fill(energy);
   }
 
   if (Evs("GenerateEvents:Detector2")) {
-    _spectrum2->Fill(energy);
-    _spectrum_sum->Fill(energy);
+    spectrum2_->Fill(energy);
+    spectrum_sum_->Fill(energy);
   }
 
   return AS_OK;

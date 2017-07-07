@@ -18,9 +18,9 @@ class SaveData : public anl::BasicModule
 public:
   SaveData();
   
-  anl::ANLStatus mod_startup() override;
-  anl::ANLStatus mod_init() override;
-  anl::ANLStatus mod_exit() override;
+  anl::ANLStatus mod_define() override;
+  anl::ANLStatus mod_initialize() override;
+  anl::ANLStatus mod_finalize() override;
 
   TDirectory* GetDirectory() { return m_RootFile->GetDirectory(0); }
   bool cd() { return m_RootFile->cd(); }

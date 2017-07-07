@@ -20,22 +20,21 @@ class FillHistogram : public anl::BasicModule
   DEFINE_ANL_MODULE(FillHistogram, 1.0);
 public:
   FillHistogram();
-  ~FillHistogram();
   
-  anl::ANLStatus mod_startup() override;
-  anl::ANLStatus mod_init() override;
-  anl::ANLStatus mod_ana() override;
+  anl::ANLStatus mod_define() override;
+  anl::ANLStatus mod_initialize() override;
+  anl::ANLStatus mod_analyze() override;
 
 private:
-  int _nbin;
-  double _energy0;
-  double _energy1;
+  int nbins_;
+  double energy0_;
+  double energy1_;
   
-  TH1* _spectrum1;
-  TH1* _spectrum2;
-  TH1* _spectrum_sum;
+  TH1* spectrum1_ = nullptr;
+  TH1* spectrum2_ = nullptr;
+  TH1* spectrum_sum_ = nullptr;
 
-  const GenerateEvents* _event;
+  const GenerateEvents* event_ = nullptr;
 };
 
 #endif /* FillHistogram_H */

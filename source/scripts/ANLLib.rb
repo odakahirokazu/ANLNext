@@ -223,6 +223,7 @@ module ANL
       :set_parameters, :with_parameters, :chain_with_parameters,
       :startup, :prepare_all_parameters,
       :print_all_parameters, :parameters_to_object, :make_doc,
+      :num_parallels, :num_parallels=,
     ]
     def_delegators :@_anlapp_analysis_chain, *anlapp_methods
     alias :with :with_parameters
@@ -312,17 +313,19 @@ module ANL
       @set_param_list = []
       @set_module_list = []
       @namespace_list = [Object]
-      @startup_done = false
+      @definition_done = false
       @analysis_done = false
       @thread_mode = true
       @parameters_json_filename = nil
+      @num_parallels = 1
     end
 
     # Accessors to internal information (instance variables).
     attr_accessor :thread_mode
+    attr_accessor :num_parallels
     attr_accessor :current_module
     attr_accessor :parameters_json_filename
-    def startup_done?(); @startup_done; end
+    def definition_done?(); @definition_done; end
     def analysis_done?(); @analysis_done; end
 
     # Clear all internal information including the analysis chain.
@@ -335,7 +338,7 @@ module ANL
       @set_param_list.clear
       @set_module_list.clear
       @namespace_list.clear; @namespace_list << Object
-      @startup_done = false
+      @definition_done = false
       @analysis_done = false
     end
 
@@ -535,7 +538,7 @@ module ANL
         end
       end
 
-      if @startup_done
+      if @definition_done
         set_param_or_raise.call
       else
         @set_param_list << set_param_or_raise
@@ -582,7 +585,7 @@ module ANL
         end
       end
 
-      if @startup_done
+      if @definition_done
         set_param_or_raise.call
       else
         @set_param_list << set_param_or_raise
@@ -628,7 +631,7 @@ module ANL
         end
       end
 
-      if @startup_done
+      if @definition_done
         set_param_or_raise.call
       else
         @set_param_list << set_param_or_raise
@@ -679,7 +682,7 @@ module ANL
         parameters.each{|name, value| setp(name.to_s, value) }
       end
       if block_given?
-        if @startup_done
+        if @definition_done
           set_param.(mod)
         else
           @set_param_list << lambda{ set_param.(mod) }
@@ -737,13 +740,17 @@ module ANL
 
     # Execute the ANL startup session.
     #
-    def startup()
-      @anl = ANL::ANLManager.new
+    def define()
+      if @num_parallels > 1
+        @anl = ANL::ANLManagerMT.new(@num_parallels)
+      else
+        @anl = ANL::ANLManager.new
+      end
       vec = ANL::ModuleVector.new(@module_list)
       @anl.SetModules(vec)
-      status = @anl.Startup()
-      check_status(status, "Startup()")
-      @startup_done = true
+      status = @anl.Define()
+      check_status(status, "Define()")
+      @definition_done = true
       return @anl
     end
 
@@ -763,7 +770,7 @@ module ANL
       if num_loop == :all; num_loop = -1; end
       display_frequency ||= proposed_display_frequency(num_loop)
 
-      anl = startup()
+      anl = define()
       prepare_all_parameters()
       if parameters_json_filename()
         File.open(parameters_json_filename(), 'w') do |fout|
@@ -771,8 +778,8 @@ module ANL
         end
       end
 
-      status = anl.Prepare()
-      check_status(status, "Prepare()")
+      status = anl.PreInitialize()
+      check_status(status, "PreInitialize()")
 
       status = anl.Initialize()
       check_status(status, "Initialize()")
@@ -787,8 +794,8 @@ module ANL
       puts "Analysis End    | Time: " + Time.now.to_s
       $stdout.flush
 
-      status = anl.Exit()
-      check_status(status, "Exit()")
+      status = anl.Finalize()
+      check_status(status, "Finalize()")
       @analysis_done = true
     rescue RuntimeError => ex
       puts ""
@@ -812,7 +819,7 @@ module ANL
     # Start the ANL interactive session for running the ANL analysis.
     #
     def run_interactive()
-      anl = startup()
+      anl = define()
 
       prepare_all_parameters()
       @set_module_list.each{|mod|
@@ -820,14 +827,14 @@ module ANL
         check_status(status, "#{mod.module_id}::mod_prepare()")
       }
 
-      status = anl.InteractiveCom()
-      check_status(status, "InteractiveCom()")
+      status = anl.InteractiveComunication()
+      check_status(status, "InteractiveComunication()")
 
-      status = anl.InteractiveAna()
-      check_status(status, "InteractiveAna()")
+      status = anl.InteractiveAnalysis()
+      check_status(status, "InteractiveAnalysis()")
 
-      status = anl.Exit()
-      check_status(status, "Exit()")
+      status = anl.Finalize()
+      check_status(status, "Finalize()")
     rescue RuntimeError => ex
       puts ""
       puts "  ### ANL NEXT Exception ###  "

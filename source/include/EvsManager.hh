@@ -33,7 +33,22 @@ struct EvsData
   bool flag = false;
   uint64_t counts = 0;
   uint64_t counts_ok = 0;
+
+  EvsData& operator+=(const EvsData& a)
+  {
+    counts    += a.counts;
+    counts_ok += a.counts_ok;
+    return *this;
+  }
 };
+
+inline EvsData operator+(const EvsData& a, const EvsData& b)
+{
+  EvsData c;
+  c.counts = a.counts + b.counts;
+  c.counts_ok = a.counts_ok + b.counts_ok;
+  return c;
+}
 
 typedef std::map<std::string, EvsData> EvsMap;
 typedef EvsMap::iterator EvsIter;
@@ -95,6 +110,9 @@ public:
   void count();
   void countCompleted();
   void printSummary();
+
+  const EvsMap& data() const { return data_; }
+  void merge(const EvsManager& r);
 
 private:
   EvsMap data_;

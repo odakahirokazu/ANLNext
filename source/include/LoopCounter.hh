@@ -82,6 +82,23 @@ public:
     }
   }
 
+  LoopCounter operator+(const LoopCounter& r) const
+  {
+    LoopCounter a(*this);
+    a.entry_ += r.entry_;
+    a.ok_    += r.ok_;
+    a.error_ += r.error_;
+    a.skip_  += r.skip_;
+    a.quit_  += r.quit_;
+    return a;
+  }
+
+  LoopCounter& operator+=(const LoopCounter& r)
+  {
+    *this = *this + r;
+    return *this;
+  }
+
 private:
   long int entry_ = 0;
   long int ok_ = 0;

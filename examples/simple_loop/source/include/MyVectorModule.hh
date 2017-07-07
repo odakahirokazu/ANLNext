@@ -18,10 +18,10 @@ class MyVectorModule : public anl::BasicModule
   DEFINE_ANL_MODULE(MyVectorModule, 1.0);
 public:
   MyVectorModule();
-  ~MyVectorModule();
+  virtual ~MyVectorModule();
   
-  anl::ANLStatus mod_startup() override;
-  anl::ANLStatus mod_ana() override;
+  anl::ANLStatus mod_define() override;
+  anl::ANLStatus mod_analyze() override;
 
 private:
   std::vector<std::tuple<int, std::string, double, double>> myVector_;

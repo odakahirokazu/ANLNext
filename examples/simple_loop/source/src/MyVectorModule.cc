@@ -8,7 +8,7 @@ MyVectorModule::MyVectorModule()
 
 MyVectorModule::~MyVectorModule() = default;
 
-ANLStatus MyVectorModule::mod_startup()
+ANLStatus MyVectorModule::mod_define()
 {
   register_parameter(&myVector_, "my_vector");
   add_value_element(&bufferID_, "ID");
@@ -19,7 +19,7 @@ ANLStatus MyVectorModule::mod_startup()
   return AS_OK;
 }
 
-ANLStatus MyVectorModule::mod_ana()
+ANLStatus MyVectorModule::mod_analyze()
 {
   return AS_OK;
 }

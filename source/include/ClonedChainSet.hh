@@ -17,55 +17,59 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_ANLManager_impl_H
-#define ANL_ANLManager_impl_H 1
+#ifndef ANL_ClonedChainSet_H
+#define ANL_ClonedChainSet_H 1
 
 #include "ANLManager.hh"
-#include "BasicModule.hh"
-#include "ANLException.hh"
 
 namespace anl
 {
 
-template<typename T>
-ANLStatus routine_modfn(T func,
-                        const std::string& func_id,
-                        const std::vector<BasicModule*>& modules)
+class EvsManager;
+class ModuleAccess;
+class BasicModule;
+
+/**
+ * class for cloned modules chain.
+ *
+ * @author Hirokazu Odaka
+ * @date 2017-07-05
+ */
+class ClonedChainSet
 {
-  std::cout << "\n"
-            << "ANLManager: starting <" << func_id << "> routine.\n"
-            << std::endl;
-
-  ANLStatus status = AS_OK;
-  for (auto& mod: modules) {
-    if (mod->is_off()) { continue; }
-    
-    try {
-      status = ((*mod).*func)();
-      if (status != AS_OK ) {
-        std::cout << "\n"
-                  << "ANLManager: <" << func_id << "> routine stopped.\n"
-                  << mod->module_name() << "::mod_" << func_id
-                  << " returned " << status << std::endl;
-        break;
-      }
-    }
-    catch (ANLException& ex) {
-      ex << ANLErrorInfoOnMethod( mod->module_name() + "::mod_" + func_id );
-      ex << ANLErrorInfoOnModule( mod->module_id() );
-      throw;
-    }
-  }
+public:
+  explicit ClonedChainSet(const EvsManager& evs);
+  ~ClonedChainSet();
+  ClonedChainSet(ClonedChainSet&&) = default;
+  ClonedChainSet& operator=(ClonedChainSet&&) = default;
   
-  if (status == AS_OK) {
-    std::cout << "\n"
-              << "ANLManager: <" << func_id << "> routine successfully done.\n"
-              << std::endl;
-  }
+  ClonedChainSet(const ClonedChainSet&) = delete;
+  ClonedChainSet& operator=(const ClonedChainSet&) = delete;
+  
+  void push(std::unique_ptr<BasicModule>&& mod);
+  void setup_module_access();
+  void reset_counters();
 
-  return status;
-}
+  const std::vector<BasicModule*>& modules_reference() const
+  { return modules_ref_; }
+
+  template <typename T>
+  ANLStatus process(T func);
+
+  const LoopCounter& get_counter(std::size_t i) const
+  { return counters_[i]; }
+
+  const EvsManager& get_evs() const
+  { return *evsManager_; }
+  
+private:
+  std::unique_ptr<EvsManager> evsManager_;
+  std::unique_ptr<ModuleAccess> moduleAccess_;
+  std::vector<std::unique_ptr<BasicModule>> modules_;
+  std::vector<BasicModule*> modules_ref_;
+  std::vector<LoopCounter> counters_;
+};
 
 } /* namespace anl */
 
-#endif /* ANL_ANLManager_impl_H */
+#endif /* ANL_ClonedChainSet_H */

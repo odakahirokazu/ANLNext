@@ -1,6 +1,7 @@
 %module ANL
 %{
 #include "ANLManager.hh"
+#include "ANLManagerMT.hh"
 #include "VModuleParameter.hh"
 #include "BasicModule.hh"
 #include "ANLException.hh"
@@ -115,7 +116,7 @@ class ANLManager
 {
  public:
   ANLManager();
-  ~ANLManager();
+  virtual ~ANLManager();
   
   %exception{
     try {
@@ -130,29 +131,34 @@ class ANLManager
   int DisplayFrequency() const;
   
   void SetModules(std::vector<anl::BasicModule*> modules);
-  ANLStatus Startup();
-  ANLStatus Initialize();
-  ANLStatus Analyze(long int num_events, bool thread_mode=true);
-  ANLStatus Exit();
-  ANLStatus Prepare();
+  virtual ANLStatus Define();
+  virtual ANLStatus PreInitialize();
+  virtual ANLStatus Initialize();
+  virtual ANLStatus Analyze(long int num_events, bool thread_mode=true);
+  virtual ANLStatus Finalize();
 
   void parameters_to_json(const std::string& filename) const;
 
-  ANLStatus InteractiveCom();
-  ANLStatus InteractiveAna();
+  virtual ANLStatus InteractiveComunication();
+  virtual ANLStatus InteractiveAnalysis();
 
   %exception;
 };
 
+class ANLManagerMT : public ANLManager
+{
+public:
+  explicit ANLManagerMT(int num_parallels=1);
+  virtual ~ANLManagerMT();
+};
  
 class BasicModule
 {
  public:
   BasicModule();
-  BasicModule(const BasicModule& r);
   virtual ~BasicModule();
 
-  virtual ANLStatus mod_prepare();
+  virtual ANLStatus mod_pre_initialize();
 
   std::string module_name() const;
   std::string module_version() const;

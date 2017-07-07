@@ -1,15 +1,15 @@
-#include "MyModule.hh"
+#include "MyMTModule.hh"
 
 using namespace anl;
 
-MyModule::MyModule()
+MyMTModule::MyMTModule()
   : myParameter1_(1), myParameter2_(2.0), myParameter3_("test")
 {
 }
 
-MyModule::~MyModule() = default;
+MyMTModule::~MyMTModule() = default;
 
-ANLStatus MyModule::mod_define()
+ANLStatus MyMTModule::mod_define()
 {
   register_parameter(&myParameter1_, "MyParameter1");
   register_parameter(&myParameter2_, "MyParameter2");
@@ -20,32 +20,33 @@ ANLStatus MyModule::mod_define()
   return AS_OK;
 }
 
-ANLStatus MyModule::mod_pre_initialize()
+ANLStatus MyMTModule::mod_pre_initialize()
 {
   return AS_OK;
 }
 
-ANLStatus MyModule::mod_initialize()
+ANLStatus MyMTModule::mod_initialize()
+{
+  std::cout << module_id() << ".mod_initialize() | copy ID = " << copy_id() << std::endl;
+  return AS_OK;
+}
+
+ANLStatus MyMTModule::mod_begin_run()
 {
   return AS_OK;
 }
 
-ANLStatus MyModule::mod_begin_run()
+ANLStatus MyMTModule::mod_analyze()
 {
   return AS_OK;
 }
 
-ANLStatus MyModule::mod_analyze()
+ANLStatus MyMTModule::mod_end_run()
 {
   return AS_OK;
 }
 
-ANLStatus MyModule::mod_end_run()
-{
-  return AS_OK;
-}
-
-ANLStatus MyModule::mod_finalize()
+ANLStatus MyMTModule::mod_finalize()
 {
   return AS_OK;
 }

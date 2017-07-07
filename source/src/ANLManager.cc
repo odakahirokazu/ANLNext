@@ -26,7 +26,7 @@
 #include <thread>
 #include <cctype>
 
-#if ANL_ANALYZE_INTERRUPT || ANL_INITIALIZE_INTERRUPT || ANL_EXIT_INTERRUPT
+#if ANL_ANALYZE_INTERRUPT || ANL_INITIALIZE_INTERRUPT || ANL_FINALIZE_INTERRUPT
 #include <csignal>
 #include <cstring>
 #endif
@@ -48,14 +48,15 @@
 #include <readline/history.h>
 #endif /* ANL_USE_READLINE */
 
+
 namespace anl
 {
 
 ANLManager::ANLManager()
   : evsManager_(new EvsManager),
+    interrupted_(false),
     moduleAccess_(new ModuleAccess),
-    displayFrequency_(-1),
-    interrupted_(false)
+    displayFrequency_(-1)
 {
   evsManager_->initialize();
 }
@@ -74,7 +75,15 @@ void ANLManager::SetModules(std::vector<BasicModule*> modules)
   reset_counters();
 }
 
-ANLStatus ANLManager::Startup()
+long int ANLManager::DisplayFrequency() const
+{
+  if (displayFrequency_ < 0) {
+    return (numEvents_ > 0) ? (numEvents_/100) : 10000;
+  }
+  return displayFrequency_;
+}
+
+ANLStatus ANLManager::Define()
 {
   std::cout << '\n'
             << "      ***********************************\n"
@@ -82,7 +91,7 @@ ANLStatus ANLManager::Startup()
             << "      ***********************************\n"
             << std::endl;
 
-  ANLStatus status = routine_startup();
+  ANLStatus status = routine_define();
   if (status != AS_OK) {
     goto final;
   }
@@ -102,19 +111,30 @@ ANLStatus ANLManager::Startup()
     }
   }
 
-  std::cout << "ANLManager: definition done." << std::endl;
-  
 final:
+  std::cout << std::endl;
   return status;
 }
 
-ANLStatus ANLManager::Prepare()
+ANLStatus ANLManager::PreInitialize()
 {
-  return routine_prepare();
+  ANLStatus status =  routine_pre_initialize();
+  if (status != AS_OK) {
+    goto final;
+  }
+final:
+  std::cout << std::endl;
+  return status;
 }
 
 ANLStatus ANLManager::Initialize()
 {
+  std::cout << '\n'
+            << "      ***********************************\n"
+            << "      ****      Initialization       ****\n"
+            << "      ***********************************\n"
+            << std::endl;
+
 #if ANL_INITIALIZE_INTERRUPT
   struct sigaction sa;
   struct sigaction sa_org;
@@ -127,24 +147,18 @@ ANLStatus ANLManager::Initialize()
     return AS_QUIT_ERR;
   }
 #endif
+  duplicateChains();
 
   show_analysis();
   print_parameters();
   reset_counters();
 
   ANLStatus status = AS_OK;
-  status = routine_init();
+  status = routine_initialize();
   if (status != AS_OK) {
     goto final;
   }
 
-  status = routine_his();
-  if (status != AS_OK) {
-    goto final;
-  }
-  
-  std::cout << "ANLManager: initialization done." << std::endl;
-  
 final:
   std::cout << std::endl;
 #if ANL_INITIALIZE_INTERRUPT
@@ -159,6 +173,14 @@ final:
 
 ANLStatus ANLManager::Analyze(long int num_events, bool thread_mode)
 {
+  std::cout << '\n'
+            << "      ***********************************\n"
+            << "      ****       Main Analysis       ****\n"
+            << "      ***********************************\n"
+            << std::endl;
+
+  numEvents_ = num_events;
+
 #if ANL_ANALYZE_INTERRUPT
   struct sigaction sa;
   struct sigaction sa_org;
@@ -173,21 +195,22 @@ ANLStatus ANLManager::Analyze(long int num_events, bool thread_mode)
 #endif
 
   ANLStatus status = AS_OK;
-  std::cout << "ANLManager: start bgnrun routine." << std::endl;
-  status = routine_bgnrun();
+
+  status = routine_begin_run();
   if (status != AS_OK) {
     goto final;
   }
 
   if (thread_mode) {
-    std::cout << "ANLManager: start analysis (with thread mode on)." << std::endl;
-    std::cout << "You can quit the analysis routine by input 'q'." << std::endl;
+    std::cout << "\n"
+              << "ANLManager: starting analysis loop (with thread mode on).\n"
+              << "You can quit the analysis routine by input '.q'.\n"
+              << std::endl;
     
-    boost::thread analysisThread(std::bind(&ANLManager::__void_process_analysis, this, num_events, &status));
+    std::thread analysisThread(std::bind(&ANLManager::__void_process_analysis, this, &status));
     boost::thread interactiveThread(std::bind(&ANLManager::interactive_session, this));
     analysisThread.join();
-    boost::chrono::seconds wait(1);
-    interactiveThread.try_join_for(wait);
+    interactiveThread.try_join_for(boost::chrono::seconds(1));
     
 #if ANL_USE_READLINE
     rl_initialize();
@@ -195,23 +218,30 @@ ANLStatus ANLManager::Analyze(long int num_events, bool thread_mode)
 #endif
   }
   else {
-    std::cout << "ANLManager: start analysis." << std::endl;
-    status = process_analysis(num_events);
+    std::cout << "\n"
+              << "ANLManager: starting analysis loop.\n"
+              << std::endl;
+    status = process_analysis();
   }
 
   if (status != AS_OK) {
     goto final;
   }
-  
-  std::cout << "ANLManager: start endrun routine." << std::endl;
-  status = routine_endrun();
+
+  std::cout << "\n"
+            << "ANLManager: analysis loop successfully done.\n"
+            << std::endl;
+
+  status = routine_end_run();
   if (status != AS_OK) {
     goto final;
   }
 
 final:
   std::cout << std::endl;
+  reduceStatistics();
   print_summary();
+  evsManager_->printSummary();
 
 #if ANL_ANALYZE_INTERRUPT
   if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
@@ -223,9 +253,15 @@ final:
   return status;
 }
 
-ANLStatus ANLManager::Exit()
+ANLStatus ANLManager::Finalize()
 {
-#if ANL_EXIT_INTERRUPT
+  std::cout << '\n'
+            << "      ***********************************\n"
+            << "      ****        Finalization       ****\n"
+            << "      ***********************************\n"
+            << std::endl;
+
+#if ANL_FINALIZE_INTERRUPT
   struct sigaction sa;
   struct sigaction sa_org;
   std::memset(&sa, 0, sizeof(sa));
@@ -239,20 +275,15 @@ ANLStatus ANLManager::Exit()
 #endif
 
   ANLStatus status = AS_OK;
-  status = routine_exit();
+  status = routine_finalize();
   if (status != AS_OK) {
     goto final;
   }
 
 final:
   std::cout << std::endl;
-  evsManager_->printSummary();
 
-  std::cout << "\n"
-            << "ANLManager: exiting..."
-            << std::endl;
-
-#if ANL_EXIT_INTERRUPT
+#if ANL_FINALIZE_INTERRUPT
   if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
     return AS_QUIT_ERR;
@@ -348,18 +379,13 @@ void ANLManager::reset_counters()
   }
 }
 
-ANLStatus ANLManager::process_analysis(long int num_events)
+ANLStatus ANLManager::process_analysis()
 {
   ANLStatus status = AS_OK;
 
   const std::vector<BasicModule*>& modules = modules_;
-  const std::size_t NumberOfModules = modules.size();
-
-  long int display_frequency = DisplayFrequency();
-  if (display_frequency < 0) {
-    if (num_events > 0) { display_frequency = num_events/100; }
-    else { display_frequency = 10000; }
-  }
+  const long int display_frequency = DisplayFrequency();
+  const long int num_events = NumberOfLoops();
 
   for (long int iEvent=0; iEvent!=num_events; iEvent++) {
     if (display_frequency != 0 && iEvent%display_frequency == 0) {
@@ -367,47 +393,9 @@ ANLStatus ANLManager::process_analysis(long int num_events)
       std::cout.width(0);
     }
 
-    evsManager_->resetAllFlags();
+    status = process_one_event(iEvent, modules, counters_, *evsManager_);
 
-    for (std::size_t iModule=0; iModule<NumberOfModules; iModule++) {
-      BasicModule* mod = modules[iModule];
-      if (mod->is_on()) {
-        counters_[iModule].count_up_by_entry();
-        mod->set_event_loop_index(iEvent);
-
-        try {
-          status = mod->mod_ana();
-        }
-        catch (ANLException& ex) {
-          ex << ANLErrorInfoOnLoopIndex(iEvent);
-          ex << ANLErrorInfoOnMethod( mod->module_name() + "::mod_ana" );
-          ex << ANLErrorInfoOnModule( mod->module_id() );
-          throw;
-        }
-        
-        counters_[iModule].count_up_by_result(status);
-        
-        if (status != AS_OK) {
-          break;
-        }
-      }
-    }
-
-    if (status == AS_OK) {
-      evsManager_->count();
-      evsManager_->countCompleted();
-    }
-    else if(status == AS_SKIP) {
-      evsManager_->count();
-    }
-    else if(status == AS_SKIP_ERR) {
-      ;
-    }
-    else if (status == AS_QUIT) {
-      evsManager_->count();
-      break;
-    }
-    else if (status == AS_QUIT_ERR) {
+    if (status == AS_QUIT || status == AS_QUIT_ERR) {
       break;
     }
 
@@ -468,58 +456,56 @@ void ANLManager::parameters_to_json(const std::string& filename) const
   write_json(filename.c_str(), pt);
 }
 
-ANLStatus ANLManager::routine_startup()
+ANLStatus ANLManager::routine_define()
 {
-  return routine_modfn(&BasicModule::mod_startup, "startup");
+  return routine_modfn(&BasicModule::mod_define, "define", modules_);
 }
 
-ANLStatus ANLManager::routine_prepare()
+ANLStatus ANLManager::routine_pre_initialize()
 {
-  return routine_modfn(&BasicModule::mod_prepare, "prepare");
+  return routine_modfn(&BasicModule::mod_pre_initialize, "pre_initialize", modules_);
 }
 
-ANLStatus ANLManager::routine_init()
+ANLStatus ANLManager::routine_initialize()
 {
-  return routine_modfn(&BasicModule::mod_init, "init");
+  return routine_modfn(&BasicModule::mod_initialize, "initialize", modules_);
 }
 
-ANLStatus ANLManager::routine_his()
+ANLStatus ANLManager::routine_begin_run()
 {
-  return routine_modfn(&BasicModule::mod_his, "his");
+  return routine_modfn(&BasicModule::mod_begin_run, "begin_run", modules_);
 }
 
-ANLStatus ANLManager::routine_bgnrun()
+ANLStatus ANLManager::routine_end_run()
 {
-  return routine_modfn(&BasicModule::mod_bgnrun, "bgnrun");
+  return routine_modfn(&BasicModule::mod_end_run, "end_run", modules_);
 }
 
-ANLStatus ANLManager::routine_endrun()
+ANLStatus ANLManager::routine_finalize()
 {
-  return routine_modfn(&BasicModule::mod_endrun, "endrun");
+  return routine_modfn(&BasicModule::mod_finalize, "finalize", modules_);
 }
 
-ANLStatus ANLManager::routine_exit()
+void ANLManager::__void_process_analysis(ANLStatus* status)
 {
-  return routine_modfn(&BasicModule::mod_exit, "exit");
-}
-
-void ANLManager::__void_process_analysis(long int num_events, ANLStatus* status)
-{
-  ANLStatus s = process_analysis(num_events);
+  ANLStatus s = process_analysis();
   *status = s;
 }
 
 void ANLManager::interactive_session()
 {
 #if ANL_USE_READLINE
-  std::shared_ptr<char> line;
+  std::unique_ptr<char> line;
   while (1) {
-    line = std::shared_ptr<char>(readline(""));
+    line.reset(readline(""));
     if (line.get()) {
-      if (std::strcmp(line.get(), "q") == 0) {
-        std::cout << "---> QUIT" << std::endl;
+      if (std::strcmp(line.get(), ".q") == 0) {
+        std::cout << "ANL> " << line.get() << " ---> QUIT\n" << std::endl;
         interrupted_ = true;
         return;
+      }
+      else {
+        std::cout << "ANL> " << line.get() << "\n" << std::endl;
       }
     }
     else {
@@ -530,13 +516,64 @@ void ANLManager::interactive_session()
   std::string buf;
   while (1) {
     std::cin >> buf;
-    if (buf=="q") {
-      std::cout << "---> QUIT by user interruption" << std::endl; 
+    if (buf==".q") {
+      std::cout << "ANL>> " << line.get() << " ---> QUIT\n" << std::endl;
       interrupted_ = true;
       return;
     }
+    else {
+      std::cout << "ANL>> " << line.get() << "\n" << std::endl;
+    }
   }
 #endif
+}
+
+ANLStatus process_one_event(long int iEvent,
+                            const std::vector<BasicModule*>& modules,
+                            std::vector<LoopCounter>& counters,
+                            EvsManager& evsManager)
+{
+  evsManager.resetAllFlags();
+
+  ANLStatus status = AS_OK;
+
+  const std::size_t NumberOfModules = modules.size();
+  for (std::size_t iModule=0; iModule<NumberOfModules; iModule++) {
+    BasicModule* mod = modules[iModule];
+    if (mod->is_on()) {
+      counters[iModule].count_up_by_entry();
+      mod->set_loop_index(iEvent);
+
+      try {
+        status = mod->mod_analyze();
+      }
+      catch (ANLException& ex) {
+        ex << ANLErrorInfoOnLoopIndex(iEvent);
+        ex << ANLErrorInfoOnMethod( mod->module_name() + "::mod_analyze" );
+        ex << ANLErrorInfoOnModule( mod->module_id() );
+        throw;
+      }
+        
+      counters[iModule].count_up_by_result(status);
+        
+      if (status != AS_OK) {
+        break;
+      }
+    }
+  }
+
+  if (status == AS_OK) {
+    evsManager.count();
+    evsManager.countCompleted();
+  }
+  else if(status == AS_SKIP) {
+    evsManager.count();
+  }
+  else if (status == AS_QUIT) {
+    evsManager.count();
+  }
+
+  return status;
 }
 
 } /* namespace anl */

@@ -48,7 +48,7 @@ const char* prompt(EditLine*)
 namespace anl
 {
 
-ANLStatus ANLManager::InteractiveCom()
+ANLStatus ANLManager::InteractiveComunication()
 {
   ANLStatus status = AS_OK;
   
@@ -226,7 +226,7 @@ void ANLManager::InteractiveComHelp()
             << "  show              : show analysis chain\n"
             << "  print MODULE_ID   : show paramters of the module\n"
             << "  mod MODULE_ID     : modify parameters of the module\n"
-            << "                      (enter mod_com() method)\n"
+            << "                      (enter mod_comunicate() method)\n"
             << "  on MODULE_ID      : switch on the module\n"
             << "  off MODULE_ID     : switch off the module\n"
             << "  init              : initialize to start analysis\n"
@@ -244,16 +244,16 @@ ANLStatus ANLManager::InteractiveModifyParam(int n)
     for (AMIter mod=modules_.begin(); mod!=modules_.end(); ++mod) {
       if ((*mod)->is_off()) continue;
       std::cout << (*mod)->module_name() << " mod_com()" << std::endl;
-      status = (*mod)->mod_com();
+      status = (*mod)->mod_comunicate();
       if (status != AS_OK) {
         std::cout << (*mod)->module_name()
-                  << " mod_com() returned "
+                  << " mod_comunicate() returned "
                   << status << std::endl;
       }
-      status = (*mod)->mod_prepare();
+      status = (*mod)->mod_pre_initialize();
       if (status != AS_OK) {
         std::cout << (*mod)->module_name()
-                  << " mod_prepare() returned "
+                  << " mod_pre_initialize() returned "
                   << status << std::endl;
       }
       std::cout << std::endl;
@@ -262,17 +262,17 @@ ANLStatus ANLManager::InteractiveModifyParam(int n)
   else if (0<=n && n<static_cast<int>(modules_.size())) {
     BasicModule* mo = modules_[n];
     std::cout << mo->module_name()
-              << " mod_com()" << std::endl;
-    status = mo->mod_com();
+              << " mod_comunicate()" << std::endl;
+    status = mo->mod_comunicate();
     if (status != AS_OK) {
       std::cout << mo->module_name()
-                << " mod_com() returned "
+                << " mod_comunicate() returned "
                 << status << std::endl;
     }
-    status = mo->mod_prepare();
+    status = mo->mod_pre_initialize();
     if (status != AS_OK) {
       std::cout << mo->module_name()
-                << " mod_prepare() returned "
+                << " mod_pre_initialize() returned "
                 << status << std::endl;
     }
   }
@@ -331,7 +331,7 @@ void ANLManager::InteractiveModuleSwitch(int n, bool module_sw)
   }
 }
 
-ANLStatus ANLManager::InteractiveAna()
+ANLStatus ANLManager::InteractiveAnalysis()
 {
   ANLStatus status = AS_OK;
 

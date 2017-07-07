@@ -11,29 +11,28 @@
 #define GenerateEvents_H 1
 
 #include "BasicModule.hh"
-
-class TRandom3;
+#include <memory>
+#include "TRandom.h"
 
 class GenerateEvents : public anl::BasicModule
 {
   DEFINE_ANL_MODULE(GenerateEvents, 1.0);
 public:
   GenerateEvents();
-  ~GenerateEvents();
   
-  anl::ANLStatus mod_startup() override;
-  anl::ANLStatus mod_init() override;
-  anl::ANLStatus mod_ana() override;
+  anl::ANLStatus mod_define() override;
+  anl::ANLStatus mod_initialize() override;
+  anl::ANLStatus mod_analyze() override;
 
-  double Energy() const { return _energy_generated; }
+  double Energy() const { return energy_generated_; }
 
 private:
-  double _center;
-  double _sigma1;
-  double _sigma2;
-  double _energy_generated;
+  double center_;
+  double sigma1_;
+  double sigma2_;
+  double energy_generated_;
 
-  TRandom3* _random;
+  std::unique_ptr<TRandom> random_;
 };
 
 #endif /* GenerateEvents_H */

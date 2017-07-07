@@ -9,14 +9,14 @@ SaveData::SaveData() :
 {
 }
 
-ANLStatus SaveData::mod_startup()
+ANLStatus SaveData::mod_define()
 {
   register_parameter(&m_FileName, "filename");
   set_parameter_description("Output file name");
   return AS_OK;
 }
 
-ANLStatus SaveData::mod_init()
+ANLStatus SaveData::mod_initialize()
 {
   m_RootFile = new TFile(m_FileName.c_str(), "recreate");
   if ( !m_RootFile ) {
@@ -27,7 +27,7 @@ ANLStatus SaveData::mod_init()
   return AS_OK;
 }
 
-ANLStatus SaveData::mod_exit()
+ANLStatus SaveData::mod_finalize()
 {
   std::cout << "SaveData: saving data to ROOT file" << std::endl;
   m_RootFile->Write();

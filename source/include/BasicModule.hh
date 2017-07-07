@@ -29,6 +29,7 @@
 #include <set>
 #include <algorithm>
 #include <iterator>
+#include <memory>
 
 #include <boost/format.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -63,7 +64,8 @@ class EvsManager;
  * @date 2013-05-22
  * @date 2014-12-18
  * @date 2015-11-10 | review parameter setter/getter methods
- * @date 2017-07-20 | do not own ModuleAccess, always fully accessible
+ * @date 2017-07-02 | do not own ModuleAccess, always fully accessible
+ * @date 2017-07-03 | new model (mod-methods are renamed)
  */
 class BasicModule
 {
@@ -75,24 +77,36 @@ private:
 
 public:
   BasicModule();
-  BasicModule(const BasicModule& r);
   virtual ~BasicModule();
 
+  BasicModule(BasicModule&& r) = delete;
+  BasicModule& operator=(const BasicModule& r) = delete;
+  BasicModule& operator=(BasicModule&& r) = delete;
+
+  virtual std::unique_ptr<BasicModule> clone() { return make_clone(this); }
+
+protected:
+  BasicModule(const BasicModule& r);
+
+public:
   std::string module_name() const { return __module_name__(); }
   std::string module_version() const { return __module_version__(); }
   
   void set_module_id(const std::string& v);
   std::string module_id() const { return (this->*moduleIDMethod_)(); }
+
+  int copy_id() const { return copyID_; }
+  bool is_master() const { return (copyID_ == 0); }
   
-  virtual ANLStatus mod_startup()  { return AS_OK; }
-  virtual ANLStatus mod_com()      { ask_parameters(); return AS_OK; }
-  virtual ANLStatus mod_prepare()  { return AS_OK; }
-  virtual ANLStatus mod_init()     { return AS_OK; }
-  virtual ANLStatus mod_his()      { return AS_OK; }
-  virtual ANLStatus mod_bgnrun()   { return AS_OK; }
-  virtual ANLStatus mod_ana()      { return AS_OK; }
-  virtual ANLStatus mod_endrun()   { return AS_OK; }
-  virtual ANLStatus mod_exit()     { return AS_OK; }
+  virtual ANLStatus mod_define()         { return AS_OK; }
+  virtual ANLStatus mod_pre_initialize() { return AS_OK; }
+  virtual ANLStatus mod_initialize()     { return AS_OK; }
+  virtual ANLStatus mod_begin_run()      { return AS_OK; }
+  virtual ANLStatus mod_analyze()        { return AS_OK; }
+  virtual ANLStatus mod_end_run()        { return AS_OK; }
+  virtual ANLStatus mod_finalize()       { return AS_OK; }
+
+  virtual ANLStatus mod_comunicate() { ask_parameters(); return AS_OK; }
 
   std::vector<std::pair<std::string, ModuleAccess::ConflictOption>> get_aliases() const { return aliases_; }
   std::vector<std::string> get_aliases_string() const;
@@ -101,8 +115,6 @@ public:
   {
     aliases_.emplace_back(name, conflict);
   }
-
-  int copy_id() { return myCopyID_; }
 
   std::string module_description() const { return moduleDescription_; }
   void set_module_description(const std::string& v) { moduleDescription_ = v; }
@@ -130,8 +142,8 @@ public:
    */
   bool is_off() const { return !moduleOn_; }
 
-  void set_event_loop_index(long int index) { eventIndex_ = index; }
-  long int get_event_loop_index() const { return eventIndex_; }
+  void set_loop_index(long int index) { loopIndex_ = index; }
+  long int get_loop_index() const { return loopIndex_; }
   
   /**
    * expose a module parameter specified by "name" and set it as the current parameter.
@@ -249,10 +261,14 @@ protected:
   void EvsSet(const std::string& key);
   void EvsReset(const std::string& key);
 
+protected:
+  template <typename ModuleType>
+  std::unique_ptr<BasicModule> make_clone(ModuleType*&& copied);
+
 private:
   ModuleParamIter find_parameter(const std::string& name);
   std::string get_module_id() const { return moduleID_; }
-  
+
 private:
   std::string moduleID_;
   std::vector<std::pair<std::string, ModuleAccess::ConflictOption>> aliases_;
@@ -262,15 +278,12 @@ private:
   const ModuleAccess* moduleAccess_ = nullptr;
   ModuleParamList moduleParameters_;
   ModuleParam_sptr currentParameter_;
-  long int eventIndex_ = -1;
+  long int loopIndex_ = -1;
     
-  int myCopyID_ = 0;
-  static int CopyID__;
+  const int copyID_ = 0;
+  int lastCopy_ = 0;
 
   std::string (BasicModule::*moduleIDMethod_)() const;
-  
-private:
-  BasicModule& operator=(const BasicModule& r);
 };
 
 using AMIter = std::vector<BasicModule*>::iterator;
@@ -447,6 +460,19 @@ void BasicModule::GetModuleIFNC(const std::string& name, T *ptr)
       = (boost::format("Dynamic cast failed from ANL Module: %s") % name).str();
     BOOST_THROW_EXCEPTION( ANLException(this, message) );
   }
+}
+
+template <typename ModuleType>
+std::unique_ptr<BasicModule> BasicModule::make_clone(ModuleType*&& copied)
+{
+  std::unique_ptr<BasicModule> m(copied);
+  if (this->is_master()) {
+    this->lastCopy_ += 1;
+  }
+  else {
+    m.reset(nullptr);
+  }
+  return m;
 }
 
 } /* namespace anl */

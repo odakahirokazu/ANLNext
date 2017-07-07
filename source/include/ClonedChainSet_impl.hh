@@ -17,55 +17,21 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_ANLManager_impl_H
-#define ANL_ANLManager_impl_H 1
+#ifndef ANL_ClonedChainSet_impl_H
+#define ANL_ClonedChainSet_impl_H 1
 
-#include "ANLManager.hh"
-#include "BasicModule.hh"
-#include "ANLException.hh"
+#include "ClonedChainSet.hh"
+#include "EvsManager.hh"
 
 namespace anl
 {
 
-template<typename T>
-ANLStatus routine_modfn(T func,
-                        const std::string& func_id,
-                        const std::vector<BasicModule*>& modules)
+template <typename T>
+ANLStatus ClonedChainSet::process(T func)
 {
-  std::cout << "\n"
-            << "ANLManager: starting <" << func_id << "> routine.\n"
-            << std::endl;
-
-  ANLStatus status = AS_OK;
-  for (auto& mod: modules) {
-    if (mod->is_off()) { continue; }
-    
-    try {
-      status = ((*mod).*func)();
-      if (status != AS_OK ) {
-        std::cout << "\n"
-                  << "ANLManager: <" << func_id << "> routine stopped.\n"
-                  << mod->module_name() << "::mod_" << func_id
-                  << " returned " << status << std::endl;
-        break;
-      }
-    }
-    catch (ANLException& ex) {
-      ex << ANLErrorInfoOnMethod( mod->module_name() + "::mod_" + func_id );
-      ex << ANLErrorInfoOnModule( mod->module_id() );
-      throw;
-    }
-  }
-  
-  if (status == AS_OK) {
-    std::cout << "\n"
-              << "ANLManager: <" << func_id << "> routine successfully done.\n"
-              << std::endl;
-  }
-
-  return status;
+  return func(modules_ref_, counters_, *evsManager_);
 }
 
 } /* namespace anl */
 
-#endif /* ANL_ANLManager_impl_H */
+#endif /* ANL_ClonedChainSet_impl_H */

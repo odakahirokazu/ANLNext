@@ -17,55 +17,57 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_ANLManager_impl_H
-#define ANL_ANLManager_impl_H 1
+#include "ClonedChainSet.hh"
+#include "ClonedChainSet_impl.hh"
 
-#include "ANLManager.hh"
 #include "BasicModule.hh"
-#include "ANLException.hh"
+#include "EvsManager.hh"
+#include "ModuleAccess.hh"
 
 namespace anl
 {
 
-template<typename T>
-ANLStatus routine_modfn(T func,
-                        const std::string& func_id,
-                        const std::vector<BasicModule*>& modules)
+ClonedChainSet::ClonedChainSet(const EvsManager& evs)
+  : evsManager_(new EvsManager(evs)),
+    moduleAccess_(new ModuleAccess)
 {
-  std::cout << "\n"
-            << "ANLManager: starting <" << func_id << "> routine.\n"
-            << std::endl;
+}
 
-  ANLStatus status = AS_OK;
-  for (auto& mod: modules) {
-    if (mod->is_off()) { continue; }
+ClonedChainSet::~ClonedChainSet() = default;
+
+void ClonedChainSet::push(std::unique_ptr<BasicModule>&& clonedModule)
+{
+  std::unique_ptr<BasicModule> m = std::move(clonedModule);
+  m->set_evs_manager(evsManager_.get());
+  m->set_module_access(moduleAccess_.get());
+  modules_ref_.push_back(m.get());
+  modules_.push_back(std::move(m));
+  counters_.push_back(LoopCounter());
+}
+
+void ClonedChainSet::setup_module_access()
+{
+  for (BasicModule* mod: modules_ref_) {
+    const std::string moduleID = mod->module_id();
+    moduleAccess_->registerModule(moduleID,
+                                  mod,
+                                  ModuleAccess::ConflictOption::error);
     
-    try {
-      status = ((*mod).*func)();
-      if (status != AS_OK ) {
-        std::cout << "\n"
-                  << "ANLManager: <" << func_id << "> routine stopped.\n"
-                  << mod->module_name() << "::mod_" << func_id
-                  << " returned " << status << std::endl;
-        break;
+    for (const std::pair<std::string, ModuleAccess::ConflictOption>& alias: mod->get_aliases()) {
+      if (alias.first != moduleID) {
+        moduleAccess_->registerModule(alias.first,
+                                      mod,
+                                      alias.second);
       }
     }
-    catch (ANLException& ex) {
-      ex << ANLErrorInfoOnMethod( mod->module_name() + "::mod_" + func_id );
-      ex << ANLErrorInfoOnModule( mod->module_id() );
-      throw;
-    }
   }
-  
-  if (status == AS_OK) {
-    std::cout << "\n"
-              << "ANLManager: <" << func_id << "> routine successfully done.\n"
-              << std::endl;
-  }
+}
 
-  return status;
+void ClonedChainSet::reset_counters()
+{
+  for (LoopCounter& c: counters_) {
+    c.reset();
+  }
 }
 
 } /* namespace anl */
-
-#endif /* ANL_ANLManager_impl_H */
