@@ -54,6 +54,11 @@ void ANLManagerMT::duplicateChains()
   for (int i=1; i<NumParallels_; i++) {
     clone_modules();
   }
+  std::cout << "\n"
+            << "<Module chain duplication>\n"
+            << (NumParallels_-1) << " chains have been duplicated. => "
+            << "Total: " << NumParallels_ << " chains.\n"
+            << std::endl;
 }
 
 void ANLManagerMT::reset_counters()

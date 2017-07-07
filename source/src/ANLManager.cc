@@ -118,10 +118,19 @@ final:
 
 ANLStatus ANLManager::PreInitialize()
 {
+  std::cout << '\n'
+            << "      ***********************************\n"
+            << "      ****    Pre-Initialization     ****\n"
+            << "      ***********************************\n"
+            << std::endl;
+
   ANLStatus status =  routine_pre_initialize();
   if (status != AS_OK) {
     goto final;
   }
+
+  duplicateChains();
+
 final:
   std::cout << std::endl;
   return status;
@@ -147,7 +156,6 @@ ANLStatus ANLManager::Initialize()
     return AS_QUIT_ERR;
   }
 #endif
-  duplicateChains();
 
   show_analysis();
   print_parameters();
