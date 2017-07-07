@@ -51,7 +51,8 @@ class BasicModule;
  * @date 2010-06-xx
  * @date 2015-08-15 | version 1.7
  * @date 2017-07-02 | version 1.9 | simpler event loop
- * @date 2017-07-04 | new model
+ * @date 2017-07-04 | new model, for multi-thread mode
+ * @date 2017-07-07 | rename methods
  */
 class ANLManager
 {
@@ -67,12 +68,12 @@ public:
   /**
    * set ANL modules
    */
-  void SetModules(std::vector<BasicModule*> modules);
+  void set_modules(std::vector<BasicModule*> modules);
 
-  long int NumberOfLoops() const { return numEvents_; }
+  long int number_of_loops() const { return numEvents_; }
 
-  void SetDisplayFrequency(long int v) { displayFrequency_ = v; }
-  long int DisplayFrequency() const;
+  void set_display_frequency(long int v) { displayFrequency_ = v; }
+  long int display_frequency() const;
 
   virtual ANLStatus Define();
   virtual ANLStatus PreInitialize();
@@ -80,8 +81,8 @@ public:
   virtual ANLStatus Analyze(long int num_events, bool thread_mode=false);
   virtual ANLStatus Finalize();
 
-  virtual ANLStatus InteractiveComunication();
-  virtual ANLStatus InteractiveAnalysis();
+  virtual ANLStatus do_interactive_comunication();
+  virtual ANLStatus do_interactive_analysis();
 
   boost::property_tree::ptree parameters_to_property_tree() const;
   void parameters_to_json(const std::string& filename) const;
@@ -100,19 +101,19 @@ protected:
   virtual ANLStatus process_analysis();
   void print_summary();
 
-  int ModuleIndex(const std::string& module_id, bool strict=true) const;
+  int module_index(const std::string& module_id, bool strict=true) const;
 
 #if ANL_ENABLE_INTERACTIVE_MODE
-  void InteractiveComHelp();
-  ANLStatus InteractiveModifyParam(int n);
-  void InteractivePrintParam(int n);
-  void InteractiveModuleSwitch(int n, bool module_sw);
-  void InteractiveAnaHelp();
+  void interactive_comunication_help();
+  ANLStatus interactive_modify_param(int n);
+  void interactive_print_param(int n);
+  void interactive_module_switch(int n, bool module_sw);
+  void interactive_analysis_help();
 #endif /* ANL_ENABLE_INTERACTIVE_MODE */
 
 private:
-  virtual void duplicateChains() {}
-  virtual void reduceStatistics() {}
+  virtual void duplicate_chains() {}
+  virtual void reduce_statistics() {}
 
   // thread mode
 private:

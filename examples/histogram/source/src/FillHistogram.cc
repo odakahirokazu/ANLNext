@@ -24,11 +24,11 @@ ANLStatus FillHistogram::mod_define()
 
 ANLStatus FillHistogram::mod_initialize()
 {
-  GetModule("GenerateEvents", &event_);
+  get_module("GenerateEvents", &event_);
 
-  if (ModuleExist("SaveData")) {
+  if (exist_module("SaveData")) {
     SaveData* saveModule = nullptr;
-    GetModuleNC("SaveData", &saveModule);
+    get_module_NC("SaveData", &saveModule);
     saveModule->cd();
   }
   
@@ -42,12 +42,12 @@ ANLStatus FillHistogram::mod_initialize()
 ANLStatus FillHistogram::mod_analyze()
 {
   const double energy = event_->Energy();
-  if (Evs("GenerateEvents:Detector1")) {
+  if (evs("GenerateEvents:Detector1")) {
     spectrum1_->Fill(energy);
     spectrum_sum_->Fill(energy);
   }
 
-  if (Evs("GenerateEvents:Detector2")) {
+  if (evs("GenerateEvents:Detector2")) {
     spectrum2_->Fill(energy);
     spectrum_sum_->Fill(energy);
   }

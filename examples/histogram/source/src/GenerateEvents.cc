@@ -23,8 +23,8 @@ ANLStatus GenerateEvents::mod_define()
 
 ANLStatus GenerateEvents::mod_initialize()
 {
-  EvsDef("GenerateEvents:Detector1");
-  EvsDef("GenerateEvents:Detector2");
+  define_evs("GenerateEvents:Detector1");
+  define_evs("GenerateEvents:Detector2");
 
   return AS_OK;
 }
@@ -35,11 +35,11 @@ ANLStatus GenerateEvents::mod_analyze()
 
   if (detector <= 3) {
     energy_generated_ = random_->Gaus(center_, sigma1_);
-    EvsSet("GenerateEvents:Detector1");
+    set_evs("GenerateEvents:Detector1");
   }
   else if (detector <= 8) {
     energy_generated_ = random_->Gaus(center_, sigma2_);
-    EvsSet("GenerateEvents:Detector2");
+    set_evs("GenerateEvents:Detector2");
   }
   else {
     return AS_SKIP;

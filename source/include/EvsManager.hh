@@ -62,6 +62,7 @@ typedef EvsMap::const_iterator EvsConstIter;
  * @date 2010-06-xx
  * @date 2014-12-18
  * @date 2016-12-20 | add count_ok
+ * @date 2017-07-07 | add merge(), rename methods
  */
 class EvsManager
 {
@@ -86,7 +87,7 @@ public:
    */
   void undefine(const std::string& key) { data_.erase(key); }
 
-  bool isDefined(const std::string& key) const
+  bool is_defined(const std::string& key) const
   { return data_.count(key); }
 
   /**
@@ -104,12 +105,12 @@ public:
    */
   void reset(const std::string& key);
   
-  void resetAllFlags();
-  void resetAllCounts();
+  void reset_all_flags();
+  void reset_all_counts();
 
   void count();
-  void countCompleted();
-  void printSummary();
+  void count_completed();
+  void print_summary() const;
 
   const EvsMap& data() const { return data_; }
   void merge(const EvsManager& r);

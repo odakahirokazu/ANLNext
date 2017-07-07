@@ -20,7 +20,7 @@
 #include "ANLStatus.hh"
 #include <string>
 
-std::string anl::ANLStatusToString(anl::ANLStatus status)
+std::string anl::status_to_string(anl::ANLStatus status)
 {
   switch (status) {
     case anl::ANLStatus::AS_OK:
@@ -40,6 +40,6 @@ std::string anl::ANLStatusToString(anl::ANLStatus status)
 
 std::ostream& operator<< (std::ostream& os, anl::ANLStatus status)
 {
-  os << anl::ANLStatusToString(status);
+  os << anl::status_to_string(status);
   return os;
 }

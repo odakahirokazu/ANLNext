@@ -31,7 +31,7 @@ namespace anl
  */
 enum class ANLStatus { AS_OK, AS_SKIP, AS_SKIP_ERR, AS_QUIT, AS_QUIT_ERR };
 
-std::string ANLStatusToString(ANLStatus status);
+std::string status_to_string(ANLStatus status);
 
 constexpr ANLStatus AS_OK       = ANLStatus::AS_OK;
 constexpr ANLStatus AS_SKIP     = ANLStatus::AS_SKIP;

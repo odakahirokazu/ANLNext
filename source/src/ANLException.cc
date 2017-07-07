@@ -26,7 +26,7 @@ namespace anl
 
 int ANLException::__VerboseLevel__ = 1;
 
-void ANLException::setVerboseLevel(int v)
+void ANLException::SetVerboseLevel(int v)
 {
   __VerboseLevel__ = v;
 }
@@ -53,12 +53,12 @@ ANLException::ANLException(const BasicModule* mod,
   *this << ANLErrorInfo(message);
 }
 
-void ANLException::setMessage(const std::string& message)
+void ANLException::set_message(const std::string& message)
 {
   *this << ANLErrorInfo(message);
 }
 
-std::string ANLException::getMessage() const
+std::string ANLException::get_message() const
 {
   const std::string* message = boost::get_error_info<ANLErrorInfo>(*this);
   if (message==nullptr) {
@@ -67,12 +67,12 @@ std::string ANLException::getMessage() const
   return *message;
 }
 
-void ANLException::setModuleInfo(const BasicModule* mod)
+void ANLException::set_module_info(const BasicModule* mod)
 {
   *this << ANLErrorInfoOnModule(mod->module_id());
 }
 
-std::string ANLException::toString() const
+std::string ANLException::to_string() const
 {
   if (VerboseLevel() == 1) {
     std::ostringstream oss;

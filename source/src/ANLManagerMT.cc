@@ -49,7 +49,7 @@ void ANLManagerMT::clone_modules()
   clonedChains_.push_back(std::move(chain));
 }
 
-void ANLManagerMT::duplicateChains()
+void ANLManagerMT::duplicate_chains()
 {
   for (int i=1; i<NumParallels_; i++) {
     clone_modules();
@@ -124,12 +124,14 @@ ANLStatus ANLManagerMT::routine_finalize()
 long int ANLManagerMT::event_index_to_process()
 {
   std::lock_guard<std::mutex> lock(mutex_);
+
+  const long int N = number_of_loops();
   ++loopIndex_;
-  if (loopIndex_>=NumberOfLoops()) {
-    return NumberOfLoops();
+  if (loopIndex_ >= N) {
+    return N;
   }
   if (interrupted_) {
-    return NumberOfLoops();
+    return N;
   }
   return loopIndex_;
 }
@@ -169,14 +171,14 @@ ANLStatus ANLManagerMT::process_analysis_impl(const std::vector<BasicModule*>& m
 {
   ANLStatus status = AS_OK;
 
-  const long int display_frequency = DisplayFrequency();
-  const long int num_events = NumberOfLoops();
+  const long int displayFrequency = display_frequency();
+  const long int numNvents = number_of_loops();
 
   while (true) {
     const long int iEvent = event_index_to_process();
-    if (iEvent == num_events) { break; }
+    if (iEvent == numNvents) { break; }
 
-    if (display_frequency != 0 && iEvent%display_frequency == 0) {
+    if (displayFrequency != 0 && iEvent%displayFrequency == 0) {
       std::cout << "Event : " << std::dec << std::setw(10) << iEvent << std::endl;
       std::cout.width(0);
     }
@@ -195,7 +197,7 @@ ANLStatus ANLManagerMT::process_analysis_impl(const std::vector<BasicModule*>& m
   return AS_OK;
 }
 
-void ANLManagerMT::reduceStatistics()
+void ANLManagerMT::reduce_statistics()
 {
   for (const ClonedChainSet& chain: clonedChains_) {
     for (std::size_t i=0; i<modules_.size(); i++) {

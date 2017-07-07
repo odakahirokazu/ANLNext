@@ -45,11 +45,12 @@ struct exception_base : virtual std::exception, virtual boost::exception
  * @author Hirokazu Odaka
  * @date 2010-06-xx
  * @date 2016-08-19 | modify design
+ * @date 2017-07-07 | rename methods
  */
 struct ANLException : virtual exception_base
 {
 public:
-  static void setVerboseLevel(int v);
+  static void SetVerboseLevel(int v);
   static int VerboseLevel();
 
 public:
@@ -59,10 +60,10 @@ public:
   ANLException(const BasicModule* mod,
                const std::string& message);
 
-  void setModuleInfo(const BasicModule* module);
-  void setMessage(const std::string& message);
-  std::string getMessage() const;
-  std::string toString() const;
+  void set_module_info(const BasicModule* module);
+  void set_message(const std::string& message);
+  std::string get_message() const;
+  std::string to_string() const;
 
 private:
   static int __VerboseLevel__;

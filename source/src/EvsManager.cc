@@ -30,14 +30,14 @@ void EvsManager::initialize()
   data_.clear();
 }
 
-void EvsManager::resetAllFlags()
+void EvsManager::reset_all_flags()
 {
   for (auto& e: data_) {
     e.second.flag = false;
   }
 }
 
-void EvsManager::resetAllCounts()
+void EvsManager::reset_all_counts()
 {
   for (auto& e: data_) {
     e.second.counts = 0;
@@ -53,7 +53,7 @@ void EvsManager::count()
   }
 }
 
-void EvsManager::countCompleted()
+void EvsManager::count_completed()
 {
   for (auto& e: data_) {
     if (e.second.flag) {
@@ -62,7 +62,7 @@ void EvsManager::countCompleted()
   }
 }
 
-void EvsManager::printSummary()
+void EvsManager::print_summary() const
 {
   std::cout << '\n'
             << "      ***********************************\n"
@@ -87,7 +87,7 @@ void EvsManager::merge(const EvsManager& r)
 {
   for (const auto& evs: r.data()) {
     const std::string& key = evs.first;
-    if (isDefined(key)) {
+    if (is_defined(key)) {
       data_[key] += evs.second;
     }
     else {

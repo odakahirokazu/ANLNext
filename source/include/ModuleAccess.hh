@@ -52,13 +52,13 @@ public:
   ModuleAccess& operator=(const ModuleAccess&) = default;
   ModuleAccess& operator=(ModuleAccess&&) = default;
 
-  const BasicModule* getModule(const std::string& name) const
-  { return getModuleNC(name); }
+  const BasicModule* get_module(const std::string& name) const
+  { return get_module_NC(name); }
   
-  BasicModule* getModuleNC(const std::string& name) const;
+  BasicModule* get_module_NC(const std::string& name) const;
 
-  void registerModule(const std::string& name, BasicModule* module,
-                      ConflictOption conflict=ConflictOption::yield);
+  void register_module(const std::string& name, BasicModule* module,
+                       ConflictOption conflict=ConflictOption::yield);
 
   bool exist(const std::string& name) const;
 
@@ -68,7 +68,7 @@ private:
 };
 
 inline
-BasicModule* ModuleAccess::getModuleNC(const std::string& name) const
+BasicModule* ModuleAccess::get_module_NC(const std::string& name) const
 {
   ANLModuleMap::const_iterator it = moduleMap_.find(name);
   if (it == std::end(moduleMap_)) {

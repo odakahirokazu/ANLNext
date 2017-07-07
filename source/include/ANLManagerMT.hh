@@ -58,11 +58,11 @@ protected:
   virtual long int event_index_to_process();
 
 private:
-  void duplicateChains() override;
+  void duplicate_chains() override;
   ANLStatus process_analysis_impl(const std::vector<BasicModule*>& modules,
                                   std::vector<LoopCounter>& counters,
                                   EvsManager& evsManager);
-  void reduceStatistics() override;
+  void reduce_statistics() override;
 
 private:
   const int NumParallels_ = 1;

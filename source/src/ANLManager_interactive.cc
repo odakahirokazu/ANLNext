@@ -48,7 +48,7 @@ const char* prompt(EditLine*)
 namespace anl
 {
 
-ANLStatus ANLManager::InteractiveComunication()
+ANLStatus ANLManager::do_interactive_comunication()
 {
   ANLStatus status = AS_OK;
   
@@ -113,7 +113,7 @@ ANLStatus ANLManager::InteractiveComunication()
         break;
       }
       else if (cmd == "help") {
-        InteractiveComHelp();
+        interactive_comunication_help();
       }
       else if (cmd == "mod") {
         std::string moduleName;
@@ -125,9 +125,9 @@ ANLStatus ANLManager::InteractiveComunication()
               n = boost::lexical_cast<int>(moduleName);
             }
             else {
-              n = ModuleIndex(moduleName, false);
+              n = module_index(moduleName, false);
             }
-            status = InteractiveModifyParam(n);
+            status = interactive_modify_param(n);
           }
           catch (const ANLException& ex) {
             std::cout << "Exception!\n"
@@ -150,9 +150,9 @@ ANLStatus ANLManager::InteractiveComunication()
             n = boost::lexical_cast<int>(moduleName);
           }
           else {
-            n = ModuleIndex(moduleName, false);
+            n = module_index(moduleName, false);
           }
-          InteractivePrintParam(n);
+          interactive_print_param(n);
         }
         else {
           std::cout << "usage: print MODULE_ID" << std::endl;
@@ -167,9 +167,9 @@ ANLStatus ANLManager::InteractiveComunication()
             n = boost::lexical_cast<int>(moduleName);
           }
           else {
-            n = ModuleIndex(moduleName, false);
+            n = module_index(moduleName, false);
           }
-          InteractiveModuleSwitch(n, true);
+          interactive_module_switch(n, true);
         }
         else {
           std::cout << "usage: on MODULE_ID" << std::endl;
@@ -184,9 +184,9 @@ ANLStatus ANLManager::InteractiveComunication()
             n = boost::lexical_cast<int>(moduleName);
           }
           else {
-            n = ModuleIndex(moduleName, false);
+            n = module_index(moduleName, false);
           }
-          InteractiveModuleSwitch(n, false);
+          interactive_module_switch(n, false);
         }
         else {
           std::cout << "usage: off MODULE_ID" << std::endl;
@@ -219,7 +219,7 @@ ANLStatus ANLManager::InteractiveComunication()
   return status;
 }
 
-void ANLManager::InteractiveComHelp()
+void ANLManager::interactive_comunication_help()
 {
   std::cout << "-------------------------------------------------------\n"
             << "  help              : show this help\n"
@@ -237,7 +237,7 @@ void ANLManager::InteractiveComHelp()
             << std::endl;
 }
 
-ANLStatus ANLManager::InteractiveModifyParam(int n)
+ANLStatus ANLManager::interactive_modify_param(int n)
 {
   ANLStatus status = AS_OK;
   if (n==-1) {
@@ -282,7 +282,7 @@ ANLStatus ANLManager::InteractiveModifyParam(int n)
   return status;
 }
 
-void ANLManager::InteractivePrintParam(int n)
+void ANLManager::interactive_print_param(int n)
 {
   if (n==-1) {
     for (AMIter mod=modules_.begin(); mod!=modules_.end(); ++mod) {
@@ -301,7 +301,7 @@ void ANLManager::InteractivePrintParam(int n)
   } 
 }
 
-void ANLManager::InteractiveModuleSwitch(int n, bool module_sw)
+void ANLManager::interactive_module_switch(int n, bool module_sw)
 {
   if (n==-1) {
     for (AMIter mod=modules_.begin(); mod!=modules_.end(); ++mod) {
@@ -331,7 +331,7 @@ void ANLManager::InteractiveModuleSwitch(int n, bool module_sw)
   }
 }
 
-ANLStatus ANLManager::InteractiveAnalysis()
+ANLStatus ANLManager::do_interactive_analysis()
 {
   ANLStatus status = AS_OK;
 
@@ -390,13 +390,14 @@ ANLStatus ANLManager::InteractiveAnalysis()
         break;
       }
       else if (cmd == "help") {
-        InteractiveAnaHelp();
+        interactive_analysis_help();
       }
       else if (cmd == "ana") {
         int n, disp;
         iss >> n >> disp;
         if (iss) {
-          status = Analyze(n, disp);
+          set_display_frequency(disp);
+          status = Analyze(n, true);
         }
         else {
           std::cout << "usage: ana NUMBER DISPLAY" << std::endl;
@@ -426,7 +427,7 @@ ANLStatus ANLManager::InteractiveAnalysis()
   return status;
 }
 
-void ANLManager::InteractiveAnaHelp()
+void ANLManager::interactive_analysis_help()
 {
   std::cout << "-------------------------------------------------------\n"
             << "  help              : show this help\n"

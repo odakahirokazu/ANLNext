@@ -49,15 +49,15 @@ void ClonedChainSet::setup_module_access()
 {
   for (BasicModule* mod: modules_ref_) {
     const std::string moduleID = mod->module_id();
-    moduleAccess_->registerModule(moduleID,
-                                  mod,
-                                  ModuleAccess::ConflictOption::error);
+    moduleAccess_->register_module(moduleID,
+                                   mod,
+                                   ModuleAccess::ConflictOption::error);
     
     for (const std::pair<std::string, ModuleAccess::ConflictOption>& alias: mod->get_aliases()) {
       if (alias.first != moduleID) {
-        moduleAccess_->registerModule(alias.first,
-                                      mod,
-                                      alias.second);
+        moduleAccess_->register_module(alias.first,
+                                       mod,
+                                       alias.second);
       }
     }
   }

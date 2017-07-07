@@ -63,7 +63,7 @@ ANLManager::ANLManager()
 
 ANLManager::~ANLManager() = default;
 
-void ANLManager::SetModules(std::vector<BasicModule*> modules)
+void ANLManager::set_modules(std::vector<BasicModule*> modules)
 {
   modules_ = modules;
 
@@ -75,7 +75,7 @@ void ANLManager::SetModules(std::vector<BasicModule*> modules)
   reset_counters();
 }
 
-long int ANLManager::DisplayFrequency() const
+long int ANLManager::display_frequency() const
 {
   if (displayFrequency_ < 0) {
     return (numEvents_ > 0) ? (numEvents_/100) : 10000;
@@ -98,15 +98,15 @@ ANLStatus ANLManager::Define()
 
   for (BasicModule* mod: modules_) {
     const std::string moduleID = mod->module_id();
-    moduleAccess_->registerModule(moduleID,
-                                  mod,
-                                  ModuleAccess::ConflictOption::error);
+    moduleAccess_->register_module(moduleID,
+                                   mod,
+                                   ModuleAccess::ConflictOption::error);
 
     for (const std::pair<std::string, ModuleAccess::ConflictOption>& alias: mod->get_aliases()) {
       if (alias.first != moduleID) {
-        moduleAccess_->registerModule(alias.first,
-                                      mod,
-                                      alias.second);
+        moduleAccess_->register_module(alias.first,
+                                       mod,
+                                       alias.second);
       }
     }
   }
@@ -129,7 +129,7 @@ ANLStatus ANLManager::PreInitialize()
     goto final;
   }
 
-  duplicateChains();
+  duplicate_chains();
 
 final:
   std::cout << std::endl;
@@ -247,9 +247,9 @@ ANLStatus ANLManager::Analyze(long int num_events, bool thread_mode)
 
 final:
   std::cout << std::endl;
-  reduceStatistics();
+  reduce_statistics();
   print_summary();
-  evsManager_->printSummary();
+  evsManager_->print_summary();
 
 #if ANL_ANALYZE_INTERRUPT
   if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
@@ -301,7 +301,7 @@ final:
   return status;
 }
 
-int ANLManager::ModuleIndex(const std::string& module_id, bool strict) const
+int ANLManager::module_index(const std::string& module_id, bool strict) const
 {
   int index = -1;
   if (strict) {
@@ -392,11 +392,11 @@ ANLStatus ANLManager::process_analysis()
   ANLStatus status = AS_OK;
 
   const std::vector<BasicModule*>& modules = modules_;
-  const long int display_frequency = DisplayFrequency();
-  const long int num_events = NumberOfLoops();
+  const long int displayFrequency = display_frequency();
+  const long int numEvents = number_of_loops();
 
-  for (long int iEvent=0; iEvent!=num_events; iEvent++) {
-    if (display_frequency != 0 && iEvent%display_frequency == 0) {
+  for (long int iEvent=0; iEvent!=numEvents; iEvent++) {
+    if (displayFrequency != 0 && iEvent%displayFrequency == 0) {
       std::cout << "Event : " << std::dec << std::setw(10) << iEvent << std::endl;
       std::cout.width(0);
     }
@@ -541,7 +541,7 @@ ANLStatus process_one_event(long int iEvent,
                             std::vector<LoopCounter>& counters,
                             EvsManager& evsManager)
 {
-  evsManager.resetAllFlags();
+  evsManager.reset_all_flags();
 
   ANLStatus status = AS_OK;
 
@@ -572,7 +572,7 @@ ANLStatus process_one_event(long int iEvent,
 
   if (status == AS_OK) {
     evsManager.count();
-    evsManager.countCompleted();
+    evsManager.count_completed();
   }
   else if(status == AS_SKIP) {
     evsManager.count();

@@ -40,11 +40,12 @@ enum class ANLStatus { AS_OK, AS_SKIP, AS_SKIP_ERR, AS_QUIT, AS_QUIT_ERR };
 
 struct ANLException
 {
-  static void setVerboseLevel(int v);
+  static void SetVerboseLevel(int v);
   static int VerboseLevel();
+
   ANLException();
   ~ANLException();
-  const std::string toString();
+  const std::string to_string();
 };
 
 
@@ -123,14 +124,15 @@ class ANLManager
       $action
     }
     catch (const anl::ANLException& ex) {
-      SWIG_exception(SWIG_RuntimeError, ex.toString().c_str());
+      SWIG_exception(SWIG_RuntimeError, ex.to_string().c_str());
     }
   }
 
-  void SetDisplayFrequency(long int v);
-  int DisplayFrequency() const;
+  void set_display_frequency(long int v);
+  int display_frequency() const;
   
-  void SetModules(std::vector<anl::BasicModule*> modules);
+  void set_modules(std::vector<anl::BasicModule*> modules);
+
   virtual ANLStatus Define();
   virtual ANLStatus PreInitialize();
   virtual ANLStatus Initialize();
@@ -139,8 +141,8 @@ class ANLManager
 
   void parameters_to_json(const std::string& filename) const;
 
-  virtual ANLStatus InteractiveComunication();
-  virtual ANLStatus InteractiveAnalysis();
+  virtual ANLStatus do_interactive_comunication();
+  virtual ANLStatus do_interactive_analysis();
 
   %exception;
 };
@@ -182,7 +184,7 @@ class BasicModule
       $action
     }
     catch (anl::ANLException& ex) {
-      SWIG_exception(SWIG_RuntimeError, ex.toString().c_str());
+      SWIG_exception(SWIG_RuntimeError, ex.to_string().c_str());
     }
   }
 

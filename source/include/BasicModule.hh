@@ -65,7 +65,7 @@ class EvsManager;
  * @date 2014-12-18
  * @date 2015-11-10 | review parameter setter/getter methods
  * @date 2017-07-02 | do not own ModuleAccess, always fully accessible
- * @date 2017-07-03 | new model (mod-methods are renamed)
+ * @date 2017-07-07 | new model (mod-methods are renamed)
  */
 class BasicModule
 {
@@ -230,36 +230,36 @@ protected:
   { currentParameter_->enable_value_elements(type, enable); }
   
   template <typename T>
-  void GetModule(const std::string& name, T* ptr)
-  { *ptr = static_cast<T>(moduleAccess_->getModule(name)); }
+  void get_module(const std::string& name, T* ptr)
+  { *ptr = static_cast<T>(moduleAccess_->get_module(name)); }
 
   template <typename T>
-  void GetModuleNC(const std::string& name, T* ptr)
-  { *ptr = static_cast<T>(moduleAccess_->getModuleNC(name)); }
+  void get_module_NC(const std::string& name, T* ptr)
+  { *ptr = static_cast<T>(moduleAccess_->get_module_NC(name)); }
 
   template <typename T>
-  const T* GetModule(const std::string& name)
-  { return static_cast<const T*>(moduleAccess_->getModule(name)); }
+  const T* get_module(const std::string& name)
+  { return static_cast<const T*>(moduleAccess_->get_module(name)); }
 
   template <typename T>
-  T* GetModuleNC(const std::string& name)
-  { return static_cast<T*>(moduleAccess_->getModuleNC(name)); }
+  T* get_module_NC(const std::string& name)
+  { return static_cast<T*>(moduleAccess_->get_module_NC(name)); }
 
   template <typename T>
-  void GetModuleIF(const std::string& name, T* ptr);
+  void get_module_IF(const std::string& name, T* ptr);
 
   template <typename T>
-  void GetModuleIFNC(const std::string& name, T* ptr);
+  void get_module_IFNC(const std::string& name, T* ptr);
 
-  bool ModuleExist(const std::string& name)
+  bool exist_module(const std::string& name)
   { return moduleAccess_->exist(name); }
   
-  void EvsDef(const std::string& key);
-  void EvsUndef(const std::string& key);
-  bool EvsIsDef(const std::string& key) const;
-  bool Evs(const std::string& key) const;
-  void EvsSet(const std::string& key);
-  void EvsReset(const std::string& key);
+  void define_evs(const std::string& key);
+  void undefine_evs(const std::string& key);
+  bool is_evs_defined(const std::string& key) const;
+  bool evs(const std::string& key) const;
+  void set_evs(const std::string& key);
+  void reset_evs(const std::string& key);
 
 protected:
   template <typename ModuleType>
@@ -433,16 +433,16 @@ void BasicModule::set_value_element(const std::string& name, T val)
     currentParameter_->set_value_element(name, val);
   }
   catch (ANLException& e) {
-    e.setModuleInfo(this);
+    e.set_module_info(this);
     throw;
   }
 }
 
 template <typename T>
 inline
-void BasicModule::GetModuleIF(const std::string& name, T *ptr)
+void BasicModule::get_module_IF(const std::string& name, T *ptr)
 {
-  *ptr = dynamic_cast<T>(moduleAccess_->getModule(name));
+  *ptr = dynamic_cast<T>(moduleAccess_->get_module(name));
   if (ptr==0) {
     const std::string message
       = (boost::format("Dynamic cast failed from ANL Module: %s") % name).str();
@@ -452,9 +452,9 @@ void BasicModule::GetModuleIF(const std::string& name, T *ptr)
 
 template <typename T>
 inline
-void BasicModule::GetModuleIFNC(const std::string& name, T *ptr)
+void BasicModule::get_module_IFNC(const std::string& name, T *ptr)
 {
-  *ptr = dynamic_cast<T>(moduleAccess_->getModuleNC(name));
+  *ptr = dynamic_cast<T>(moduleAccess_->get_module_NC(name));
   if (ptr==0) {
     const std::string message
       = (boost::format("Dynamic cast failed from ANL Module: %s") % name).str();

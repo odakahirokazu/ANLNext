@@ -150,32 +150,32 @@ void BasicModule::ask_parameter(const std::string& name,
   }
 }
 
-void BasicModule::EvsDef(const std::string& key)
+void BasicModule::define_evs(const std::string& key)
 {
   evsManager_->define(key);
 }
 
-void BasicModule::EvsUndef(const std::string& key)
+void BasicModule::undefine_evs(const std::string& key)
 {
   evsManager_->undefine(key);
 }
 
-bool BasicModule::EvsIsDef(const std::string& key) const
+bool BasicModule::is_evs_defined(const std::string& key) const
 {
-  return evsManager_->isDefined(key);
+  return evsManager_->is_defined(key);
 }
 
-bool BasicModule::Evs(const std::string& key) const
+bool BasicModule::evs(const std::string& key) const
 {
   return evsManager_->get(key);
 }
 
-void BasicModule::EvsSet(const std::string& key)
+void BasicModule::set_evs(const std::string& key)
 {
   evsManager_->set(key);
 }
 
-void BasicModule::EvsReset(const std::string& key)
+void BasicModule::reset_evs(const std::string& key)
 {
   evsManager_->reset(key);
 }

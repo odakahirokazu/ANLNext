@@ -24,9 +24,9 @@ namespace anl
 
 ModuleAccess::~ModuleAccess() = default;
 
-void ModuleAccess::registerModule(const std::string& name,
-                                  BasicModule* module,
-                                  ModuleAccess::ConflictOption conflict)
+void ModuleAccess::register_module(const std::string& name,
+                                   BasicModule* module,
+                                   ModuleAccess::ConflictOption conflict)
 {
   if (exist(name)) {
     switch (conflict) {

@@ -747,7 +747,7 @@ module ANL
         @anl = ANL::ANLManager.new
       end
       vec = ANL::ModuleVector.new(@module_list)
-      @anl.SetModules(vec)
+      @anl.set_modules(vec)
       status = @anl.Define()
       check_status(status, "Define()")
       @definition_done = true
@@ -787,7 +787,7 @@ module ANL
       puts ""
       puts "Analysis Begin  | Time: " + Time.now.to_s
       $stdout.flush
-      anl.SetDisplayFrequency(display_frequency)
+      anl.set_display_frequency(display_frequency)
       status = anl.Analyze(num_loop, @thread_mode)
       check_status(status, "Analyze()")
       puts ""
@@ -822,16 +822,16 @@ module ANL
       anl = define()
 
       prepare_all_parameters()
-      @set_module_list.each{|mod|
-        status = mod.mod_prepare()
+      @set_module_list.each do |mod|
+        status = mod.mod_pre_initialize()
         check_status(status, "#{mod.module_id}::mod_prepare()")
-      }
+      end
 
-      status = anl.InteractiveComunication()
-      check_status(status, "InteractiveComunication()")
+      status = anl.do_interactive_comunication()
+      check_status(status, "do_interactive_comunication()")
 
-      status = anl.InteractiveAnalysis()
-      check_status(status, "InteractiveAnalysis()")
+      status = anl.do_interactive_analysis()
+      check_status(status, "do_interactive_analysis()")
 
       status = anl.Finalize()
       check_status(status, "Finalize()")
