@@ -139,9 +139,11 @@ module ANL
     {
       ANL::ANLStatus_AS_OK => "AS_OK",
       ANL::ANLStatus_AS_SKIP => "AS_SKIP",
-      ANL::ANLStatus_AS_SKIP_ERR => "AS_SKIP_ERR",
+      ANL::ANLStatus_AS_SKIP_ERROR => "AS_SKIP_ERROR",
       ANL::ANLStatus_AS_QUIT => "AS_QUIT",
-      ANL::ANLStatus_AS_QUIT_ERR => "AS_QUIT_ERR",
+      ANL::ANLStatus_AS_QUIT_ERROR => "AS_QUIT_ERROR",
+      ANL::ANLStatus_AS_QUIT_ALL => "AS_QUIT_ALL",
+      ANL::ANLStatus_AS_QUIT_ALL_ERROR => "AS_QUIT_ALL_ERROR",
     }[i] or "unknown status"
   end
   module_function :show_status
@@ -785,14 +787,14 @@ module ANL
       check_status(status, "Initialize()")
 
       puts ""
-      puts "Analysis Begin  | Time: " + Time.now.to_s
+      puts "<Begin Analysis> | Time: " + Time.now.to_s
       $stdout.flush
       anl.set_display_frequency(display_frequency)
       status = anl.Analyze(num_loop, @thread_mode)
-      check_status(status, "Analyze()")
       puts ""
-      puts "Analysis End    | Time: " + Time.now.to_s
+      puts "<End Analysis>   | Time: " + Time.now.to_s
       $stdout.flush
+      check_status(status, "Analyze()")
 
       status = anl.Finalize()
       check_status(status, "Finalize()")

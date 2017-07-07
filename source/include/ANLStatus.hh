@@ -27,17 +27,29 @@ namespace anl
 
 /**
  * scoped enum indicating a status of an ANL module.
+ * @author Hirokazu Odaka
  * @date 2014-12-10
+ * @date 2017-07-07 | add as_quit_all, as_quit_all_error
  */
-enum class ANLStatus { AS_OK, AS_SKIP, AS_SKIP_ERR, AS_QUIT, AS_QUIT_ERR };
+enum class ANLStatus {
+  AS_OK,
+  AS_SKIP,
+  AS_SKIP_ERROR,
+  AS_QUIT,
+  AS_QUIT_ERROR,
+  AS_QUIT_ALL,
+  AS_QUIT_ALL_ERROR
+};
 
 std::string status_to_string(ANLStatus status);
 
-constexpr ANLStatus AS_OK       = ANLStatus::AS_OK;
-constexpr ANLStatus AS_SKIP     = ANLStatus::AS_SKIP;
-constexpr ANLStatus AS_SKIP_ERR = ANLStatus::AS_SKIP_ERR;
-constexpr ANLStatus AS_QUIT     = ANLStatus::AS_QUIT;
-constexpr ANLStatus AS_QUIT_ERR = ANLStatus::AS_QUIT_ERR;
+constexpr ANLStatus AS_OK             = ANLStatus::AS_OK;
+constexpr ANLStatus AS_SKIP           = ANLStatus::AS_SKIP;
+constexpr ANLStatus AS_SKIP_ERROR     = ANLStatus::AS_SKIP_ERROR;
+constexpr ANLStatus AS_QUIT           = ANLStatus::AS_QUIT;
+constexpr ANLStatus AS_QUIT_ERROR     = ANLStatus::AS_QUIT_ERROR;
+constexpr ANLStatus AS_QUIT_ALL       = ANLStatus::AS_QUIT_ALL;
+constexpr ANLStatus AS_QUIT_ALL_ERROR = ANLStatus::AS_QUIT_ALL_ERROR;
 
 } /* namespace anl */
 

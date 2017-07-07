@@ -27,12 +27,16 @@ std::string anl::status_to_string(anl::ANLStatus status)
       return "AS_OK";
     case anl::ANLStatus::AS_SKIP:
       return "AS_SKIP";
-    case anl::ANLStatus::AS_SKIP_ERR:
-      return "AS_SKIP_ERR";
+    case anl::ANLStatus::AS_SKIP_ERROR:
+      return "AS_SKIP_ERROR";
     case anl::ANLStatus::AS_QUIT:
       return "AS_QUIT";
-    case anl::ANLStatus::AS_QUIT_ERR:
-      return "AS_QUIT_ERR";
+    case anl::ANLStatus::AS_QUIT_ERROR:
+      return "AS_QUIT_ERROR";
+    case anl::ANLStatus::AS_QUIT_ALL:
+      return "AS_QUIT_ALL";
+    case anl::ANLStatus::AS_QUIT_ALL_ERROR:
+      return "AS_QUIT_ALL_ERROR";
     default:
       return "AS_UNDEFINED";
   }

@@ -35,7 +35,15 @@ namespace std
 namespace anl
 {
 
-enum class ANLStatus { AS_OK, AS_SKIP, AS_SKIP_ERR, AS_QUIT, AS_QUIT_ERR };
+enum class ANLStatus {
+  AS_OK,
+  AS_SKIP,
+  AS_SKIP_ERROR,
+  AS_QUIT,
+  AS_QUIT_ERROR,
+  AS_QUIT_ALL,
+  AS_QUIT_ALL_ERROR
+};
 
 
 struct ANLException

@@ -153,7 +153,7 @@ ANLStatus ANLManager::Initialize()
   sa.sa_flags |= SA_RESTART;
   if ( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
-    return AS_QUIT_ERR;
+    return AS_QUIT_ERROR;
   }
 #endif
 
@@ -161,8 +161,7 @@ ANLStatus ANLManager::Initialize()
   print_parameters();
   reset_counters();
 
-  ANLStatus status = AS_OK;
-  status = routine_initialize();
+  ANLStatus status = routine_initialize();
   if (status != AS_OK) {
     goto final;
   }
@@ -172,7 +171,7 @@ final:
 #if ANL_INITIALIZE_INTERRUPT
   if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
-    return AS_QUIT_ERR;
+    return AS_QUIT_ERROR;
   }
 #endif
   
@@ -198,7 +197,7 @@ ANLStatus ANLManager::Analyze(long int num_events, bool thread_mode)
   sa.sa_flags |= SA_RESTART;
   if ( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
-    return AS_QUIT_ERR;
+    return AS_QUIT_ERROR;
   }
 #endif
 
@@ -254,7 +253,7 @@ final:
 #if ANL_ANALYZE_INTERRUPT
   if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
-    return AS_QUIT_ERR;
+    return AS_QUIT_ERROR;
   }
 #endif
   
@@ -278,12 +277,11 @@ ANLStatus ANLManager::Finalize()
   sa.sa_flags |= SA_RESTART;
   if ( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
-    return AS_QUIT_ERR;
+    return AS_QUIT_ERROR;
   }
 #endif
 
-  ANLStatus status = AS_OK;
-  status = routine_finalize();
+  ANLStatus status = routine_finalize();
   if (status != AS_OK) {
     goto final;
   }
@@ -294,7 +292,7 @@ final:
 #if ANL_FINALIZE_INTERRUPT
   if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
-    return AS_QUIT_ERR;
+    return AS_QUIT_ERROR;
   }
 #endif
   
@@ -403,7 +401,10 @@ ANLStatus ANLManager::process_analysis()
 
     status = process_one_event(iEvent, modules, counters_, *evsManager_);
 
-    if (status == AS_QUIT || status == AS_QUIT_ERR) {
+    if (status==AS_QUIT_ALL) { status = AS_QUIT; }
+    if (status==AS_QUIT_ALL_ERROR) { status = AS_QUIT_ERROR; }
+
+    if (status==AS_QUIT || status==AS_QUIT_ERROR) {
       break;
     }
 
@@ -412,7 +413,7 @@ ANLStatus ANLManager::process_analysis()
     }
   }
 
-  if (status==AS_SKIP_ERR || status==AS_QUIT_ERR) {
+  if (status==AS_SKIP_ERROR || status==AS_QUIT_ERROR) {
     return status;
   }
 
@@ -434,14 +435,15 @@ void ANLManager::print_summary()
       moduleID += "/" + modules_[i]->module_id();
     }
     moduleID += "  version  " + modules_[i]->module_version();
-    std::cout << boost::format("     [%3d]  %-40s") % i % moduleID;
-    if (counters_[i].quit() > 1) { std::cout << "  ---> Quit"; }
+    std::cout << boost::format("    [%4d]  %-40s") % i % moduleID;
+    if (counters_[i].quit() > 0) { std::cout << "         ---> [Quit]"; }
     std::cout <<  '\n';
-    std::cout << "    " << std::setw(10) << counters_[i].entry() << "  |"
-              << "  OK: " << counters_[i].ok()
-              << "  Skip: " << counters_[i].skip()
-              << "  Error: " << counters_[i].error() << '\n';
-    std::cout.width(0);
+    std::cout << boost::format("    %10d  |  OK: %10d | Skip: %10d | Error: %10d")
+      % counters_[i].entry()
+      % counters_[i].ok()
+      % counters_[i].skip()
+      % counters_[i].error();
+    std::cout << '\n';
   }
   std::cout << "               Get: " << counters_[n-1].ok() << '\n';
   std::cout << std::endl;
@@ -508,6 +510,7 @@ void ANLManager::interactive_session()
     line.reset(readline(""));
     if (line.get()) {
       if (std::strcmp(line.get(), ".q") == 0) {
+        std::lock_guard<std::mutex> lock(mutex_);
         std::cout << "ANL> " << line.get() << " ---> QUIT\n" << std::endl;
         interrupted_ = true;
         return;
@@ -525,6 +528,7 @@ void ANLManager::interactive_session()
   while (1) {
     std::cin >> buf;
     if (buf==".q") {
+      std::lock_guard<std::mutex> lock(mutex_);
       std::cout << "ANL>> " << line.get() << " ---> QUIT\n" << std::endl;
       interrupted_ = true;
       return;
@@ -578,6 +582,9 @@ ANLStatus process_one_event(long int iEvent,
     evsManager.count();
   }
   else if (status == AS_QUIT) {
+    evsManager.count();
+  }
+  else if (status == AS_QUIT_ALL) {
     evsManager.count();
   }
 

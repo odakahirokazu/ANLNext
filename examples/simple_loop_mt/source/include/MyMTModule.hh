@@ -35,12 +35,8 @@ public:
 
 
 private:
-  int myParameter1_;
-  double myParameter2_;
-  std::string myParameter3_;
-  std::vector<int> myVector1_;
-  std::vector<double> myVector2_;
-  std::vector<std::string> myVector3_;
+  int m_QuitIndex = -1;
+  bool m_QuitAll = true;
 };
 
 #endif /* MyMTModule_H */

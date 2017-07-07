@@ -69,14 +69,14 @@ public:
     else if (status == AS_SKIP) {
       ++skip_;
     }
-    else if (status == AS_SKIP_ERR) {
+    else if (status == AS_SKIP_ERROR) {
       ++skip_;
       ++error_;
     }
-    else if (status == AS_QUIT) {
+    else if (status == AS_QUIT || status == AS_QUIT_ALL) {
       ++quit_;
     }
-    else if (status == AS_QUIT_ERR) {
+    else if (status == AS_QUIT_ERROR || status == AS_QUIT_ALL_ERROR) {
       ++quit_;
       ++error_;
     }

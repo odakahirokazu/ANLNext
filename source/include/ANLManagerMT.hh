@@ -67,7 +67,7 @@ private:
 private:
   const int NumParallels_ = 1;
   std::vector<ClonedChainSet> clonedChains_;
-  std::atomic<long> loopIndex_{-1};
+  long int loopIndex_ = -1;
 };
 
 } /* namespace anl */

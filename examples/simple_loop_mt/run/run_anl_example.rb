@@ -10,21 +10,18 @@ class MyApp < ANL::ANLApp
     add_namespace MyPackageMT
 
     chain :MyMTModule
-    with_parameters(MyParameter1: 10,
-                    MyParameter2: 20.5,
-                    MyParameter3: "Hello",
-                    MyVector1: [1, 2, 3, 4, 5],
-                    MyVector2: [1.3, 4.0, 11.2, 3.2],
-                    MyVector3: ["Hakuba", "Niseko", "Appi"])
+    with_parameters(quit_index: -1,
+                    quit_all: true)
 
     # If you need to add the same type of module, you should set another name
     # via the second argument.
     chain :MyMTModule, :MyMTModule2
-    with_parameters(MyParameter2: 102.1,
-                    MyVector3: ["Jupiter", "Venus", "Mars", "Saturn"])
+    with_parameters(quit_index: 77777,
+                    quit_all: true)
+
   end
 end
 
 a = MyApp.new
 a.num_parallels = 4
-a.run(1000000, 100000)
+a.run(1000000, 10000)

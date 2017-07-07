@@ -148,7 +148,14 @@ ANLStatus ANLManagerMT::process_analysis()
     analysisThreads[i].join();
   }
 
-  return AS_OK;
+  ANLStatus status = AS_OK;
+  for (ANLStatus s: statusVector) {
+    if (s == AS_SKIP_ERROR || s == AS_QUIT_ERROR || s == AS_QUIT_ALL_ERROR) {
+      status = s;
+    }
+  }
+
+  return status;
 }
 
 void ANLManagerMT::process_analysis_in_each_thread(int iThread, ANLStatus& status)
@@ -185,12 +192,22 @@ ANLStatus ANLManagerMT::process_analysis_impl(const std::vector<BasicModule*>& m
 
     status = process_one_event(iEvent, modules, counters, evsManager);
 
-    if (status == AS_QUIT || status == AS_QUIT_ERR) {
+    if (status == AS_QUIT || status == AS_QUIT_ERROR) {
+      break;
+    }
+
+    if (status == AS_QUIT_ALL || status == AS_QUIT_ALL_ERROR) {
       break;
     }
   }
 
-  if (status==AS_SKIP_ERR || status==AS_QUIT_ERR) {
+  if (status == AS_QUIT_ALL || status == AS_QUIT_ALL_ERROR) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    interrupted_ = true;
+    return status;
+  }
+
+  if (status==AS_SKIP_ERROR || status==AS_QUIT_ERROR) {
     return status;
   }
 
