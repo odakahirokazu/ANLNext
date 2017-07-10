@@ -7,42 +7,42 @@
     <text></text>
     <parameters>
       <param container_type=''>
-        <name>MyParameter1</name>
+        <name>my_parameter1</name>
         <type>int</type>
         <unit></unit>
         <default_value>1</default_value>
         <description></description>
       </param>
       <param container_type=''>
-        <name>MyParameter2</name>
+        <name>my_parameter2</name>
         <type>double</type>
         <unit></unit>
         <default_value>2</default_value>
         <description></description>
       </param>
       <param container_type=''>
-        <name>MyParameter3</name>
+        <name>my_parameter3</name>
         <type>string</type>
         <unit></unit>
         <default_value>test</default_value>
         <description></description>
       </param>
       <param container_type=''>
-        <name>MyVector1</name>
+        <name>my_vector1</name>
         <type>vector&lt;int&gt;</type>
         <unit></unit>
         <default_value></default_value>
         <description></description>
       </param>
       <param container_type=''>
-        <name>MyVector2</name>
+        <name>my_vector2</name>
         <type>vector&lt;double&gt;</type>
         <unit></unit>
         <default_value></default_value>
         <description></description>
       </param>
       <param container_type=''>
-        <name>MyVector3</name>
+        <name>my_vector3</name>
         <type>vector&lt;string&gt;</type>
         <unit></unit>
         <default_value></default_value>
@@ -66,7 +66,7 @@
         <name>name</name>
         <type>string</type>
         <unit></unit>
-        <default_value>Si</default_value>
+        <default_value></default_value>
         <description></description>
       </param>
       <param container_type='value'>

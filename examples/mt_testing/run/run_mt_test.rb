@@ -24,4 +24,11 @@ end
 
 a = MyApp.new
 a.num_parallels = 4
-a.run(1000000, 10000)
+
+a.modify do |anl|
+  anl.modify_parameters 2, :MyMTModule2, {
+    quit_index: 500
+  }
+end
+
+a.run(1000000)

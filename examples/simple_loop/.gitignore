@@ -1,0 +1,6 @@
+*~
+.DS_Store
+build/
+install/
+*.json
+script_generation/run_myapp.rb

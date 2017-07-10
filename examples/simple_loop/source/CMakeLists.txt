@@ -55,8 +55,8 @@ link_directories(
 
 set(ANL_MODULES
   src/MyModule.cc
-  src/MyMapModule.cc
   src/MyVectorModule.cc
+  src/MyMapModule.cc
   )
 
 add_library(${MY_LIBRARY} SHARED
@@ -71,5 +71,5 @@ target_link_libraries(${MY_LIBRARY}
 install(TARGETS ${MY_LIBRARY} LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
 if(USE_RUBY)
-  add_subdirectory(ruby)
+  add_subdirectory(rubyext)
 endif(USE_RUBY)

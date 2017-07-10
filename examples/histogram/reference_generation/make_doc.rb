@@ -13,6 +13,6 @@ end
 
 a = MyApp.new
 a.setup
-a.startup
+a.define
 a.make_doc(output: "doc_detail.xml",
            namespace: "TestHistogram")

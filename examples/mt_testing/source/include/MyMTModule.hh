@@ -14,15 +14,13 @@
 class MyMTModule : public anl::BasicModule
 {
   DEFINE_ANL_MODULE(MyMTModule, 1.0);
+  ENABLE_PARALLEL_RUN();
 public:
   MyMTModule();
   virtual ~MyMTModule();
 
-  std::unique_ptr<BasicModule> clone() override
-  { return make_clone(new MyMTModule(*this)); }
-
 protected:
-  MyMTModule(const MyMTModule&) = default;
+  MyMTModule(const MyMTModule& r) = default;
 
 public:
   anl::ANLStatus mod_define() override;
@@ -32,7 +30,6 @@ public:
   anl::ANLStatus mod_analyze() override;
   anl::ANLStatus mod_end_run() override;
   anl::ANLStatus mod_finalize() override;
-
 
 private:
   int m_QuitIndex = -1;

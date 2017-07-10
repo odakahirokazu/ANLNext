@@ -27,40 +27,9 @@ namespace anl {
 
 VModuleParameter::VModuleParameter(const std::string& name)
   : name_(name),
+    hidden_(false),
     unit_(1.0), unit_name_(""),
     expr_(""), question_(""), default_string_(""),
-    hidden_(false),
-    description_("")
-{
-}
-
-VModuleParameter::VModuleParameter(const std::string& name,
-                                   double unit, const std::string& unit_name)
-  : name_(name),
-    unit_(unit), unit_name_(unit_name),
-    expr_(""), question_(""), default_string_(""),
-    hidden_(false),
-    description_("")
-{
-}
-
-VModuleParameter::VModuleParameter(const std::string& name,
-                                   const std::string& expression)
-  : name_(name),
-    unit_(1.0), unit_name_(""),
-    expr_(expression), question_(""), default_string_(""),
-    hidden_(false),
-    description_("")
-{
-}
-
-VModuleParameter::VModuleParameter(const std::string& name,
-                                   const std::string& expression,
-                                   const std::string& default_string)
-  : name_(name),
-    unit_(1.0), unit_name_(""),
-    expr_(expression), question_(""), default_string_(default_string),
-    hidden_(false),
     description_("")
 {
 }

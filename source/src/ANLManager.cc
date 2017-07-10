@@ -301,6 +301,19 @@ final:
   return status;
 }
 
+BasicModule* ANLManager::access_to_module(int chainID,
+                                          const std::string& moduleID)
+{
+  if (chainID == 0) {
+    return moduleAccess_->get_module_NC(moduleID);
+  }
+
+  const std::string message
+    = (boost::format("Chain ID is not found: %d") % chainID).str();
+  BOOST_THROW_EXCEPTION( ANLException(message) );
+  return nullptr;
+}
+
 int ANLManager::module_index(const std::string& module_id, bool strict) const
 {
   int index = -1;

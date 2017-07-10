@@ -27,8 +27,9 @@
 namespace anl
 {
 
-ClonedChainSet::ClonedChainSet(const EvsManager& evs)
-  : evsManager_(new EvsManager(evs)),
+ClonedChainSet::ClonedChainSet(int chain_id, const EvsManager& evs)
+  : id_(chain_id),
+    evsManager_(new EvsManager(evs)),
     moduleAccess_(new ModuleAccess)
 {
 }
@@ -68,6 +69,11 @@ void ClonedChainSet::reset_counters()
   for (LoopCounter& c: counters_) {
     c.reset();
   }
+}
+
+BasicModule* ClonedChainSet::access_to_module(const std::string& moduleID)
+{
+  return moduleAccess_->get_module_NC(moduleID);
 }
 
 } /* namespace anl */

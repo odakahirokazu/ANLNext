@@ -62,40 +62,38 @@ namespace anl
  * @date 2014-12-09 | use variadic template.
  * @date 2015-11-10 | get_value() methods
  * @date 2017-07-03 | rename get/set to __get__/__set__
+ * @date 2017-07-10 | keep one ctor, use <using> instead of <typedef>
  */
 template <typename T>
 class ModuleParameter : public VModuleParameter
 {
-  typedef std::integral_constant<bool,
-                                 boost::icl::is_container<T>::value
-                                 && !std::is_same<T, std::string>::value> is_container_type;
-  
-  typedef std::integral_constant<bool,
-                                 std::is_arithmetic<T>::value> is_arithmetic_type;
-    
-  typedef std::integral_constant<bool,
-                                 std::is_floating_point<T>::value> is_floating_point_type;
-
-  typedef std::integral_constant<bool,
-                                 std::is_integral<T>::value> is_integer_type;
-
-  typedef typename param_call_traits<T>::type call_type;
+  using is_container_type =
+    std::integral_constant<bool,
+                           boost::icl::is_container<T>::value
+                           && !std::is_same<T, std::string>::value>;
+  using is_arithmetic_type =
+    std::integral_constant<bool,
+                           std::is_arithmetic<T>::value>;
+  using is_floating_point_type =
+    std::integral_constant<bool,
+                           std::is_floating_point<T>::value>;
+  using is_integer_type =
+    std::integral_constant<bool,
+                           std::is_integral<T>::value>;
+  using call_type = typename boost::call_traits<T>::param_type;
   
 public:
-  ModuleParameter(T* ptr, const std::string& name);
-  
-  ModuleParameter(T* ptr, const std::string& name,
-                  double unit, const std::string& unit_name);
-  
-  ModuleParameter(T* ptr, const std::string& name,
-                  const std::string& expression);
-  
-  ModuleParameter(T* ptr, const std::string& name,
-                  const std::string& expression,
-                  const std::string& default_string);
+  ModuleParameter(const std::string& name, T* ptr);
 
+  std::shared_ptr<VModuleParameter> clone() override
+  { return std::shared_ptr<VModuleParameter>(new ModuleParameter(*this)); }
+
+protected:
+  ModuleParameter(const ModuleParameter&) = default;
+
+public:
   std::string type_name() const override
-  { return type_info<T>::name(); }
+  { return param_type_info<T>::name(); }
 
   bool ask() override;
 
@@ -216,8 +214,8 @@ private:
                       const std::integral_constant<bool, b2>&)
   {
     // container
-    typedef typename T::iterator iter_type;
-    typedef typename std::iterator_traits<iter_type>::iterator_category IterCategory;
+    using iter_type = typename T::iterator;
+    using IterCategory = typename std::iterator_traits<iter_type>::iterator_category;
     set_value_impl(val, IterCategory());
   }
   
@@ -273,8 +271,8 @@ private:
                    const std::integral_constant<bool, b2>&) const
   {
     // container
-    typedef typename T::iterator iter_type;
-    typedef typename std::iterator_traits<iter_type>::iterator_category IterCategory;
+    using iter_type = typename T::const_iterator;
+    using IterCategory = typename std::iterator_traits<iter_type>::iterator_category;
     return get_value_impl(dummy, IterCategory());
   }
   
@@ -322,8 +320,8 @@ private:
                    const std::integral_constant<bool, b2>&) const
   {
     // container
-    typedef typename T::iterator iter_type;
-    typedef typename std::iterator_traits<iter_type>::iterator_category IterCategory;
+    using iter_type = typename T::const_iterator;
+    using IterCategory = typename std::iterator_traits<iter_type>::iterator_category;
     output_impl(os, IterCategory());
   }
   
@@ -373,8 +371,8 @@ private:
                   const std::integral_constant<bool, b2>&)
   {
     // container
-    typedef typename T::iterator iter_type;
-    typedef typename std::iterator_traits<iter_type>::iterator_category IterCategory;
+    using iter_type = typename T::iterator;
+    using IterCategory = typename std::iterator_traits<iter_type>::iterator_category;
     input_impl(is, IterCategory());
   }
   
@@ -440,7 +438,9 @@ private:
 
 #include "ModuleParameter_impl.hh"
 #include "ModuleParameter_spec.hh"
-#include "ModuleParameter_map.hh"
+#include "ModuleParameter_tuple.hh"
 #include "ModuleParameter_vector.hh"
+#include "ModuleParameter_map.hh"
+#include "ModuleParameter_member.hh"
 
 #endif /* ANL_ModuleParameter_H */

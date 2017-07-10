@@ -11,7 +11,7 @@ SaveData::SaveData() :
 
 ANLStatus SaveData::mod_define()
 {
-  register_parameter(&m_FileName, "filename");
+  define_parameter("filename", &mod_class::m_FileName);
   set_parameter_description("Output file name");
   return AS_OK;
 }

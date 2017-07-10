@@ -69,5 +69,5 @@ target_link_libraries(${MY_LIBRARY}
 install(TARGETS ${MY_LIBRARY} LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
 if(USE_RUBY)
-  add_subdirectory(ruby)
+  add_subdirectory(rubyext)
 endif(USE_RUBY)

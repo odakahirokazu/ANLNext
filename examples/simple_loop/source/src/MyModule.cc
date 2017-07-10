@@ -11,12 +11,12 @@ MyModule::~MyModule() = default;
 
 ANLStatus MyModule::mod_define()
 {
-  register_parameter(&myParameter1_, "MyParameter1");
-  register_parameter(&myParameter2_, "MyParameter2");
-  register_parameter(&myParameter3_, "MyParameter3");
-  register_parameter(&myVector1_, "MyVector1");
-  register_parameter(&myVector2_, "MyVector2");
-  register_parameter(&myVector3_, "MyVector3");
+  define_parameter("my_parameter1", &mod_class::myParameter1_);
+  define_parameter("my_parameter2", &mod_class::myParameter2_);
+  define_parameter("my_parameter3", &mod_class::myParameter3_);
+  define_parameter("my_vector1", &mod_class::myVector1_);
+  define_parameter("my_vector2", &mod_class::myVector2_);
+  define_parameter("my_vector3", &mod_class::myVector3_);
   return AS_OK;
 }
 

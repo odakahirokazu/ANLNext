@@ -21,13 +21,13 @@ GenerateEvents::GenerateEvents(const GenerateEvents& r)
 
 ANLStatus GenerateEvents::mod_define()
 {
-  register_parameter(&center_, "energy", 1.0, "keV");
-  register_parameter(&sigma_, "sigma", 1.0, "keV");
+  define_parameter("energy", &mod_class::center_, 1.0, "keV");
+  define_parameter("sigma", &mod_class::sigma_, 1.0, "keV");
   set_parameter_description("Energy resolution (1-sigma) of the detectors");
-  register_parameter(&efficiency_, "efficiency");
+  define_parameter("efficiency", &mod_class::efficiency_);
   set_parameter_description("Detection efficiency");
-  register_parameter(&num_detectors_, "num_detectors");
-  register_parameter(&random_seed_, "random_seed");
+  define_parameter("num_detectors", &mod_class::num_detectors_);
+  define_parameter("random_seed", &mod_class::random_seed_);
 
   return AS_OK;
 }

@@ -22,70 +22,63 @@
 
 #include <string>
 #include <vector>
-#include <boost/call_traits.hpp>
 
 namespace anl
 {
 
-template <typename T>
-struct param_call_traits
-{
-  typedef typename boost::call_traits<T>::param_type type;
-};
-
 template <typename... Ts>
-struct type_info
+struct param_type_info
 {
   static std::string name() { return ""; }
 };
 
 template <typename T, typename... Ts>
-struct type_info<T, Ts...>
+struct param_type_info<T, Ts...>
 {
   static std::string name()
   {
-    return type_info<T>::name() + ", " + type_info<Ts...>::name();
+    return param_type_info<T>::name() + ", " + param_type_info<Ts...>::name();
   }
 };
 
 template <>
-struct type_info<bool>
+struct param_type_info<bool>
 {
   static std::string name() { return "bool"; }
 };
 
 template <>
-struct type_info<int>
+struct param_type_info<int>
 {
   static std::string name() { return "int"; }
 };
 
 template <>
-struct type_info<double>
+struct param_type_info<double>
 {
   static std::string name() { return "double"; }
 };
 
 template <>
-struct type_info<std::string>
+struct param_type_info<std::string>
 {
   static std::string name() { return "string"; }
 };
 
 template <>
-struct type_info<std::vector<int>>
+struct param_type_info<std::vector<int>>
 {
   static std::string name() { return "vector<int>"; }
 };
 
 template <>
-struct type_info<std::vector<double>>
+struct param_type_info<std::vector<double>>
 {
   static std::string name() { return "vector<double>"; }
 };
 
 template <>
-struct type_info<std::vector<std::string>>
+struct param_type_info<std::vector<std::string>>
 {
   static std::string name() { return "vector<string>"; }
 };

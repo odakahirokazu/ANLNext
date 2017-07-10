@@ -50,9 +50,9 @@ inline EvsData operator+(const EvsData& a, const EvsData& b)
   return c;
 }
 
-typedef std::map<std::string, EvsData> EvsMap;
-typedef EvsMap::iterator EvsIter;
-typedef EvsMap::const_iterator EvsConstIter;
+using EvsMap = std::map<std::string, EvsData>;
+using EvsIter = EvsMap::iterator;
+using EvsConstIter = EvsMap::const_iterator;
 
 /**
  * The Evs (event selection) management class.

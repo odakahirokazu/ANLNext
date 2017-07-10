@@ -13,7 +13,7 @@ end
 
 a = MyApp.new
 a.setup
-a.startup
+a.define
 a.make_script(output: "run_app.rb",
               package: "testHistogram",
               namespace: "TestHistogram")

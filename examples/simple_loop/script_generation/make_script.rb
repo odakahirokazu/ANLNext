@@ -17,7 +17,7 @@ namespace = "MyPackage"
 
 a = MyApp.new
 a.setup
-a.startup
+a.define
 a.make_script(output: output,
               package: package,
               namespace: namespace)

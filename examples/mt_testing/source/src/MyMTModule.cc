@@ -10,8 +10,8 @@ MyMTModule::~MyMTModule() = default;
 
 ANLStatus MyMTModule::mod_define()
 {
-  register_parameter(&m_QuitIndex, "quit_index");
-  register_parameter(&m_QuitAll, "quit_all");
+  define_parameter("quit_index", &mod_class::m_QuitIndex);
+  define_parameter("quit_all", &mod_class::m_QuitAll);
   return AS_OK;
 }
 

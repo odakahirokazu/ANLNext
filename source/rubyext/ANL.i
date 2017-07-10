@@ -56,7 +56,6 @@ struct ANLException
   const std::string to_string();
 };
 
-
 %nodefaultctor VModuleParameter;
 class VModuleParameter
 {
@@ -115,53 +114,11 @@ class VModuleParameter
   std::string value_string() const;
 };
 
-typedef std::shared_ptr<VModuleParameter> ModuleParam_sptr;
-typedef std::list<ModuleParam> ModuleParamList;
-typedef ModuleParamList::iterator ModuleParamIter;
-typedef std::list<std::shared_ptr<VModuleParameter> >::const_iterator ModuleParamConstIter;
+using ModuleParam_sptr = std::shared_ptr<VModuleParameter>;
+using ModuleParamList = std::list<ModuleParam_sptr>;
+using ModuleParamIter = ModuleParamList::iterator;
+using ModuleParamConstIter = ModuleParamList::const_iterator;
 
-
-class ANLManager
-{
- public:
-  ANLManager();
-  virtual ~ANLManager();
-  
-  %exception{
-    try {
-      $action
-    }
-    catch (const anl::ANLException& ex) {
-      SWIG_exception(SWIG_RuntimeError, ex.to_string().c_str());
-    }
-  }
-
-  void set_display_frequency(long int v);
-  int display_frequency() const;
-  
-  void set_modules(std::vector<anl::BasicModule*> modules);
-
-  virtual ANLStatus Define();
-  virtual ANLStatus PreInitialize();
-  virtual ANLStatus Initialize();
-  virtual ANLStatus Analyze(long int num_events, bool thread_mode=true);
-  virtual ANLStatus Finalize();
-
-  void parameters_to_json(const std::string& filename) const;
-
-  virtual ANLStatus do_interactive_comunication();
-  virtual ANLStatus do_interactive_analysis();
-
-  %exception;
-};
-
-class ANLManagerMT : public ANLManager
-{
-public:
-  explicit ANLManagerMT(int num_parallels=1);
-  virtual ~ANLManagerMT();
-};
- 
 class BasicModule
 {
  public:
@@ -232,7 +189,7 @@ class BasicModule
 
   %exception;
 
-  void print_parameters();
+  void print_parameters() const;
 
   %extend {
     void insert_to_map(const std::string& map_name, const std::string& key)
@@ -258,4 +215,50 @@ class BasicModule
   }
 };
 
+class ANLManager
+{
+ public:
+  ANLManager();
+  virtual ~ANLManager();
+  
+  %exception{
+    try {
+      $action
+    }
+    catch (const anl::ANLException& ex) {
+      SWIG_exception(SWIG_RuntimeError, ex.to_string().c_str());
+    }
+  }
+
+  void set_display_frequency(long int v);
+  int display_frequency() const;
+  
+  void set_modules(std::vector<anl::BasicModule*> modules);
+
+  virtual ANLStatus Define();
+  virtual ANLStatus PreInitialize();
+  virtual ANLStatus Initialize();
+  virtual ANLStatus Analyze(long int num_events, bool thread_mode=true);
+  virtual ANLStatus Finalize();
+
+  virtual int number_of_parallels() const;
+  void set_print_parallel_modules(bool v=true);
+  virtual BasicModule* access_to_module(int chainID,
+                                        const std::string& moduleID);
+
+  void parameters_to_json(const std::string& filename) const;
+
+  virtual ANLStatus do_interactive_comunication();
+  virtual ANLStatus do_interactive_analysis();
+
+  %exception;
+};
+
+class ANLManagerMT : public ANLManager
+{
+public:
+  explicit ANLManagerMT(int num_parallels=1);
+  virtual ~ANLManagerMT();
+};
+ 
 } /* namespace anl */

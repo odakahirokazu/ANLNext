@@ -38,6 +38,9 @@
 namespace anl
 {
 
+class BasicModule;
+
+
 /**
  * A virtual class for an ANL module parameter.
  *
@@ -47,42 +50,45 @@ namespace anl
  * @date 2011-12-28
  * @date 2015-11-11 | review set/get-value methods.
  * @date 2017-07-03 | rename get/set to __get__/__set__
+ * @date 2017-07-10 | review ctor. define_parameter() for data member pointer
  */
 class VModuleParameter
 {
 public:
-  VModuleParameter(const std::string& name);
-  VModuleParameter(const std::string& name,
-                   double unit, const std::string& unit_name);  
-  VModuleParameter(const std::string& name, const std::string& expression);
-  VModuleParameter(const std::string& name, const std::string& expression,
-                   const std::string& default_string);
-
+  explicit VModuleParameter(const std::string& name);
   virtual ~VModuleParameter();
 
-  VModuleParameter(const VModuleParameter&) = delete;
   VModuleParameter(VModuleParameter&&) = delete;
   VModuleParameter& operator=(const VModuleParameter&) = delete;
   VModuleParameter& operator=(VModuleParameter&&) = delete;
-  
+
+  virtual std::shared_ptr<VModuleParameter> clone()
+  { return std::shared_ptr<VModuleParameter>(new VModuleParameter(*this)); }
+
+protected:
+  VModuleParameter(const VModuleParameter&) = default;
+
+public:
   std::string name() const { return name_; }
-  double unit() const { return unit_; }
-  std::string unit_name() const { return unit_name_; }
-
-  std::string expression() const { return expr_; }
-  std::string question() const { return question_; }
-  std::string default_string() const { return default_string_; }
-
-  void set_unit(double unit, const std::string& unit_name)
-  { unit_ = unit; unit_name_ = unit_name; }
-  
-  void set_expression(const std::string& v) { expr_ = v; }
-  void set_question(const std::string& v) { question_ = v; }
-  void set_default_string(const std::string& v) { default_string_ = v; }
 
   void set_hidden(bool v=true) { hidden_ = v; }
   void set_exposed() { hidden_ = false; }
   bool is_hidden() const { return hidden_; }
+
+  void set_unit(double unit, const std::string& unit_name)
+  { unit_ = unit; unit_name_ = unit_name; }
+
+  double unit() const { return unit_; }
+  std::string unit_name() const { return unit_name_; }
+
+  void set_expression(const std::string& v) { expr_ = v; }
+  std::string expression() const { return expr_; }
+
+  void set_question(const std::string& v) { question_ = v; }
+  std::string question() const { return question_; }
+
+  void set_default_string(const std::string& v) { default_string_ = v; }
+  std::string default_string() const { return default_string_; }
 
   void set_description(const std::string& v) { description_ = v; }
   std::string description() const { return description_; }
@@ -121,8 +127,9 @@ public:
   virtual void __get__(void* /* value_ptr */) const {}
   virtual void __set__(const void* /* value_ptr */) {}
 
+  virtual void set_map_key_name(const std::string& /* name */) {}
+  virtual void set_map_key_properties(const std::string& /* name */, const std::string& /* default_key */) {}
   virtual std::string map_key_name() const { return ""; }
-  virtual void set_map_key(const std::string& /* key */) {}
 
   virtual std::size_t num_value_elements() const { return 0; }
   virtual std::shared_ptr<VModuleParameter const> value_element_info(std::size_t /* index */) const
@@ -138,6 +145,8 @@ public:
   virtual void insert_to_container() {}
   virtual void retrieve_from_container(const std::string& /* key */) const {}
   virtual void retrieve_from_container(std::size_t /* index */) const {}
+
+  virtual void set_map_key(const std::string& /* key */) {}
 
   virtual void set_value_element(const std::string& /* name */, bool /* val */) {}
   virtual void set_value_element(const std::string& /* name */, int /* val */) {}
@@ -155,8 +164,11 @@ public:
 
   void print(std::ostream& os) const;
   std::string value_string() const;
+
   virtual boost::property_tree::ptree to_property_tree() const
   { return boost::property_tree::ptree(); }
+
+  virtual void set_module_pointer(BasicModule*) {};
 
 protected:
   virtual bool ask_base();
@@ -164,22 +176,24 @@ protected:
   virtual bool ask_base_in(std::istream& ist);
   std::string special_message_to_ask() const;
   void throw_type_match_exception(const std::string& message="") const;
+
+  virtual void set_module_pointer_of_value_info(BasicModule*) {}
   
 private:
   std::string name_;
+  bool hidden_;
   double unit_ = 1.0;
   std::string unit_name_;
   std::string expr_;
   std::string question_;
   std::string default_string_;
-  bool hidden_;
   std::string description_;
 };
 
-typedef std::shared_ptr<VModuleParameter> ModuleParam_sptr;
-typedef std::list<ModuleParam_sptr> ModuleParamList;
-typedef ModuleParamList::iterator ModuleParamIter;
-typedef ModuleParamList::const_iterator ModuleParamConstIter;
+using ModuleParam_sptr = std::shared_ptr<VModuleParameter>;
+using ModuleParamList = std::list<ModuleParam_sptr>;
+using ModuleParamIter = ModuleParamList::iterator;
+using ModuleParamConstIter = ModuleParamList::const_iterator;
 
 } /* namespace anl */
 

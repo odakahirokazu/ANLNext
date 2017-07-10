@@ -26,4 +26,11 @@ end
 
 a = MyApp.new
 a.num_parallels = 4
-a.run(1000000, 10000)
+a.modify do |m|
+  m.modify_parameters 0, :GenerateEvents, {
+    energy: 90.0,
+    sigma: 6.0,
+  }
+end
+
+a.run(1000000)

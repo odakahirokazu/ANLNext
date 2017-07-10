@@ -43,19 +43,26 @@ public:
   explicit ANLManagerMT(int num_parallels=1);
   virtual ~ANLManagerMT();
 
+  int number_of_parallels() const override { return NumParallels_; }
+  BasicModule* access_to_module(int chainID,
+                                const std::string& moduleID) override;
+
 protected:
-  void clone_modules();
+  void clone_modules(int chainID);
 
   ANLStatus routine_initialize() override;
   ANLStatus routine_begin_run() override;
   ANLStatus routine_end_run() override;
   ANLStatus routine_finalize() override;
 
+  void print_parameters() override;
   void reset_counters() override;
   
   ANLStatus process_analysis() override;
   virtual void process_analysis_in_each_thread(int iThread, ANLStatus& status);
   virtual long int event_index_to_process();
+
+  boost::property_tree::ptree parameters_to_property_tree() const override;
 
 private:
   void duplicate_chains() override;

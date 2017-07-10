@@ -81,10 +81,16 @@ public:
   virtual ANLStatus Analyze(long int num_events, bool thread_mode=false);
   virtual ANLStatus Finalize();
 
+  virtual int number_of_parallels() const { return 1; }
+  void set_print_parallel_modules(bool v=true)
+  { printCloneParameters_ = v; }
+  virtual BasicModule* access_to_module(int chainID,
+                                        const std::string& moduleID);
+
   virtual ANLStatus do_interactive_comunication();
   virtual ANLStatus do_interactive_analysis();
 
-  boost::property_tree::ptree parameters_to_property_tree() const;
+  virtual boost::property_tree::ptree parameters_to_property_tree() const;
   void parameters_to_json(const std::string& filename) const;
 
 protected:
@@ -96,7 +102,7 @@ protected:
   virtual ANLStatus routine_finalize();
 
   void show_analysis();
-  void print_parameters();
+  virtual void print_parameters();
   virtual void reset_counters();
   virtual ANLStatus process_analysis();
   void print_summary();
@@ -128,6 +134,7 @@ protected:
   std::unique_ptr<EvsManager> evsManager_;
   std::mutex mutex_;
   std::atomic<bool> interrupted_{false};
+  bool printCloneParameters_ = false;
 
 private:
   std::unique_ptr<ModuleAccess> moduleAccess_;

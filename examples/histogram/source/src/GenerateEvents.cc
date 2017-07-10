@@ -12,10 +12,10 @@ GenerateEvents::GenerateEvents() :
 
 ANLStatus GenerateEvents::mod_define()
 {
-  register_parameter(&center_, "energy", 1.0, "keV");
-  register_parameter(&sigma1_, "detector1_sigma", 1.0, "keV");
+  define_parameter("energy", &mod_class::center_, 1.0, "keV");
+  define_parameter("detector1_sigma", &mod_class::sigma1_, 1.0, "keV");
   set_parameter_description("Energy resolution (1-sigma) of the detector 1");
-  register_parameter(&sigma2_, "detector2_sigma");
+  define_parameter("detector2_sigma", &mod_class::sigma2_);
   set_parameter_description("Energy resolution (1-sigma) of the detector 2");
 
   return AS_OK;

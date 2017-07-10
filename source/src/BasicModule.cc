@@ -32,6 +32,10 @@ BasicModule::BasicModule()
   : moduleID_(""),
     moduleDescription_(""),
     moduleOn_(true),
+    evsManager_(nullptr),
+    moduleAccess_(nullptr),
+    currentParameter_(nullptr),
+    currentValueElement_(nullptr),
     loopIndex_(-1),
     copyID_(0),
     lastCopy_(0)
@@ -46,16 +50,29 @@ BasicModule::BasicModule(const BasicModule& r)
     aliases_(r.aliases_),
     moduleDescription_(r.moduleDescription_),
     moduleOn_(r.moduleOn_),
-    evsManager_(r.evsManager_),
-    moduleAccess_(r.moduleAccess_),
+    evsManager_(nullptr),
+    moduleAccess_(nullptr),
+    currentParameter_(nullptr),
+    currentValueElement_(nullptr),
     loopIndex_(-1),
-    copyID_(r.lastCopy_+1)
+    copyID_(r.lastCopy_+1),
+    lastCopy_(0)
 {
   if (moduleID_=="") {
     moduleIDMethod_ = &BasicModule::module_name;
   }
   else {
     moduleIDMethod_ = &BasicModule::get_module_id;
+  }
+}
+
+void BasicModule::copy_parameters(const BasicModule& r)
+{
+  moduleParameters_.clear();
+  for (ModuleParam_sptr p: r.moduleParameters_) {
+    ModuleParam_sptr newParam = p->clone();
+    p->set_module_pointer(this);
+    moduleParameters_.push_back(newParam);
   }
 }
 
@@ -84,7 +101,7 @@ std::vector<std::string> BasicModule::get_aliases_string() const
   return v;
 }
 
-void BasicModule::print_parameters()
+void BasicModule::print_parameters() const
 {
   for (const auto& param: moduleParameters_) {
     param->print(std::cout);
@@ -110,7 +127,7 @@ void BasicModule::ask_parameters()
   }
 }
 
-void BasicModule::unregister_parameter(const std::string& name)
+void BasicModule::undefine_parameter(const std::string& name)
 {
   ModuleParamIter it = std::begin(moduleParameters_);
   while (it != std::end(moduleParameters_)) {

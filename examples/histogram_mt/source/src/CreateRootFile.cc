@@ -52,10 +52,10 @@ std::string CreateRootFile::Filename() const
 
 ANLStatus CreateRootFile::mod_define()
 {
-  register_parameter(&m_FilenameBase, "filename_base");
-  register_parameter(&m_MasterFile, "master_file");
-  register_parameter(&m_SeparateClones, "parallel");
-  register_parameter(&m_SaveClones, "save_parallel");
+  define_parameter("filename_base", &mod_class::m_FilenameBase);
+  define_parameter("master_file", &mod_class::m_MasterFile);
+  define_parameter("parallel", &mod_class::m_SeparateClones);
+  define_parameter("save_parallel", &mod_class::m_SaveClones);
   return AS_OK;
 }
 

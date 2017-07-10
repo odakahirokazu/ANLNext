@@ -76,6 +76,7 @@ private:
   { return "0.0"; }
   virtual std::unique_ptr<BasicModule> __clone__()
   { return nullptr; }
+  virtual BasicModule* __this_ptr__() { return this; }
 
 public:
   BasicModule();
@@ -185,12 +186,82 @@ public:
 
   void insert_to_container() { currentParameter_->insert_to_container(); }
 
-  void print_parameters();
+  void print_parameters() const;
   void ask_parameters();
 
   boost::property_tree::ptree parameters_to_property_tree() const;
 
 protected:
+
+  /*
+   * define-parameter methods
+   */
+
+  template <typename ModuleClass, typename T>
+  void define_parameter(const std::string& name,
+                        T ModuleClass::* ptr);
+
+  template <typename ModuleClass, typename T>
+  void define_parameter(const std::string& name,
+                        T ModuleClass::* ptr,
+                        double unit,
+                        const std::string& unit_name);
+
+  void define_map_key(const std::string& name, const std::string& default_key="")
+  { currentParameter_->set_map_key_properties(name, default_key); }
+
+  void undefine_parameter(const std::string& name);
+  void hide_parameter(const std::string& name, bool hidden=true);
+
+  void set_parameter_unit(double unit, const std::string& unit_name)
+  { currentParameter_->set_unit(unit, unit_name); }
+
+  void set_parameter_expression(const std::string& v)
+  { currentParameter_->set_expression(v); }
+
+  void set_parameter_question(const std::string& v)
+  { currentParameter_->set_question(v); }
+
+  void set_parameter_default_string(const std::string& v)
+  { currentParameter_->set_default_string(v); }
+
+  void set_parameter_description(const std::string& v)
+  { currentParameter_->set_description(v); }
+
+  template <typename ModuleClass, typename T>
+  void add_value_element(const std::string& name,
+                         T ModuleClass::* ptr);
+
+  template <typename ModuleClass, typename T>
+  void add_value_element(const std::string& name,
+                         T ModuleClass::* ptr,
+                         double unit,
+                         const std::string& unit_name);
+
+  void enable_value_elements(int type, const std::vector<std::size_t>& enable)
+  { currentValueElement_->enable_value_elements(type, enable); }
+
+  void set_value_element_unit(double unit, const std::string& unit_name)
+  { currentValueElement_->set_unit(unit, unit_name); }
+
+  void set_value_element_expression(const std::string& v)
+  { currentValueElement_->set_expression(v); }
+
+  void set_value_element_question(const std::string& v)
+  { currentValueElement_->set_question(v); }
+
+  void set_value_element_default_string(const std::string& v)
+  { currentValueElement_->set_default_string(v); }
+
+  void set_value_element_description(const std::string& v)
+  { currentValueElement_->set_description(v); }
+
+  void ask_parameter(const std::string& name, const std::string& question="");
+
+  /*
+   * define-parameter methods (non-member pointer) [conventional]
+   */
+
   template <typename T>
   void register_parameter(T* ptr, const std::string& name);
 
@@ -199,42 +270,23 @@ protected:
                           double unit, const std::string& unit_name);
 
   template <typename T>
-  void register_parameter(T* ptr, const std::string& name,
-                          const std::string& expression);
-
-  template <typename T>
-  void register_parameter(T* ptr, const std::string& name,
-                          const std::string& expression,
-                          const std::string& default_string);
-
-  template <typename T>
   void register_parameter_map(T* ptr, const std::string& name,
                               const std::string& key_name,
                               const std::string& key_default);
 
-  void set_parameter_question(const std::string& q)
-  { currentParameter_->set_question(q); }
-  void set_parameter_description(const std::string& q)
-  { currentParameter_->set_description(q); }
-  
-  void unregister_parameter(const std::string& name);
-  void hide_parameter(const std::string& name, bool hidden=true);
-  void ask_parameter(const std::string& name, const std::string& question="");
+  void unregister_parameter(const std::string& name)
+  { undefine_parameter(name); }
 
   template <typename T>
   void add_value_element(T* ptr, const std::string& name);
   template <typename T>
   void add_value_element(T* ptr, const std::string& name,
-                         double unit, const std::string& unit_name,
-                         const std::string& question="");
-  template <typename T>
-  void add_value_element(T* ptr, const std::string& name,
-                         const std::string& expression,
-                         const std::string& question="");
+                         double unit, const std::string& unit_name);
   
-  void enable_value_elements(int type, const std::vector<std::size_t>& enable)
-  { currentParameter_->enable_value_elements(type, enable); }
-  
+  /*
+   * get-module methods
+   */
+
   template <typename T>
   void get_module(const std::string& name, T* ptr)
   { *ptr = static_cast<T>(moduleAccess_->get_module(name)); }
@@ -259,7 +311,11 @@ protected:
 
   bool exist_module(const std::string& name)
   { return moduleAccess_->exist(name); }
-  
+
+  /*
+   * EVS methods
+   */
+
   void define_evs(const std::string& key);
   void undefine_evs(const std::string& key);
   bool is_evs_defined(const std::string& key) const;
@@ -274,6 +330,7 @@ protected:
 private:
   ModuleParamIter find_parameter(const std::string& name);
   std::string get_module_id() const { return moduleID_; }
+  void copy_parameters(const BasicModule& r);
 
 private:
   std::string moduleID_;
@@ -284,6 +341,7 @@ private:
   const ModuleAccess* moduleAccess_ = nullptr;
   ModuleParamList moduleParameters_;
   ModuleParam_sptr currentParameter_;
+  ModuleParam_sptr currentValueElement_;
   long int loopIndex_ = -1;
     
   const int copyID_ = 0;
@@ -295,10 +353,49 @@ private:
 using AMIter = std::vector<BasicModule*>::iterator;
 using AMConstIter = std::vector<BasicModule*>::const_iterator;
 
+template <typename ModuleClass, typename T>
+void BasicModule::define_parameter(const std::string& name, T ModuleClass::* ptr)
+{
+  ModuleParam_sptr p(new ModuleParameterMember<ModuleClass, T>(name, dynamic_cast<ModuleClass*>(this), ptr));
+  moduleParameters_.push_back(p);
+  currentParameter_ = p;
+}
+
+template <typename ModuleClass, typename T>
+void BasicModule::define_parameter(const std::string& name, T ModuleClass::* ptr,
+                                   double unit, const std::string& unit_name)
+{
+  ModuleParam_sptr p(new ModuleParameterMember<ModuleClass, T>(name, dynamic_cast<ModuleClass*>(this), ptr));
+  p->set_unit(unit, unit_name);
+  moduleParameters_.push_back(p);
+  currentParameter_ = p;
+}
+
+template <typename ModuleClass, typename T>
+void BasicModule::add_value_element(const std::string& name,
+                                    T ModuleClass::* ptr)
+{
+  ModuleParam_sptr p(new ModuleParameterMember<ModuleClass, T>(name, dynamic_cast<ModuleClass*>(this), ptr));
+  currentParameter_->add_value_element(p);
+  currentValueElement_ = p;
+}
+
+template <typename ModuleClass, typename T>
+void BasicModule::add_value_element(const std::string& name,
+                                    T ModuleClass::* ptr,
+                                    double unit,
+                                    const std::string& unit_name)
+{
+  ModuleParam_sptr p(new ModuleParameterMember<ModuleClass, T>(name, dynamic_cast<ModuleClass*>(this), ptr));
+  p->set_unit(unit, unit_name);
+  currentParameter_->add_value_element(p);
+  currentValueElement_ = p;
+}
+
 template<typename T>
 void BasicModule::register_parameter(T* ptr, const std::string& name)
 {
-  ModuleParam_sptr p(new ModuleParameter<T>(ptr, name));
+  ModuleParam_sptr p(new ModuleParameter<T>(name, ptr));
   moduleParameters_.push_back(p);
   currentParameter_ = p;
 }
@@ -307,26 +404,8 @@ template<typename T>
 void BasicModule::register_parameter(T* ptr, const std::string& name,
                                      double unit, const std::string& unit_name)
 {
-  ModuleParam_sptr p(new ModuleParameter<T>(ptr, name, unit, unit_name));
-  moduleParameters_.push_back(p);
-  currentParameter_ = p;
-}
-
-template<typename T>
-void BasicModule::register_parameter(T* ptr, const std::string& name,
-                                     const std::string& expression)
-{
-  ModuleParam_sptr p(new ModuleParameter<T>(ptr, name, expression));
-  moduleParameters_.push_back(p);
-  currentParameter_ = p;
-}
-
-template<typename T>
-void BasicModule::register_parameter(T* ptr, const std::string& name,
-                                     const std::string& expression,
-                                     const std::string& default_string)
-{
-  ModuleParam_sptr p(new ModuleParameter<T>(ptr, name, expression, default_string));
+  ModuleParam_sptr p(new ModuleParameter<T>(name, ptr));
+  p->set_unit(unit, unit_name);
   moduleParameters_.push_back(p);
   currentParameter_ = p;
 }
@@ -336,7 +415,8 @@ void BasicModule::register_parameter_map(T* ptr, const std::string& name,
                                          const std::string& key_name,
                                          const std::string& key_default)
 {
-  ModuleParam_sptr p(new ModuleParameter<T>(ptr, name, key_name, key_default));
+  ModuleParam_sptr p(new ModuleParameter<T>(name, ptr));
+  p->set_map_key_properties(key_name, key_default);
   moduleParameters_.push_back(p);
   currentParameter_ = p;
 }
@@ -344,28 +424,19 @@ void BasicModule::register_parameter_map(T* ptr, const std::string& name,
 template <typename T>
 void BasicModule::add_value_element(T* ptr, const std::string& name)
 {
-  ModuleParam_sptr p(new ModuleParameter<T>(ptr, name));
+  ModuleParam_sptr p(new ModuleParameter<T>(name, ptr));
   currentParameter_->add_value_element(p);
+  currentValueElement_ = p;
 }
 
 template <typename T>
 void BasicModule::add_value_element(T* ptr, const std::string& name,
-                                    double unit, const std::string& unit_name,
-                                    const std::string& question)
+                                    double unit, const std::string& unit_name)
 {
-  ModuleParam_sptr p(new ModuleParameter<T>(ptr, name, unit, unit_name));
-  p->set_question(question);
+  ModuleParam_sptr p(new ModuleParameter<T>(name, ptr));
+  p->set_unit(unit, unit_name);
   currentParameter_->add_value_element(p);
-}
-
-template <typename T>
-void BasicModule::add_value_element(T* ptr, const std::string& name,
-                                    const std::string& expression,
-                                    const std::string& question)
-{
-  ModuleParam_sptr p(new ModuleParameter<T>(ptr, name, expression));
-  p->set_question(question);
-  currentParameter_->add_value_element(p);
+  currentValueElement_ = p;
 }
 
 inline
@@ -473,6 +544,7 @@ std::unique_ptr<BasicModule> BasicModule::make_clone(ModuleType*&& copied)
 {
   std::unique_ptr<BasicModule> m(copied);
   if (this->is_master()) {
+    m->copy_parameters(*this);
     this->lastCopy_ += 1;
   }
   else {

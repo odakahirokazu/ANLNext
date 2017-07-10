@@ -38,13 +38,15 @@ class BasicModule;
 class ClonedChainSet
 {
 public:
-  explicit ClonedChainSet(const EvsManager& evs);
+  ClonedChainSet(int chain_id, const EvsManager& evs);
   ~ClonedChainSet();
   ClonedChainSet(ClonedChainSet&&) = default;
   ClonedChainSet& operator=(ClonedChainSet&&) = default;
   
   ClonedChainSet(const ClonedChainSet&) = delete;
   ClonedChainSet& operator=(const ClonedChainSet&) = delete;
+
+  int chain_id() const { return id_; }
   
   void push(std::unique_ptr<BasicModule>&& mod);
   void setup_module_access();
@@ -61,8 +63,11 @@ public:
 
   const EvsManager& get_evs() const
   { return *evsManager_; }
+
+  BasicModule* access_to_module(const std::string& moduleID);
   
 private:
+  int id_;
   std::unique_ptr<EvsManager> evsManager_;
   std::unique_ptr<ModuleAccess> moduleAccess_;
   std::vector<std::unique_ptr<BasicModule>> modules_;

@@ -9,12 +9,12 @@ class MyApp < ANL::ANLApp
   # Define an analysis chain in setup() method.
   def setup()
     chain MyPackage::MyModule
-    with_parameters(MyParameter1: 10,
-                    MyParameter2: 20.5,
-                    MyParameter3: "Hello",
-                    MyVector1: [1, 2, 3, 4, 5],
-                    MyVector2: [1.3, 4.0, 11.2, 3.2],
-                    MyVector3: ["Hakuba", "Niseko", "Appi"])
+    with_parameters(my_parameter1: 10,
+                    my_parameter2: 20.5,
+                    my_parameter3: "Hello",
+                    my_vector1: [1, 2, 3, 4, 5],
+                    my_vector2: [1.3, 4.0, 11.2, 3.2],
+                    my_vector3: ["Hakuba", "Niseko", "Appi"])
 
     chain MyPackage::MyMapModule
     with_parameters()
@@ -32,15 +32,15 @@ class MyApp < ANL::ANLApp
     # If you need to add the same type of module, you should set another name
     # via the second argument.
     chain MyPackage::MyModule, :MyModule2
-    with_parameters(MyParameter2: 102.1,
-                    MyVector3: ["Jupiter", "Venus", "Mars", "Saturn"])
+    with_parameters(my_parameter2: 102.1,
+                    my_vector3: ["Jupiter", "Venus", "Mars", "Saturn"])
   end
 end
 
 a = MyApp.new
 a.setup
-a.startup
-a.prepare_all_parameters
+a.define
+a.load_all_parameters
 a.print_all_parameters
 
 o = a.parameters_to_object

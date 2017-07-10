@@ -17,162 +17,26 @@
  *                                                                       *
  *************************************************************************/
 
-#include <tuple>
-
 namespace anl
 {
-
-#define ANL_USE_SINGLE_TUPLE_PARAMETER 1
-#if ANL_USE_SINGLE_TUPLE_PARAMETER
-template <typename... Ts>
-class ModuleParameter<std::tuple<Ts...>> : public VModuleParameter
-{
-  typedef std::tuple<Ts...> tuple_type;
-public:
-  ModuleParameter(tuple_type* ptr, const std::string& name)
-    : VModuleParameter(name), ptr_(ptr)
-  {}
-  
-  ModuleParameter(tuple_type* ptr, const std::string& name,
-                  double unit, const std::string& unit_name)
-    : VModuleParameter(name, unit, unit_name), ptr_(ptr)
-  {}
-
-  std::string type_name() const override
-  {
-    std::string t("tuple<");
-    t += type_info<Ts...>::name();
-    t += ">";
-    return t;
-  }
-
-  void set_value(Ts... values) override
-  {
-    set_value_tuple_impl<0>(values...);
-  }
-  using VModuleParameter::set_value;
-  
-  void output(std::ostream& os) const override
-  {
-    output_tuple_impl<0, Ts...>(os);
-  }
-  
-  void input(std::istream& is) override
-  {
-    input_tuple_impl<0, Ts...>(is);
-  }
-
-protected:
-  virtual tuple_type& __ref__() { return *ptr_; }
-  virtual const tuple_type& __ref__() const { return *ptr_; }
-
-private:
-  template <int I>
-  void set_value_tuple_impl() {}
-
-  template <int I, typename T0, typename... TRest>
-  void set_value_tuple_impl(T0 value, TRest... values)
-  {
-    typedef boost::integral_constant<bool,
-                                     boost::is_floating_point<T0>::value> float_truth_type;
-    set_value_tuple_one<I>(value, float_truth_type());
-    set_value_tuple_impl<I+1>(values...);
-  }
-  
-  template <int I, bool B, typename T0>
-  void set_value_tuple_one(T0 value, const boost::integral_constant<bool, B>&)
-  {
-    // non-floating point
-    std::get<I>(__ref__()) = value;
-  }
-
-  template <int I, typename T0>
-  void set_value_tuple_one(T0 value, const boost::true_type&)
-  {
-    // floating point
-    std::get<I>(__ref__()) = value * unit();
-  }
-
-  template <int I>
-  void output_tuple_impl(std::ostream&) const {}
-
-  template <int I, typename T0, typename... TRest>
-  void output_tuple_impl(std::ostream& os) const
-  {
-    typedef boost::integral_constant<bool,
-                                     boost::is_floating_point<T0>::value> float_truth_type;
-    output_tuple_one<I, T0>(os, float_truth_type());
-    os << " ";
-    output_tuple_impl<I+1, TRest...>(os);
-  }
-
-  template <int I, typename T0, bool B>
-  void output_tuple_one(std::ostream& os,
-                        const boost::integral_constant<bool, B>&) const
-  {
-    // non-floating point
-    os << std::get<I>(__ref__());
-  }
-
-  template <int I, typename T0>
-  void output_tuple_one(std::ostream& os,
-                        const boost::true_type&) const
-  {
-    // floating point
-    os << std::get<I>(__ref__())/unit();
-  }
-
-  template <int I>
-  void input_tuple_impl(std::istream&) {}
-
-  template <int I, typename T0, typename... TRest>
-  void input_tuple_impl(std::istream& is)
-  {
-    typedef boost::integral_constant<bool,
-                                     boost::is_floating_point<T0>::value> float_truth_type;
-    input_tuple_one<I, T0>(is, float_truth_type());
-    input_tuple_impl<I+1, TRest...>(is);
-  }
-
-  template <int I, typename T0, bool B>
-  void input_tuple_one(std::istream& is,
-                       const boost::integral_constant<bool, B>&)
-  {
-    // non-floating point
-    is >> std::get<I>(__ref__());
-  }
-
-  template <int I, typename T0>
-  void input_tuple_one(std::istream& is,
-                       const boost::true_type&)
-  {
-    // floating point
-    is >> std::get<I>(__ref__());
-    if (is) {
-      std::get<I>(__ref__()) *= unit();
-    }
-  }
-
-private:
-  std::tuple<Ts...>* ptr_;
-};
-#endif
 
 #ifdef ANL_USE_TVECTOR
 template <> class ModuleParameter<TVector2> : public VModuleParameter
 {
-  typedef TVector2 T;
+  using T = TVector2;
 
 public:
-  ModuleParameter(TVector2* ptr, const std::string& name)
+  ModuleParameter(const std::string& name, T* ptr)
     : VModuleParameter(name), ptr_(ptr)
   {}
-  
-  ModuleParameter(TVector2* ptr, const std::string& name,
-                  double unit, const std::string& unit_name)
-    : VModuleParameter(name, unit, unit_name), ptr_(ptr)
-  {}
 
+  std::shared_ptr<VModuleParameter> clone() override
+  { return std::shared_ptr<VModuleParameter>(new ModuleParameter(*this)); }
+
+protected:
+  ModuleParameter(const ModuleParameter&) = default;
+
+public:
   std::string type_name() const override
   { return "2-vector"; }
   
@@ -230,18 +94,20 @@ private:
 
 template <> class ModuleParameter<TVector3> : public VModuleParameter
 {
-  typedef TVector3 T;
+  using T = TVector3;
 
 public:
-  ModuleParameter(TVector3* ptr, const std::string& name)
+  ModuleParameter(const std::string& name, T* ptr)
     : VModuleParameter(name), ptr_(ptr)
   {}
-  
-  ModuleParameter(TVector3* ptr, const std::string& name,
-                  double unit, const std::string& unit_name)
-    : VModuleParameter(name, unit, unit_name), ptr_(ptr)
-  {}
 
+  std::shared_ptr<VModuleParameter> clone() override
+  { return std::shared_ptr<VModuleParameter>(new ModuleParameter(*this)); }
+
+protected:
+  ModuleParameter(const ModuleParameter&) = default;
+
+public:
   std::string type_name() const override
   { return "3-vector"; }
   
@@ -301,18 +167,20 @@ private:
 #ifdef ANL_USE_HEPVECTOR
 template <> class ModuleParameter<CLHEP::Hep2Vector> : public VModuleParameter
 {
-  typedef CLHEP::Hep2Vector T;
+  using T = CLHEP::Hep2Vector;
 
 public:
-  ModuleParameter(CLHEP::Hep2Vector* ptr, const std::string& name)
+  ModuleParameter(const std::string& name, T* ptr)
     : VModuleParameter(name), ptr_(ptr)
   {}
   
-  ModuleParameter(CLHEP::Hep2Vector* ptr, const std::string& name,
-                  double unit, const std::string& unit_name)
-    : VModuleParameter(name, unit, unit_name), ptr_(ptr)
-  {}
-  
+  std::shared_ptr<VModuleParameter> clone() override
+  { return std::shared_ptr<VModuleParameter>(new ModuleParameter(*this)); }
+
+protected:
+  ModuleParameter(const ModuleParameter&) = default;
+
+public:
   std::string type_name() const override
   { return "2-vector"; }
 
@@ -368,18 +236,20 @@ private:
 
 template <> class ModuleParameter<CLHEP::Hep3Vector> : public VModuleParameter
 {
-  typedef CLHEP::Hep3Vector T;
+  using T = CLHEP::Hep3Vector;
 
 public:
-  ModuleParameter(CLHEP::Hep3Vector* ptr, const std::string& name)
+  ModuleParameter(const std::string& name, T* ptr)
     : VModuleParameter(name), ptr_(ptr)
   {}
   
-  ModuleParameter(CLHEP::Hep3Vector* ptr, const std::string& name,
-                  double unit, const std::string& unit_name)
-    : VModuleParameter(name, unit, unit_name), ptr_(ptr)
-  {}
-  
+  std::shared_ptr<VModuleParameter> clone() override
+  { return std::shared_ptr<VModuleParameter>(new ModuleParameter(*this)); }
+
+protected:
+  ModuleParameter(const ModuleParameter&) = default;
+
+public:
   std::string type_name() const override
   { return "3-vector"; }
 

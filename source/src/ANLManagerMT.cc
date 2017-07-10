@@ -36,13 +36,31 @@ namespace anl
 ANLManagerMT::ANLManagerMT(int num_parallels)
   : NumParallels_(num_parallels)
 {
+  set_print_parallel_modules();
 }
 
 ANLManagerMT::~ANLManagerMT() = default;
 
-void ANLManagerMT::clone_modules()
+BasicModule* ANLManagerMT::access_to_module(int chainID, const std::string& moduleID)
 {
-  ClonedChainSet chain(*evsManager_);
+  if (chainID==0) {
+    return ANLManager::access_to_module(chainID, moduleID);
+  }
+  for (auto& chain: clonedChains_) {
+    if (chain.chain_id() == chainID) {
+      return chain.access_to_module(moduleID);
+    }
+  }
+
+  const std::string message
+    = (boost::format("Chain ID is not found: %d") % chainID).str();
+  BOOST_THROW_EXCEPTION( ANLException(message) );
+  return nullptr;
+}
+
+void ANLManagerMT::clone_modules(int chainID)
+{
+  ClonedChainSet chain(chainID, *evsManager_);
   for (BasicModule* mod: modules_) {
     std::unique_ptr<BasicModule> cloned(mod->clone());
     if (cloned.get()) {
@@ -63,13 +81,28 @@ void ANLManagerMT::clone_modules()
 void ANLManagerMT::duplicate_chains()
 {
   for (int i=1; i<NumParallels_; i++) {
-    clone_modules();
+    clone_modules(i);
   }
   std::cout << "\n"
             << "<Module chain duplication>\n"
             << (NumParallels_-1) << " chains have been duplicated. => "
             << "Total: " << NumParallels_ << " chains.\n"
             << std::endl;
+}
+
+void ANLManagerMT::print_parameters()
+{
+  ANLManager::print_parameters();
+
+  if (printCloneParameters_) {
+    for (auto& chain: clonedChains_) {
+      for (const BasicModule* mod: chain.modules_reference()) {
+        std::cout << "--- " << mod->module_id() << "[" << chain.chain_id() << "] ---"<< std::endl;
+        mod->print_parameters();
+        std::cout << std::endl;
+      }
+    }
+  }
 }
 
 void ANLManagerMT::reset_counters()
@@ -85,10 +118,10 @@ ANLStatus ANLManagerMT::routine_initialize()
   ANLStatus status = AS_OK;
   status = ANLManager::routine_initialize();
   if (status == AS_OK) {
-    for (std::size_t i=0; i<clonedChains_.size(); i++) {
+    for (auto& chain: clonedChains_) {
       status = routine_modfn(&BasicModule::mod_initialize,
-                             boost::str(boost::format("initialize:%d")%(i+1)),
-                             clonedChains_[i].modules_reference());
+                             boost::str(boost::format("initialize:%d")%chain.chain_id()),
+                             chain.modules_reference());
       if (status != AS_OK) { break; }
     }
   }
@@ -100,10 +133,10 @@ ANLStatus ANLManagerMT::routine_begin_run()
   ANLStatus status = AS_OK;
   status = ANLManager::routine_begin_run();
   if (status == AS_OK) {
-    for (std::size_t i=0; i<clonedChains_.size(); i++) {
+    for (auto& chain: clonedChains_) {
       status = routine_modfn(&BasicModule::mod_begin_run,
-                             boost::str(boost::format("begin_run:%d")%(i+1)),
-                             clonedChains_[i].modules_reference());
+                             boost::str(boost::format("begin_run:%d")%chain.chain_id()),
+                             chain.modules_reference());
       if (status != AS_OK) { break; }
     }
   }
@@ -115,10 +148,10 @@ ANLStatus ANLManagerMT::routine_end_run()
   ANLStatus status = AS_OK;
   status = ANLManager::routine_end_run();
   if (status == AS_OK) {
-    for (std::size_t i=0; i<clonedChains_.size(); i++) {
+    for (auto& chain: clonedChains_) {
       status = routine_modfn(&BasicModule::mod_end_run,
-                             boost::str(boost::format("end_run:%d")%(i+1)),
-                             clonedChains_[i].modules_reference());
+                             boost::str(boost::format("end_run:%d")%chain.chain_id()),
+                             chain.modules_reference());
       if (status != AS_OK) { break; }
     }
   }
@@ -130,10 +163,10 @@ ANLStatus ANLManagerMT::routine_finalize()
   ANLStatus status = AS_OK;
   status = ANLManager::routine_finalize();
   if (status == AS_OK) {
-    for (std::size_t i=0; i<clonedChains_.size(); i++) {
+    for (auto& chain: clonedChains_) {
       status = routine_modfn(&BasicModule::mod_finalize,
-                             boost::str(boost::format("finalize:%d")%(i+1)),
-                             clonedChains_[i].modules_reference());
+                             boost::str(boost::format("finalize:%d")%chain.chain_id()),
+                             chain.modules_reference());
       if (status != AS_OK) { break; }
     }
   }
@@ -258,6 +291,19 @@ void ANLManagerMT::reduce_statistics()
     }
     evsManager_->merge(chain.get_evs());
   }
+}
+
+boost::property_tree::ptree ANLManagerMT::parameters_to_property_tree() const
+{
+  boost::property_tree::ptree pt = ANLManager::parameters_to_property_tree();
+  for (const ClonedChainSet& chain: clonedChains_) {
+    boost::property_tree::ptree pt_modules;
+    for (const BasicModule* module: chain.modules_reference()) {
+      pt_modules.push_back(std::make_pair("", module->parameters_to_property_tree()));
+    }
+    pt.add_child(boost::str(boost::format("application.chain%d")%chain.chain_id()), std::move(pt_modules));
+  }
+  return pt;
 }
 
 } /* namespace anl*/

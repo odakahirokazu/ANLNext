@@ -28,10 +28,10 @@
 namespace anl
 {
 
-typedef boost::error_info<struct tag_ANLError, std::string> ANLErrorInfo;
-typedef boost::error_info<struct tag_ANLError_Module, std::string> ANLErrorInfoOnModule;
-typedef boost::error_info<struct tag_ANLError_Method, std::string> ANLErrorInfoOnMethod;
-typedef boost::error_info<struct tag_ANLError_LoopIndex, int64_t> ANLErrorInfoOnLoopIndex;
+using ANLErrorInfo = boost::error_info<struct tag_ANLError, std::string>;
+using ANLErrorInfoOnModule = boost::error_info<struct tag_ANLError_Module, std::string>;
+using ANLErrorInfoOnMethod = boost::error_info<struct tag_ANLError_Method, std::string>;
+using ANLErrorInfoOnLoopIndex = boost::error_info<struct tag_ANLError_LoopIndex, int64_t>;
 
 class BasicModule;
 
