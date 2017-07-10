@@ -65,6 +65,16 @@ void BasicModule::set_module_id(const std::string& module_id)
   moduleIDMethod_ = &BasicModule::get_module_id;
 }
 
+ANLStatus BasicModule::mod_reduce(const std::list<BasicModule*>& parallel_modules)
+{
+  ANLStatus status = AS_OK;
+  for (BasicModule* m: parallel_modules) {
+    status = mod_merge(m);
+    if (status != AS_OK) { break; }
+  }
+  return status;
+}
+
 std::vector<std::string> BasicModule::get_aliases_string() const
 {
   std::vector<std::string> v;

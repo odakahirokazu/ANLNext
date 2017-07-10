@@ -19,6 +19,7 @@
 
 #include "ANLManagerMT.hh"
 
+#include <boost/format.hpp>
 #include <functional>
 #include <thread>
 
@@ -43,7 +44,17 @@ void ANLManagerMT::clone_modules()
 {
   ClonedChainSet chain(*evsManager_);
   for (BasicModule* mod: modules_) {
-    chain.push(mod->clone());
+    std::unique_ptr<BasicModule> cloned(mod->clone());
+    if (cloned.get()) {
+      chain.push(std::move(cloned));
+    }
+    else {
+      const std::string message
+        = (boost::format("Module %s (ID: %s) can not be cloned.")
+           % mod->module_name()
+           % mod->module_id()).str();
+      BOOST_THROW_EXCEPTION( ANLException(message) );
+    }
   }
   chain.setup_module_access();
   clonedChains_.push_back(std::move(chain));
@@ -74,8 +85,10 @@ ANLStatus ANLManagerMT::routine_initialize()
   ANLStatus status = AS_OK;
   status = ANLManager::routine_initialize();
   if (status == AS_OK) {
-    for (auto& chain: clonedChains_) {
-      status = routine_modfn(&BasicModule::mod_initialize, "initialize", chain.modules_reference());
+    for (std::size_t i=0; i<clonedChains_.size(); i++) {
+      status = routine_modfn(&BasicModule::mod_initialize,
+                             boost::str(boost::format("initialize:%d")%(i+1)),
+                             clonedChains_[i].modules_reference());
       if (status != AS_OK) { break; }
     }
   }
@@ -87,8 +100,10 @@ ANLStatus ANLManagerMT::routine_begin_run()
   ANLStatus status = AS_OK;
   status = ANLManager::routine_begin_run();
   if (status == AS_OK) {
-    for (auto& chain: clonedChains_) {
-      status = routine_modfn(&BasicModule::mod_begin_run, "begin_run", chain.modules_reference());
+    for (std::size_t i=0; i<clonedChains_.size(); i++) {
+      status = routine_modfn(&BasicModule::mod_begin_run,
+                             boost::str(boost::format("begin_run:%d")%(i+1)),
+                             clonedChains_[i].modules_reference());
       if (status != AS_OK) { break; }
     }
   }
@@ -100,8 +115,10 @@ ANLStatus ANLManagerMT::routine_end_run()
   ANLStatus status = AS_OK;
   status = ANLManager::routine_end_run();
   if (status == AS_OK) {
-    for (auto& chain: clonedChains_) {
-      status = routine_modfn(&BasicModule::mod_end_run, "end_run", chain.modules_reference());
+    for (std::size_t i=0; i<clonedChains_.size(); i++) {
+      status = routine_modfn(&BasicModule::mod_end_run,
+                             boost::str(boost::format("end_run:%d")%(i+1)),
+                             clonedChains_[i].modules_reference());
       if (status != AS_OK) { break; }
     }
   }
@@ -113,8 +130,10 @@ ANLStatus ANLManagerMT::routine_finalize()
   ANLStatus status = AS_OK;
   status = ANLManager::routine_finalize();
   if (status == AS_OK) {
-    for (auto& chain: clonedChains_) {
-      status = routine_modfn(&BasicModule::mod_finalize, "finalize", chain.modules_reference());
+    for (std::size_t i=0; i<clonedChains_.size(); i++) {
+      status = routine_modfn(&BasicModule::mod_finalize,
+                             boost::str(boost::format("finalize:%d")%(i+1)),
+                             clonedChains_[i].modules_reference());
       if (status != AS_OK) { break; }
     }
   }
@@ -212,6 +231,23 @@ ANLStatus ANLManagerMT::process_analysis_impl(const std::vector<BasicModule*>& m
   }
 
   return AS_OK;
+}
+
+ANLStatus ANLManagerMT::reduce_modules()
+{
+  ANLStatus status = AS_OK;
+  for (std::size_t iModule=0; iModule<modules_.size(); iModule++) {
+    BasicModule* mod = modules_[iModule];
+    std::list<BasicModule*> moduleList;
+    for (const ClonedChainSet& chain: clonedChains_) {
+      moduleList.push_back(chain.modules_reference()[iModule]);
+    }
+    status = mod->mod_reduce(moduleList);
+    if (status != AS_OK) {
+      break;
+    }
+  }
+  return status;
 }
 
 void ANLManagerMT::reduce_statistics()

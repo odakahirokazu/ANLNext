@@ -17,60 +17,52 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_ANLManagerMT_H
-#define ANL_ANLManagerMT_H 1
+#ifndef COMPTONSOFT_CreateRootFile_H
+#define COMPTONSOFT_CreateRootFile_H 1
 
-#include "ANLManager.hh"
+#include "BasicModule.hh"
+#include <memory>
 
-#include "ClonedChainSet.hh"
+class TDirectory;
+class TFile;
 
-namespace anl
-{
-
-class EvsManager;
-class ModuleAccess;
-class BasicModule;
+namespace comptonsoft {
 
 /**
- * The ANL Next manager class for multi-thread mode.
- *
+ * Module to manage TFile for save histograms/trees.
  * @author Hirokazu Odaka
- * @date 2017-07-05
+ * @date 2017-07-07 | based on SaveData
  */
-class ANLManagerMT : public ANLManager
+class CreateRootFile : public anl::BasicModule
 {
+  DEFINE_ANL_MODULE(CreateRootFile, 1.0);
+  ENABLE_PARALLEL_RUN();
 public:
-  explicit ANLManagerMT(int num_parallels=1);
-  virtual ~ANLManagerMT();
-
-protected:
-  void clone_modules();
-
-  ANLStatus routine_initialize() override;
-  ANLStatus routine_begin_run() override;
-  ANLStatus routine_end_run() override;
-  ANLStatus routine_finalize() override;
-
-  void reset_counters() override;
+  CreateRootFile();
+  ~CreateRootFile();
   
-  ANLStatus process_analysis() override;
-  virtual void process_analysis_in_each_thread(int iThread, ANLStatus& status);
-  virtual long int event_index_to_process();
+protected:
+  CreateRootFile(const CreateRootFile& r);
+
+public:
+  anl::ANLStatus mod_define() override;
+  anl::ANLStatus mod_initialize() override;
+  anl::ANLStatus mod_finalize() override;
+
+  TDirectory* GetDirectory();
+  bool cd();
+
+  std::string FilenameBase() const { return m_FilenameBase; }
+  std::string Filename() const;
 
 private:
-  void duplicate_chains() override;
-  ANLStatus process_analysis_impl(const std::vector<BasicModule*>& modules,
-                                  std::vector<LoopCounter>& counters,
-                                  EvsManager& evsManager);
-  ANLStatus reduce_modules() override;
-  void reduce_statistics() override;
-
-private:
-  const int NumParallels_ = 1;
-  std::vector<ClonedChainSet> clonedChains_;
-  long int loopIndex_ = -1;
+  std::string m_FilenameBase;
+  std::unique_ptr<TFile> m_RootFile;
+  bool m_MasterFile = true;
+  bool m_SeparateClones = false;
+  bool m_SaveClones = false;
 };
 
-} /* namespace anl */
+} /* namespace comptonsoft */
 
-#endif /* ANL_ANLManagerMT_H */
+#endif /* COMPTONSOFT_CreateRootFile_H */

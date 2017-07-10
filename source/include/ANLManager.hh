@@ -113,6 +113,7 @@ protected:
 
 private:
   virtual void duplicate_chains() {}
+  virtual ANLStatus reduce_modules() { return AS_OK; }
   virtual void reduce_statistics() {}
 
   // thread mode

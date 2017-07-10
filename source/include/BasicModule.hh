@@ -74,6 +74,8 @@ private:
   { return "BasicModule"; }
   virtual std::string __module_version__() const
   { return "0.0"; }
+  virtual std::unique_ptr<BasicModule> __clone__()
+  { return nullptr; }
 
 public:
   BasicModule();
@@ -83,7 +85,8 @@ public:
   BasicModule& operator=(const BasicModule& r) = delete;
   BasicModule& operator=(BasicModule&& r) = delete;
 
-  virtual std::unique_ptr<BasicModule> clone() { return make_clone(this); }
+  virtual std::unique_ptr<BasicModule> clone()
+  { return __clone__(); }
 
 protected:
   BasicModule(const BasicModule& r);
@@ -105,6 +108,9 @@ public:
   virtual ANLStatus mod_analyze()        { return AS_OK; }
   virtual ANLStatus mod_end_run()        { return AS_OK; }
   virtual ANLStatus mod_finalize()       { return AS_OK; }
+
+  virtual ANLStatus mod_reduce(const std::list<BasicModule*>& parallel_modules);
+  virtual ANLStatus mod_merge(const BasicModule*) { return AS_OK; }
 
   virtual ANLStatus mod_communicate() { ask_parameters(); return AS_OK; }
 

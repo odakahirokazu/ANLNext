@@ -244,6 +244,8 @@ ANLStatus ANLManager::Analyze(long int num_events, bool thread_mode)
     goto final;
   }
 
+  reduce_modules();
+
 final:
   std::cout << std::endl;
   reduce_statistics();
