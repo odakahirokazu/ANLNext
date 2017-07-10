@@ -63,13 +63,13 @@ struct size_of_value<std::tuple<Ts...>>
  * @date 2015-11-10 | rename {set/get/output}_value<I>() to value_info_{set/get/output}().
  * @date 2016-08-19 | modify exceptions.
  */
-template <typename T>
-class ModuleParameter<std::map<std::string, T>> : public VModuleParameter
+template <typename value_type>
+class ModuleParameter<std::map<std::string, value_type>> : public VModuleParameter
 {
-  typedef std::map<std::string, T> container_type;
+  typedef std::map<std::string, value_type> container_type;
   typedef std::string key_type;
-  typedef T value_type;
   typedef typename container_type::iterator iter_type;
+  typedef typename container_type::const_iterator const_iter_type;
   typedef typename size_of_value<value_type>::type value_category;
  
   constexpr static std::size_t ValueSize = size_of_value<value_type>::value;
@@ -102,10 +102,10 @@ public:
   void output(std::ostream& os) const override
   {
     os << '\n';
-    for (iter_type it=ptr_->begin(); it!=ptr_->end(); ++it) {
+    for (const_iter_type it=__ref__().begin(); it!=__ref__().end(); ++it) {
       os << "  " << key_name_ << ": " << it->first << '\n';
-      value_type tmpValue = it->second;
-      value_info_set<0>(&tmpValue, value_category());
+      value_type t = it->second;
+      value_info_set<0>(&t, value_category());
       value_info_output<0>(os, value_category());
     }
     os.flush();
@@ -160,14 +160,14 @@ public:
   }
 
   std::size_t size_of_container() const override
-  { return ptr_->size(); }
+  { return __ref__().size(); }
   void clear_container() override
-  { ptr_->clear(); }
+  { __ref__().clear(); }
 
   std::vector<std::string> map_key_list() const override
   {
     std::vector<std::string> keys;
-    for (auto& pair: *ptr_) {
+    for (auto& pair: __ref__()) {
       keys.push_back(pair.first);
     }
     return keys;
@@ -175,17 +175,17 @@ public:
   
   void insert_to_container() override
   {
-    value_type tmpValue;
-    value_info_get<0>(&tmpValue, value_category());
-    ptr_->insert(std::make_pair(buffer_key_, tmpValue));
+    value_type t;
+    value_info_get<0>(&t, value_category());
+    __ref__().insert(std::make_pair(buffer_key_, t));
     
     value_info_set<0>(&default_value_, value_category());
   }
 
   void retrieve_from_container(const std::string& key) const override
   {
-    auto it = ptr_->find(key);
-    if (it == ptr_->end()) {
+    auto it = __ref__().find(key);
+    if (it == __ref__().end()) {
       const std::string message
         = (boost::format("Map \"%s\" does not have key: %s") % name() % key).str();
       BOOST_THROW_EXCEPTION( ANLException(message) );
@@ -225,7 +225,7 @@ public:
     ModuleParameter<std::string> tmpKeyParam(&buffer_key_, key_name_);
     tmpKeyParam.set_question(name()+" (OK for exit)");
     
-    ptr_->clear();
+    __ref__().clear();
     if (first_input()) { initialize_default_value_elements(); }
 
     while (1) {
@@ -241,9 +241,9 @@ public:
         }
       }
       
-      value_type tmpValue;
-      value_info_get<0>(&tmpValue, value_category());
-      ptr_->insert(std::make_pair(buffer_key_, tmpValue));
+      value_type t;
+      value_info_get<0>(&t, value_category());
+      __ref__().insert(std::make_pair(buffer_key_, t));
       buffer_key_ = "OK";
     }
     return true;
@@ -273,6 +273,10 @@ public:
     return pt;
   }
   
+protected:
+  virtual container_type& __ref__() { return *ptr_; }
+  virtual const container_type& __ref__() const { return *ptr_; }
+
 private:
   bool first_input()
   {

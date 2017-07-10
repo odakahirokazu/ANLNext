@@ -216,19 +216,19 @@ void BasicModule::set_parameter(const std::string& name, double val);
 
 template
 void BasicModule::set_parameter(const std::string& name,
-                               const std::string& val);
+                                const std::string& val);
 
 template
 void BasicModule::set_parameter(const std::string& name,
-                               const std::vector<int>& val);
+                                const std::vector<int>& val);
 
 template
 void BasicModule::set_parameter(const std::string& name,
-                               const std::vector<double>& val);
+                                const std::vector<double>& val);
 
 template
 void BasicModule::set_parameter(const std::string& name,
-                               const std::vector<std::string>& val);
+                                const std::vector<std::string>& val);
 
 template
 void BasicModule::set_value_element(const std::string& name, bool val);

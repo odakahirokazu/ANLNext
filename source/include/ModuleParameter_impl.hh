@@ -74,14 +74,14 @@ bool ModuleParameter<T>::ask_sequential(const std::true_type&)
   ModuleParameter<std::string> tmpStringParam(&tmpString, name()); 
   tmpStringParam.set_question(name()+" (OK for exit)");
   value_type t;
-  ModuleParameter<value_type> tmpParam(&t, name());
+  ModuleParameter<value_type> param(&t, name());
   
-  ptr_->clear();
+  __ref__().clear();
   while (1) {
     tmpStringParam.ask();
     if (tmpString=="ok" || tmpString=="OK") break;
-    tmpParam.set_value(boost::lexical_cast<value_type>(tmpString));
-    ptr_->push_back(t);
+    param.set_value(boost::lexical_cast<value_type>(tmpString));
+    __ref__().push_back(t);
     tmpString = "OK";
   }
   return true;
@@ -95,14 +95,14 @@ void ModuleParameter<T>::set_value_impl(call_type val,
   typedef typename std::iterator_traits<iter_type>::value_type value_type;
 
   const std::size_t n = val.size();
-  ptr_->resize(n);
+  __ref__().resize(n);
   for (std::size_t i=0; i<n; ++i) {
     value_type t;
-    ModuleParameter<value_type> tmpParam(&t, "");
-    tmpParam.set_unit(unit(), unit_name());
-    tmpParam.set_expression(expression());
-    tmpParam.set_value(val[i]);
-    ptr_->at(i) = t;
+    ModuleParameter<value_type> param(&t, "");
+    param.set_unit(unit(), unit_name());
+    param.set_expression(expression());
+    param.set_value(val[i]);
+    __ref__().at(i) = t;
   }
 }
 
@@ -115,11 +115,11 @@ void ModuleParameter<T>::set_value_impl(call_type val,
 
   for (iter_type it=val.begin(); it!=val.end(); ++it) {
     value_type t;
-    ModuleParameter<value_type> tmpParam(&t, "");
-    tmpParam.set_unit(unit(), unit_name());
-    tmpParam.set_expression(expression());
-    tmpParam.set_value(*it);
-    ptr_->push_back(t);
+    ModuleParameter<value_type> param(&t, "");
+    param.set_unit(unit(), unit_name());
+    param.set_expression(expression());
+    param.set_value(*it);
+    __ref__().push_back(t);
   }
 }
 
@@ -131,16 +131,16 @@ T ModuleParameter<T>::get_value_impl(call_type,
   typedef typename std::iterator_traits<iter_type>::value_type value_type;
 
   T rval;
-  const std::size_t n = ptr_->size();
+  const std::size_t n = __ref__().size();
   rval.resize(n);
   value_type dummy = value_type();
 
   for (std::size_t i=0; i<n; ++i) {
-    value_type* t = &((*ptr_)[i]);
-    ModuleParameter<value_type> tmpParam(t, "");
-    tmpParam.set_unit(unit(), unit_name());
-    tmpParam.set_expression(expression());
-    rval[i] = tmpParam.get_value(dummy);
+    value_type t = __ref__()[i];
+    ModuleParameter<value_type> param(&t, "");
+    param.set_unit(unit(), unit_name());
+    param.set_expression(expression());
+    rval[i] = param.get_value(dummy);
   }
   return rval;
 }
@@ -155,12 +155,12 @@ T ModuleParameter<T>::get_value_impl(call_type,
   T rval;
   value_type dummy = value_type();
 
-  for (iter_type it=ptr_->begin(); it!=ptr_->end(); ++it) {
-    value_type* t = &(*it);
-    ModuleParameter<value_type> tmpParam(t, "");
-    tmpParam.set_unit(unit(), unit_name());
-    tmpParam.set_expression(expression());
-    rval.push_back(tmpParam.get_value(dummy));
+  for (iter_type it=__ref__().begin(); it!=__ref__().end(); ++it) {
+    value_type t = *it;
+    ModuleParameter<value_type> param(&t, "");
+    param.set_unit(unit(), unit_name());
+    param.set_expression(expression());
+    rval.push_back(param.get_value(dummy));
   }
   return rval;
 }
@@ -169,14 +169,15 @@ template <typename T>
 void ModuleParameter<T>::output_impl(std::ostream& os,
                                      std::forward_iterator_tag) const
 {
-  typedef typename T::iterator iter_type;
+  typedef typename T::const_iterator iter_type;
   typedef typename std::iterator_traits<iter_type>::value_type value_type;
 
-  for (iter_type it=ptr_->begin(); it!=ptr_->end(); ++it) {
-    ModuleParameter<value_type> tmpParam(&(*it), "");
-    tmpParam.set_unit(unit(), unit_name());
-    tmpParam.set_expression(expression());
-    tmpParam.output(os);
+  for (iter_type it=__ref__().begin(); it!=__ref__().end(); ++it) {
+    value_type t = *it;
+    ModuleParameter<value_type> param(&t, "");
+    param.set_unit(unit(), unit_name());
+    param.set_expression(expression());
+    param.output(os);
     os << " ";
   }
 }
@@ -191,14 +192,14 @@ void ModuleParameter<T>::input_impl(std::istream& is,
   std::size_t n = 0;
   is >> n;
   if (!is) return;
-  ptr_->resize(n);
+  __ref__().resize(n);
   for (std::size_t i=0; i<n; ++i) {
     value_type t;
-    ModuleParameter<value_type> tmpParam(&t, "");
-    tmpParam.set_unit(unit(), unit_name());
-    tmpParam.set_expression(expression());
-    is >> tmpParam;
-    ptr_->at(i) = t;
+    ModuleParameter<value_type> param(&t, "");
+    param.set_unit(unit(), unit_name());
+    param.set_expression(expression());
+    is >> param;
+    __ref__().at(i) = t;
   }
 }
 
@@ -214,11 +215,11 @@ void ModuleParameter<T>::input_impl(std::istream& is,
   if (!is) return;
   for (std::size_t i=0; i<n; ++i) {
     value_type t;
-    ModuleParameter<value_type> tmpParam(&t, "");
-    tmpParam.set_unit(unit(), unit_name());
-    tmpParam.set_expression(expression());
-    is >> tmpParam;
-    ptr_->push_back(t);
+    ModuleParameter<value_type> param(&t, "");
+    param.set_unit(unit(), unit_name());
+    param.set_expression(expression());
+    is >> param;
+    __ref__().push_back(t);
   }
 }
 

@@ -62,6 +62,10 @@ public:
     input_tuple_impl<0, Ts...>(is);
   }
 
+protected:
+  virtual tuple_type& __ref__() { return *ptr_; }
+  virtual const tuple_type& __ref__() const { return *ptr_; }
+
 private:
   template <int I>
   void set_value_tuple_impl() {}
@@ -79,14 +83,14 @@ private:
   void set_value_tuple_one(T0 value, const boost::integral_constant<bool, B>&)
   {
     // non-floating point
-    std::get<I>(*ptr_) = value;
+    std::get<I>(__ref__()) = value;
   }
 
   template <int I, typename T0>
   void set_value_tuple_one(T0 value, const boost::true_type&)
   {
     // floating point
-    std::get<I>(*ptr_) = value * unit();
+    std::get<I>(__ref__()) = value * unit();
   }
 
   template <int I>
@@ -107,7 +111,7 @@ private:
                         const boost::integral_constant<bool, B>&) const
   {
     // non-floating point
-    os << std::get<I>(*ptr_);
+    os << std::get<I>(__ref__());
   }
 
   template <int I, typename T0>
@@ -115,7 +119,7 @@ private:
                         const boost::true_type&) const
   {
     // floating point
-    os << std::get<I>(*ptr_)/unit();
+    os << std::get<I>(__ref__())/unit();
   }
 
   template <int I>
@@ -135,7 +139,7 @@ private:
                        const boost::integral_constant<bool, B>&)
   {
     // non-floating point
-    is >> std::get<I>(*ptr_);
+    is >> std::get<I>(__ref__());
   }
 
   template <int I, typename T0>
@@ -143,9 +147,9 @@ private:
                        const boost::true_type&)
   {
     // floating point
-    is >> std::get<I>(*ptr_);
+    is >> std::get<I>(__ref__());
     if (is) {
-      std::get<I>(*ptr_) *= unit();
+      std::get<I>(__ref__()) *= unit();
     }
   }
 
@@ -157,6 +161,8 @@ private:
 #ifdef ANL_USE_TVECTOR
 template <> class ModuleParameter<TVector2> : public VModuleParameter
 {
+  typedef TVector2 T;
+
 public:
   ModuleParameter(TVector2* ptr, const std::string& name)
     : VModuleParameter(name), ptr_(ptr)
@@ -172,19 +178,19 @@ public:
   
   void set_value(double x, double y) override
   {
-    ptr_->Set(x*unit(), y*unit());
+    __ref__().Set(x*unit(), y*unit());
   }
   using VModuleParameter::set_value;
 
   std::vector<double> get_value(double, double) const override
   {
-    return std::vector<double>{ptr_->X()/unit(), ptr_->Y()/unit()};
+    return std::vector<double>{__ref__().X()/unit(), __ref__().Y()/unit()};
   }
   using VModuleParameter::get_value;
   
   void output(std::ostream& os) const override
   {
-    os << ptr_->X()/unit() << " " << ptr_->Y()/unit();
+    os << __ref__().X()/unit() << " " << __ref__().Y()/unit();
   }
   
   void input(std::istream& is) override
@@ -192,7 +198,7 @@ public:
     double x(0.0), y(0.0);
     is >> x >> y;
     if (is) {
-      ptr_->Set(x*unit(), y*unit());
+      __ref__().Set(x*unit(), y*unit());
     }
   }
 
@@ -214,12 +220,18 @@ public:
     return pt;
   }
 
+protected:
+  virtual T& __ref__() { return *ptr_; }
+  virtual const T& __ref__() const { return *ptr_; }
+
 private:
   TVector2* ptr_;
 };
 
 template <> class ModuleParameter<TVector3> : public VModuleParameter
 {
+  typedef TVector3 T;
+
 public:
   ModuleParameter(TVector3* ptr, const std::string& name)
     : VModuleParameter(name), ptr_(ptr)
@@ -234,20 +246,20 @@ public:
   { return "3-vector"; }
   
   void set_value(double x, double y, double z) override
-  { ptr_->SetXYZ(x*unit(), y*unit(), z*unit()); }
+  { __ref__().SetXYZ(x*unit(), y*unit(), z*unit()); }
   using VModuleParameter::set_value;
   
   std::vector<double> get_value(double, double, double) const override
   {
-    return std::vector<double>{ptr_->X()/unit(), ptr_->Y()/unit(), ptr_->Z()/unit()};
+    return std::vector<double>{__ref__().X()/unit(), __ref__().Y()/unit(), __ref__().Z()/unit()};
   }
   using VModuleParameter::get_value;
   
   void output(std::ostream& os) const override
   {
-    os << ptr_->X()/unit() << " "
-       << ptr_->Y()/unit() << " "
-       << ptr_->Z()/unit();
+    os << __ref__().X()/unit() << " "
+       << __ref__().Y()/unit() << " "
+       << __ref__().Z()/unit();
   }
 
   void input(std::istream& is) override
@@ -255,7 +267,7 @@ public:
     double x(0.0), y(0.0), z(0.0);
     is >> x >> y >> z;
     if (is) {
-      ptr_->SetXYZ(x*unit(), y*unit(), z*unit());
+      __ref__().SetXYZ(x*unit(), y*unit(), z*unit());
     }
   }
 
@@ -277,6 +289,10 @@ public:
     return pt;
   }
 
+protected:
+  virtual T& __ref__() { return *ptr_; }
+  virtual const T& __ref__() const { return *ptr_; }
+
 private:
   TVector3* ptr_;
 };
@@ -285,6 +301,8 @@ private:
 #ifdef ANL_USE_HEPVECTOR
 template <> class ModuleParameter<CLHEP::Hep2Vector> : public VModuleParameter
 {
+  typedef CLHEP::Hep2Vector T;
+
 public:
   ModuleParameter(CLHEP::Hep2Vector* ptr, const std::string& name)
     : VModuleParameter(name), ptr_(ptr)
@@ -299,18 +317,18 @@ public:
   { return "2-vector"; }
 
   void set_value(double x, double y) override
-  { ptr_->set(x*unit(), y*unit()); }
+  { __ref__().set(x*unit(), y*unit()); }
   using VModuleParameter::set_value;
 
   std::vector<double> get_value(double, double) const override
   {
-    return std::vector<double>{ptr_->x()/unit(), ptr_->y()/unit()};
+    return std::vector<double>{__ref__().x()/unit(), __ref__().y()/unit()};
   }
   using VModuleParameter::get_value;
 
   void output(std::ostream& os) const override
   {
-    os << ptr_->x()/unit() << " " << ptr_->y()/unit();
+    os << __ref__().x()/unit() << " " << __ref__().y()/unit();
   }
 
   void input(std::istream& is) override
@@ -318,7 +336,7 @@ public:
     double x(0.0), y(0.0);
     is >> x >> y;
     if (is) {
-      ptr_->set(x*unit(), y*unit());
+      __ref__().set(x*unit(), y*unit());
     }
   }
  
@@ -340,12 +358,18 @@ public:
     return pt;
   }
 
+protected:
+  virtual T& __ref__() { return *ptr_; }
+  virtual const T& __ref__() const { return *ptr_; }
+
 private:
   CLHEP::Hep2Vector* ptr_;
 };
 
 template <> class ModuleParameter<CLHEP::Hep3Vector> : public VModuleParameter
 {
+  typedef CLHEP::Hep3Vector T;
+
 public:
   ModuleParameter(CLHEP::Hep3Vector* ptr, const std::string& name)
     : VModuleParameter(name), ptr_(ptr)
@@ -360,20 +384,20 @@ public:
   { return "3-vector"; }
 
   void set_value(double x, double y, double z) override
-  { ptr_->set(x*unit(), y*unit(), z*unit()); }
+  { __ref__().set(x*unit(), y*unit(), z*unit()); }
   using VModuleParameter::set_value;
 
   std::vector<double> get_value(double, double, double) const override
   {
-    return std::vector<double>{ptr_->x()/unit(), ptr_->y()/unit(), ptr_->z()/unit()};
+    return std::vector<double>{__ref__().x()/unit(), __ref__().y()/unit(), __ref__().z()/unit()};
   }
   using VModuleParameter::get_value;
 
   void output(std::ostream& os) const override
   {
-    os << ptr_->x()/unit() << " "
-       << ptr_->y()/unit() << " "
-       << ptr_->z()/unit();
+    os << __ref__().x()/unit() << " "
+       << __ref__().y()/unit() << " "
+       << __ref__().z()/unit();
   }
 
   void input(std::istream& is) override
@@ -381,7 +405,7 @@ public:
     double x(0.0), y(0.0), z(0.0);
     is >> x >> y >> z;
     if (is) {
-      ptr_->set(x*unit(), y*unit(), z*unit());
+      __ref__().set(x*unit(), y*unit(), z*unit());
     }
   }
 
@@ -402,6 +426,10 @@ public:
     pt.add_child("value", pt_values);
     return pt;
   }
+
+protected:
+  virtual T& __ref__() { return *ptr_; }
+  virtual const T& __ref__() const { return *ptr_; }
 
 private:
   CLHEP::Hep3Vector* ptr_;

@@ -140,12 +140,12 @@ public:
 
   void __get__(void* value_ptr) const override
   {
-    *static_cast<T*>(value_ptr) = *ptr_;
+    *static_cast<T*>(value_ptr) = __ref__();
   }
   
   void __set__(const void* value_ptr) override
   {
-    *ptr_ = *static_cast<const T*>(value_ptr);
+    __ref__() = *static_cast<const T*>(value_ptr);
   }
 
   boost::property_tree::ptree to_property_tree() const override
@@ -159,6 +159,9 @@ public:
   }
   
 protected:
+  virtual T& __ref__() { return *ptr_; }
+  virtual const T& __ref__() const { return *ptr_; }
+  
   template <bool b0>
   bool ask_sequential(const std::integral_constant<bool, b0>&)
   { return ask_base(); }
@@ -183,7 +186,7 @@ private:
                       const std::integral_constant<bool, b2>&)
   {
     // non-container, non-number
-    *ptr_ = val;
+    __ref__() = val;
   }
   
   template <bool b0, bool b2>
@@ -193,7 +196,7 @@ private:
                       const std::integral_constant<bool, b2>&)
   {
     // non-container, number, int
-    *ptr_ = val;
+    __ref__() = val;
   }
   
   template <bool b0>
@@ -203,7 +206,7 @@ private:
                       const std::true_type&)
   {
     // non-container, number, floating-point
-    *ptr_ = val * unit();
+    __ref__() = val * unit();
   }
   
   template <bool b1, bool b2>
@@ -230,7 +233,7 @@ private:
   void clear_array_impl(const std::true_type&)
   {
     // container
-    ptr_->clear();
+    __ref__().clear();
   }
   
   template <bool b0, bool b1, bool b2>
@@ -240,7 +243,7 @@ private:
                    const std::integral_constant<bool, b2>&) const
   {
     // non-container, non-number
-    return *ptr_;
+    return __ref__();
   }
   
   template <bool b0, bool b2>
@@ -250,7 +253,7 @@ private:
                    const std::integral_constant<bool, b2>&) const
   {
     // non-container, number, int
-    return *ptr_;
+    return __ref__();
   }
   
   template <bool b0>
@@ -260,7 +263,7 @@ private:
                    const std::true_type&) const
   {
     // non-container, number, floating-point
-    return (*ptr_)/unit();
+    return __ref__()/unit();
   }
   
   template <bool b1, bool b2>
@@ -285,7 +288,7 @@ private:
                    const std::integral_constant<bool, b2>&) const
   {
     // non-container, non-number
-    os << *ptr_;
+    os << __ref__();
   }
   
   template <bool b0, bool b2>
@@ -298,7 +301,7 @@ private:
     using std::string;
     if (expression().find("hex")!=string::npos) os << std::hex;
     else if (expression().find("dec")!=string::npos) os << std::dec;
-    os << *ptr_;
+    os << __ref__();
     os << std::dec;
   }
 
@@ -309,7 +312,7 @@ private:
                    const std::true_type&) const
   {
     // non-container, number, floating-point
-    os << *ptr_/unit();
+    os << __ref__()/unit();
   }
   
   template <bool b1, bool b2>
@@ -333,7 +336,7 @@ private:
                    const std::integral_constant<bool, b2>&)
   {
     // non-container, non-number
-    is >> *ptr_;
+    is >> __ref__();
   }
   
   template <bool b0, bool b2>
@@ -347,7 +350,7 @@ private:
     using std::string;
     if (expression().find("hex")!=string::npos) is >> std::hex;
     else if (expression().find("dec")!=string::npos) is >> std::dec;
-    is >> *ptr_;
+    is >> __ref__();
     is >> std::dec;
   }
 
@@ -360,7 +363,7 @@ private:
     // non-container, number, floating-point
     T val(0.0);
     is >> val;
-    if (is) { *ptr_ = val * unit(); }
+    if (is) { __ref__() = val * unit(); }
   }
   
   template <bool b1, bool b2>

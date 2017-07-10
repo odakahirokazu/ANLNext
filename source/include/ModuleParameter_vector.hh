@@ -39,6 +39,7 @@ class ModuleParameter<std::vector<std::tuple<Ts...>>> : public VModuleParameter
   typedef std::vector<std::tuple<Ts...>> container_type;
   typedef std::tuple<Ts...> value_type;
   typedef typename container_type::iterator iter_type;
+  typedef typename container_type::const_iterator const_iter_type;
   typedef typename size_of_value<value_type>::type value_category;
  
   constexpr static std::size_t ValueSize = size_of_value<value_type>::value;
@@ -65,10 +66,10 @@ public:
   {
     os << '\n';
     std::size_t index = 0;
-    for (iter_type it=ptr_->begin(); it!=ptr_->end(); ++it) {
+    for (const_iter_type it=__ref__().begin(); it!=__ref__().end(); ++it) {
       os << "  index: " << index++ << '\n';
-      value_type tmpValue = *it;
-      value_info_set<0>(&tmpValue, value_category());
+      value_type t = *it;
+      value_info_set<0>(&t, value_category());
       value_info_output<0>(os, value_category());
     }
     os.flush();
@@ -85,22 +86,22 @@ public:
   { value_info_.push_back(param); }
 
   std::size_t size_of_container() const override
-  { return ptr_->size(); }
+  { return __ref__().size(); }
   void clear_container() override
-  { ptr_->clear(); }
+  { __ref__().clear(); }
 
   void insert_to_container() override
   {
-    value_type tmpValue;
-    value_info_get<0>(&tmpValue, value_category());
-    ptr_->push_back(tmpValue);
+    value_type t;
+    value_info_get<0>(&t, value_category());
+    __ref__().push_back(t);
     
     value_info_set<0>(&default_value_, value_category());
   }
 
   void retrieve_from_container(std::size_t index) const override
   {
-    value_type value = ptr_->at(index);
+    value_type value = __ref__().at(index);
     value_info_set<0>(&value, value_category());
   }
   using VModuleParameter::retrieve_from_container;
@@ -136,7 +137,7 @@ public:
     ModuleParameter<std::string> tmpKeyParam(&buffer, "continue");
     tmpKeyParam.set_question(name()+" (OK for exit)");
     
-    ptr_->clear();
+    __ref__().clear();
     if (first_input()) { initialize_default_value_elements(); }
 
     while (1) {
@@ -150,9 +151,9 @@ public:
         value_info_[i]->ask();
       }
       
-      value_type tmpValue;
-      value_info_get<0>(&tmpValue, value_category());
-      ptr_->push_back(tmpValue);
+      value_type t;
+      value_info_get<0>(&t, value_category());
+      __ref__().push_back(t);
       buffer = "OK";
     }
     return true;
@@ -181,6 +182,10 @@ public:
     pt.add_child("value", std::move(pt_values));
     return pt;
   }
+
+protected:
+  virtual container_type& __ref__() { return *ptr_; }
+  virtual const container_type& __ref__() const { return *ptr_; }
   
 private:
   bool first_input()
