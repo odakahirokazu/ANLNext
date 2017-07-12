@@ -1271,6 +1271,15 @@ module ANL
       @classList.each{|s| puts 'class '+s.name+';' }
       puts '}' if @namespace
     end
+
+    def print_make_doc()
+      @classList.each do |s|
+        module_name = @name[0].upcase+@name[1..-1]
+        puts "a.push #{module_name}::#{s.name}.new"
+        puts "# a.text \"\""
+        puts ""
+      end
+    end
   end
 
 
