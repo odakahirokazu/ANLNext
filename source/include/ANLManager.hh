@@ -79,7 +79,7 @@ public:
   virtual ANLStatus Define();
   virtual ANLStatus PreInitialize();
   virtual ANLStatus Initialize();
-  virtual ANLStatus Analyze(long int num_events, bool thread_mode=false);
+  virtual ANLStatus Analyze(long int num_events, bool enable_console=false);
   virtual ANLStatus Finalize();
 
   virtual int number_of_parallels() const { return 1; }

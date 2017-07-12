@@ -244,7 +244,7 @@ class ANLManager
   virtual ANLStatus Define();
   virtual ANLStatus PreInitialize();
   virtual ANLStatus Initialize();
-  virtual ANLStatus Analyze(long int num_events, bool thread_mode=true);
+  virtual ANLStatus Analyze(long int num_events, bool enable_console=true);
   virtual ANLStatus Finalize();
 
   virtual int number_of_parallels() const;

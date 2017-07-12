@@ -179,7 +179,7 @@ final:
   return status;
 }
 
-ANLStatus ANLManager::Analyze(long int num_events, bool thread_mode)
+ANLStatus ANLManager::Analyze(long int num_events, bool enable_console)
 {
   std::cout << '\n'
             << "      ***********************************\n"
@@ -209,7 +209,7 @@ ANLStatus ANLManager::Analyze(long int num_events, bool thread_mode)
     goto final;
   }
 
-  if (thread_mode) {
+  if (enable_console) {
     std::cout << "\n"
               << "ANLManager: starting analysis loop (with thread mode on).\n"
               << "You can quit the analysis routine by input '.q'.\n"

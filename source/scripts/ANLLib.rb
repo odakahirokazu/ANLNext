@@ -227,7 +227,7 @@ module ANL
 
     ### method delegation to the AnalysisChain object.
     anlapp_methods = [
-      :thread_mode, :thread_mode=, :add_namespace,
+      :console, :console=, :add_namespace,
       :push, :insert, :insert_before, :insert_after, :chain,
       :expose_module, :get_module, :index, :rindex,
       :insert_to_map, :push_to_vector,
@@ -320,7 +320,7 @@ module ANL
     # Initialization method.
     #
     def initialize()
-      @thread_mode = true
+      @console = true
       @num_parallels = 1
       @display_frequency = nil
       @parameters_json_filename = nil
@@ -336,12 +336,27 @@ module ANL
     end
 
     # Accessors to internal information (instance variables).
-    attr_accessor :thread_mode
+    attr_accessor :console
     attr_accessor :num_parallels
     attr_accessor :current_module
     attr_accessor :display_frequency
     attr_accessor :parameters_json_filename
     attr_accessor :parameters_json_master
+
+    # Clear all internal information on the analysis chain.
+    # But it keeps setting not strongly related to the chain.
+    # (e.g., console, parallel number, display frequency)
+    #
+    def clear()
+      @module_list.clear
+      @module_hash = {}
+      @current_module = nil
+      @set_param_list.clear
+      @set_module_list.clear
+      @namespace_list.clear; @namespace_list << Object
+      @modification_block = nil
+      @stage = nil
+    end
 
     def definition_already_done?()
       @stage != nil
@@ -353,20 +368,6 @@ module ANL
 
     def chain_empty?()
       @module_list.empty?
-    end
-
-    # Clear all internal information including the analysis chain.
-    # But it keeps thread_mode setting.
-    #
-    def clear()
-      @module_list.clear
-      @module_hash = {}
-      @current_module = nil
-      @set_param_list.clear
-      @set_module_list.clear
-      @namespace_list.clear; @namespace_list << Object
-      @modification_block = nil
-      @stage = nil
     end
 
     # Add namespace (module) into search list of ANL modules.
@@ -862,7 +863,7 @@ module ANL
       puts "<Begin Analysis> | Time: " + Time.now.to_s
       $stdout.flush
       anl.set_display_frequency(@display_frequency)
-      status = anl.Analyze(num_loop, @thread_mode)
+      status = anl.Analyze(num_loop, @console)
       puts ""
       puts "<End Analysis>   | Time: " + Time.now.to_s
       $stdout.flush

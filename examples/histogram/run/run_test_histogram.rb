@@ -21,5 +21,4 @@ class MyApp < ANL::ANLApp
 end
 
 a = MyApp.new
-a.thread_mode = false
 a.run(1000000)
