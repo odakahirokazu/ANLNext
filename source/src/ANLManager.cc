@@ -42,6 +42,7 @@
 #include "ModuleAccess.hh"
 #include "ANLException.hh"
 #include "ANLManager_impl.hh"
+#include "OrderKeeper.hh"
 
 #if ANL_USE_READLINE
 #include <readline/readline.h>
@@ -567,9 +568,10 @@ ANLStatus process_one_event(long int iEvent,
   const std::size_t NumberOfModules = modules.size();
   for (std::size_t iModule=0; iModule<NumberOfModules; iModule++) {
     BasicModule* mod = modules[iModule];
+    mod->set_loop_index(iEvent);
+
     if (mod->is_on()) {
       counters[iModule].count_up_by_entry();
-      mod->set_loop_index(iEvent);
 
       try {
         status = mod->mod_analyze();
@@ -589,6 +591,52 @@ ANLStatus process_one_event(long int iEvent,
     }
   }
 
+  count_evs(status, evsManager);
+
+  return status;
+}
+
+ANLStatus process_one_event(long int iEvent,
+                            const std::vector<BasicModule*>& modules,
+                            std::vector<LoopCounter>& counters,
+                            EvsManager& evsManager,
+                            std::vector<std::unique_ptr<OrderKeeper>>& order_keepers)
+{
+  evsManager.reset_all_flags();
+
+  ANLStatus status = AS_OK;
+
+  const std::size_t NumberOfModules = modules.size();
+  for (std::size_t iModule=0; iModule<NumberOfModules; iModule++) {
+    BasicModule* mod = modules[iModule];
+    mod->set_loop_index(iEvent);
+
+    const KeeperBlock<OrderKeeper, long int> block(order_keepers[iModule].get(), iEvent);
+
+    if (status == AS_OK && mod->is_on()) {
+      counters[iModule].count_up_by_entry();
+
+      try {
+        status = mod->mod_analyze();
+      }
+      catch (ANLException& ex) {
+        ex << ANLErrorInfoOnLoopIndex(iEvent);
+        ex << ANLErrorInfoOnMethod( mod->module_name() + "::mod_analyze" );
+        ex << ANLErrorInfoOnModule( mod->module_id() );
+        throw;
+      }
+
+      counters[iModule].count_up_by_result(status);
+    }
+  }
+
+  count_evs(status, evsManager);
+
+  return status;
+}
+
+void count_evs(ANLStatus status, EvsManager& evsManager)
+{
   if (status == AS_OK) {
     evsManager.count();
     evsManager.count_completed();
@@ -602,8 +650,6 @@ ANLStatus process_one_event(long int iEvent,
   else if (status == AS_QUIT_ALL) {
     evsManager.count();
   }
-
-  return status;
 }
 
 } /* namespace anl */

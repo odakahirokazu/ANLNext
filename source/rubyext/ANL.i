@@ -132,6 +132,12 @@ class BasicModule
   
   void set_module_id(const std::string& v);
   std::string module_id() const;
+
+  int copy_id() const;
+  bool is_master() const;
+
+  void set_order_sensitive(bool v);
+  bool is_order_sensitive() const;
   
   std::vector<std::string> get_aliases_string() const;
   void add_alias(const std::string& name);

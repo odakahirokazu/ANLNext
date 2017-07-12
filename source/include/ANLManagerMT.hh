@@ -76,6 +76,7 @@ private:
   const int NumParallels_ = 1;
   std::vector<ClonedChainSet> clonedChains_;
   long int loopIndex_ = -1;
+  std::vector<std::unique_ptr<OrderKeeper>> orderKeepers_;
 };
 
 } /* namespace anl */

@@ -43,6 +43,7 @@ namespace anl
 class EvsManager;
 class ModuleAccess;
 class BasicModule;
+class OrderKeeper;
 
 /**
  * The ANL Next manager class.
@@ -154,6 +155,14 @@ ANLStatus process_one_event(long int iEvent,
                             const std::vector<BasicModule*>& modules,
                             std::vector<LoopCounter>& counters,
                             EvsManager& evsManager);
+
+ANLStatus process_one_event(long int iEvent,
+                            const std::vector<BasicModule*>& modules,
+                            std::vector<LoopCounter>& counters,
+                            EvsManager& evsManager,
+                            std::vector<std::unique_ptr<OrderKeeper>>& order_keepers);
+
+void count_evs(ANLStatus status, EvsManager& evsManager);
 
 } /* namespace anl */
 

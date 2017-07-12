@@ -29,6 +29,7 @@
 #include "ANLException.hh"
 #include "ANLManager_impl.hh"
 #include "ClonedChainSet_impl.hh"
+#include "OrderKeeper.hh"
 
 namespace anl
 {
@@ -80,6 +81,16 @@ void ANLManagerMT::clone_modules(int chainID)
 
 void ANLManagerMT::duplicate_chains()
 {
+  orderKeepers_.clear();
+  for (BasicModule* mod: modules_) {
+    if (mod->is_order_sensitive()) {
+      orderKeepers_.emplace_back(new OrderKeeper);
+    }
+    else {
+      orderKeepers_.emplace_back(nullptr);
+    }
+  }
+
   for (int i=1; i<NumParallels_; i++) {
     clone_modules(i);
   }
@@ -242,7 +253,7 @@ ANLStatus ANLManagerMT::process_analysis_impl(const std::vector<BasicModule*>& m
       std::cout.width(0);
     }
 
-    status = process_one_event(iEvent, modules, counters, evsManager);
+    status = process_one_event(iEvent, modules, counters, evsManager, orderKeepers_);
 
     if (status == AS_QUIT || status == AS_QUIT_ERROR) {
       break;

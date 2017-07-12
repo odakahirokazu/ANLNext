@@ -101,6 +101,9 @@ public:
 
   int copy_id() const { return copyID_; }
   bool is_master() const { return (copyID_ == 0); }
+
+  void set_order_sensitive(bool v) { orderSensitive_ = v; }
+  bool is_order_sensitive() const { return orderSensitive_; }
   
   virtual ANLStatus mod_define()         { return AS_OK; }
   virtual ANLStatus mod_pre_initialize() { return AS_OK; }
@@ -333,6 +336,7 @@ private:
   void copy_parameters(const BasicModule& r);
 
 private:
+  bool orderSensitive_ = false;
   std::string moduleID_;
   std::vector<std::pair<std::string, ModuleAccess::ConflictOption>> aliases_;
   std::string moduleDescription_;
@@ -343,7 +347,7 @@ private:
   ModuleParam_sptr currentParameter_;
   ModuleParam_sptr currentValueElement_;
   long int loopIndex_ = -1;
-    
+
   const int copyID_ = 0;
   int lastCopy_ = 0;
 

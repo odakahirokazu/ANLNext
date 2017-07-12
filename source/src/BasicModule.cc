@@ -29,7 +29,8 @@ namespace anl
 {
 
 BasicModule::BasicModule()
-  : moduleID_(""),
+  : orderSensitive_(false),
+    moduleID_(""),
     moduleDescription_(""),
     moduleOn_(true),
     evsManager_(nullptr),
@@ -46,7 +47,8 @@ BasicModule::BasicModule()
 BasicModule::~BasicModule() = default;
 
 BasicModule::BasicModule(const BasicModule& r)
-  : moduleID_(r.moduleID_),
+  : orderSensitive_(r.orderSensitive_),
+    moduleID_(r.moduleID_),
     aliases_(r.aliases_),
     moduleDescription_(r.moduleDescription_),
     moduleOn_(r.moduleOn_),
