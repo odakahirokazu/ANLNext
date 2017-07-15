@@ -1,6 +1,6 @@
 %module testHistogram
 %{
-#include "BasicModule.hh"
+#include <anl/BasicModule.hh>
 
 // include headers of my modules
 #include "SaveData.hh"
@@ -9,7 +9,7 @@
 
 %}
 
-%import "ANL.i"
+%import "anl/ruby/ANL.i"
 
 
 // interface to my modules

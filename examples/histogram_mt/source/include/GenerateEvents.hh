@@ -10,7 +10,7 @@
 #ifndef GenerateEvents_H
 #define GenerateEvents_H 1
 
-#include "BasicModule.hh"
+#include <anl/BasicModule.hh>
 #include <memory>
 #include "TRandom.h"
 

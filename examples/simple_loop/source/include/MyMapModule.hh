@@ -9,7 +9,7 @@
 #ifndef MyMapModule_H
 #define MyMapModule_H 1
 
-#include "BasicModule.hh"
+#include <anl/BasicModule.hh>
 #include <map>
 #include <tuple>
 

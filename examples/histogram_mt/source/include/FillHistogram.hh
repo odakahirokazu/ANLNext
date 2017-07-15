@@ -9,7 +9,7 @@
 #ifndef FillHistogram_H
 #define FillHistogram_H 1
 
-#include "BasicModule.hh"
+#include <anl/BasicModule.hh>
 
 class TH1;
 class GenerateEvents;

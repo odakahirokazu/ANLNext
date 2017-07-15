@@ -9,7 +9,7 @@
 #ifndef MyModule_H
 #define MyModule_H 1
 
-#include "BasicModule.hh"
+#include <anl/BasicModule.hh>
 
 class MyModule : public anl::BasicModule
 {

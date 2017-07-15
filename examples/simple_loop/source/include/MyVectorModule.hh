@@ -9,7 +9,7 @@
 #ifndef MyVectorModule_H
 #define MyVectorModule_H 1
 
-#include "BasicModule.hh"
+#include <anl/BasicModule.hh>
 #include <vector>
 #include <tuple>
 
