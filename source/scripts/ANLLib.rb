@@ -1202,7 +1202,7 @@ module ANL
                 next
               end
 
-              if l.include?(className+'(')
+              if l.include?(className+'(') && !l.include?('&')
                 puts l
                 constructor = true
               elsif constructor
