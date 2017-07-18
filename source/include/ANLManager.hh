@@ -134,7 +134,7 @@ protected:
   std::vector<LoopCounter> counters_;
   std::unique_ptr<EvsManager> evsManager_;
   std::mutex mutex_;
-  std::atomic<bool> interrupted_{false};
+  std::atomic<ANLRequest> requested_{ANLRequest::NONE};
   bool printCloneParameters_ = false;
 
 private:
@@ -163,6 +163,12 @@ ANLStatus process_one_event(long int iEvent,
                             std::vector<std::unique_ptr<OrderKeeper>>& order_keepers);
 
 void count_evs(ANLStatus status, EvsManager& evsManager);
+
+inline void print_event_index(long int index)
+{
+  std::cout << "Event : " << std::dec << std::setw(10) << index << std::endl;
+  std::cout.width(0);
+}
 
 } /* namespace anl */
 

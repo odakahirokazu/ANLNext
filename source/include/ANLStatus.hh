@@ -51,6 +51,13 @@ constexpr ANLStatus AS_QUIT_ERROR     = ANLStatus::AS_QUIT_ERROR;
 constexpr ANLStatus AS_QUIT_ALL       = ANLStatus::AS_QUIT_ALL;
 constexpr ANLStatus AS_QUIT_ALL_ERROR = ANLStatus::AS_QUIT_ALL_ERROR;
 
+enum class ANLRequest {
+  NONE,
+  QUIT,
+  SHOW_EVENT_INDEX,
+  SHOW_EVS_SUMMARY
+};
+
 } /* namespace anl */
 
 std::ostream& operator<< (std::ostream& os, anl::ANLStatus status);

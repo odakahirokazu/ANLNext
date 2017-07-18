@@ -55,7 +55,7 @@ namespace anl
 
 ANLManager::ANLManager()
   : evsManager_(new EvsManager),
-    interrupted_(false),
+    requested_(ANLRequest::NONE),
     moduleAccess_(new ModuleAccess),
     displayFrequency_(-1)
 {
@@ -161,6 +161,7 @@ ANLStatus ANLManager::Initialize()
   show_analysis();
   print_parameters();
   reset_counters();
+  requested_ = ANLRequest::NONE;
 
   ANLStatus status = routine_initialize();
   if (status != AS_OK) {
@@ -175,7 +176,7 @@ final:
     return AS_QUIT_ERROR;
   }
 #endif
-  
+
   return status;
 }
 
@@ -188,6 +189,10 @@ ANLStatus ANLManager::Analyze(long int num_events, bool enable_console)
             << std::endl;
 
   numEvents_ = num_events;
+  requested_ = ANLRequest::NONE;
+
+  std::cout << "Number of events: " << num_events << '\n'
+            << std::endl;
 
 #if ANL_ANALYZE_INTERRUPT
   struct sigaction sa;
@@ -252,6 +257,7 @@ final:
   reduce_statistics();
   print_summary();
   evsManager_->print_summary();
+  requested_ = ANLRequest::NONE;
 
 #if ANL_ANALYZE_INTERRUPT
   if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
@@ -259,7 +265,7 @@ final:
     return AS_QUIT_ERROR;
   }
 #endif
-  
+
   return status;
 }
 
@@ -298,7 +304,7 @@ final:
     return AS_QUIT_ERROR;
   }
 #endif
-  
+
   return status;
 }
 
@@ -411,8 +417,7 @@ ANLStatus ANLManager::process_analysis()
 
   for (long int iEvent=0; iEvent!=numEvents; iEvent++) {
     if (displayFrequency != 0 && iEvent%displayFrequency == 0) {
-      std::cout << "Event : " << std::dec << std::setw(10) << iEvent << std::endl;
-      std::cout.width(0);
+      print_event_index(iEvent);
     }
 
     status = process_one_event(iEvent, modules, counters_, *evsManager_);
@@ -424,8 +429,19 @@ ANLStatus ANLManager::process_analysis()
       break;
     }
 
-    if (interrupted_) {
-      break;
+    if (requested_ != ANLRequest::NONE) {
+      std::lock_guard<std::mutex> lock(mutex_);
+      if (requested_ == ANLRequest::QUIT) {
+        break;
+      }
+      else if (requested_ == ANLRequest::SHOW_EVENT_INDEX) {
+        print_event_index(iEvent);
+      }
+      else if (requested_ == ANLRequest::SHOW_EVS_SUMMARY) {
+        print_event_index(iEvent);
+        evsManager_->print_summary();
+      }
+      requested_ = ANLRequest::NONE;
     }
   }
 
@@ -528,8 +544,18 @@ void ANLManager::interactive_session()
       if (std::strcmp(line.get(), ".q") == 0) {
         std::lock_guard<std::mutex> lock(mutex_);
         std::cout << "ANL> " << line.get() << " ---> QUIT\n" << std::endl;
-        interrupted_ = true;
+        requested_ = ANLRequest::QUIT;
         return;
+      }
+      else if (std::strcmp(line.get(), ".i") == 0) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        std::cout << "ANL> " << line.get() << " ---> SHOW_EVENT_INDEX \n" << std::endl;
+        requested_ = ANLRequest::SHOW_EVENT_INDEX;
+      }
+      else if (std::strcmp(line.get(), ".s") == 0) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        std::cout << "ANL> " << line.get() << " ---> SHOW_EVS_SUMMARY \n" << std::endl;
+        requested_ = ANLRequest::SHOW_EVS_SUMMARY;
       }
       else {
         std::cout << "ANL> " << line.get() << "\n" << std::endl;
@@ -546,8 +572,18 @@ void ANLManager::interactive_session()
     if (buf==".q") {
       std::lock_guard<std::mutex> lock(mutex_);
       std::cout << "ANL>> " << line.get() << " ---> QUIT\n" << std::endl;
-      interrupted_ = true;
+      requested_ = ANLRequest::QUIT;
       return;
+    }
+    else if (buf==".i") {
+      std::lock_guard<std::mutex> lock(mutex_);
+      std::cout << "ANL>> " << line.get() << " ---> SHOW_EVENT_INDEX \n" << std::endl;
+      requested_ = ANLRequest::SHOW_EVENT_INDEX;
+    }
+    else if (buf==".s") {
+      std::lock_guard<std::mutex> lock(mutex_);
+      std::cout << "ANL>> " << line.get() << " ---> SHOW_EVS_SUMMARY \n" << std::endl;
+      requested_ = ANLRequest::SHOW_EVS_SUMMARY;
     }
     else {
       std::cout << "ANL>> " << line.get() << "\n" << std::endl;
