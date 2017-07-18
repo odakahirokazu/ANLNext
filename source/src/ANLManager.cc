@@ -570,12 +570,11 @@ void ANLManager::__void_process_analysis(ANLStatus* status)
 void ANLManager::interactive_session()
 {
 #if ANL_USE_READLINE
-  fd_set readFDSet;
-  FD_ZERO(&readFDSet);
-  FD_SET(0, &readFDSet); // check STDIN (= 0)
-  struct timeval timeout{1, 0}; // 1 s, 0 us
-
   while (1) {
+    fd_set readFDSet;
+    FD_ZERO(&readFDSet);
+    FD_SET(0, &readFDSet); // check STDIN (= 0)
+    struct timeval timeout{1, 0}; // 1 s, 0 us
     const int retval = select(1, &readFDSet, nullptr, nullptr, &timeout);
     if (retval == -1) {
       std::cout << "Error by select() in ANLManager::interactive_sesson()" << std::endl;
