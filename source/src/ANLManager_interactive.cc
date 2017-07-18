@@ -28,22 +28,12 @@
 #include <boost/lexical_cast.hpp>
 
 #if ANL_USE_READLINE
+#include <memory>
+#include <cstring>
 #include <readline/readline.h>
 #include <readline/history.h>
-#else /* ANL_USE_READLINE */
-#include <histedit.h>
 #endif /* ANL_USE_READLINE */
 
-
-namespace
-{
-#if !ANL_USE_READLINE
-const char* prompt(EditLine*)
-{
-  return "ANL> ";
-}
-#endif /* !ANL_USE_READLINE */
-}
 
 namespace anl
 {
@@ -52,170 +42,141 @@ ANLStatus ANLManager::do_interactive_comunication()
 {
   ANLStatus status = AS_OK;
   
-#if ANL_USE_READLINE
-  char *line;
-  int count = 0;
-#else /* ANL_USE_READLINE */
-  const char *line;
-  int count = 0;
-  EditLine *el;
-  History *anlHistory;
-  HistEvent event;
-  el = el_init("ANL_Com", stdin, stdout, stderr);
-  el_set(el, EL_PROMPT, &prompt);
-  el_set(el, EL_EDITOR, "emacs");
-
-  anlHistory = history_init();
-  if (anlHistory == 0) {
-    std::cerr << "history initialization falied" << std::endl;
-    return AS_QUIT;
-  }
-  
-  history(anlHistory, &event, H_SETSIZE, 1000);
-  el_set(el, EL_HIST, history, anlHistory);
-#endif /* ANL_USE_READLINE */
-  
-  std::string cmd;
-  std::istringstream iss;
-
   std::cout << "\n ** type \"help\" if you need. ** \n" << std::endl;
 
-  while (iss.str()=="") {
+  while (true) {
 #if ANL_USE_READLINE
-    line = readline("ANL> ");
-    if (line) count = strlen(line)+1;
-    else {
-      exit(1);
+    std::unique_ptr<char> line( readline("iANL> ") );
+    if (line == nullptr) {
+      return AS_QUIT_ERROR;
     }
-#else /* ANL_USE_READLINE */
-    line = el_gets(el, &count);
-#endif /* ANL_USE_READLINE */
-    
-    if (count > 1) {
-#if ANL_USE_READLINE
-      add_history(line);
-#else /* ANL_USE_READLINE */
-      history(anlHistory, &event, H_ENTER, line);
+
+    const int count = std::strlen(line.get());
+    if (count == 0) { continue; }
+
+    add_history(line.get());
+
+    std::istringstream iss;
+    iss.str(line.get());
+    std::istream& is = iss;
+#else
+    std::istream& is = std::cin;
 #endif /* ANL_USE_READLINE */
 
-      iss.str(line);
-      
-#if ANL_USE_READLINE
-      free(line);
-      line = 0;
-#endif /* ANL_USE_READLINE */
-
-      iss >> cmd;
+    std::string cmd;
+    iss >> cmd;
  
-      if (cmd == "quit") {
-        std::cout << "ANL quitting..." << std::endl;
-        status = AS_QUIT;
-        break;
+    if (cmd == "") {
+      continue;
+    }
+    else if (cmd == "quit") {
+      std::cout << "ANL quitting..." << std::endl;
+      status = AS_QUIT;
+      break;
+    }
+    else if (cmd == "help") {
+      interactive_comunication_help();
+    }
+    else if (cmd == "chain") {
+      show_analysis();
+    }
+    else if (cmd == "show") {
+      show_analysis();
+      interactive_print_param(-1);
+    }
+    else if (cmd == "rev") {
+      try {
+        status = interactive_modify_param(-1);
       }
-      else if (cmd == "help") {
-        interactive_comunication_help();
+      catch (const ANLException& ex) {
+        std::cout << "Exception!\n"
+                  << *boost::get_error_info<ANLErrorInfo>(ex) << std::endl;
       }
-      else if (cmd == "mod") {
-        std::string moduleName;
-        int n;
-        iss >> moduleName;
-        if (iss) {
-          try {
-            if (std::isdigit(moduleName[0])) {
-              n = boost::lexical_cast<int>(moduleName);
-            }
-            else {
-              n = module_index(moduleName, false);
-            }
-            status = interactive_modify_param(n);
-          }
-          catch (const ANLException& ex) {
-            std::cout << "Exception!\n"
-                      << *boost::get_error_info<ANLErrorInfo>(ex) << std::endl;
-          }
-        }
-        else {
-          std::cout << "usage: mod MODULE_ID" << std::endl;
-        }
-      }
-      else if (cmd == "show") {
-        show_analysis();
-      }
-      else if (cmd == "print") {
-        std::string moduleName;
-        int n;
-        iss >> moduleName;
-        if (iss) {
+    }
+    else if (cmd == "mod") {
+      std::string moduleName;
+      int n;
+      is >> moduleName;
+      if (is) {
+        try {
           if (std::isdigit(moduleName[0])) {
             n = boost::lexical_cast<int>(moduleName);
           }
           else {
             n = module_index(moduleName, false);
           }
-          interactive_print_param(n);
+          status = interactive_modify_param(n);
         }
-        else {
-          std::cout << "usage: print MODULE_ID" << std::endl;
+        catch (const ANLException& ex) {
+          std::cout << "Exception!\n"
+                    << *boost::get_error_info<ANLErrorInfo>(ex) << std::endl;
         }
-      }
-      else if (cmd == "on") {
-        std::string moduleName;
-        int n;
-        iss >> moduleName;
-        if (iss) {
-          if (std::isdigit(moduleName[0])) {
-            n = boost::lexical_cast<int>(moduleName);
-          }
-          else {
-            n = module_index(moduleName, false);
-          }
-          interactive_module_switch(n, true);
-        }
-        else {
-          std::cout << "usage: on MODULE_ID" << std::endl;
-        }
-      }
-      else if (cmd == "off") {
-        std::string moduleName;
-        int n;
-        iss >> moduleName;
-        if (iss) {
-          if (std::isdigit(moduleName[0])) {
-            n = boost::lexical_cast<int>(moduleName);
-          }
-          else {
-            n = module_index(moduleName, false);
-          }
-          interactive_module_switch(n, false);
-        }
-        else {
-          std::cout << "usage: off MODULE_ID" << std::endl;
-        }
-      }
-      else if (cmd == "init") {
-        status = Initialize();
-        break;
       }
       else {
-        std::cout << "command not found." << std::endl;
+        std::cout << "usage: mod <module_id>" << std::endl;
       }
     }
+    else if (cmd == "print") {
+      std::string moduleName;
+      int n;
+      is >> moduleName;
+      if (is) {
+        if (std::isdigit(moduleName[0])) {
+          n = boost::lexical_cast<int>(moduleName);
+        }
+        else {
+          n = module_index(moduleName, false);
+        }
+        interactive_print_param(n);
+      }
+      else {
+        std::cout << "usage: print <module_id>" << std::endl;
+      }
+    }
+    else if (cmd == "on") {
+      std::string moduleName;
+      int n;
+      is >> moduleName;
+      if (is) {
+        if (std::isdigit(moduleName[0])) {
+          n = boost::lexical_cast<int>(moduleName);
+        }
+        else {
+          n = module_index(moduleName, false);
+        }
+        interactive_module_switch(n, true);
+      }
+      else {
+        std::cout << "usage: on <module_id>" << std::endl;
+      }
+    }
+    else if (cmd == "off") {
+      std::string moduleName;
+      int n;
+      is >> moduleName;
+      if (is) {
+        if (std::isdigit(moduleName[0])) {
+          n = boost::lexical_cast<int>(moduleName);
+        }
+        else {
+          n = module_index(moduleName, false);
+        }
+        interactive_module_switch(n, false);
+      }
+      else {
+        std::cout << "usage: off <module_id>" << std::endl;
+      }
+    }
+    else if (cmd == "init") {
+      break;
+    }
     else {
-#if ANL_USE_READLINE
-      free(line);
-      line = 0;
-#endif /* ANL_USE_READLINE */
+      std::cout << "command not found." << std::endl;
     }
     
-    iss.str("");
-    iss.clear();
+    is.clear();
   }
   
-#if ANL_USE_READLINE
-#else /* ANL_USE_READLINE */
-  history_end(anlHistory);
-  el_end(el);
-#endif /* ANL_USE_READLINE */
   return status;
 }
 
@@ -223,16 +184,20 @@ void ANLManager::interactive_comunication_help()
 {
   std::cout << "-------------------------------------------------------\n"
             << "  help              : show this help\n"
+            << "  chain             : show analysis chain\n"
             << "  show              : show analysis chain\n"
-            << "  print MODULE_ID   : show paramters of the module\n"
-            << "  mod MODULE_ID     : modify parameters of the module\n"
+            << "                      and all parameters\n"
+            << "  print <module_id> : show paramters of the module\n"
+            << "  rev               : review parameters of all modules\n"
+            << "                      (same as \"mod -1\")\n"
+            << "  mod <module_id>   : modify parameters of the module\n"
             << "                      (enter mod_communicate() method)\n"
-            << "  on MODULE_ID      : switch on the module\n"
-            << "  off MODULE_ID     : switch off the module\n"
+            << "  on <module_id>    : switch on the module\n"
+            << "  off <module_id>   : switch off the module\n"
             << "  init              : initialize to start analysis\n"
             << "  quit              : quit this program\n"
             << "\n"
-            << "    MODULE_ID = 0 for all\n"
+            << "   <module_id> = -1 for all\n"
             << "-------------------------------------------------------\n"
             << std::endl;
 }
@@ -241,43 +206,31 @@ ANLStatus ANLManager::interactive_modify_param(int n)
 {
   ANLStatus status = AS_OK;
   if (n==-1) {
-    for (AMIter mod=modules_.begin(); mod!=modules_.end(); ++mod) {
-      if ((*mod)->is_off()) continue;
-      std::cout << (*mod)->module_name() << " mod_communicate()" << std::endl;
-      status = (*mod)->mod_communicate();
+    for (BasicModule* m: modules_) {
+      if (m->is_off()) { continue; }
+      std::cout << m->module_name() << " mod_communicate()" << std::endl;
+      status = m->mod_communicate();
       if (status != AS_OK) {
-        std::cout << (*mod)->module_name()
+        std::cout << m->module_name()
                   << " mod_communicate() returned "
-                  << status << std::endl;
-      }
-      status = (*mod)->mod_pre_initialize();
-      if (status != AS_OK) {
-        std::cout << (*mod)->module_name()
-                  << " mod_pre_initialize() returned "
                   << status << std::endl;
       }
       std::cout << std::endl;
     }
   }
   else if (0<=n && n<static_cast<int>(modules_.size())) {
-    BasicModule* mo = modules_[n];
-    std::cout << mo->module_name()
+    BasicModule* m = modules_[n];
+    std::cout << m->module_name()
               << " mod_communicate()" << std::endl;
-    status = mo->mod_communicate();
+    status = m->mod_communicate();
     if (status != AS_OK) {
-      std::cout << mo->module_name()
+      std::cout << m->module_name()
                 << " mod_communicate() returned "
-                << status << std::endl;
-    }
-    status = mo->mod_pre_initialize();
-    if (status != AS_OK) {
-      std::cout << mo->module_name()
-                << " mod_pre_initialize() returned "
                 << status << std::endl;
     }
   }
   else {
-    std::cout << "input argument is out of range." << std::endl;
+    std::cout << "Module index " << n << " is out of range." << std::endl;
   }
   return status;
 }
@@ -285,49 +238,55 @@ ANLStatus ANLManager::interactive_modify_param(int n)
 void ANLManager::interactive_print_param(int n)
 {
   if (n==-1) {
-    for (AMIter mod=modules_.begin(); mod!=modules_.end(); ++mod) {
-      std::cout << (*mod)->module_name() << " parameters" << std::endl;
-      (*mod)->print_parameters();
+    std::cout << '\n'
+              << "        **************************************\n"
+              << "        ****      Module parameters       ****\n"
+              << "        **************************************\n"
+              << std::endl;
+
+    for (BasicModule* m: modules_) {
+      std::cout << "--- " << m->module_id() << " ---"<< std::endl;
+      m->print_parameters();
       std::cout << std::endl;
     }
   }
   else if (0<=n && n<static_cast<int>(modules_.size())) {
-    BasicModule* mo = modules_[n];
-    std::cout << mo->module_name() << " parameters" << std::endl;
-    mo->print_parameters();
+    BasicModule* m = modules_[n];
+    std::cout << "--- " << m->module_id() << " ---"<< std::endl;
+    m->print_parameters();
   }
   else {
-    std::cout << "input argument is out of range." << std::endl;
+    std::cout << "Module index " << n << " is out of range." << std::endl;
   } 
 }
 
 void ANLManager::interactive_module_switch(int n, bool module_sw)
 {
   if (n==-1) {
-    for (AMIter mod=modules_.begin(); mod!=modules_.end(); ++mod) {
+    for (BasicModule* m: modules_) {
       if (module_sw) {
-        (*mod)->on();
-        std::cout << (*mod)->module_name() << " turned on." << std::endl;  
+        m->on();
+        std::cout << m->module_name() << " turned on." << std::endl;
       }
       else {
-        (*mod)->off();
-        std::cout << (*mod)->module_name() << " turned off." << std::endl;  
+        m->off();
+        std::cout << m->module_name() << " turned off." << std::endl;
       }
     }
   }
   else if (0<=n && n<static_cast<int>(modules_.size())) {
-    BasicModule* mo = modules_[n];
+    BasicModule* m = modules_[n];
     if (module_sw) {
-      mo->on();
-      std::cout << mo->module_name() << " turned on." << std::endl;
+      m->on();
+      std::cout << m->module_name() << " turned on." << std::endl;
     }
     else {
-      mo->off();
-      std::cout << mo->module_name() << " turned off." << std::endl;
+      m->off();
+      std::cout << m->module_name() << " turned off." << std::endl;
     }
   }
   else {
-    std::cout << "input argument is out of range." << std::endl;
+    std::cout << "Module index " << n << " is out of range." << std::endl;
   }
 }
 
@@ -335,94 +294,64 @@ ANLStatus ANLManager::do_interactive_analysis()
 {
   ANLStatus status = AS_OK;
 
-#if ANL_USE_READLINE
-  int count = 0;
-  char *line;
-#else /* ANL_USE_READLINE */
-  int count = 0;
-  const char *line;
-  EditLine *el;
-  History *anlHistory;
-  HistEvent event;
-
-  el = el_init("ANL_Ana", stdin, stdout, stderr);
-  el_set(el, EL_PROMPT, &prompt);
-  el_set(el, EL_EDITOR, "emacs");
-
-  anlHistory = history_init();
-  if (anlHistory == 0) {
-    std::cerr << "history initialization falied" << std::endl;
-    return AS_QUIT;
-  }
-  
-  history(anlHistory, &event, H_SETSIZE, 1000);
-  el_set(el, EL_HIST, history, anlHistory);
-#endif /* ANL_USE_READLINE */
-  
-  std::string cmd;
-  std::istringstream iss;
-
   std::cout << "\n ** type \"help\" if you need. ** \n" << std::endl;
 
-  while (iss.str()=="") {
+  while (true) {
 #if ANL_USE_READLINE
-    line = readline("ANL> ");
-    count = strlen(line)+1;
-#else /* ANL_USE_READLINE */
-    line = el_gets(el, &count);
+    std::unique_ptr<char> line( readline("iANL> ") );
+    if (line == nullptr) {
+      return AS_QUIT_ERROR;
+    }
+
+    const int count = std::strlen(line.get());
+    if (count == 0) { continue; }
+
+    add_history(line.get());
+
+    std::istringstream iss;
+    iss.str(line.get());
+    std::istream& is = iss;
+#else
+    std::istream& is = std::cin;
 #endif /* ANL_USE_READLINE */
 
-    if (count > 1) {
-#if ANL_USE_READLINE
-      add_history(line);
-#else /* ANL_USE_READLINE */
-      history(anlHistory, &event, H_ENTER, line);
-#endif /* ANL_USE_READLINE */
-      iss.str(line);
-
-#if ANL_USE_READLINE
-      free(line);
-      line = 0;
-#endif /* ANL_USE_READLINE */
-
-      iss >> cmd;
-      if (cmd == "exit") {
-        break;
-      }
-      else if (cmd == "help") {
-        interactive_analysis_help();
-      }
-      else if (cmd == "ana") {
-        int n, disp;
-        iss >> n >> disp;
-        if (iss) {
-          set_display_frequency(disp);
-          status = Analyze(n, true);
-        }
-        else {
-          std::cout << "usage: ana NUMBER DISPLAY" << std::endl;
-        }
+    std::string cmd;
+    is >> cmd;
+ 
+    if (cmd == "") {
+      continue;
+    }
+    else if (cmd == "exit") {
+      break;
+    }
+    else if (cmd == "help") {
+      interactive_analysis_help();
+    }
+    else if (cmd == "run") {
+      int num_loops(0);
+      is >> num_loops;
+      if (!is) {
+        std::cout << "usage: run <number>" << std::endl;
+        std::cout << "usage: run <number> <display_frequence>" << std::endl;
       }
       else {
-        std::cout << "command not found." << std::endl;
+        int disp(0);
+        is >> disp;
+        if (is) {
+          set_display_frequency(disp);
+        }
+        else {
+          is.clear();
+        }
+        status = Analyze(num_loops, true);
       }
     }
     else {
-#if ANL_USE_READLINE
-      free(line);
-      line = 0;
-#endif /* ANL_USE_READLINE */
+      std::cout << "command not found." << std::endl;
     }
 
-    iss.str("");
-    iss.clear();
+    is.clear();
   }
-  
-#if ANL_USE_READLINE
-#else /* ANL_USE_READLINE */
-  history_end(anlHistory);
-  el_end(el);
-#endif /* ANL_USE_READLINE */
   
   return status;
 }
@@ -431,11 +360,11 @@ void ANLManager::interactive_analysis_help()
 {
   std::cout << "-------------------------------------------------------\n"
             << "  help              : show this help\n"
-            << "  ana TIMES DISPLAY : start analysis\n"
-            << "                      TIMES: number of loop\n"
-            << "                      DISPLAY: display frequency\n"
+            << "  run <N> <display> : start analysis\n"
+            << "                      <N>: number of loops\n"
+            << "                      <display>: display frequency\n"
             << "  exit              : exit this program\n"
-            << "                      (enter exit routine)\n"
+            << "                      (enter <finalize> stage)\n"
             << "-------------------------------------------------------\n"
             << std::endl;
 }

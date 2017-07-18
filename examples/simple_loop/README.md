@@ -27,6 +27,7 @@ You need only source and run directories. All other directories are not required
     * source/src: C++ source files (*.cc) define the modules.
     * source/rubyext: SWIG interface file to build a Ruby extension library.
 - run: this directory a Ruby script (`run_simple_loop.rb`) that defines the ANL application. You can directly execute this script.
+- run_interactive (optional): a run script in an interactive mode
 - reference_generation (optional): you can automatically make a reference document.
 - script_generation (optional): you can automatically make a run script.
 - misc (optional, technical): shows how to examine the modules.

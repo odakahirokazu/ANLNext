@@ -31,10 +31,7 @@
 #include <cstring>
 #endif
 
-#include <unistd.h>
-
 #include <boost/format.hpp>
-#include <boost/thread.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
 #include "BasicModule.hh"
@@ -47,6 +44,11 @@
 #if ANL_USE_READLINE
 #include <readline/readline.h>
 #include <readline/history.h>
+
+#include <unistd.h>
+#include <sys/select.h>
+#include <sys/time.h>
+#include <sys/types.h>
 #endif /* ANL_USE_READLINE */
 
 
@@ -60,10 +62,13 @@ const int ANLManager::__version3__ = 0;
 
 
 ANLManager::ANLManager()
-  : evsManager_(new EvsManager),
+  : printCloneParameters_(false),
+    numEvents_(0),
+    evsManager_(new EvsManager),
     requested_(ANLRequest::NONE),
+    displayFrequency_(-1),
     moduleAccess_(new ModuleAccess),
-    displayFrequency_(-1)
+    analysisThreadFinished_(false)
 {
   evsManager_->initialize();
 }
@@ -243,13 +248,16 @@ ANLStatus ANLManager::Analyze(long int num_events, bool enable_console)
               << "  input '.s' => show the status of event selections (of the master thread)\n"
               << "----------------------------------------------------------------------------\n"
               << std::endl;
-    
+
+    analysisThreadFinished_ = false;
     std::thread analysisThread(std::bind(&ANLManager::__void_process_analysis, this, &status));
-    boost::thread interactiveThread(std::bind(&ANLManager::interactive_session, this));
+    std::thread interactiveThread(std::bind(&ANLManager::interactive_session, this));
     analysisThread.join();
-    interactiveThread.try_join_for(boost::chrono::seconds(1));
+    analysisThreadFinished_ = true;
+    interactiveThread.join();
     
 #if ANL_USE_READLINE
+    rl_reset_terminal(NULL);
     rl_initialize();
     rl_deprep_terminal();
 #endif
@@ -562,9 +570,25 @@ void ANLManager::__void_process_analysis(ANLStatus* status)
 void ANLManager::interactive_session()
 {
 #if ANL_USE_READLINE
-  std::unique_ptr<char> line;
+  fd_set readFDSet;
+  FD_ZERO(&readFDSet);
+  FD_SET(0, &readFDSet); // check STDIN (= 0)
+  struct timeval timeout{1, 0}; // 1 s, 0 us
+
   while (1) {
-    line.reset(readline(""));
+    const int retval = select(1, &readFDSet, nullptr, nullptr, &timeout);
+    if (retval == -1) {
+      std::cout << "Error by select() in ANLManager::interactive_sesson()" << std::endl;
+      return;
+    }
+    if (retval == 0) {
+      if (analysisThreadFinished_) {
+        return;
+      }
+      continue;
+    }
+
+    std::unique_ptr<char> line(readline(""));
     if (line.get()) {
       if (std::strcmp(line.get(), ".q") == 0) {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -590,7 +614,7 @@ void ANLManager::interactive_session()
       return;
     }
   }
-#else
+#else /* ANL_USE_READLINE */
   std::string buf;
   while (1) {
     std::cin >> buf;
@@ -614,7 +638,7 @@ void ANLManager::interactive_session()
       std::cout << "ANL>> " << line.get() << "\n" << std::endl;
     }
   }
-#endif
+#endif /* ANL_USE_READLINE */
 }
 
 ANLStatus process_one_event(long int iEvent,

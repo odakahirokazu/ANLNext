@@ -135,17 +135,18 @@ private:
   void interactive_session();
 
 protected:
+  bool printCloneParameters_ = false;
   long int numEvents_ = 0;
   std::vector<BasicModule*> modules_;
   std::vector<LoopCounter> counters_;
   std::unique_ptr<EvsManager> evsManager_;
   std::mutex mutex_;
   std::atomic<ANLRequest> requested_{ANLRequest::NONE};
-  bool printCloneParameters_ = false;
 
 private:
-  std::unique_ptr<ModuleAccess> moduleAccess_;
   long int displayFrequency_ = -1;
+  std::unique_ptr<ModuleAccess> moduleAccess_;
+  std::atomic<bool> analysisThreadFinished_{false};
 };
 
 /**

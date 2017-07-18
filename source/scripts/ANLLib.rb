@@ -205,8 +205,8 @@ module ANL
 
     # Run this application.
     #
-    # @param [Fixnum] num_loop number of loops. :all or -1 for infinite loops.
-    # @param [Fixnum] display_frequency frequency of displaying loop ID
+    # @param [Integer] num_loop number of loops. :all or -1 for infinite loops.
+    # @param [Integer] display_frequency frequency of displaying loop ID
     #     to STDOUT.
     #
     def run(num_loop, display_frequency=nil)
@@ -223,6 +223,20 @@ module ANL
       end
 
       @_anlapp_analysis_chain.run(num_loop)
+    end
+
+    # Run this application in interactive mode.
+    #
+    def run_interactive()
+      if @_anlapp_analysis_chain.finalization_done?
+        @_anlapp_analysis_chain.clear()
+      end
+
+      if @_anlapp_analysis_chain.chain_empty?
+        setup()
+      end
+
+      @_anlapp_analysis_chain.run_interactive()
     end
 
     ### method delegation to the AnalysisChain object.
@@ -329,7 +343,6 @@ module ANL
       @module_hash = {}
       @current_module = nil
       @set_param_list = []
-      @set_module_list = []
       @namespace_list = [Object]
       @modification_block = nil
       @stage = nil
@@ -352,7 +365,6 @@ module ANL
       @module_hash = {}
       @current_module = nil
       @set_param_list.clear
-      @set_module_list.clear
       @namespace_list.clear; @namespace_list << Object
       @modification_block = nil
       @stage = nil
@@ -395,7 +407,7 @@ module ANL
 
     # Insert an ANL module to the module chain at a specified position.
     #
-    # @param [Fixnum] index position to be inserted.
+    # @param [Integer] index position to be inserted.
     # @param [ANLModule] anl_module ANL module to be inserted.
     # @return [ANLModule] ANL module inserted.
     #
@@ -485,7 +497,7 @@ module ANL
     # in the analysis chain.
     #
     # @param [Symbol] module_id ANL module ID.
-    # @return [Fixnum] Position.
+    # @return [Integer] Position.
     #
     def index(module_id)
       @module_list.index{|mod| mod.module_id.to_sym==module_id }
@@ -495,7 +507,7 @@ module ANL
     # in the analysis chain.
     #
     # @param [Symbol] module_id ANL module ID.
-    # @return [Fixnum] Position.
+    # @return [Integer] Position.
     #
     def rindex(module_id)
       @module_list.rindex{|mod| mod.module_id.to_sym==module_id }
@@ -707,9 +719,6 @@ module ANL
         return
       end
 
-      unless @set_module_list.include? mod
-        @set_module_list << mod
-      end
       if parameters
         parameters.each{|name, value| setp(name.to_s, value) }
       end
@@ -766,8 +775,8 @@ module ANL
     # Proposed display frequency based on the number of loops.
     # This method is private.
     #
-    # @param [Fixnum] num_loop number of loops. -1 for infinite loops.
-    # @return [Fixnum] frequency of displaying loop ID to STDOUT.
+    # @param [Integer] num_loop number of loops. -1 for infinite loops.
+    # @return [Integer] frequency of displaying loop ID to STDOUT.
     #
     def proposed_display_frequency(num_loop)
       if num_loop < 0
@@ -784,7 +793,7 @@ module ANL
     # Check ANL status. If it is not OK, raise an exception.
     # This method is private.
     #
-    # param[Fixnum] status ANL status.
+    # param[Integer] status ANL status.
     # param[String] function name of ANL routine.
     #
     def check_status(status, function_name)
@@ -827,7 +836,7 @@ module ANL
 
     # Run the ANL analysis.
     #
-    # @param [Fixnum] num_loop number of loops. :all or -1 for infinite loops.
+    # @param [Integer] num_loop number of loops. :all or -1 for infinite loops.
     #
     def run(num_loop)
       if num_loop == :all; num_loop = -1; end
@@ -898,13 +907,27 @@ module ANL
       anl = define() unless self.definition_already_done?
 
       load_all_parameters() unless @stage == :loading_parameters_done
-      @set_module_list.each do |mod|
-        status = mod.mod_pre_initialize()
-        check_status(status, "#{mod.module_id}::mod_prepare()")
-      end
 
       status = anl.do_interactive_comunication()
       check_status(status, "do_interactive_comunication()")
+
+      if parameters_json_filename() && parameters_json_master()
+        File.open(parameters_json_filename(), 'w') do |fout|
+          fout.print(JSON.pretty_generate(parameters_to_object()))
+        end
+      end
+
+      status = anl.PreInitialize()
+      check_status(status, "PreInitialize()")
+      @stage = :pre_initialization_done
+
+      if parameters_json_filename() && !parameters_json_master()
+        anl.parameters_to_json(parameters_json_filename())
+      end
+
+      status = anl.Initialize()
+      check_status(status, "Initialize()")
+      @stage = :initialization_done
 
       status = anl.do_interactive_analysis()
       check_status(status, "do_interactive_analysis()")
@@ -915,9 +938,21 @@ module ANL
       @stage = :finalization_done
     rescue RuntimeError => ex
       puts ""
-      puts "  ### ANL NEXT Exception ###  "
+      puts "################################################################"
+      puts "#                                                              #"
+      puts "#                       ANL EXCEPTION                          #"
+      puts "#                                                              #"
+      puts "################################################################"
       puts ""
       puts ex
+      puts ""
+      puts "################################################################"
+      puts ""
+      puts ""
+
+      if ANL::ANLException.VerboseLevel >= 3
+        raise
+      end
     end
 
     # Print all parameters of all the module in the analysis chain.

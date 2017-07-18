@@ -35,7 +35,8 @@ namespace anl
 {
 
 ANLManagerMT::ANLManagerMT(int num_parallels)
-  : NumParallels_(num_parallels)
+  : NumParallels_(num_parallels),
+    loopIndex_(-1)
 {
   set_print_parallel_modules();
 }
