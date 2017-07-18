@@ -137,13 +137,13 @@ module ANL
   # @return [String] ANL status
   def show_status(i)
     {
-      ANL::ANLStatus_AS_OK => "AS_OK",
-      ANL::ANLStatus_AS_SKIP => "AS_SKIP",
-      ANL::ANLStatus_AS_SKIP_ERROR => "AS_SKIP_ERROR",
-      ANL::ANLStatus_AS_QUIT => "AS_QUIT",
-      ANL::ANLStatus_AS_QUIT_ERROR => "AS_QUIT_ERROR",
-      ANL::ANLStatus_AS_QUIT_ALL => "AS_QUIT_ALL",
-      ANL::ANLStatus_AS_QUIT_ALL_ERROR => "AS_QUIT_ALL_ERROR",
+      ANL::ANLStatus_ok => "AS_OK",
+      ANL::ANLStatus_skip => "AS_SKIP",
+      ANL::ANLStatus_skip_error => "AS_SKIP_ERROR",
+      ANL::ANLStatus_quit => "AS_QUIT",
+      ANL::ANLStatus_quit_error => "AS_QUIT_ERROR",
+      ANL::ANLStatus_quit_all => "AS_QUIT_ALL",
+      ANL::ANLStatus_quit_all_error => "AS_QUIT_ALL_ERROR",
     }[i] or "unknown status"
   end
   module_function :show_status

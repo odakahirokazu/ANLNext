@@ -36,15 +36,14 @@ namespace anl
 {
 
 enum class ANLStatus {
-  AS_OK,
-  AS_SKIP,
-  AS_SKIP_ERROR,
-  AS_QUIT,
-  AS_QUIT_ERROR,
-  AS_QUIT_ALL,
-  AS_QUIT_ALL_ERROR
+  ok,
+  skip,
+  skip_error,
+  quit,
+  quit_error,
+  quit_all,
+  quit_all_error
 };
-
 
 struct ANLException
 {

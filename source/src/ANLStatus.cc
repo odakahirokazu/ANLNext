@@ -23,19 +23,19 @@
 std::string anl::status_to_string(anl::ANLStatus status)
 {
   switch (status) {
-    case anl::ANLStatus::AS_OK:
+    case anl::ANLStatus::ok:
       return "AS_OK";
-    case anl::ANLStatus::AS_SKIP:
+    case anl::ANLStatus::skip:
       return "AS_SKIP";
-    case anl::ANLStatus::AS_SKIP_ERROR:
+    case anl::ANLStatus::skip_error:
       return "AS_SKIP_ERROR";
-    case anl::ANLStatus::AS_QUIT:
+    case anl::ANLStatus::quit:
       return "AS_QUIT";
-    case anl::ANLStatus::AS_QUIT_ERROR:
+    case anl::ANLStatus::quit_error:
       return "AS_QUIT_ERROR";
-    case anl::ANLStatus::AS_QUIT_ALL:
+    case anl::ANLStatus::quit_all:
       return "AS_QUIT_ALL";
-    case anl::ANLStatus::AS_QUIT_ALL_ERROR:
+    case anl::ANLStatus::quit_all_error:
       return "AS_QUIT_ALL_ERROR";
     default:
       return "AS_UNDEFINED";

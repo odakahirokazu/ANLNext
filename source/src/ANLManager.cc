@@ -65,7 +65,7 @@ ANLManager::ANLManager()
   : printCloneParameters_(false),
     numEvents_(0),
     evsManager_(new EvsManager),
-    requested_(ANLRequest::NONE),
+    requested_(ANLRequest::none),
     displayFrequency_(-1),
     moduleAccess_(new ModuleAccess),
     analysisThreadFinished_(false)
@@ -186,7 +186,7 @@ ANLStatus ANLManager::Initialize()
   show_analysis();
   print_parameters();
   reset_counters();
-  requested_ = ANLRequest::NONE;
+  requested_ = ANLRequest::none;
 
   ANLStatus status = routine_initialize();
   if (status != AS_OK) {
@@ -214,7 +214,7 @@ ANLStatus ANLManager::Analyze(long int num_events, bool enable_console)
             << std::endl;
 
   numEvents_ = num_events;
-  requested_ = ANLRequest::NONE;
+  requested_ = ANLRequest::none;
 
   std::cout << "Number of events: " << num_events << '\n'
             << std::endl;
@@ -289,7 +289,7 @@ final:
   reduce_statistics();
   print_summary();
   evsManager_->print_summary();
-  requested_ = ANLRequest::NONE;
+  requested_ = ANLRequest::none;
 
 #if ANL_ANALYZE_INTERRUPT
   if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
@@ -461,19 +461,19 @@ ANLStatus ANLManager::process_analysis()
       break;
     }
 
-    if (requested_ != ANLRequest::NONE) {
+    if (requested_ != ANLRequest::none) {
       std::lock_guard<std::mutex> lock(mutex_);
-      if (requested_ == ANLRequest::QUIT) {
+      if (requested_ == ANLRequest::quit) {
         break;
       }
-      else if (requested_ == ANLRequest::SHOW_EVENT_INDEX) {
+      else if (requested_ == ANLRequest::show_event_index) {
         print_event_index(iEvent);
       }
-      else if (requested_ == ANLRequest::SHOW_EVS_SUMMARY) {
+      else if (requested_ == ANLRequest::show_evs_summary) {
         print_event_index(iEvent);
         evsManager_->print_summary();
       }
-      requested_ = ANLRequest::NONE;
+      requested_ = ANLRequest::none;
     }
   }
 
@@ -591,19 +591,19 @@ void ANLManager::interactive_session()
     if (line.get()) {
       if (std::strcmp(line.get(), ".q") == 0) {
         std::lock_guard<std::mutex> lock(mutex_);
-        std::cout << "ANL> " << line.get() << " ---> QUIT\n" << std::endl;
-        requested_ = ANLRequest::QUIT;
+        std::cout << "ANL> " << line.get() << " ---> Quit\n" << std::endl;
+        requested_ = ANLRequest::quit;
         return;
       }
       else if (std::strcmp(line.get(), ".i") == 0) {
         std::lock_guard<std::mutex> lock(mutex_);
-        std::cout << "ANL> " << line.get() << " ---> SHOW_EVENT_INDEX \n" << std::endl;
-        requested_ = ANLRequest::SHOW_EVENT_INDEX;
+        std::cout << "ANL> " << line.get() << " ---> Show event index\n" << std::endl;
+        requested_ = ANLRequest::show_event_index;
       }
       else if (std::strcmp(line.get(), ".s") == 0) {
         std::lock_guard<std::mutex> lock(mutex_);
-        std::cout << "ANL> " << line.get() << " ---> SHOW_EVS_SUMMARY \n" << std::endl;
-        requested_ = ANLRequest::SHOW_EVS_SUMMARY;
+        std::cout << "ANL> " << line.get() << " ---> Show evs summary\n" << std::endl;
+        requested_ = ANLRequest::show_evs_summary;
       }
       else {
         std::cout << "ANL> " << line.get() << "\n" << std::endl;
@@ -619,19 +619,19 @@ void ANLManager::interactive_session()
     std::cin >> buf;
     if (buf==".q") {
       std::lock_guard<std::mutex> lock(mutex_);
-      std::cout << "ANL>> " << line.get() << " ---> QUIT\n" << std::endl;
-      requested_ = ANLRequest::QUIT;
+      std::cout << "ANL>> " << line.get() << " ---> Quit\n" << std::endl;
+      requested_ = ANLRequest::quit;
       return;
     }
     else if (buf==".i") {
       std::lock_guard<std::mutex> lock(mutex_);
-      std::cout << "ANL>> " << line.get() << " ---> SHOW_EVENT_INDEX \n" << std::endl;
-      requested_ = ANLRequest::SHOW_EVENT_INDEX;
+      std::cout << "ANL>> " << line.get() << " ---> Show event index\n" << std::endl;
+      requested_ = ANLRequest::show_event_index;
     }
     else if (buf==".s") {
       std::lock_guard<std::mutex> lock(mutex_);
-      std::cout << "ANL>> " << line.get() << " ---> SHOW_EVS_SUMMARY \n" << std::endl;
-      requested_ = ANLRequest::SHOW_EVS_SUMMARY;
+      std::cout << "ANL>> " << line.get() << " ---> Show evs summary\n" << std::endl;
+      requested_ = ANLRequest::show_evs_summary;
     }
     else {
       std::cout << "ANL>> " << line.get() << "\n" << std::endl;

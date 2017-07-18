@@ -194,7 +194,7 @@ long int ANLManagerMT::event_index_to_process()
   if (loopIndex_ >= N) {
     return N;
   }
-  if (requested_ == ANLRequest::QUIT) {
+  if (requested_ == ANLRequest::quit) {
     return N;
   }
 
@@ -264,24 +264,24 @@ ANLStatus ANLManagerMT::process_analysis_impl(const std::vector<BasicModule*>& m
       break;
     }
 
-    if (requested_ != ANLRequest::NONE) {
+    if (requested_ != ANLRequest::none) {
       std::lock_guard<std::mutex> lock(mutex_);
-      if (requested_ == ANLRequest::QUIT) {
+      if (requested_ == ANLRequest::quit) {
         break;
       }
-      else if (requested_ == ANLRequest::SHOW_EVENT_INDEX) {
+      else if (requested_ == ANLRequest::show_event_index) {
         print_event_index(iEvent);
       }
-      else if (requested_ == ANLRequest::SHOW_EVS_SUMMARY) {
+      else if (requested_ == ANLRequest::show_evs_summary) {
         print_event_index(iEvent);
         evsManager_->print_summary();
       }
-      requested_ = ANLRequest::NONE;
+      requested_ = ANLRequest::none;
     }
   }
 
   if (status == AS_QUIT_ALL || status == AS_QUIT_ALL_ERROR) {
-    requested_ = ANLRequest::QUIT;
+    requested_ = ANLRequest::quit;
     return status;
   }
 

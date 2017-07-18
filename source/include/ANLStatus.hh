@@ -32,30 +32,30 @@ namespace anl
  * @date 2017-07-07 | add as_quit_all, as_quit_all_error
  */
 enum class ANLStatus {
-  AS_OK,
-  AS_SKIP,
-  AS_SKIP_ERROR,
-  AS_QUIT,
-  AS_QUIT_ERROR,
-  AS_QUIT_ALL,
-  AS_QUIT_ALL_ERROR
+  ok,
+  skip,
+  skip_error,
+  quit,
+  quit_error,
+  quit_all,
+  quit_all_error
 };
 
 std::string status_to_string(ANLStatus status);
 
-constexpr ANLStatus AS_OK             = ANLStatus::AS_OK;
-constexpr ANLStatus AS_SKIP           = ANLStatus::AS_SKIP;
-constexpr ANLStatus AS_SKIP_ERROR     = ANLStatus::AS_SKIP_ERROR;
-constexpr ANLStatus AS_QUIT           = ANLStatus::AS_QUIT;
-constexpr ANLStatus AS_QUIT_ERROR     = ANLStatus::AS_QUIT_ERROR;
-constexpr ANLStatus AS_QUIT_ALL       = ANLStatus::AS_QUIT_ALL;
-constexpr ANLStatus AS_QUIT_ALL_ERROR = ANLStatus::AS_QUIT_ALL_ERROR;
+constexpr ANLStatus AS_OK             = ANLStatus::ok;
+constexpr ANLStatus AS_SKIP           = ANLStatus::skip;
+constexpr ANLStatus AS_SKIP_ERROR     = ANLStatus::skip_error;
+constexpr ANLStatus AS_QUIT           = ANLStatus::quit;
+constexpr ANLStatus AS_QUIT_ERROR     = ANLStatus::quit_error;
+constexpr ANLStatus AS_QUIT_ALL       = ANLStatus::quit_all;
+constexpr ANLStatus AS_QUIT_ALL_ERROR = ANLStatus::quit_all_error;
 
 enum class ANLRequest {
-  NONE,
-  QUIT,
-  SHOW_EVENT_INDEX,
-  SHOW_EVS_SUMMARY
+  none,
+  quit,
+  show_event_index,
+  show_evs_summary
 };
 
 } /* namespace anl */

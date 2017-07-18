@@ -141,7 +141,7 @@ protected:
   std::vector<LoopCounter> counters_;
   std::unique_ptr<EvsManager> evsManager_;
   std::mutex mutex_;
-  std::atomic<ANLRequest> requested_{ANLRequest::NONE};
+  std::atomic<ANLRequest> requested_{ANLRequest::none};
 
 private:
   long int displayFrequency_ = -1;
