@@ -10,6 +10,15 @@ require 'rexml/document'
 require 'json'
 
 module ANL
+  ### aliases of ANL status
+  AS_OK             = ANL::ANLStatus_ok
+  AS_SKIP           = ANL::ANLStatus_skip
+  AS_SKIP_ERROR     = ANL::ANLStatus_skip_error
+  AS_QUIT           = ANL::ANLStatus_quit
+  AS_QUIT_ERROR     = ANL::ANLStatus_quit_error
+  AS_QUIT_ALL       = ANL::ANLStatus_quit_all
+  AS_QUIT_ALL_ERROR = ANL::ANLStatus_quit_all_error
+
   class BasicModule
     # Get a list of parameters registered in the module.
     #
@@ -797,7 +806,7 @@ module ANL
     # param[String] function name of ANL routine.
     #
     def check_status(status, function_name)
-      unless status == ANL::ANLStatus_AS_OK
+      unless status == AS_OK
         raise "#{function_name} returned #{ANL.show_status(status)}."
       end
       true
