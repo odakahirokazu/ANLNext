@@ -65,10 +65,11 @@ void EvsManager::count_completed()
 void EvsManager::print_summary() const
 {
   std::cout << '\n'
-            << "      ***********************************\n"
-            << "      *** Results of Event Selections ***\n"
-            << "      ***********************************\n"
+            << "        **************************************\n"
+            << "        ****  Result of Event Selections  ****\n"
+            << "        **************************************\n"
             << std::endl;
+
   std::cout << "  Number of EVS : " << data_.size() << '\n'
             << "------------------------------------------------------------------------------\n"
             << "                 key                        |     counts     |   completed    \n"

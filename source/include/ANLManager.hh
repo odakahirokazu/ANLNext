@@ -54,9 +54,15 @@ class OrderKeeper;
  * @date 2017-07-02 | version 1.9 | simpler event loop
  * @date 2017-07-04 | new model, for multi-thread mode
  * @date 2017-07-07 | rename methods
+ * @date 2017-07-19 | introduce user request, modify print messages.
  */
 class ANLManager
 {
+public:
+  static const int __version1__;
+  static const int __version2__;
+  static const int __version3__;
+
 public:
   ANLManager();
   virtual ~ANLManager();

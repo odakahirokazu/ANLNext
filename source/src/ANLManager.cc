@@ -53,6 +53,12 @@
 namespace anl
 {
 
+/* version definition */
+const int ANLManager::__version1__ = 2;
+const int ANLManager::__version2__ = 0;
+const int ANLManager::__version3__ = 0;
+
+
 ANLManager::ANLManager()
   : evsManager_(new EvsManager),
     requested_(ANLRequest::NONE),
@@ -87,9 +93,23 @@ long int ANLManager::display_frequency() const
 ANLStatus ANLManager::Define()
 {
   std::cout << '\n'
-            << "      ***********************************\n"
-            << "      ****          ANL Next         ****\n"
-            << "      ***********************************\n"
+            << "######################################################\n"
+            << "#                                                    #\n"
+            << "#          ANL Next Data Analysis Framework          #\n"
+            << "#                                                    #\n"
+            <<
+    boost::format("#    version: %2d.%02d.%02d%31s#\n")
+    % __version1__ % __version2__ % __version3__ % " "
+            << "#    author: Hirokazu Odaka                          #\n"
+            << "#    URL: https://github.com/odakahirokazu/ANLNext   #\n"
+            << "#                                                    #\n"
+            << "######################################################\n"
+            << std::endl;
+
+  std::cout << '\n'
+            << "        **************************************\n"
+            << "        ****          Definition          ****\n"
+            << "        **************************************\n"
             << std::endl;
 
   ANLStatus status = routine_define();
@@ -120,9 +140,9 @@ final:
 ANLStatus ANLManager::PreInitialize()
 {
   std::cout << '\n'
-            << "      ***********************************\n"
-            << "      ****    Pre-Initialization     ****\n"
-            << "      ***********************************\n"
+            << "        **************************************\n"
+            << "        ****      Pre-Initialization      ****\n"
+            << "        **************************************\n"
             << std::endl;
 
   ANLStatus status =  routine_pre_initialize();
@@ -140,9 +160,9 @@ final:
 ANLStatus ANLManager::Initialize()
 {
   std::cout << '\n'
-            << "      ***********************************\n"
-            << "      ****      Initialization       ****\n"
-            << "      ***********************************\n"
+            << "        **************************************\n"
+            << "        ****        Initialization        ****\n"
+            << "        **************************************\n"
             << std::endl;
 
 #if ANL_INITIALIZE_INTERRUPT
@@ -183,9 +203,9 @@ final:
 ANLStatus ANLManager::Analyze(long int num_events, bool enable_console)
 {
   std::cout << '\n'
-            << "      ***********************************\n"
-            << "      ****       Main Analysis       ****\n"
-            << "      ***********************************\n"
+            << "        **************************************\n"
+            << "        ****        Main Analysis         ****\n"
+            << "        **************************************\n"
             << std::endl;
 
   numEvents_ = num_events;
@@ -216,8 +236,12 @@ ANLStatus ANLManager::Analyze(long int num_events, bool enable_console)
 
   if (enable_console) {
     std::cout << "\n"
-              << "ANLManager: starting analysis loop (with thread mode on).\n"
-              << "You can quit the analysis routine by input '.q'.\n"
+              << "ANLManager: starting analysis loop (with user-console mode on).\n"
+              << "----------------------------------------------------------------------------\n"
+              << "  input '.q' => quit the analysis loop\n"
+              << "  input '.i' => show the current event index\n"
+              << "  input '.s' => show the status of event selections (of the master thread)\n"
+              << "----------------------------------------------------------------------------\n"
               << std::endl;
     
     std::thread analysisThread(std::bind(&ANLManager::__void_process_analysis, this, &status));
@@ -272,9 +296,9 @@ final:
 ANLStatus ANLManager::Finalize()
 {
   std::cout << '\n'
-            << "      ***********************************\n"
-            << "      ****        Finalization       ****\n"
-            << "      ***********************************\n"
+            << "        **************************************\n"
+            << "        ****         Finalization         ****\n"
+            << "        **************************************\n"
             << std::endl;
 
 #if ANL_FINALIZE_INTERRUPT
@@ -351,9 +375,9 @@ int ANLManager::module_index(const std::string& module_id, bool strict) const
 void ANLManager::show_analysis()
 {
   std::cout << '\n'
-            << "      ***********************************\n"
-            << "      ****      Analysis chain      *****\n"
-            << "      ***********************************\n"
+            << "        **************************************\n"
+            << "        ****        Analysis chain        ****\n"
+            << "        **************************************\n"
             << std::endl;
   
   if (modules_.size() < 1) {
@@ -361,8 +385,8 @@ void ANLManager::show_analysis()
   }
   else {
     std::cout
-      << " #  " << "    "
-      << "              Module ID                      " << "  " 
+      << "   #" << "    "
+      << "    Module ID                                " << "  "
       << " Version " << "  " << " ON/OFF \n"
       << "----------------------------------------------------------------------------"
       << std::endl;
@@ -387,9 +411,9 @@ void ANLManager::show_analysis()
 void ANLManager::print_parameters()
 {
   std::cout << '\n'
-            << "      ***********************************\n"
-            << "      ****     Module parameters     ****\n"
-            << "      ***********************************\n"
+            << "        **************************************\n"
+            << "        ****      Module parameters       ****\n"
+            << "        **************************************\n"
             << std::endl;
   
   for (BasicModule* mod: modules_) {
@@ -455,9 +479,10 @@ ANLStatus ANLManager::process_analysis()
 void ANLManager::print_summary()
 {
   const std::size_t n = modules_.size();
-  std::cout << "      ***********************************\n"
-            << "      ****      Analysis chain      *****\n"
-            << "      ***********************************\n"
+  std::cout << '\n'
+            << "        **************************************\n"
+            << "        ****        Analysis chain        ****\n"
+            << "        **************************************\n"
             << "               Put: " << counters_[0].entry() << '\n'
             << "                |\n";
 
