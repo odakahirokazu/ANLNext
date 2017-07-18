@@ -587,26 +587,26 @@ void ANLManager::interactive_session()
       continue;
     }
 
-    std::unique_ptr<char> line(readline(""));
-    if (line.get()) {
+    std::unique_ptr<char> line(readline("ANL> "));
+    if (line) {
       if (std::strcmp(line.get(), ".q") == 0) {
         std::lock_guard<std::mutex> lock(mutex_);
-        std::cout << "ANL> " << line.get() << " ---> Quit\n" << std::endl;
+        std::cout << " ---> Quit\n" << std::endl;
         requested_ = ANLRequest::quit;
         return;
       }
       else if (std::strcmp(line.get(), ".i") == 0) {
         std::lock_guard<std::mutex> lock(mutex_);
-        std::cout << "ANL> " << line.get() << " ---> Show event index\n" << std::endl;
+        std::cout << " ---> Show event index\n" << std::endl;
         requested_ = ANLRequest::show_event_index;
       }
       else if (std::strcmp(line.get(), ".s") == 0) {
         std::lock_guard<std::mutex> lock(mutex_);
-        std::cout << "ANL> " << line.get() << " ---> Show evs summary\n" << std::endl;
+        std::cout << " ---> Show evs summary\n" << std::endl;
         requested_ = ANLRequest::show_evs_summary;
       }
       else {
-        std::cout << "ANL> " << line.get() << "\n" << std::endl;
+        ;
       }
     }
     else {
@@ -617,24 +617,28 @@ void ANLManager::interactive_session()
   std::string buf;
   while (1) {
     std::cin >> buf;
+    if (analysisThreadFinished_) {
+      return;
+    }
+
     if (buf==".q") {
       std::lock_guard<std::mutex> lock(mutex_);
-      std::cout << "ANL>> " << line.get() << " ---> Quit\n" << std::endl;
+      std::cout << "ANL>> " << buf << " ---> Quit\n" << std::endl;
       requested_ = ANLRequest::quit;
       return;
     }
     else if (buf==".i") {
       std::lock_guard<std::mutex> lock(mutex_);
-      std::cout << "ANL>> " << line.get() << " ---> Show event index\n" << std::endl;
+      std::cout << "ANL>> " << buf << " ---> Show event index\n" << std::endl;
       requested_ = ANLRequest::show_event_index;
     }
     else if (buf==".s") {
       std::lock_guard<std::mutex> lock(mutex_);
-      std::cout << "ANL>> " << line.get() << " ---> Show evs summary\n" << std::endl;
+      std::cout << "ANL>> " << buf << " ---> Show evs summary\n" << std::endl;
       requested_ = ANLRequest::show_evs_summary;
     }
     else {
-      std::cout << "ANL>> " << line.get() << "\n" << std::endl;
+      std::cout << "ANL>> " << buf << "\n" << std::endl;
     }
   }
 #endif /* ANL_USE_READLINE */

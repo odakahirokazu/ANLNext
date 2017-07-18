@@ -61,10 +61,12 @@ ANLStatus ANLManager::do_interactive_comunication()
     std::istream& is = iss;
 #else
     std::istream& is = std::cin;
+    std::cout << "iANL>> ";
+    std::cout.flush();
 #endif /* ANL_USE_READLINE */
 
     std::string cmd;
-    iss >> cmd;
+    is >> cmd;
  
     if (cmd == "") {
       continue;
