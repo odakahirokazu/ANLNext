@@ -37,5 +37,4 @@ class MyApp < ANL::ANLApp
 end
 
 a = MyApp.new
-a.setup
-a.instance_variable_get(:@_anlapp_analysis_chain).run_interactive
+a.run_interactive
