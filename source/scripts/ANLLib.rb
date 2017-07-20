@@ -40,6 +40,10 @@ module ANL
       get_parameter_original(name.to_s)
     end
 
+    def get_parameter_value(name)
+      get_parameter(name).to_value_object()
+    end
+
     def parameters_to_object()
       o = {}
       o[:module_id] = module_id()
@@ -57,6 +61,8 @@ module ANL
         get_value(false)
       when "int"
         get_value(0)
+      when "integer"
+        get_value_integer()
       when "double"
         get_value(0.0)
       when "string"
@@ -76,7 +82,36 @@ module ANL
       end
     end
 
-    def to_object()
+    def to_value_object(children_into_hash: true, value_element_to_object: false)
+      case type_name()
+      when "vector"
+        values = []
+        size_of_container.times do |k|
+          values <<
+            if children_into_hash
+              get_hash_from_container(k, value_element_to_object: value_element_to_object)
+            else
+              get_list_from_container(k, value_element_to_object: value_element_to_object)
+            end
+        end
+        return values
+      when "map"
+        values = {}
+        map_key_list.each do |k|
+          values[k] =
+            if children_into_hash
+              get_hash_from_container(k, value_element_to_object: value_element_to_object)
+            else
+              get_list_from_container(k, value_element_to_object: value_element_to_object)
+            end
+        end
+        return values
+      else
+        return get_value_auto()
+      end
+    end
+
+    def to_object(children_into_hash: false)
       type = type_name()
       o = {}
       o[:name] = name()
@@ -88,35 +123,36 @@ module ANL
         o[:unit_name] = unit_name()
       end
 
-      case type
-      when "vector"
-        values = []
-        o[:value] = values
-        size_of_container.times do |k|
-          value = []
-          values.push(value)
-          retrieve_from_container(k)
-          num_value_elements.times do |i|
-            element = value_element_info(i)
-            value.push(element.to_object)
-          end
-        end
-      when "map"
-        values = {}
-        o[:value] = values
-        map_key_list.each do |k|
-          value = []
-          values[k] = value
-          retrieve_from_container(k)
-          num_value_elements.times do |i|
-            element = value_element_info(i)
-            value.push(element.to_object)
-          end
-        end
-      else
-        o[:value] = get_value_auto()
-      end
+      o[:value] = self.to_value_object(children_into_hash: children_into_hash,
+                                       value_element_to_object: true)
+      return o
+    end
 
+    def get_list_from_container(k, value_element_to_object: false)
+      o = []
+      retrieve_from_container(k)
+      num_value_elements.times do |i|
+        element = value_element_info(i)
+        if value_element_to_object
+          o.push(element.to_object)
+        else
+          o.push(element.to_value_object)
+        end
+      end
+      return o
+    end
+
+    def get_hash_from_container(k, value_element_to_object: false)
+      o = {}
+      retrieve_from_container(k)
+      num_value_elements.times do |i|
+        element = value_element_info(i)
+        if value_element_to_object
+          o[element.name] = element.to_object
+        else
+          o[element.name] = element.to_value_object
+        end
+      end
       return o
     end
   end
@@ -457,7 +493,7 @@ module ANL
     # @return [ANLModule] ANL module pushed.
     #
     def chain(anl_module_class, module_id=nil)
-      if anl_module_class.class==String || anl_module_class.class==Symbol
+      if anl_module_class.is_a?(String) || anl_module_class.is_a?(Symbol)
         class_found = false
         @namespace_list.each do |ns|
           if ns.const_defined? anl_module_class
@@ -541,12 +577,12 @@ module ANL
     # @param [String] name name of the parameter.
     # @param value value to be set.
     #
-    def setp(name, value)
+    def set_parameter(name, value)
       mod = @current_module
 
-      if value.class == Hash
+      if value.is_a? Hash
         value.each do |k, vs|
-          vs = [vs] unless vs.class == Array
+          vs = [vs] unless vs.is_a? Array
           h = {}
           vs.each_with_index do |v, i|
             h[i] = v
@@ -557,29 +593,33 @@ module ANL
       end
 
       set_param =
-        if value.class == Vector
+        if value.is_a? Vector
           if value.z
             lambda{ mod.set_parameter(name, value.x, value.y, value.z) }
           else
             lambda{ mod.set_parameter(name, value.x, value.y) }
           end
-        elsif value.class == Array
+        elsif value.is_a? Array
           if value.empty?
             lambda{ mod.clear_array(name) }
           else
             f = value.first
-            if f.class == String
+            if f.is_a? String
               lambda{ mod.set_parameter_vector_str(name, value) }
-            elsif f.class == Float
+            elsif f.is_a? Float
               lambda{ mod.set_parameter_vector_d(name, value) }
-            elsif f.integer?
+            elsif f.is_a? Integer
               lambda{ mod.set_parameter_vector_i(name, value) }
             else
-              raise "ANLApp#setp(): type invalid (Array of *)."
+              raise "ANLApp#set_parameter(): type invalid (Array of *)."
             end
           end
         else
-          lambda{ mod.set_parameter(name, value) }
+          if value.is_a? Integer
+            lambda{ mod.set_parameter_integer(name, value) }
+          else
+            lambda{ mod.set_parameter(name, value) }
+          end
         end
 
       set_param_or_raise = lambda do
@@ -729,7 +769,7 @@ module ANL
       end
 
       if parameters
-        parameters.each{|name, value| setp(name.to_s, value) }
+        parameters.each{|name, value| set_parameter(name.to_s, value) }
       end
       if block_given?
         if self.definition_already_done?
@@ -1094,6 +1134,8 @@ module ANL
               '"'+param.value_string+'"'
             when 'double'
               param.value_string.to_f.to_s
+            when 'bool'
+              {'1'=>'true', '0'=>'false'}[param.value_string]
             when '2-vector'
               x, y = param.value_string.strip.split(/\s+/)
               'vec('+x.to_f.to_s+', '+y.to_f.to_s+')'

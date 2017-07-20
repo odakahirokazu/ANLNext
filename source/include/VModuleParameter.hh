@@ -21,19 +21,16 @@
 #define ANL_VModuleParameter_H 1
 
 #include <cstddef>
+#include <cstdint>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <list>
 #include <map>
 #include <memory>
+#include <utility>
 
 #include <boost/property_tree/ptree.hpp>
-
-#if ANL_USE_READLINE
-#include <readline/readline.h>
-#include <readline/history.h>
-#endif /* ANL_USE_READLINE */
 
 namespace anl
 {
@@ -108,6 +105,8 @@ public:
   virtual void set_value(double x, double y);
   virtual void set_value(double x, double y, double z);
 
+  virtual void set_value_integer(intmax_t v);
+
   virtual void clear_array() {}
 
   virtual bool get_value(bool) const;
@@ -120,6 +119,8 @@ public:
   virtual std::list<std::string> get_value(const std::list<std::string>&) const;
   virtual std::vector<double> get_value(double, double) const;
   virtual std::vector<double> get_value(double, double, double) const;
+
+  virtual intmax_t get_value_integer() const;
 
   virtual void output(std::ostream& ) const {}
   virtual void input(std::istream& ) {}
@@ -172,8 +173,8 @@ public:
 
 protected:
   virtual bool ask_base();
-  virtual void ask_base_out(std::ostream& ost);
-  virtual bool ask_base_in(std::istream& ist);
+  virtual void ask_base_out(std::ostream& os);
+  virtual bool ask_base_in(std::istream& is);
   std::string special_message_to_ask() const;
   void throw_type_match_exception(const std::string& message="") const;
 

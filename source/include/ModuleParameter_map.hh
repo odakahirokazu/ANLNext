@@ -224,14 +224,15 @@ public:
   {
     std::cout << "Define table of " << name() << ":" << std::endl;
     ModuleParameter<std::string> keyParam(key_name_, &buffer_key_);
-    keyParam.set_question(name()+" (OK for exit)");
+    keyParam.set_question(name()+" | break => '!' | keep -> '='");
     
-    __ref__().clear();
+    container_type container;
     if (first_input()) { initialize_default_value_elements(); }
 
     while (1) {
       keyParam.ask();
-      if (buffer_key_=="ok" || buffer_key_=="OK") break;
+      if (buffer_key_=="=") { return false; }
+      if (buffer_key_=="!") { break; }
       
       value_info_set<0>(&default_value_, value_category());
       
@@ -244,9 +245,10 @@ public:
       
       value_type t;
       value_info_get<0>(&t, value_category());
-      __ref__().insert(std::make_pair(buffer_key_, t));
-      buffer_key_ = "OK";
+      container.insert(std::make_pair(buffer_key_, t));
     }
+
+    __ref__() = std::move(container);
     return true;
   }
 

@@ -19,9 +19,26 @@
 
 #include "VModuleParameter.hh"
 #include <sstream>
-#include <climits>
+#include <limits>
 #include <boost/format.hpp>
 #include "ANLException.hh"
+
+#if ANL_USE_READLINE
+#include "CLIUtility.hh"
+#endif /* ANL_USE_READLINE */
+
+namespace {
+
+void trim_right(std::string& line)
+{
+  std::string::iterator it =
+    std::find_if(line.rbegin(), line.rend(), [](int c) {
+        return !std::isspace(c);
+      }).base();
+  line.erase(it, line.end());
+}
+
+} /* anonynous namespace */
 
 namespace anl {
 
@@ -106,6 +123,13 @@ void VModuleParameter::set_value(double x, double y, double z)
   throw_type_match_exception(oss.str());
 }
 
+void VModuleParameter::set_value_integer(intmax_t v)
+{
+  std::ostringstream oss;
+  oss << v << " " << "[intmax_t]";
+  throw_type_match_exception(oss.str());
+}
+
 bool VModuleParameter::get_value(bool) const
 {
   throw_type_match_exception("bool");
@@ -166,6 +190,12 @@ std::vector<double> VModuleParameter::get_value(double, double, double) const
   return {};
 }
 
+intmax_t VModuleParameter::get_value_integer() const
+{
+  throw_type_match_exception("intmax_t");
+  return 0;
+}
+
 void VModuleParameter::print(std::ostream& os) const
 {
   os << name() << ": " << *this
@@ -182,62 +212,71 @@ std::string VModuleParameter::value_string() const
   return oss.str();
 }
 
-void VModuleParameter::ask_base_out(std::ostream& ost)
+void VModuleParameter::ask_base_out(std::ostream& os)
 {
   if (question()=="") {
-    ost << name() << " ";
+    os << name() << " ";
   }
   else {
-    ost << question() << " ";
+    os << question() << " ";
   }
   
-  ost << ((unit_name()!="") ? "[" : "")
-      << unit_name()
-      << ((unit_name()!="") ? "] " : "")
-      << "? " << *this;
+  os << ((unit_name()!="") ? "[" : "")
+     << unit_name()
+     << ((unit_name()!="") ? "] " : "")
+     << "? " << *this;
 
-  ost << special_message_to_ask();
-  ost << " : ";
-  ost.flush();
+  os << special_message_to_ask();
+  os << " : ";
+  os.flush();
 }
 
-bool VModuleParameter::ask_base_in(std::istream& ist)
-{  
-  char c;
-  ist.get(c);
-  if (c=='\n') return false;
-  ist.putback(c);
-  ist >> *this;
-  ist.ignore(INT_MAX, '\n');
+bool VModuleParameter::ask_base_in(std::istream& is)
+{
+  std::string line;
+  std::getline(is, line);
+  trim_right(line);
+  if (line.size() == 0) { return false; }
+
+  std::istringstream iss(line);
+  if (line==";") { std::string tmp; iss >> tmp; }
+  iss >> *this;
+  if (!iss) {
+    const std::string message
+      = (boost::format("Input error: %s [%s]") % name() % type_name()).str();
+    BOOST_THROW_EXCEPTION( ANLException(message) );
+  }
   return true;
 }
 
+#if ANL_USE_READLINE
 bool VModuleParameter::ask_base()
 {
-#if ANL_USE_READLINE
-  std::ostringstream ost;
-  ask_base_out(ost);
-  
-  char* line;
-  line = readline(ost.str().c_str());
-  if (strlen(line)>0) {
-  add_history(line);
-  std::istringstream ist(line);
-    free(line);
-    line = 0;
-    ist >> *this;
-    return true;
+  std::ostringstream os;
+  ask_base_out(os);
+
+  ReadLine reader;
+  const int count = reader.read(os.str().c_str());
+  if (count == -1) { return false; }
+  if (count == 0) { return false; }
+  std::string line = reader.str();
+  std::istringstream iss(line);
+  if (line==";") { std::string tmp; iss >> tmp; }
+  iss >> *this;
+  if (!iss) {
+    const std::string message
+      = (boost::format("Input error: %s [%s]") % name() % type_name()).str();
+    BOOST_THROW_EXCEPTION( ANLException(message) );
   }
-  else {
-    if (line) free(line);
-    line = 0;
-    return false;
-  }
+  return true;
+}
 #else /* ANL_USE_READLINE */
+bool VModuleParameter::ask_base()
+{
   ask_base_out(std::cout);
   return ask_base_in(std::cin);
-#endif /* ANL_USE_READLINE */
 }
+#endif /* ANL_USE_READLINE */
 
 std::string VModuleParameter::special_message_to_ask() const
 {

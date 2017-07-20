@@ -49,18 +49,22 @@ bool ModuleParameter<T>::ask_sequential(const std::true_type&)
 
   std::string buffer(default_string());
   ModuleParameter<std::string> stringParam(name(), &buffer);
-  stringParam.set_question(name()+" (OK for exit)");
+  stringParam.set_question(name()+" | break => '!' | keep => '='");
   value_type t;
   ModuleParameter<value_type> param(name(), &t);
+  param.set_unit(unit(), unit_name());
   
-  __ref__().clear();
+  T container;
   while (1) {
     stringParam.ask();
-    if (buffer=="ok" || buffer=="OK") { break; }
+    if (buffer=="=") { return false; }
+    if (buffer=="!") { break; }
     param.set_value(boost::lexical_cast<value_type>(buffer));
-    __ref__().push_back(t);
-    buffer = "OK";
+    container.push_back(t);
+    buffer = "!";
   }
+
+  __ref__() = std::move(container);
   return true;
 }
 
@@ -90,6 +94,7 @@ void ModuleParameter<T>::set_value_impl(call_type val,
   using iter_type = typename T::iterator;
   using value_type = typename std::iterator_traits<iter_type>::value_type;
 
+  __ref__().clear();
   for (iter_type it=val.begin(); it!=val.end(); ++it) {
     value_type t;
     ModuleParameter<value_type> param("", &t);
@@ -161,43 +166,35 @@ void ModuleParameter<T>::output_impl(std::ostream& os,
 
 template <typename T>
 void ModuleParameter<T>::input_impl(std::istream& is,
-                                    std::random_access_iterator_tag)
-{
-  using iter_type = typename T::iterator;
-  using value_type = typename std::iterator_traits<iter_type>::value_type;
-
-  std::size_t n = 0;
-  is >> n;
-  if (!is) return;
-  __ref__().resize(n);
-  for (std::size_t i=0; i<n; ++i) {
-    value_type t;
-    ModuleParameter<value_type> param("", &t);
-    param.set_unit(unit(), unit_name());
-    param.set_expression(expression());
-    is >> param;
-    __ref__().at(i) = t;
-  }
-}
-
-template <typename T>
-void ModuleParameter<T>::input_impl(std::istream& is,
                                     std::forward_iterator_tag)
 {
   using iter_type = typename T::iterator;
   using value_type = typename std::iterator_traits<iter_type>::value_type;
-  
-  std::size_t n = 0;
-  is >> n;
-  if (!is) return;
-  for (std::size_t i=0; i<n; ++i) {
+
+  if (is.eof()) {
+    __ref__().clear();
+    return;
+  }
+
+  T container;
+  while (true) {
     value_type t;
     ModuleParameter<value_type> param("", &t);
     param.set_unit(unit(), unit_name());
     param.set_expression(expression());
     is >> param;
-    __ref__().push_back(t);
+    if (is) {
+      container.push_back(t);
+      if (is.eof()) {
+        is.clear();
+        break;
+      }
+    }
+    else {
+      return;
+    }
   }
+  __ref__() = std::move(container);
 }
 
 } /* namespace anl */

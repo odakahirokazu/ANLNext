@@ -8,6 +8,7 @@
 %}
 
 %include "exception.i"
+%include "stdint.i"
 %include "std_string.i"
 %include "std_vector.i"
 %include "std_list.i"
@@ -87,6 +88,8 @@ class VModuleParameter
   // std::list<std::string> get_value(const std::list<std::string>&) const;
   std::vector<double> get_value(double, double) const;
   std::vector<double> get_value(double, double, double) const;
+
+  intmax_t get_value_integer() const;
 
   std::string map_key_name() const;
   std::size_t num_value_elements() const;
@@ -183,6 +186,7 @@ class BasicModule
                      const std::vector<std::string>& val);
   void set_parameter(const std::string& name, double x, double y);
   void set_parameter(const std::string& name, double x, double y, double z);
+  void set_parameter_integer(const std::string& name, intmax_t val);
 
   void clear_array(const std::string& name);
 

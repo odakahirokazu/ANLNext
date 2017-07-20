@@ -42,13 +42,11 @@
 #include "OrderKeeper.hh"
 
 #if ANL_USE_READLINE
-#include <readline/readline.h>
-#include <readline/history.h>
-
 #include <unistd.h>
 #include <sys/select.h>
 #include <sys/time.h>
 #include <sys/types.h>
+#include "CLIUtility.hh"
 #endif /* ANL_USE_READLINE */
 
 
@@ -255,12 +253,6 @@ ANLStatus ANLManager::Analyze(long int num_events, bool enable_console)
     analysisThread.join();
     analysisThreadFinished_ = true;
     interactiveThread.join();
-    
-#if ANL_USE_READLINE
-    rl_reset_terminal(NULL);
-    rl_initialize();
-    rl_deprep_terminal();
-#endif
   }
   else {
     std::cout << "\n"
@@ -569,79 +561,59 @@ void ANLManager::__void_process_analysis(ANLStatus* status)
 
 void ANLManager::interactive_session()
 {
-#if ANL_USE_READLINE
   while (1) {
-    fd_set readFDSet;
-    FD_ZERO(&readFDSet);
-    FD_SET(0, &readFDSet); // check STDIN (= 0)
-    struct timeval timeout{1, 0}; // 1 s, 0 us
-    const int retval = select(1, &readFDSet, nullptr, nullptr, &timeout);
-    if (retval == -1) {
-      std::cout << "Error by select() in ANLManager::interactive_sesson()" << std::endl;
-      return;
-    }
-    if (retval == 0) {
-      if (analysisThreadFinished_) {
+#if ANL_USE_READLINE
+    {
+      fd_set readFDSet;
+      FD_ZERO(&readFDSet);
+      FD_SET(0, &readFDSet); // check STDIN (= 0)
+      struct timeval timeout{1, 0}; // 1 s, 0 us
+      const int retval = select(1, &readFDSet, nullptr, nullptr, &timeout);
+      if (retval == -1) {
+        std::cout << "Error by select() in ANLManager::interactive_sesson()" << std::endl;
         return;
       }
-      continue;
+      if (retval == 0) {
+        if (analysisThreadFinished_) {
+          return;
+        }
+        continue;
+      }
     }
 
-    std::unique_ptr<char> line(readline("ANL> "));
-    if (line) {
-      if (std::strcmp(line.get(), ".q") == 0) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        std::cout << " ---> Quit\n" << std::endl;
-        requested_ = ANLRequest::quit;
-        return;
-      }
-      else if (std::strcmp(line.get(), ".i") == 0) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        std::cout << " ---> Show event index\n" << std::endl;
-        requested_ = ANLRequest::show_event_index;
-      }
-      else if (std::strcmp(line.get(), ".s") == 0) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        std::cout << " ---> Show evs summary\n" << std::endl;
-        requested_ = ANLRequest::show_evs_summary;
-      }
-      else {
-        ;
-      }
-    }
-    else {
-      return;
-    }
-  }
+    ReadLine reader;
+    const int count = reader.read("ANL> ");
+    if (count == -1) { return; }
+    if (count == 0) { continue; }
+    std::string line = reader.str();
 #else /* ANL_USE_READLINE */
-  std::string buf;
-  while (1) {
-    std::cin >> buf;
+    std::string line;
+    std::getline(std::cin, line);
+    std::cout << "ANL>> " << line;
     if (analysisThreadFinished_) {
       return;
     }
-
-    if (buf==".q") {
+#endif /* ANL_USE_READLINE */
+    if (line == ".q") {
       std::lock_guard<std::mutex> lock(mutex_);
-      std::cout << "ANL>> " << buf << " ---> Quit\n" << std::endl;
+      std::cout << " ---> Quit\n" << std::endl;
       requested_ = ANLRequest::quit;
       return;
     }
-    else if (buf==".i") {
+    else if (line == ".i") {
       std::lock_guard<std::mutex> lock(mutex_);
-      std::cout << "ANL>> " << buf << " ---> Show event index\n" << std::endl;
+      std::cout << " ---> Show event index\n" << std::endl;
       requested_ = ANLRequest::show_event_index;
     }
-    else if (buf==".s") {
+    else if (line == ".s") {
       std::lock_guard<std::mutex> lock(mutex_);
-      std::cout << "ANL>> " << buf << " ---> Show evs summary\n" << std::endl;
+      std::cout << " ---> Show evs summary\n" << std::endl;
       requested_ = ANLRequest::show_evs_summary;
     }
     else {
-      std::cout << "ANL>> " << buf << "\n" << std::endl;
+      ;
     }
   }
-#endif /* ANL_USE_READLINE */
 }
 
 ANLStatus process_one_event(long int iEvent,

@@ -115,17 +115,7 @@ void BasicModule::ask_parameters()
 {
   for (const auto& param: moduleParameters_) {
     if (param->is_hidden()) { continue; }
-    
     param->ask();
-    
-    if (!std::cin) {
-      std::cin.clear();
-      std::cin.ignore(INT_MAX, '\n');
-
-      std::string message
-        = (boost::format("Input error: %s") % (param->name())).str();
-      BOOST_THROW_EXCEPTION( ANLException(this, message) );
-    }
   }
 }
 
@@ -164,16 +154,6 @@ void BasicModule::ask_parameter(const std::string& name,
         param->set_question(question);
       }
       param->ask();
-
-      if (!std::cin) {
-        std::cin.clear();
-        std::cin.ignore(INT_MAX, '\n');
-
-        std::string message
-          = (boost::format("Input error: %s") % (param->name())).str();
-        BOOST_THROW_EXCEPTION( ANLException(this, message) );
-      }
-      
       break;
     }
   }

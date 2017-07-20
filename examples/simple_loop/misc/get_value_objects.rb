@@ -36,46 +36,14 @@ class MyApp < ANL::ANLApp
   end
 end
 
-def print_params(mod)
-  mod.parameter_list.each do |param|
-    type = param.type_name
-    case type
-    when "vector"
-      puts "#{param.name} #{param.type_name} #{param.get_value_auto}"
-      param.size_of_container.times do |k|
-        puts "  index: #{k}"
-        param.retrieve_from_container(k)
-        param.num_value_elements.times do |i|
-          value_element = param.value_element_info(i)
-          puts "    #{value_element.name} #{value_element.type_name} #{value_element.get_value_auto}"
-        end
-      end
-    when "map"
-      puts "#{param.name} #{param.type_name} #{param.get_value_auto}"
-      param.map_key_list.each do |k|
-        puts "  key: #{k}"
-        param.retrieve_from_container(k)
-        param.num_value_elements.times do |i|
-          value_element = param.value_element_info(i)
-          puts "    #{value_element.name} #{value_element.type_name} #{value_element.get_value_auto}"
-        end
-      end
-    else
-      puts "#{param.name} #{param.type_name} #{param.get_value_auto}"
-    end
-  end
-end
-
 a = MyApp.new
 a.setup
 a.define
 a.load_all_parameters
-a.print_all_parameters
+# a.print_all_parameters
 
-[:MyModule, :MyMapModule, :MyVectorModule, :MyModule2].each do |module_id|
-  puts "ANL Module #{module_id}"
-  print_params(a.get_module(module_id))
-  puts ""
-end
-
-p a.get_module(:MyModule).get_parameter(:my_parameter3).get_value_auto
+p a.get_module(:MyModule).get_parameter_value(:my_parameter1)
+p a.get_module(:MyModule).get_parameter_value(:my_parameter3)
+p a.get_module(:MyModule).get_parameter_value(:my_vector2)
+p a.get_module(:MyMapModule).get_parameter_value(:my_map)
+p a.get_module(:MyVectorModule).get_parameter_value(:my_vector)

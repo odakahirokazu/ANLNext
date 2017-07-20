@@ -79,8 +79,14 @@ class ModuleParameter : public VModuleParameter
                            std::is_floating_point<T>::value>;
   using is_integer_type =
     std::integral_constant<bool,
-                           std::is_integral<T>::value>;
-  using call_type = typename boost::call_traits<T>::param_type;
+                           std::is_integral<T>::value
+                           && !std::is_same<T, bool>::value>;
+  using call_type =
+    typename std::conditional<is_integer_type::value,
+                              int,
+                              typename boost::call_traits<T>::param_type>::type;
+  using get_return_type =
+    typename std::conditional<is_integer_type::value, int, T>::type;
   
 public:
   ModuleParameter(const std::string& name, T* ptr);
@@ -106,12 +112,18 @@ public:
   }
   using VModuleParameter::set_value;
 
+  void set_value_integer(intmax_t val) override
+  {
+    set_value_integer_impl(val,
+                           is_integer_type());
+  }
+
   void clear_array() override
   {
     clear_array_impl(is_container_type());
   }
   
-  T get_value(call_type dummy) const override
+  get_return_type get_value(call_type dummy) const override
   {
     return get_value_impl(dummy,
                           is_container_type(),
@@ -119,7 +131,12 @@ public:
                           is_floating_point_type());
   }
   using VModuleParameter::get_value;
-  
+
+  intmax_t get_value_integer() const override
+  {
+    return get_value_integer_impl(is_integer_type());
+  }
+
   void output(std::ostream& os) const override
   {
     output_impl(os,
@@ -221,7 +238,20 @@ private:
   
   void set_value_impl(call_type val, std::random_access_iterator_tag);
   void set_value_impl(call_type val, std::forward_iterator_tag);
+
+  void set_value_integer_impl(intmax_t val,
+                              const std::false_type&)
+  {
+    VModuleParameter::set_value_integer(val);
+  }
   
+  void set_value_integer_impl(intmax_t val,
+                              const std::true_type&)
+  {
+    // integer
+    __ref__() = static_cast<T>(val);
+  }
+
   template <bool b0>
   void clear_array_impl(const std::integral_constant<bool, b0>&)
   {
@@ -279,6 +309,17 @@ private:
   T get_value_impl(call_type dummy, std::random_access_iterator_tag) const;
   T get_value_impl(call_type dummy, std::forward_iterator_tag) const;
 
+  intmax_t get_value_integer_impl(const std::false_type&) const
+  {
+    return VModuleParameter::get_value_integer();
+  }
+
+  intmax_t get_value_integer_impl(const std::true_type&) const
+  {
+    // integer
+    return __ref__();
+  }
+
   template <bool b0, bool b1, bool b2>
   void output_impl(std::ostream& os,
                    const std::integral_constant<bool, b0>&,
@@ -334,7 +375,9 @@ private:
                    const std::integral_constant<bool, b2>&)
   {
     // non-container, non-number
-    is >> __ref__();
+    T val;
+    is >> val;
+    if (is) { __ref__() = std::move(val); }
   }
   
   template <bool b0, bool b2>
@@ -343,12 +386,13 @@ private:
                   const std::true_type&,
                   const std::integral_constant<bool, b2>&)
   {
-
     // non-container, number, int
     using std::string;
-    if (expression().find("hex")!=string::npos) is >> std::hex;
-    else if (expression().find("dec")!=string::npos) is >> std::dec;
-    is >> __ref__();
+    if (expression().find("hex")!=string::npos) { is >> std::hex; }
+    else if (expression().find("dec")!=string::npos) { is >> std::dec; }
+    T val(0);
+    is >> val;
+    if (is) { __ref__() = val; }
     is >> std::dec;
   }
 
@@ -376,7 +420,6 @@ private:
     input_impl(is, IterCategory());
   }
   
-  void input_impl(std::istream& is, std::random_access_iterator_tag);
   void input_impl(std::istream& is, std::forward_iterator_tag);
 
   std::string special_message_to_ask();
@@ -411,7 +454,7 @@ private:
                                             const std::integral_constant<bool, b0>&) const
   {
     // non-container
-    T dummy = T();
+    get_return_type dummy = T();
     pt.put("value", get_value(dummy));
   }
 
@@ -420,7 +463,7 @@ private:
   {
     // container
     boost::property_tree::ptree pt_values;
-    T dummy = T();
+    get_return_type dummy = T();
     T values = get_value(dummy);
     for (const auto& v: values) {
       boost::property_tree::ptree pt_value;

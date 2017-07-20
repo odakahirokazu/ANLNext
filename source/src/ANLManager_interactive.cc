@@ -28,10 +28,7 @@
 #include <boost/lexical_cast.hpp>
 
 #if ANL_USE_READLINE
-#include <memory>
-#include <cstring>
-#include <readline/readline.h>
-#include <readline/history.h>
+#include "CLIUtility.hh"
 #endif /* ANL_USE_READLINE */
 
 
@@ -46,23 +43,20 @@ ANLStatus ANLManager::do_interactive_comunication()
 
   while (true) {
 #if ANL_USE_READLINE
-    std::unique_ptr<char> line( readline("iANL> ") );
-    if (line == nullptr) {
-      return AS_QUIT_ERROR;
-    }
-
-    const int count = std::strlen(line.get());
+    ReadLine reader;
+    reader.set_completion_candidates(
+      {"quit", "help", "chain", "show", "review", "modify", "print", "on", "off", "initialize"}
+      );
+    const int count = reader.read("iANL> ");
+    if (count == -1) { return AS_QUIT_ERROR; }
     if (count == 0) { continue; }
-
-    add_history(line.get());
-
-    std::istringstream iss;
-    iss.str(line.get());
-    std::istream& is = iss;
+    std::istringstream is(reader.c_str());
 #else
-    std::istream& is = std::cin;
     std::cout << "iANL>> ";
     std::cout.flush();
+    std::string line;
+    std::getline(std::cin, line);
+    std::istringstream is(line);
 #endif /* ANL_USE_READLINE */
 
     std::string cmd;
@@ -86,31 +80,35 @@ ANLStatus ANLManager::do_interactive_comunication()
       show_analysis();
       interactive_print_param(-1);
     }
-    else if (cmd == "rev") {
+    else if (cmd == "review") {
       try {
         status = interactive_modify_param(-1);
       }
       catch (const ANLException& ex) {
-        std::cout << "Exception!\n"
+        std::cout << "<ANLException> ===> "
                   << *boost::get_error_info<ANLErrorInfo>(ex) << std::endl;
       }
     }
-    else if (cmd == "mod") {
-      std::string moduleName;
+    else if (cmd == "modify") {
+      std::string moduleID;
       int n;
-      is >> moduleName;
+      is >> moduleID;
       if (is) {
         try {
-          if (std::isdigit(moduleName[0])) {
-            n = boost::lexical_cast<int>(moduleName);
+          if (std::isdigit(moduleID[0])) {
+            n = boost::lexical_cast<int>(moduleID);
           }
           else {
-            n = module_index(moduleName, false);
+            n = module_index(moduleID, false);
+            if (n<0) {
+              std::cout << "Module not found: " << moduleID << std::endl;
+              continue;
+            }
           }
           status = interactive_modify_param(n);
         }
         catch (const ANLException& ex) {
-          std::cout << "Exception!\n"
+          std::cout << "<ANLException> ===> "
                     << *boost::get_error_info<ANLErrorInfo>(ex) << std::endl;
         }
       }
@@ -119,15 +117,19 @@ ANLStatus ANLManager::do_interactive_comunication()
       }
     }
     else if (cmd == "print") {
-      std::string moduleName;
+      std::string moduleID;
       int n;
-      is >> moduleName;
+      is >> moduleID;
       if (is) {
-        if (std::isdigit(moduleName[0])) {
-          n = boost::lexical_cast<int>(moduleName);
+        if (std::isdigit(moduleID[0])) {
+          n = boost::lexical_cast<int>(moduleID);
         }
         else {
-          n = module_index(moduleName, false);
+          n = module_index(moduleID, false);
+          if (n<0) {
+            std::cout << "Module not found: " << moduleID << std::endl;
+            continue;
+          }
         }
         interactive_print_param(n);
       }
@@ -136,15 +138,19 @@ ANLStatus ANLManager::do_interactive_comunication()
       }
     }
     else if (cmd == "on") {
-      std::string moduleName;
+      std::string moduleID;
       int n;
-      is >> moduleName;
+      is >> moduleID;
       if (is) {
-        if (std::isdigit(moduleName[0])) {
-          n = boost::lexical_cast<int>(moduleName);
+        if (std::isdigit(moduleID[0])) {
+          n = boost::lexical_cast<int>(moduleID);
         }
         else {
-          n = module_index(moduleName, false);
+          n = module_index(moduleID, false);
+          if (n<0) {
+            std::cout << "Module not found: " << moduleID << std::endl;
+            continue;
+          }
         }
         interactive_module_switch(n, true);
       }
@@ -153,15 +159,19 @@ ANLStatus ANLManager::do_interactive_comunication()
       }
     }
     else if (cmd == "off") {
-      std::string moduleName;
+      std::string moduleID;
       int n;
-      is >> moduleName;
+      is >> moduleID;
       if (is) {
-        if (std::isdigit(moduleName[0])) {
-          n = boost::lexical_cast<int>(moduleName);
+        if (std::isdigit(moduleID[0])) {
+          n = boost::lexical_cast<int>(moduleID);
         }
         else {
-          n = module_index(moduleName, false);
+          n = module_index(moduleID, false);
+          if (n<0) {
+            std::cout << "Module not found: " << moduleID << std::endl;
+            continue;
+          }
         }
         interactive_module_switch(n, false);
       }
@@ -169,7 +179,7 @@ ANLStatus ANLManager::do_interactive_comunication()
         std::cout << "usage: off <module_id>" << std::endl;
       }
     }
-    else if (cmd == "init") {
+    else if (cmd == "init" || cmd == "initialize") {
       break;
     }
     else {
@@ -185,20 +195,23 @@ ANLStatus ANLManager::do_interactive_comunication()
 void ANLManager::interactive_comunication_help()
 {
   std::cout << "-------------------------------------------------------\n"
-            << "  help              : show this help\n"
-            << "  chain             : show analysis chain\n"
-            << "  show              : show analysis chain\n"
-            << "                      and all parameters\n"
-            << "  print <module_id> : show paramters of the module\n"
-            << "  rev               : review parameters of all modules\n"
-            << "                      (same as \"mod -1\")\n"
-            << "  mod <module_id>   : modify parameters of the module\n"
-            << "                      (enter mod_communicate() method)\n"
-            << "  on <module_id>    : switch on the module\n"
-            << "  off <module_id>   : switch off the module\n"
-            << "  init              : initialize to start analysis\n"
-            << "  quit              : quit this program\n"
+            << "  help               : show this help\n"
+            << "  chain              : show analysis chain\n"
+            << "  show               : show analysis chain\n"
+            << "                       and all parameters\n"
+            << "  print <module_id>  : show paramters of the module\n"
+            << "  review             : review parameters of all modules\n"
+            << "                       (same as \"modify -1\")\n"
+            << "  modify <module_id> : modify parameters of the module\n"
+            << "                       (enter mod_communicate() method)\n"
+            << "  on <module_id>     : switch on the module\n"
+            << "  off <module_id>    : switch off the module\n"
+            << "  initialize         : initialize to start analysis\n"
+            << "  init               : = initialize\n"
+            << "  quit               : quit this program\n"
             << "\n"
+            << "   <module_id> can be either module ID    (string)\n"
+            << "                          or module index (integer)\n"
             << "   <module_id> = -1 for all\n"
             << "-------------------------------------------------------\n"
             << std::endl;
@@ -300,21 +313,18 @@ ANLStatus ANLManager::do_interactive_analysis()
 
   while (true) {
 #if ANL_USE_READLINE
-    std::unique_ptr<char> line( readline("iANL> ") );
-    if (line == nullptr) {
-      return AS_QUIT_ERROR;
-    }
-
-    const int count = std::strlen(line.get());
+    ReadLine reader;
+    reader.set_completion_candidates({"exit", "help", "run"});
+    const int count = reader.read("iANL> ");
+    if (count == -1) { return AS_QUIT_ERROR; }
     if (count == 0) { continue; }
-
-    add_history(line.get());
-
-    std::istringstream iss;
-    iss.str(line.get());
-    std::istream& is = iss;
+    std::istringstream is(reader.c_str());
 #else
-    std::istream& is = std::cin;
+    std::cout << "iANL>> ";
+    std::cout.flush();
+    std::string line;
+    std::getline(std::cin, line);
+    std::istringstream is(line);
 #endif /* ANL_USE_READLINE */
 
     std::string cmd;

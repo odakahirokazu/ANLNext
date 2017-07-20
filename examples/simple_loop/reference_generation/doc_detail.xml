@@ -48,6 +48,34 @@
         <default_value></default_value>
         <description></description>
       </param>
+      <param container_type=''>
+        <name>my_parameter11</name>
+        <type>integer</type>
+        <unit></unit>
+        <default_value>200</default_value>
+        <description></description>
+      </param>
+      <param container_type=''>
+        <name>my_parameter12</name>
+        <type>int</type>
+        <unit></unit>
+        <default_value>20000</default_value>
+        <description></description>
+      </param>
+      <param container_type=''>
+        <name>my_parameter13</name>
+        <type>integer</type>
+        <unit></unit>
+        <default_value>5000000000</default_value>
+        <description></description>
+      </param>
+      <param container_type=''>
+        <name>my_parameter21</name>
+        <type>bool</type>
+        <unit></unit>
+        <default_value>1</default_value>
+        <description></description>
+      </param>
     </parameters>
   </module>
   <module>

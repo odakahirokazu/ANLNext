@@ -178,6 +178,7 @@ public:
                      double x, double y);
   void set_parameter(const std::string& name,
                      double x, double y, double z);
+  void set_parameter_integer(const std::string& name, intmax_t val);
   void clear_array(const std::string& name);
   void set_map_key(const std::string& key)
   {
@@ -497,6 +498,13 @@ void BasicModule::set_parameter(const std::string& name,
 {
   ModuleParamIter it = find_parameter(name);
   (*it)->set_value(x, y);
+}
+
+inline
+void BasicModule::set_parameter_integer(const std::string& name, intmax_t val)
+{
+  ModuleParamIter it = find_parameter(name);
+  (*it)->set_value_integer(val);
 }
 
 inline

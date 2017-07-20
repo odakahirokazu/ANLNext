@@ -151,16 +151,17 @@ public:
   bool ask() override
   {
     std::cout << "Define table of " << name() << ":" << std::endl;
-    std::string buffer = "OK";
+    std::string buffer = "";
     ModuleParameter<std::string> keyParam("continue", &buffer);
-    keyParam.set_question(name()+" (OK for exit)");
+    keyParam.set_question(name()+" | break => '!' | keep -> '='");
     
-    __ref__().clear();
+    container_type container;
     if (first_input()) { initialize_default_value_elements(); }
 
     while (1) {
       keyParam.ask();
-      if (buffer=="ok" || buffer=="OK") { break; }
+      if (buffer=="=") { return false; }
+      if (buffer=="!") { break; }
       
       value_info_set<0>(&default_value_, value_category());
       
@@ -171,9 +172,10 @@ public:
       
       value_type t;
       value_info_get<0>(&t, value_category());
-      __ref__().push_back(t);
-      buffer = "OK";
+      container.push_back(t);
     }
+
+    __ref__() = std::move(container);
     return true;
   }
 

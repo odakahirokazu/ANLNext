@@ -10,6 +10,7 @@
 #define MyModule_H 1
 
 #include <anl/BasicModule.hh>
+#include <cstdint>
 
 class MyModule : public anl::BasicModule
 {
@@ -33,6 +34,12 @@ private:
   std::vector<int> myVector1_;
   std::vector<double> myVector2_;
   std::vector<std::string> myVector3_;
+
+  int16_t myParameter11_;
+  int32_t myParameter12_;
+  int64_t myParameter13_;
+
+  bool myParameter21_;
 };
 
 #endif /* MyModule_H */

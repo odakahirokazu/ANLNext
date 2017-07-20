@@ -26,10 +26,22 @@
 namespace anl
 {
 
+template <typename T, bool b>
+struct param_type_info_one
+{
+  static std::string name() { return "unknown"; }
+};
+
+template <typename T>
+struct param_type_info_one<T, true>
+{
+  static std::string name() { return "integer"; }
+};
+
 template <typename... Ts>
 struct param_type_info
 {
-  static std::string name() { return ""; }
+  static std::string name() { return "unknowns"; }
 };
 
 template <typename T, typename... Ts>
@@ -39,6 +51,13 @@ struct param_type_info<T, Ts...>
   {
     return param_type_info<T>::name() + ", " + param_type_info<Ts...>::name();
   }
+};
+
+template <typename T>
+struct param_type_info<T>
+{
+  static std::string name()
+  { return param_type_info_one<T, std::is_integral<T>::value>::name(); }
 };
 
 template <>
