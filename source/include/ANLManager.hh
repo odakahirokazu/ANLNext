@@ -171,10 +171,27 @@ ANLStatus process_one_event(long int iEvent,
 
 void count_evs(ANLStatus status, EvsManager& evsManager);
 
-inline void print_event_index(long int index)
+inline void print_event_index(long int index, std::ostream& os=std::cout)
 {
-  std::cout << "Event : " << std::dec << std::setw(10) << index << std::endl;
-  std::cout.width(0);
+  os << "Event : " << std::dec << std::setw(10) << index << std::endl;
+  os.width(0);
+}
+
+inline void print_exception(const ANLException& ex, std::ostream& os=std::cout)
+{
+  os << "################################################################\n"
+     << "#                                                              #\n"
+     << "#                       ANL Exception                          #\n"
+     << "#                                                              #\n"
+     << "################################################################\n"
+     << "\n"
+     << ex.to_string()
+     << "\n"
+     << "################################################################\n"
+     << "\n"
+     << "---- displayed by ANLManager::print_exception() ----\n"
+     << "\n"
+     << std::endl;
 }
 
 } /* namespace anl */

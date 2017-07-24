@@ -176,7 +176,6 @@ protected:
   virtual void ask_base_out(std::ostream& os);
   virtual bool ask_base_in(std::istream& is);
   std::string special_message_to_ask() const;
-  void throw_type_match_exception(const std::string& message="") const;
 
   virtual void set_module_pointer_of_value_info(BasicModule*) {}
   

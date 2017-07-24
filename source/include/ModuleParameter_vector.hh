@@ -361,9 +361,7 @@ private:
     }
 
     if (it == std::end(value_info_)) {
-      const std::string message
-        = (boost::format("Parameter is not found: %s") % name).str();
-      BOOST_THROW_EXCEPTION( ANLException(message) );
+      BOOST_THROW_EXCEPTION( ParameterError(this, (boost::format("Value element is not found: %s") % name).str()) );
     }
     return it;
   }
@@ -379,9 +377,7 @@ private:
     }
 
     if (it == std::end(value_info_)) {
-      const std::string message
-        = (boost::format("Parameter is not found: %s") % name).str();
-      BOOST_THROW_EXCEPTION( ANLException(message) );
+      BOOST_THROW_EXCEPTION( ParameterError(this, (boost::format("Value element is not found: %s") % name).str()) );
     }
     return it;
   }

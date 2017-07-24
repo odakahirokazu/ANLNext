@@ -54,9 +54,7 @@ BasicModule* ANLManagerMT::access_to_module(int chainID, const std::string& modu
     }
   }
 
-  const std::string message
-    = (boost::format("Chain ID is not found: %d") % chainID).str();
-  BOOST_THROW_EXCEPTION( ANLException(message) );
+  BOOST_THROW_EXCEPTION( ANLException((boost::format("Chain does not exist ===> Chain ID: %d") % chainID).str()) );
   return nullptr;
 }
 
@@ -64,17 +62,7 @@ void ANLManagerMT::clone_modules(int chainID)
 {
   ClonedChainSet chain(chainID, *evsManager_);
   for (BasicModule* mod: modules_) {
-    std::unique_ptr<BasicModule> cloned(mod->clone());
-    if (cloned.get()) {
-      chain.push(std::move(cloned));
-    }
-    else {
-      const std::string message
-        = (boost::format("Module %s (ID: %s) can not be cloned.")
-           % mod->module_name()
-           % mod->module_id()).str();
-      BOOST_THROW_EXCEPTION( ANLException(message) );
-    }
+    chain.push(mod->clone());
   }
   chain.setup_module_access();
   clonedChains_.push_back(std::move(chain));

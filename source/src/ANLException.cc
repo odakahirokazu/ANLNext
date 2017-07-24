@@ -20,6 +20,7 @@
 #include "ANLException.hh"
 #include <boost/format.hpp>
 #include "BasicModule.hh"
+#include "VModuleParameter.hh"
 
 namespace anl
 {
@@ -38,52 +39,81 @@ int ANLException::VerboseLevel()
 
 ANLException::ANLException(const BasicModule* mod)
 {
-  *this << ANLErrorInfoOnModule(mod->module_id());
+  *this << ErrorInfoOnModuleID(mod->module_id());
+  *this << ErrorInfoOnModuleName(mod->module_name());
 }
 
 ANLException::ANLException(const std::string& message)
 {
-  *this << ANLErrorInfo(message);
+  *this << ErrorMessage(message);
 }
 
 ANLException::ANLException(const BasicModule* mod,
                            const std::string& message)
 {
-  *this << ANLErrorInfoOnModule(mod->module_id());
-  *this << ANLErrorInfo(message);
+  *this << ErrorInfoOnModuleID(mod->module_id());
+  *this << ErrorInfoOnModuleName(mod->module_name());
+  *this << ErrorMessage(message);
 }
 
-void ANLException::set_message(const std::string& message)
+const ANLException& ANLException::set_message(const std::string& message) const
 {
-  *this << ANLErrorInfo(message);
+  *this << ErrorMessage(message);
+  return *this;
+}
+
+const ANLException& ANLException::append_message(const std::string& message) const
+{
+  std::ostringstream oss;
+  oss << get_message() << "\n" << message;
+  *this << ErrorMessage(oss.str());
+  return *this;
+}
+
+const ANLException& ANLException::prepend_message(const std::string& message) const
+{
+  std::ostringstream oss;
+  oss << message << "\n" << get_message();
+  *this << ErrorMessage(oss.str());
+  return *this;
 }
 
 std::string ANLException::get_message() const
 {
-  const std::string* message = boost::get_error_info<ANLErrorInfo>(*this);
+  const std::string* message = boost::get_error_info<ErrorMessage>(*this);
   if (message==nullptr) {
     return std::string();
   }
   return *message;
 }
 
-void ANLException::set_module_info(const BasicModule* mod)
+const ANLException& ANLException::set_module_info(const BasicModule* mod) const
 {
-  *this << ANLErrorInfoOnModule(mod->module_id());
+  *this << ErrorInfoOnModuleID(mod->module_id());
+  *this << ErrorInfoOnModuleName(mod->module_name());
+  return *this;
 }
 
 std::string ANLException::to_string() const
 {
   if (VerboseLevel() == 1) {
+    const std::string* message    = boost::get_error_info<ErrorMessage>(*this);
+    const std::string* moduleID   = boost::get_error_info<ErrorInfoOnModuleID>(*this);
+    const std::string* moduleName = boost::get_error_info<ErrorInfoOnModuleName>(*this);
+    const std::string* method     = boost::get_error_info<ErrorInfoOnMethod>(*this);
+    const int64_t* loopIndex      = boost::get_error_info<ErrorInfoOnLoopIndex>(*this);
+    const int* chainID            = boost::get_error_info<ErrorInfoOnChainID>(*this);
+    const std::string* parameter  = boost::get_error_info<ErrorInfoOnParameter>(*this);
+
     std::ostringstream oss;
-    const std::string* message = boost::get_error_info<ANLErrorInfo>(*this);
-    const std::string* method = boost::get_error_info<ANLErrorInfoOnMethod>(*this);
-    const std::string* module = boost::get_error_info<ANLErrorInfoOnModule>(*this);
-    const int64_t* loopIndex = boost::get_error_info<ANLErrorInfoOnLoopIndex>(*this);
-    if (message) { oss << *message << "\n"; }
-    if (module) { oss << "Module ID: " << *module << "\n"; }
-    if (method) { oss << "Method: " << *method << "\n"; }
-    if (loopIndex) { oss << "Loop index: " << *loopIndex << "\n"; }
+    if (message)    { oss << *message << "\n"; }
+    if (message)    { oss << "<Error information>\n"; }
+    if (chainID)    { oss << "Chain ID: " << *chainID << "\n"; }
+    if (moduleID)   { oss << "Module ID: " << *moduleID << "\n"; }
+    if (moduleName) { oss << "Module Name: " << *moduleName << "\n"; }
+    if (method)     { oss << "Method: " << *method << "\n"; }
+    if (loopIndex)  { oss << "Loop index: " << *loopIndex << "\n"; }
+    if (parameter)  { oss << "Parameter:" << *parameter << "\n"; }
     return oss.str();
   }
   else if (VerboseLevel() >= 2) {
@@ -91,6 +121,68 @@ std::string ANLException::to_string() const
   }
 
   return "";
+}
+
+ModuleCloningError::ModuleCloningError(const BasicModule* mod)
+  : ANLException(mod)
+{
+  set_message("<ModuleCloningError>");
+  append_message((boost::format("Module %s (ID: %s) can not be cloned.")
+                  % mod->module_name()
+                  % mod->module_id()).str());
+}
+
+ModuleAccessError::ModuleAccessError(const std::string& message, const std::string& module_key)
+{
+  set_message("<ModuleAccessError>");
+  append_message(message+": "+module_key);
+}
+
+ParameterNotFoundError::ParameterNotFoundError(const BasicModule* mod, const std::string& name)
+  : ANLException(mod)
+{
+  set_message("<ParameterNotFound>");
+  append_message((boost::format("Parameter is not found: %s / %s")
+                  % mod->module_id()
+                  % name).str());
+}
+
+ParameterError::ParameterError(const VModuleParameter* param, const std::string& message)
+{
+  *this << ErrorInfoOnParameter(param->name());
+  set_message("<ParameterError>");
+  append_message((boost::format("Error in parameter: %s [%s]")
+                  % param->name()
+                  % param->type_name()).str());
+  append_message(message);
+}
+
+ParameterInputError::ParameterInputError(const VModuleParameter* param)
+  : ParameterError(param, "<ParameterInputError>")
+{
+  append_message("Invalid input!");
+}
+
+ParameterTypeError::ParameterTypeError(const VModuleParameter* param,
+                                       const std::string& type_tried)
+  : ParameterError(param, "<ParameterTypeError>")
+{
+  append_message((boost::format("Type does not match: %s [%s] => [%s]")
+                  % param->name()
+                  % param->type_name()
+                  % type_tried).str());
+}
+
+ParameterTypeError::ParameterTypeError(const VModuleParameter* param,
+                                       const std::string& type_tried,
+                                       const std::string& value_tried)
+  : ParameterError(param, "<ParameterTypeError>")
+{
+  append_message((boost::format("Type does not match in assignment: %s [%s] <= %s [%s]")
+                  % param->name()
+                  % param->type_name()
+                  % value_tried
+                  % type_tried).str());
 }
 
 } /* namespace anl */

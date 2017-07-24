@@ -339,9 +339,7 @@ BasicModule* ANLManager::access_to_module(int chainID,
     return moduleAccess_->get_module_NC(moduleID);
   }
 
-  const std::string message
-    = (boost::format("Chain ID is not found: %d") % chainID).str();
-  BOOST_THROW_EXCEPTION( ANLException(message) );
+  BOOST_THROW_EXCEPTION( ANLException((boost::format("Chain does not exist ===> Chain ID: %d") % chainID).str()) );
   return nullptr;
 }
 
@@ -637,10 +635,14 @@ ANLStatus process_one_event(long int iEvent,
         status = mod->mod_analyze();
       }
       catch (ANLException& ex) {
-        ex << ANLErrorInfoOnLoopIndex(iEvent);
-        ex << ANLErrorInfoOnMethod( mod->module_name() + "::mod_analyze" );
-        ex << ANLErrorInfoOnModule( mod->module_id() );
-        throw;
+        ex << ErrorInfoOnLoopIndex(iEvent);
+        ex << ErrorInfoOnMethod( mod->module_name() + "::mod_analyze" );
+        ex << ErrorInfoOnModuleID( mod->module_id() );
+        ex << ErrorInfoOnModuleName( mod->module_name() );
+        ex << ErrorInfoOnChainID( mod->copy_id() );
+        print_exception(ex);
+        status = AS_QUIT_ERROR;
+        break;
       }
         
       counters[iModule].count_up_by_result(status);
@@ -680,10 +682,14 @@ ANLStatus process_one_event(long int iEvent,
         status = mod->mod_analyze();
       }
       catch (ANLException& ex) {
-        ex << ANLErrorInfoOnLoopIndex(iEvent);
-        ex << ANLErrorInfoOnMethod( mod->module_name() + "::mod_analyze" );
-        ex << ANLErrorInfoOnModule( mod->module_id() );
-        throw;
+        ex << ErrorInfoOnLoopIndex(iEvent);
+        ex << ErrorInfoOnMethod( mod->module_name() + "::mod_analyze" );
+        ex << ErrorInfoOnModuleID( mod->module_id() );
+        ex << ErrorInfoOnModuleName( mod->module_name() );
+        ex << ErrorInfoOnChainID( mod->copy_id() );
+        print_exception(ex);
+        status = AS_QUIT_ERROR;
+        break;
       }
 
       counters[iModule].count_up_by_result(status);

@@ -52,7 +52,7 @@ struct ANLException
   static int VerboseLevel();
 
   ANLException();
-  ~ANLException();
+  virtual ~ANLException();
   const std::string to_string();
 };
 
@@ -196,8 +196,6 @@ class BasicModule
   void set_value_element(const std::string& name, const std::string& val);
   void insert_to_container();
 
-  %exception;
-
   void print_parameters() const;
 
   %extend {
@@ -222,6 +220,8 @@ class BasicModule
       $self->insert_to_container();
     }
   }
+
+  %exception;
 };
 
 class ANLManager

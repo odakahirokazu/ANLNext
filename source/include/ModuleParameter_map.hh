@@ -184,9 +184,7 @@ public:
   {
     auto it = __ref__().find(key);
     if (it == __ref__().end()) {
-      const std::string message
-        = (boost::format("Map \"%s\" does not have key: %s") % name() % key).str();
-      BOOST_THROW_EXCEPTION( ANLException(message) );
+      BOOST_THROW_EXCEPTION( ParameterError(this, (boost::format("Map does not have key: %s") % key).str()) );
     }
     value_type value = (*it).second;
     value_info_set<0>(&value, value_category());
@@ -236,8 +234,8 @@ public:
       
       value_info_set<0>(&default_value_, value_category());
       
-      const std::size_t NumValue = value_info_.size();
-      for (std::size_t i=0; i<NumValue; ++i) {
+      const std::size_t NumValues = value_info_.size();
+      for (std::size_t i=0; i<NumValues; ++i) {
         if (value_enable(i, value_category())) {
           value_info_[i]->ask();
         }
@@ -436,9 +434,7 @@ private:
     }
 
     if (it == std::end(value_info_)) {
-      const std::string message
-        = (boost::format("Parameter is not found: %s") % name).str();
-      BOOST_THROW_EXCEPTION( ANLException(message) );
+      BOOST_THROW_EXCEPTION( ParameterError(this, (boost::format("Value element is not found: %s") % name).str()) );
     }
     return it;
   }
@@ -454,9 +450,7 @@ private:
     }
 
     if (it == std::end(value_info_)) {
-      const std::string message
-        = (boost::format("Parameter is not found: %s") % name).str();
-      BOOST_THROW_EXCEPTION( ANLException(message) );
+      BOOST_THROW_EXCEPTION( ParameterError(this, (boost::format("Value element is not found: %s") % name).str()) );
     }
     return it;
   }

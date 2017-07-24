@@ -28,12 +28,16 @@
 namespace anl
 {
 
-using ANLErrorInfo = boost::error_info<struct tag_ANLError, std::string>;
-using ANLErrorInfoOnModule = boost::error_info<struct tag_ANLError_Module, std::string>;
-using ANLErrorInfoOnMethod = boost::error_info<struct tag_ANLError_Method, std::string>;
-using ANLErrorInfoOnLoopIndex = boost::error_info<struct tag_ANLError_LoopIndex, int64_t>;
+using ErrorMessage          = boost::error_info<struct tag_ErrorMessage, std::string>;
+using ErrorInfoOnModuleID   = boost::error_info<struct tag_ErrorModuleID, std::string>;
+using ErrorInfoOnModuleName = boost::error_info<struct tag_ErrorModuleName, std::string>;
+using ErrorInfoOnMethod     = boost::error_info<struct tag_ErrorMethod, std::string>;
+using ErrorInfoOnLoopIndex  = boost::error_info<struct tag_ErrorLoopIndex, int64_t>;
+using ErrorInfoOnChainID    = boost::error_info<struct tag_ErrorChainID, int>;
+using ErrorInfoOnParameter  = boost::error_info<struct tag_ErrorParameter, std::string>;
 
 class BasicModule;
+class VModuleParameter;
 
 struct exception_base : virtual std::exception, virtual boost::exception
 {
@@ -46,6 +50,7 @@ struct exception_base : virtual std::exception, virtual boost::exception
  * @date 2010-06-xx
  * @date 2016-08-19 | modify design
  * @date 2017-07-07 | rename methods
+ * @date 2017-07-24 | ANL exception class system is redesigned
  */
 struct ANLException : virtual exception_base
 {
@@ -60,13 +65,53 @@ public:
   ANLException(const BasicModule* mod,
                const std::string& message);
 
-  void set_module_info(const BasicModule* module);
-  void set_message(const std::string& message);
+  virtual ~ANLException() = default;
+
+  /* apply const specifiers similarly to operator<<(const boost::exception&, v) */
+  const ANLException& set_module_info(const BasicModule* module) const;
+  const ANLException& set_message(const std::string& message) const;
+  const ANLException& append_message(const std::string& message) const;
+  const ANLException& prepend_message(const std::string& message) const;
+
   std::string get_message() const;
   std::string to_string() const;
 
 private:
   static int __VerboseLevel__;
+};
+
+struct ModuleCloningError : anl::ANLException
+{
+  explicit ModuleCloningError(const BasicModule* mod);
+};
+
+struct ModuleAccessError : anl::ANLException
+{
+  explicit ModuleAccessError(const std::string& message, const std::string& module_key);
+};
+
+struct ParameterNotFoundError : anl::ANLException
+{
+  ParameterNotFoundError(const BasicModule* mod, const std::string& name);
+};
+
+struct ParameterError : anl::ANLException
+{
+  ParameterError(const VModuleParameter* param, const std::string& message);
+};
+
+struct ParameterInputError : ParameterError
+{
+  ParameterInputError(const VModuleParameter* param);
+};
+
+struct ParameterTypeError : ParameterError
+{
+  ParameterTypeError(const VModuleParameter* param,
+                     const std::string& type_tried);
+  ParameterTypeError(const VModuleParameter* param,
+                     const std::string& type_tried,
+                     const std::string& value_tried);
 };
 
 } /* namespace anl */

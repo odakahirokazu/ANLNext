@@ -20,6 +20,7 @@
 #include "VModuleParameter.hh"
 #include <sstream>
 #include <limits>
+#include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 #include "ANLException.hh"
 
@@ -55,144 +56,122 @@ VModuleParameter::~VModuleParameter() = default;
 
 void VModuleParameter::set_value(bool v)
 {
-  std::ostringstream oss;
-  oss << v << " " << "[bool]";
-  throw_type_match_exception(oss.str());
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "bool", boost::lexical_cast<std::string>(v)) );
 }
 
 void VModuleParameter::set_value(int v)
 {
-  std::ostringstream oss;
-  oss << v << " " << "[int]";
-  throw_type_match_exception(oss.str());
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "int", boost::lexical_cast<std::string>(v)) );
 }
 
 void VModuleParameter::set_value(double v)
 {
-  std::ostringstream oss;
-  oss << v << " " << "[double]";
-  throw_type_match_exception(oss.str());
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "double", boost::lexical_cast<std::string>(v)) );
 }
 
 void VModuleParameter::set_value(const std::string& v)
 {
-  std::ostringstream oss;
-  oss << v << " " << "[string]";
-  throw_type_match_exception(oss.str());
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "string", v) );
 }
 
 void VModuleParameter::set_value(const std::vector<int>& v)
 {
-  std::ostringstream oss;
-  oss << "vector(" << v.size() << ") " << "[vector<int>]";
-  throw_type_match_exception(oss.str());
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "vector<int>", (boost::format("vector(size=%d)") % v.size()).str()) );
 }
 
 void VModuleParameter::set_value(const std::vector<double>& v)
 {
-  std::ostringstream oss;
-  oss << "vector(" << v.size() << ") " << "[vector<double>]";
-  throw_type_match_exception(oss.str());
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "vector<double>", (boost::format("vector(size=%d)") % v.size()).str()) );
 }
 
 void VModuleParameter::set_value(const std::vector<std::string>& v)
 {
-  std::ostringstream oss;
-  oss << "vector(" << v.size() << ") " << "[vector<string>]";
-  throw_type_match_exception(oss.str());
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "vector<string>", (boost::format("vector(size=%d)") % v.size()).str()) );
 }
 
 void VModuleParameter::set_value(const std::list<std::string>& v)
 {
-  std::ostringstream oss;
-  oss << "list: " << v.front() << " ... "<< "[list<string>]";
-  throw_type_match_exception(oss.str());
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "list<string>", (boost::format("list(size=%d)") % v.size()).str()) );
 }
 
 void VModuleParameter::set_value(double x, double y)
 {
-  std::ostringstream oss;
-  oss << "( " << x << " " << y << " ) " << "[2-vector]";
-  throw_type_match_exception(oss.str());
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "2-vector", (boost::format("(%f, %f)") % x % y).str()) );
 }
 
 void VModuleParameter::set_value(double x, double y, double z)
 {
-  std::ostringstream oss;
-  oss << "( " << x << " " << y << " " << z << " ) " << "[3-vector]";
-  throw_type_match_exception(oss.str());
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "3-vector", (boost::format("(%f, %f, %f)") % x % y % z).str()) );
 }
 
 void VModuleParameter::set_value_integer(intmax_t v)
 {
-  std::ostringstream oss;
-  oss << v << " " << "[intmax_t]";
-  throw_type_match_exception(oss.str());
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "intger", boost::lexical_cast<std::string>(v)) );
 }
 
 bool VModuleParameter::get_value(bool) const
 {
-  throw_type_match_exception("bool");
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "bool") );
   return false;
 }
 
 int VModuleParameter::get_value(int) const
 {
-  throw_type_match_exception("int");
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "int") );
   return 0;
 }
 
 double VModuleParameter::get_value(double) const
 {
-  throw_type_match_exception("double");
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "double") );
   return 0.0;
 }
 
 std::string VModuleParameter::get_value(const std::string&) const
 {
-  throw_type_match_exception("string");
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "string") );
   return "";
 }
 
 std::vector<int> VModuleParameter::get_value(const std::vector<int>&) const
 {
-  throw_type_match_exception("vector<int>");
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "vector<int>") );
   return {};
 }
 
 std::vector<double> VModuleParameter::get_value(const std::vector<double>&) const
 {
-  throw_type_match_exception("vector<double>");
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "vector<double>") );
   return {};
 }
 
 std::vector<std::string> VModuleParameter::get_value(const std::vector<std::string>&) const
 {
-  throw_type_match_exception("vector<string>");
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "vector<string>") );
   return {};
 }
 
 std::list<std::string> VModuleParameter::get_value(const std::list<std::string>&) const
 {
-  throw_type_match_exception("list<string>");
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "list<string>") );
   return {};
 }
 
 std::vector<double> VModuleParameter::get_value(double, double) const
 {
-  throw_type_match_exception("2-vector");
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "2-vector") );
   return {};
 }
 
 std::vector<double> VModuleParameter::get_value(double, double, double) const
 {
-  throw_type_match_exception("3-vector");
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "3-vector") );
   return {};
 }
 
 intmax_t VModuleParameter::get_value_integer() const
 {
-  throw_type_match_exception("intmax_t");
+  BOOST_THROW_EXCEPTION( ParameterTypeError(this, "integer") );
   return 0;
 }
 
@@ -242,9 +221,7 @@ bool VModuleParameter::ask_base_in(std::istream& is)
   if (line==";") { std::string tmp; iss >> tmp; }
   iss >> *this;
   if (!iss) {
-    const std::string message
-      = (boost::format("Input error: %s [%s]") % name() % type_name()).str();
-    BOOST_THROW_EXCEPTION( ANLException(message) );
+    BOOST_THROW_EXCEPTION( ParameterInputError(this) );
   }
   return true;
 }
@@ -264,9 +241,7 @@ bool VModuleParameter::ask_base()
   if (line==";") { std::string tmp; iss >> tmp; }
   iss >> *this;
   if (!iss) {
-    const std::string message
-      = (boost::format("Input error: %s [%s]") % name() % type_name()).str();
-    BOOST_THROW_EXCEPTION( ANLException(message) );
+    BOOST_THROW_EXCEPTION( ParameterInputError(this) );
   }
   return true;
 }
@@ -282,13 +257,6 @@ std::string VModuleParameter::special_message_to_ask() const
 {
   std::string message("");
   return message;
-}
-
-void VModuleParameter::throw_type_match_exception(const std::string& message) const
-{
-  const std::string message2
-    = (boost::format("Type does not match: %s [%s] <= %s") % name() % type_name() % message).str();
-  BOOST_THROW_EXCEPTION( ANLException(message2) );
 }
 
 } /* namespace anl */

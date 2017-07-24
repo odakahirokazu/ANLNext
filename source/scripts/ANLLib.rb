@@ -611,7 +611,7 @@ module ANL
             elsif f.is_a? Integer
               lambda{ mod.set_parameter_vector_i(name, value) }
             else
-              raise "ANLApp#set_parameter(): type invalid (Array of *)."
+              raise "AnalysisChain#set_parameter(): type invalid (Array of *)."
             end
           end
         else
@@ -626,7 +626,7 @@ module ANL
         begin
           set_param.call
         rescue
-          puts "Set parameter exception: #{name} in module #{mod.module_id}"
+          puts "AnalysisChain#set_parameter(): exception detected ===> #{name} in module #{mod.module_id}"
           raise
         end
       end
@@ -673,7 +673,7 @@ module ANL
         begin
           set_param.call
         rescue
-          puts "Set parameter exception: #{map_name}/#{key} in module #{mod.module_id}"
+          puts "AnalysisChain#insert_to_map(): exception detected ===> #{map_name}/#{key} in module #{mod.module_id}"
           raise
         end
       end
@@ -719,7 +719,7 @@ module ANL
         begin
           set_param.call
         rescue
-          puts "Set parameter exception: #{vector_name} in module #{mod.module_id}"
+          puts "AnalysisChain#insert_to_map(): exception detected ===> #{vector_name} in module #{mod.module_id}"
           raise
         end
       end
@@ -839,17 +839,23 @@ module ANL
     end
     private :proposed_display_frequency
 
-    # Check ANL status. If it is not OK, raise an exception.
+    # Check ANL status if we can go ahead.
+    # If it is OK, return true,
+    # if it is an error, raise an exception,
+    # otherwise false.
     # This method is private.
     #
     # param[Integer] status ANL status.
     # param[String] function name of ANL routine.
     #
     def check_status(status, function_name)
-      unless status == AS_OK
+      if status == AS_OK
+        return true
+      end
+      if status == AS_SKIP_ERROR || status == AS_QUIT_ERROR || status == AS_QUIT_ALL_ERROR
         raise "#{function_name} returned #{ANL.show_status(status)}."
       end
-      true
+      return false
     end
     private :check_status
 
@@ -866,7 +872,7 @@ module ANL
       @anl.set_modules(vec)
 
       status = @anl.Define()
-      check_status(status, "Define()")
+      check_status(status, "Define()") or return
       @stage = :definition_done
 
       return @anl
@@ -902,7 +908,7 @@ module ANL
       end
 
       status = anl.PreInitialize()
-      check_status(status, "PreInitialize()")
+      check_status(status, "PreInitialize()") or return
       @stage = :pre_initialization_done
 
       if @modification_block
@@ -914,7 +920,7 @@ module ANL
       end
 
       status = anl.Initialize()
-      check_status(status, "Initialize()")
+      check_status(status, "Initialize()") or return
       @stage = :initialization_done
 
       puts ""
@@ -925,17 +931,17 @@ module ANL
       puts ""
       puts "<End Analysis>   | Time: " + Time.now.to_s
       $stdout.flush
-      check_status(status, "Analyze()")
+      check_status(status, "Analyze()") or return
       @stage = :analysis_done
 
       status = anl.Finalize()
-      check_status(status, "Finalize()")
+      check_status(status, "Finalize()") or return
       @stage = :finalization_done
     rescue RuntimeError => ex
       puts ""
       puts "################################################################"
       puts "#                                                              #"
-      puts "#                       ANL EXCEPTION                          #"
+      puts "#                       ANL Exception                          #"
       puts "#                                                              #"
       puts "################################################################"
       puts ""
@@ -943,6 +949,7 @@ module ANL
       puts ""
       puts "################################################################"
       puts ""
+      puts "---- displayed by <Ruby> AnalysisChain#run() ----"
       puts ""
 
       if ANL::ANLException.VerboseLevel >= 3
@@ -958,7 +965,7 @@ module ANL
       load_all_parameters() unless @stage == :loading_parameters_done
 
       status = anl.do_interactive_comunication()
-      check_status(status, "do_interactive_comunication()")
+      check_status(status, "do_interactive_comunication()") or return
 
       if parameters_json_filename() && parameters_json_master()
         File.open(parameters_json_filename(), 'w') do |fout|
@@ -967,7 +974,7 @@ module ANL
       end
 
       status = anl.PreInitialize()
-      check_status(status, "PreInitialize()")
+      check_status(status, "PreInitialize()") or return
       @stage = :pre_initialization_done
 
       if parameters_json_filename() && !parameters_json_master()
@@ -975,21 +982,21 @@ module ANL
       end
 
       status = anl.Initialize()
-      check_status(status, "Initialize()")
+      check_status(status, "Initialize()") or return
       @stage = :initialization_done
 
       status = anl.do_interactive_analysis()
-      check_status(status, "do_interactive_analysis()")
+      check_status(status, "do_interactive_analysis()") or return
       @stage = :analysis_done
 
       status = anl.Finalize()
-      check_status(status, "Finalize()")
+      check_status(status, "Finalize()") or return
       @stage = :finalization_done
     rescue RuntimeError => ex
       puts ""
       puts "################################################################"
       puts "#                                                              #"
-      puts "#                       ANL EXCEPTION                          #"
+      puts "#                       ANL Exception                          #"
       puts "#                                                              #"
       puts "################################################################"
       puts ""
@@ -997,6 +1004,7 @@ module ANL
       puts ""
       puts "################################################################"
       puts ""
+      puts "---- displayed by <Ruby> AnalysisChain#run_interactive() ----"
       puts ""
 
       if ANL::ANLException.VerboseLevel >= 3

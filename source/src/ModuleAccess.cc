@@ -39,9 +39,7 @@ void ModuleAccess::register_module(const std::string& name,
         moduleMap_.erase(name);
         break;
       case ConflictOption::error:
-        const std::string message
-          = (boost::format("Module ID or alias %s already exists.") % name).str();
-        BOOST_THROW_EXCEPTION( ANLException(message) );
+        BOOST_THROW_EXCEPTION( ANLException((boost::format("Module ID or alias %s already exists.") % name).str()) );
         break;
     }
   }

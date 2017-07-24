@@ -86,8 +86,7 @@ public:
   BasicModule& operator=(const BasicModule& r) = delete;
   BasicModule& operator=(BasicModule&& r) = delete;
 
-  virtual std::unique_ptr<BasicModule> clone()
-  { return __clone__(); }
+  virtual std::unique_ptr<BasicModule> clone();
 
 protected:
   BasicModule(const BasicModule& r);
@@ -292,12 +291,12 @@ protected:
    */
 
   template <typename T>
-  void get_module(const std::string& name, T* ptr)
-  { *ptr = static_cast<T>(moduleAccess_->get_module(name)); }
+  void get_module(const std::string& name, const T** ptr)
+  { *ptr = static_cast<const T*>(moduleAccess_->get_module(name)); }
 
   template <typename T>
-  void get_module_NC(const std::string& name, T* ptr)
-  { *ptr = static_cast<T>(moduleAccess_->get_module_NC(name)); }
+  void get_module_NC(const std::string& name, T** ptr)
+  { *ptr = static_cast<T*>(moduleAccess_->get_module_NC(name)); }
 
   template <typename T>
   const T* get_module(const std::string& name)
@@ -308,10 +307,10 @@ protected:
   { return static_cast<T*>(moduleAccess_->get_module_NC(name)); }
 
   template <typename T>
-  void get_module_IF(const std::string& name, T* ptr);
+  void get_module_IF(const std::string& name, const T** ptr);
 
   template <typename T>
-  void get_module_IFNC(const std::string& name, T* ptr);
+  void get_module_IFNC(const std::string& name, T** ptr);
 
   bool exist_module(const std::string& name)
   { return moduleAccess_->exist(name); }
@@ -454,9 +453,7 @@ ModuleParamIter BasicModule::find_parameter(const std::string& name)
     }
   }
   if (it == std::end(moduleParameters_)) {
-    const std::string message
-      = (boost::format("Parameter is not found: %s / %s") % module_id() % name).str();
-    BOOST_THROW_EXCEPTION( ANLException(this, message) );
+    BOOST_THROW_EXCEPTION( ParameterNotFoundError(this, name) );
   }
   return it;
 }
@@ -471,9 +468,7 @@ ModuleParamConstIter BasicModule::find_parameter(const std::string& name) const
     }
   }
   if (it == std::end(moduleParameters_)) {
-    const std::string message
-      = (boost::format("Parameter is not found: %s / %s") % module_id() % name).str();
-    BOOST_THROW_EXCEPTION( ANLException(this, message) );
+    BOOST_THROW_EXCEPTION( ParameterNotFoundError(this, name) );
   }
   return it;
 }
@@ -529,25 +524,21 @@ void BasicModule::set_value_element(const std::string& name, T val)
 
 template <typename T>
 inline
-void BasicModule::get_module_IF(const std::string& name, T *ptr)
+void BasicModule::get_module_IF(const std::string& name, const T** ptr)
 {
-  *ptr = dynamic_cast<T>(moduleAccess_->get_module(name));
-  if (ptr==0) {
-    const std::string message
-      = (boost::format("Dynamic cast failed from ANL Module: %s") % name).str();
-    BOOST_THROW_EXCEPTION( ANLException(this, message) );
+  *ptr = dynamic_cast<const T*>(moduleAccess_->get_module(name));
+  if (*ptr==0) {
+    BOOST_THROW_EXCEPTION( ModuleAccessError("Dynamic cast failed -- Module", name) );
   }
 }
 
 template <typename T>
 inline
-void BasicModule::get_module_IFNC(const std::string& name, T *ptr)
+void BasicModule::get_module_IFNC(const std::string& name, T** ptr)
 {
-  *ptr = dynamic_cast<T>(moduleAccess_->get_module_NC(name));
-  if (ptr==0) {
-    const std::string message
-      = (boost::format("Dynamic cast failed from ANL Module: %s") % name).str();
-    BOOST_THROW_EXCEPTION( ANLException(this, message) );
+  *ptr = dynamic_cast<T*>(moduleAccess_->get_module_NC(name));
+  if (*ptr==0) {
+    BOOST_THROW_EXCEPTION( ModuleAccessError("Dynamic cast failed -- Module", name) );
   }
 }
 

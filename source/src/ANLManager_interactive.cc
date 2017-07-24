@@ -84,9 +84,9 @@ ANLStatus ANLManager::do_interactive_comunication()
       try {
         status = interactive_modify_param(-1);
       }
-      catch (const ANLException& ex) {
-        std::cout << "<ANLException> ===> "
-                  << *boost::get_error_info<ANLErrorInfo>(ex) << std::endl;
+      catch (const ParameterInputError& ex) {
+        print_exception(ex);
+        std::cout << "You can retry." << std::endl;
       }
     }
     else if (cmd == "modify") {
@@ -107,9 +107,9 @@ ANLStatus ANLManager::do_interactive_comunication()
           }
           status = interactive_modify_param(n);
         }
-        catch (const ANLException& ex) {
-          std::cout << "<ANLException> ===> "
-                    << *boost::get_error_info<ANLErrorInfo>(ex) << std::endl;
+        catch (const ParameterInputError& ex) {
+          print_exception(ex);
+          std::cout << "You can retry." << std::endl;
         }
       }
       else {

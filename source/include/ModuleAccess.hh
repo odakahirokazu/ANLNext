@@ -72,9 +72,7 @@ BasicModule* ModuleAccess::get_module_NC(const std::string& name) const
 {
   ANLModuleMap::const_iterator it = moduleMap_.find(name);
   if (it == std::end(moduleMap_)) {
-    const std::string message
-      = (boost::format("Module is not found: %s") % name).str();
-    BOOST_THROW_EXCEPTION( ANLException(message) );
+    BOOST_THROW_EXCEPTION( ModuleAccessError("Module is not found", name) );
   }
   return it->second;
 }

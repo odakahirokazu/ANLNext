@@ -68,6 +68,15 @@ BasicModule::BasicModule(const BasicModule& r)
   }
 }
 
+std::unique_ptr<BasicModule> BasicModule::clone()
+{
+  std::unique_ptr<BasicModule> m(__clone__());
+  if (m==nullptr) {
+    BOOST_THROW_EXCEPTION( ModuleCloningError(this) );
+  }
+  return m;
+}
+
 void BasicModule::copy_parameters(const BasicModule& r)
 {
   moduleParameters_.clear();
@@ -121,42 +130,26 @@ void BasicModule::ask_parameters()
 
 void BasicModule::undefine_parameter(const std::string& name)
 {
-  ModuleParamIter it = std::begin(moduleParameters_);
-  while (it != std::end(moduleParameters_)) {
-    if (name == (*it)->name()) {
-      it = moduleParameters_.erase(it);
-    }
-    else {
-      ++it;
-    }
-  }
+  ModuleParamIter it = find_parameter(name);
+  moduleParameters_.erase(it);
 }
 
 void BasicModule::hide_parameter(const std::string& name, bool hidden)
 {
-  for (auto& param: moduleParameters_) {
-    if (param->name() == name) {
-      if (!hidden) { currentParameter_ = param; }
-      param->set_hidden(hidden);
-      break;
-    }
-  }
+  ModuleParamIter it = find_parameter(name);
+  if (!hidden) { currentParameter_ = *it; }
+  (*it)->set_hidden(hidden);
 }
 
 void BasicModule::ask_parameter(const std::string& name,
                                 const std::string& question)
 {
-  for (const auto& param: moduleParameters_) {
-    if (param->name() == name) {
-      currentParameter_ = param;
-      
-      if (question!="") {
-        param->set_question(question);
-      }
-      param->ask();
-      break;
-    }
+  ModuleParamIter it = find_parameter(name);
+  currentParameter_ = *it;
+  if (question!="") {
+    (*it)->set_question(question);
   }
+  (*it)->ask();
 }
 
 void BasicModule::define_evs(const std::string& key)

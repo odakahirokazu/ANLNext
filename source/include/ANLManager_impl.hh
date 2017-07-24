@@ -42,18 +42,23 @@ ANLStatus routine_modfn(T func,
     
     try {
       status = ((*mod).*func)();
-      if (status != AS_OK ) {
-        std::cout << "\n"
-                  << "ANLManager: <" << func_id << "> routine stopped.\n"
-                  << mod->module_name() << "::mod_" << func_id
-                  << " returned " << status << std::endl;
-        break;
-      }
     }
     catch (ANLException& ex) {
-      ex << ANLErrorInfoOnMethod( mod->module_name() + "::mod_" + func_id );
-      ex << ANLErrorInfoOnModule( mod->module_id() );
-      throw;
+      ex << ErrorInfoOnMethod( mod->module_name() + "::mod_" + func_id );
+      ex << ErrorInfoOnModuleID( mod->module_id() );
+      ex << ErrorInfoOnModuleName( mod->module_name() );
+      ex << ErrorInfoOnChainID( mod->copy_id() );
+      print_exception(ex);
+      status = AS_QUIT_ERROR;
+      break;
+    }
+
+    if (status != AS_OK ) {
+      std::cout << "\n"
+                << "ANLManager: <" << func_id << "> routine stopped.\n"
+                << mod->module_name() << "::mod_" << func_id
+                << " returned " << status << std::endl;
+      break;
     }
   }
   
