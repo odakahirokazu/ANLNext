@@ -248,8 +248,12 @@ ANLStatus ANLManager::Analyze(long int num_events, bool enable_console)
               << std::endl;
 
     analysisThreadFinished_ = false;
-    std::thread analysisThread(std::bind(&ANLManager::__void_process_analysis, this, &status));
+    std::promise<ANLStatus> statusPromise;
+    std::future<ANLStatus> statusFuture = statusPromise.get_future();
+    std::thread analysisThread(std::bind(&ANLManager::process_analysis_for_the_thread, this, std::placeholders::_1),
+                               std::move(statusPromise));
     std::thread interactiveThread(std::bind(&ANLManager::interactive_session, this));
+    status = statusFuture.get();
     analysisThread.join();
     analysisThreadFinished_ = true;
     interactiveThread.join();
@@ -551,10 +555,21 @@ ANLStatus ANLManager::routine_finalize()
   return routine_modfn(&BasicModule::mod_finalize, "finalize", modules_);
 }
 
-void ANLManager::__void_process_analysis(ANLStatus* status)
+void ANLManager::process_analysis_for_the_thread(std::promise<ANLStatus> statusPromise)
 {
-  ANLStatus s = process_analysis();
-  *status = s;
+  try {
+    ANLStatus s = process_analysis();
+    statusPromise.set_value(s);
+  }
+  catch (...) {
+#if 1
+    statusPromise.set_exception(std::current_exception());
+#else
+    try {
+      statusPromise.set_exception(std::current_exception());
+    } catch(...) {} // ignore an exception thrown by set_exception()
+#endif
+  }
 }
 
 void ANLManager::interactive_session()

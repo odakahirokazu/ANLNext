@@ -21,6 +21,7 @@
 #define ANL_ANLManagerMT_H 1
 
 #include "ANLManager.hh"
+#include <future>
 
 #include "ClonedChainSet.hh"
 
@@ -59,7 +60,7 @@ protected:
   void reset_counters() override;
   
   ANLStatus process_analysis() override;
-  virtual void process_analysis_in_each_thread(int iThread, ANLStatus& status);
+  virtual void process_analysis_in_each_thread(int iThread, std::promise<ANLStatus> statusPromise);
   virtual long int event_index_to_process();
 
   boost::property_tree::ptree parameters_to_property_tree() const override;

@@ -31,6 +31,7 @@
 #include <map>
 #include <atomic>
 #include <mutex>
+#include <future>
 #include <boost/property_tree/ptree.hpp>
 
 #include "ANLStatus.hh"
@@ -131,7 +132,7 @@ private:
 
   // thread mode
 private:
-  void __void_process_analysis(ANLStatus* status);
+  void process_analysis_for_the_thread(std::promise<ANLStatus> statusPromise);
   void interactive_session();
 
 protected:

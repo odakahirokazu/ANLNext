@@ -191,10 +191,18 @@ long int ANLManagerMT::event_index_to_process()
 
 ANLStatus ANLManagerMT::process_analysis()
 {
-  std::vector<ANLStatus> statusVector(NumParallels_, AS_OK);
+  std::vector<std::future<ANLStatus>> statusFutureVector;
   std::vector<std::thread> analysisThreads(NumParallels_);
   for (int i=0; i<NumParallels_; i++) {
-    analysisThreads[i] = std::thread(std::bind(&ANLManagerMT::process_analysis_in_each_thread, this, i, statusVector[i]));
+    std::promise<ANLStatus> statusPromise;
+    statusFutureVector.push_back(statusPromise.get_future());
+    analysisThreads[i] = std::thread(std::bind(&ANLManagerMT::process_analysis_in_each_thread, this, i, std::placeholders::_1),
+                                     std::move(statusPromise));
+  }
+
+  std::vector<ANLStatus> statusVector(NumParallels_, AS_OK);
+  for (int i=0; i<NumParallels_; i++) {
+    statusVector[i] = statusFutureVector[i].get();
   }
 
   for (int i=0; i<NumParallels_; i++) {
@@ -203,25 +211,41 @@ ANLStatus ANLManagerMT::process_analysis()
 
   ANLStatus status = AS_OK;
   for (ANLStatus s: statusVector) {
-    if (s == AS_SKIP_ERROR || s == AS_QUIT_ERROR || s == AS_QUIT_ALL_ERROR) {
-      status = s;
-    }
+    if (s == AS_SKIP_ERROR) { status = s; }
+  }
+  for (ANLStatus s: statusVector) {
+    if (s == AS_QUIT_ERROR) { status = s; }
+  }
+  for (ANLStatus s: statusVector) {
+    if (s == AS_QUIT_ALL_ERROR) { status = s; }
   }
 
   return status;
 }
 
-void ANLManagerMT::process_analysis_in_each_thread(int iThread, ANLStatus& status)
+void ANLManagerMT::process_analysis_in_each_thread(int iThread, std::promise<ANLStatus> statusPromise)
 {
-  status = AS_OK;
-  if (iThread==0) {
-    status = process_analysis_impl(modules_, counters_, *evsManager_);
+  try {
+    ANLStatus status = AS_OK;
+    if (iThread==0) {
+      status = process_analysis_impl(modules_, counters_, *evsManager_);
+    }
+    else {
+      using std::placeholders::_1;
+      using std::placeholders::_2;
+      using std::placeholders::_3;
+      status = clonedChains_[iThread-1].process(std::bind(&ANLManagerMT::process_analysis_impl, this, _1, _2, _3));
+    }
+    statusPromise.set_value(status);
   }
-  else {
-    using std::placeholders::_1;
-    using std::placeholders::_2;
-    using std::placeholders::_3;
-    status = clonedChains_[iThread-1].process(std::bind(&ANLManagerMT::process_analysis_impl, this, _1, _2, _3));
+  catch (...) {
+#if 1
+    statusPromise.set_exception(std::current_exception());
+#else
+    try {
+      statusPromise.set_exception(std::current_exception());
+    } catch(...) {} // ignore an exception thrown by set_exception()
+#endif
   }
 }
 
