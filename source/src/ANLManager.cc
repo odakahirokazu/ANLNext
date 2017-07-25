@@ -121,16 +121,18 @@ ANLStatus ANLManager::Define()
   }
 
   for (BasicModule* mod: modules_) {
-    const std::string moduleID = mod->module_id();
-    moduleAccess_->register_module(moduleID,
-                                   mod,
-                                   ModuleAccess::ConflictOption::error);
+    if (mod->access_permission() != ModuleAccess::Permission::privacy) {
+      const std::string moduleID = mod->module_id();
+      moduleAccess_->register_module(moduleID,
+                                     mod,
+                                     ModuleAccess::ConflictOption::error);
 
-    for (const std::pair<std::string, ModuleAccess::ConflictOption>& alias: mod->get_aliases()) {
-      if (alias.first != moduleID) {
-        moduleAccess_->register_module(alias.first,
-                                       mod,
-                                       alias.second);
+      for (const std::pair<std::string, ModuleAccess::ConflictOption>& alias: mod->get_aliases()) {
+        if (alias.first != moduleID) {
+          moduleAccess_->register_module(alias.first,
+                                         mod,
+                                         alias.second);
+        }
       }
     }
   }

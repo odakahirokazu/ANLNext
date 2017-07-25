@@ -31,6 +31,7 @@ namespace anl
 BasicModule::BasicModule()
   : orderSensitive_(false),
     moduleID_(""),
+    accessPermission_(ModuleAccess::Permission::full_access),
     moduleDescription_(""),
     moduleOn_(true),
     evsManager_(nullptr),
@@ -50,6 +51,7 @@ BasicModule::BasicModule(const BasicModule& r)
   : orderSensitive_(r.orderSensitive_),
     moduleID_(r.moduleID_),
     aliases_(r.aliases_),
+    accessPermission_(r.accessPermission_),
     moduleDescription_(r.moduleDescription_),
     moduleOn_(r.moduleOn_),
     evsManager_(nullptr),

@@ -18,11 +18,74 @@
  *************************************************************************/
 
 #include "ModuleAccess.hh"
+#include "BasicModule.hh"
 
 namespace anl
 {
 
 ModuleAccess::~ModuleAccess() = default;
+
+const BasicModule* ModuleAccess::get_module(const std::string& name) const
+{
+  ANLModuleMap::const_iterator it = moduleMap_.find(name);
+  if (it != std::end(moduleMap_)) {
+    const BasicModule* const m = it->second;
+    const Permission permission = m->access_permission();
+    if (permission == Permission::full_access || permission == Permission::read_only_access) {
+      return m;
+    }
+    else {
+      BOOST_THROW_EXCEPTION( ModuleAccessError("Module access is denied", name) );
+    }
+  }
+  else {
+    BOOST_THROW_EXCEPTION( ModuleAccessError("Module is not found", name) );
+  }
+  return nullptr;
+}
+
+BasicModule* ModuleAccess::get_module_NC(const std::string& name) const
+{
+  ANLModuleMap::const_iterator it = moduleMap_.find(name);
+  if (it != std::end(moduleMap_)) {
+    BasicModule* const m = it->second;
+    if (m->access_permission() == Permission::full_access) {
+      return m;
+    }
+    else {
+      BOOST_THROW_EXCEPTION( ModuleAccessError("Module access is denied", name) );
+    }
+  }
+  else {
+    BOOST_THROW_EXCEPTION( ModuleAccessError("Module is not found", name) );
+  }
+  return nullptr;
+}
+
+const BasicModule* ModuleAccess::request_module(const std::string& name) const
+{
+  ANLModuleMap::const_iterator it = moduleMap_.find(name);
+  if (it != std::end(moduleMap_)) {
+    const BasicModule* const m = it->second;
+    const Permission permission = m->access_permission();
+    if (permission == Permission::full_access || permission == Permission::read_only_access) {
+      return m;
+    }
+  }
+  return nullptr;
+}
+
+BasicModule* ModuleAccess::request_module_NC(const std::string& name) const
+{
+  ANLModuleMap::const_iterator it = moduleMap_.find(name);
+  if (it != std::end(moduleMap_)) {
+    BasicModule* const m = it->second;
+    if (m->access_permission() == Permission::full_access) {
+      return m;
+    }
+  }
+  return nullptr;
+}
 
 void ModuleAccess::register_module(const std::string& name,
                                    BasicModule* module,

@@ -131,6 +131,9 @@ public:
   void set_evs_manager(EvsManager* man) { evsManager_ = man; }
   void set_module_access(const ModuleAccess* aa) { moduleAccess_ = aa; }
 
+  ModuleAccess::Permission access_permission() const
+  { return accessPermission_; }
+
   /**
    * enable this module.
    */
@@ -285,6 +288,12 @@ protected:
   template <typename T>
   void add_value_element(T* ptr, const std::string& name,
                          double unit, const std::string& unit_name);
+
+  /*
+   * access permission
+   */
+  void set_access_permission(ModuleAccess::Permission v)
+  { accessPermission_ = v; }
   
   /*
    * get-module methods
@@ -315,6 +324,28 @@ protected:
   bool exist_module(const std::string& name)
   { return moduleAccess_->exist(name); }
 
+  template <typename T>
+  void request_module(const std::string& name, const T** ptr)
+  { *ptr = static_cast<const T*>(moduleAccess_->request_module(name)); }
+
+  template <typename T>
+  void request_module_NC(const std::string& name, T** ptr)
+  { *ptr = static_cast<T*>(moduleAccess_->request_module_NC(name)); }
+
+  template <typename T>
+  const T* request_module(const std::string& name)
+  { return static_cast<const T*>(moduleAccess_->request_module(name)); }
+
+  template <typename T>
+  T* request_module_NC(const std::string& name)
+  { return static_cast<T*>(moduleAccess_->request_module_NC(name)); }
+
+  template <typename T>
+  void request_module_IF(const std::string& name, const T** ptr);
+
+  template <typename T>
+  void request_module_IFNC(const std::string& name, T** ptr);
+
   /*
    * EVS methods
    */
@@ -339,6 +370,7 @@ private:
   bool orderSensitive_ = false;
   std::string moduleID_;
   std::vector<std::pair<std::string, ModuleAccess::ConflictOption>> aliases_;
+  ModuleAccess::Permission accessPermission_ = ModuleAccess::Permission::full_access;
   std::string moduleDescription_;
   bool moduleOn_ = true;
   EvsManager* evsManager_ = nullptr;
@@ -539,6 +571,32 @@ void BasicModule::get_module_IFNC(const std::string& name, T** ptr)
   *ptr = dynamic_cast<T*>(moduleAccess_->get_module_NC(name));
   if (*ptr==0) {
     BOOST_THROW_EXCEPTION( ModuleAccessError("Dynamic cast failed -- Module", name) );
+  }
+}
+
+template <typename T>
+inline
+void BasicModule::request_module_IF(const std::string& name, const T** ptr)
+{
+  const BasicModule* m = moduleAccess_->request_module(name);
+  if (m) {
+    *ptr = dynamic_cast<const T*>(m);
+  }
+  else {
+    *ptr = m;
+  }
+}
+
+template <typename T>
+inline
+void BasicModule::request_module_IFNC(const std::string& name, T** ptr)
+{
+  BasicModule* m = moduleAccess_->request_module_NC(name);
+  if (m) {
+    *ptr = dynamic_cast<T*>(m);
+  }
+  else {
+    *ptr = m;
   }
 }
 

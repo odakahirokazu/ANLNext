@@ -43,6 +43,7 @@ class ModuleAccess
 {
 public:
   enum class ConflictOption { error, yield, overwrite, remove };
+  enum class Permission { privacy, no_access, read_only_access, full_access };
 
 public:
   ModuleAccess() = default;
@@ -52,10 +53,10 @@ public:
   ModuleAccess& operator=(const ModuleAccess&) = default;
   ModuleAccess& operator=(ModuleAccess&&) = default;
 
-  const BasicModule* get_module(const std::string& name) const
-  { return get_module_NC(name); }
-  
+  const BasicModule* get_module(const std::string& name) const;
   BasicModule* get_module_NC(const std::string& name) const;
+  const BasicModule* request_module(const std::string& name) const;
+  BasicModule* request_module_NC(const std::string& name) const;
 
   void register_module(const std::string& name, BasicModule* module,
                        ConflictOption conflict=ConflictOption::yield);
@@ -66,16 +67,6 @@ private:
   using ANLModuleMap = std::map<std::string, BasicModule*>;
   ANLModuleMap moduleMap_;
 };
-
-inline
-BasicModule* ModuleAccess::get_module_NC(const std::string& name) const
-{
-  ANLModuleMap::const_iterator it = moduleMap_.find(name);
-  if (it == std::end(moduleMap_)) {
-    BOOST_THROW_EXCEPTION( ModuleAccessError("Module is not found", name) );
-  }
-  return it->second;
-}
 
 inline
 bool ModuleAccess::exist(const std::string& name) const
