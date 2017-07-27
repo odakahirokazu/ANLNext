@@ -17,8 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_BasicModule_H
-#define ANL_BasicModule_H 1
+#ifndef ANLNEXT_BasicModule_H
+#define ANLNEXT_BasicModule_H 1
 
 #include <iostream>
 #include <string>
@@ -40,17 +40,17 @@
 #include "ModuleAccess.hh"
 #include "ANLMacro.hh"
 
-#ifdef ANL_USE_TVECTOR
+#ifdef ANLNEXT_USE_TVECTOR
 #include "TVector2.h"
 #include "TVector3.h"
-#endif /* ANL_USE_TVECTOR */
+#endif /* ANLNEXT_USE_TVECTOR */
 
-#ifdef ANL_USE_HEPVECTOR
+#ifdef ANLNEXT_USE_HEPVECTOR
 #include "CLHEP/Vector/TwoVector.h"
 #include "CLHEP/Vector/ThreeVector.h"
-#endif /* ANL_USE_HEPVECTOR */
+#endif /* ANLNEXT_USE_HEPVECTOR */
 
-namespace anl
+namespace anlnext
 {
 
 class EvsManager;
@@ -614,6 +614,6 @@ std::unique_ptr<BasicModule> BasicModule::make_clone(ModuleType*&& copied)
   return m;
 }
 
-} /* namespace anl */
+} /* namespace anlnext */
 
-#endif /* ANL_BasicModule_H */
+#endif /* ANLNEXT_BasicModule_H */

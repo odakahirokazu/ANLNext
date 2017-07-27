@@ -17,8 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_VModuleParameter_H
-#define ANL_VModuleParameter_H 1
+#ifndef ANLNEXT_VModuleParameter_H
+#define ANLNEXT_VModuleParameter_H 1
 
 #include <cstddef>
 #include <cstdint>
@@ -32,7 +32,7 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-namespace anl
+namespace anlnext
 {
 
 class BasicModule;
@@ -195,20 +195,20 @@ using ModuleParamList = std::list<ModuleParam_sptr>;
 using ModuleParamIter = ModuleParamList::iterator;
 using ModuleParamConstIter = ModuleParamList::const_iterator;
 
-} /* namespace anl */
+} /* namespace anlnext */
 
 inline
-std::ostream& operator<<(std::ostream& os, const anl::VModuleParameter& p)
+std::ostream& operator<<(std::ostream& os, const anlnext::VModuleParameter& p)
 {
   p.output(os);
   return os;
 }
 
 inline
-std::istream& operator>>(std::istream& is, anl::VModuleParameter& p)
+std::istream& operator>>(std::istream& is, anlnext::VModuleParameter& p)
 {
   p.input(is);
   return is;
 }
 
-#endif /* ANL_VModuleParameter_H */
+#endif /* ANLNEXT_VModuleParameter_H */

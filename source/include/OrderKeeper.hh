@@ -17,13 +17,13 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_OrderKeeper_H
-#define ANL_OrderKeeper_H 1
+#ifndef ANLNEXT_OrderKeeper_H
+#define ANLNEXT_OrderKeeper_H 1
 
 #include <mutex>
 #include <condition_variable>
 
-namespace anl
+namespace anlnext
 {
 
 /**
@@ -85,6 +85,6 @@ private:
   IndexType index_;
 };
 
-} /* namespace anl */
+} /* namespace anlnext */
 
-#endif /* ANL_OrderKeeper_H */
+#endif /* ANLNEXT_OrderKeeper_H */

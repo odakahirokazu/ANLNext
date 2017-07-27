@@ -1,6 +1,6 @@
 #include "MyModule.hh"
 
-using namespace anl;
+using namespace anlnext;
 
 MyModule::MyModule()
   : myParameter1_(1), myParameter2_(2.0), myParameter3_("test"),

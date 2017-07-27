@@ -25,7 +25,7 @@
 #include "EvsManager.hh"
 #include "ANLManager.hh"
 
-namespace anl
+namespace anlnext
 {
 
 BasicModule::BasicModule()
@@ -237,4 +237,4 @@ template
 void BasicModule::set_value_element(const std::string& name,
                                     const std::string& val);
 
-} /* namespace anl */
+} /* namespace anlnext */

@@ -3,7 +3,7 @@
 #include "GenerateEvents.hh"
 #include "SaveData.hh"
 
-using namespace anl;
+using namespace anlnext;
 
 FillHistogram::FillHistogram() :
   nbins_(128), energy0_(0.0), energy1_(100.0)

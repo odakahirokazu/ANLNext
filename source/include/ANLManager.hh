@@ -17,12 +17,12 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_ANLManager_H
-#define ANL_ANLManager_H 1
+#ifndef ANLNEXT_ANLManager_H
+#define ANLNEXT_ANLManager_H 1
 
-#define ANL_ANALYZE_INTERRUPT 1
-#define ANL_INITIALIZE_INTERRUPT 1
-#define ANL_FINALIZE_INTERRUPT 1
+#define ANLNEXT_ANALYZE_INTERRUPT 1
+#define ANLNEXT_INITIALIZE_INTERRUPT 1
+#define ANLNEXT_FINALIZE_INTERRUPT 1
 
 #include <cstddef>
 #include <iostream>
@@ -38,7 +38,7 @@
 #include "ANLException.hh"
 #include "LoopCounter.hh"
 
-namespace anl
+namespace anlnext
 {
 
 class EvsManager;
@@ -122,13 +122,13 @@ protected:
 
   int module_index(const std::string& module_id, bool strict=true) const;
 
-#if ANL_ENABLE_INTERACTIVE_MODE
+#if ANLNEXT_ENABLE_INTERACTIVE_MODE
   void interactive_comunication_help();
   ANLStatus interactive_modify_param(int n);
   void interactive_print_param(int n);
   void interactive_module_switch(int n, bool module_sw);
   void interactive_analysis_help();
-#endif /* ANL_ENABLE_INTERACTIVE_MODE */
+#endif /* ANLNEXT_ENABLE_INTERACTIVE_MODE */
 
 private:
   virtual void duplicate_chains() {}
@@ -201,6 +201,6 @@ inline void print_exception(const ANLException& ex, std::ostream& os=std::cout)
      << std::endl;
 }
 
-} /* namespace anl */
+} /* namespace anlnext */
 
-#endif /* ANL_ANLManager_H */
+#endif /* ANLNEXT_ANLManager_H */

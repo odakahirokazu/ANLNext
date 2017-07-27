@@ -17,15 +17,15 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_ANLException_H
-#define ANL_ANLException_H 1
+#ifndef ANLNEXT_ANLException_H
+#define ANLNEXT_ANLException_H 1
 
 #include <stdexcept>
 #include <cstdint>
 #include <string>
 #include <boost/exception/all.hpp>
 
-namespace anl
+namespace anlnext
 {
 
 using ErrorMessage          = boost::error_info<struct tag_ErrorMessage, std::string>;
@@ -87,22 +87,22 @@ private:
 
 using ExceptionTreatment = boost::error_info<struct tag_ExceptionTreatment, ANLException::Treatment>;
 
-struct ModuleCloningError : anl::ANLException
+struct ModuleCloningError : anlnext::ANLException
 {
   explicit ModuleCloningError(const BasicModule* mod);
 };
 
-struct ModuleAccessError : anl::ANLException
+struct ModuleAccessError : anlnext::ANLException
 {
   explicit ModuleAccessError(const std::string& message, const std::string& module_key);
 };
 
-struct ParameterNotFoundError : anl::ANLException
+struct ParameterNotFoundError : anlnext::ANLException
 {
   ParameterNotFoundError(const BasicModule* mod, const std::string& name);
 };
 
-struct ParameterError : anl::ANLException
+struct ParameterError : anlnext::ANLException
 {
   ParameterError(const VModuleParameter* param, const std::string& message);
 };
@@ -121,6 +121,6 @@ struct ParameterTypeError : ParameterError
                      const std::string& value_tried);
 };
 
-} /* namespace anl */
+} /* namespace anlnext */
 
-#endif /* ANL_ANLException_H */
+#endif /* ANLNEXT_ANLException_H */

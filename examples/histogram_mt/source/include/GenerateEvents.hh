@@ -10,11 +10,11 @@
 #ifndef GenerateEvents_H
 #define GenerateEvents_H 1
 
-#include <anl/BasicModule.hh>
+#include <anlnext/BasicModule.hh>
 #include <memory>
 #include "TRandom.h"
 
-class GenerateEvents : public anl::BasicModule
+class GenerateEvents : public anlnext::BasicModule
 {
   DEFINE_ANL_MODULE(GenerateEvents, 1.0);
   ENABLE_PARALLEL_RUN();
@@ -25,11 +25,11 @@ protected:
   GenerateEvents(const GenerateEvents&);
 
 public:
-  anl::ANLStatus mod_define() override;
-  anl::ANLStatus mod_initialize() override;
-  anl::ANLStatus mod_begin_run() override;
-  anl::ANLStatus mod_analyze() override;
-  anl::ANLStatus mod_end_run() override;
+  anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_begin_run() override;
+  anlnext::ANLStatus mod_analyze() override;
+  anlnext::ANLStatus mod_end_run() override;
 
   const std::vector<double>& Energies() const
   { return energies_generated_; }

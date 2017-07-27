@@ -31,7 +31,7 @@
 #include "ClonedChainSet_impl.hh"
 #include "OrderKeeper.hh"
 
-namespace anl
+namespace anlnext
 {
 
 ANLManagerMT::ANLManagerMT(int num_parallels)
@@ -375,4 +375,4 @@ boost::property_tree::ptree ANLManagerMT::parameters_to_property_tree() const
   return pt;
 }
 
-} /* namespace anl*/
+} /* namespace anlnext*/

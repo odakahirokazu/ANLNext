@@ -9,21 +9,21 @@
 #ifndef FillHistogram_H
 #define FillHistogram_H 1
 
-#include <anl/BasicModule.hh>
+#include <anlnext/BasicModule.hh>
 
 class TH1;
 class GenerateEvents;
 
 
-class FillHistogram : public anl::BasicModule
+class FillHistogram : public anlnext::BasicModule
 {
   DEFINE_ANL_MODULE(FillHistogram, 1.0);
 public:
   FillHistogram();
   
-  anl::ANLStatus mod_define() override;
-  anl::ANLStatus mod_initialize() override;
-  anl::ANLStatus mod_analyze() override;
+  anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_analyze() override;
 
 private:
   int nbins_;

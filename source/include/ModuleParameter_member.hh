@@ -17,7 +17,7 @@
  *                                                                       *
  *************************************************************************/
 
-namespace anl
+namespace anlnext
 {
 
 template <typename ModuleClass, typename T>
@@ -87,4 +87,4 @@ protected:
   { return MemberPointerPair<ModuleClass, T>::ref(); }
 };
 
-} /* namespace anl */
+} /* namespace anlnext */

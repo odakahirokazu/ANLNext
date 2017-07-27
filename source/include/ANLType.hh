@@ -17,13 +17,13 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_ANLType_H
-#define ANL_ANLType_H 1
+#ifndef ANLNEXT_ANLType_H
+#define ANLNEXT_ANLType_H 1
 
 #include <string>
 #include <vector>
 
-namespace anl
+namespace anlnext
 {
 
 template <typename T, bool b>
@@ -102,6 +102,6 @@ struct param_type_info<std::vector<std::string>>
   static std::string name() { return "vector<string>"; }
 };
 
-} /* namespace anl */
+} /* namespace anlnext */
 
-#endif /* ANL_ANLType_H */
+#endif /* ANLNEXT_ANLType_H */

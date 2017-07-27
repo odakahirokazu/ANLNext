@@ -9,9 +9,9 @@
 #ifndef MyMTModule_H
 #define MyMTModule_H 1
 
-#include <anl/BasicModule.hh>
+#include <anlnext/BasicModule.hh>
 
-class MyMTModule : public anl::BasicModule
+class MyMTModule : public anlnext::BasicModule
 {
   DEFINE_ANL_MODULE(MyMTModule, 1.0);
   ENABLE_PARALLEL_RUN();
@@ -23,13 +23,13 @@ protected:
   MyMTModule(const MyMTModule& r) = default;
 
 public:
-  anl::ANLStatus mod_define() override;
-  anl::ANLStatus mod_pre_initialize() override;
-  anl::ANLStatus mod_initialize() override;
-  anl::ANLStatus mod_begin_run() override;
-  anl::ANLStatus mod_analyze() override;
-  anl::ANLStatus mod_end_run() override;
-  anl::ANLStatus mod_finalize() override;
+  anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_pre_initialize() override;
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_begin_run() override;
+  anlnext::ANLStatus mod_analyze() override;
+  anlnext::ANLStatus mod_end_run() override;
+  anlnext::ANLStatus mod_finalize() override;
 
 private:
   int m_QuitIndex = -1;

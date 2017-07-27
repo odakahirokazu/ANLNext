@@ -17,10 +17,10 @@
  *                                                                       *
  *************************************************************************/
 
-namespace anl
+namespace anlnext
 {
 
-#ifdef ANL_USE_TVECTOR
+#ifdef ANLNEXT_USE_TVECTOR
 template <> class ModuleParameter<TVector2> : public VModuleParameter
 {
   using T = TVector2;
@@ -162,9 +162,9 @@ protected:
 private:
   TVector3* ptr_;
 };
-#endif /* ANL_USE_TVECTOR */
+#endif /* ANLNEXT_USE_TVECTOR */
 
-#ifdef ANL_USE_HEPVECTOR
+#ifdef ANLNEXT_USE_HEPVECTOR
 template <> class ModuleParameter<CLHEP::Hep2Vector> : public VModuleParameter
 {
   using T = CLHEP::Hep2Vector;
@@ -304,6 +304,6 @@ protected:
 private:
   CLHEP::Hep3Vector* ptr_;
 };
-#endif /* ANL_USE_HEPVECTOR */
+#endif /* ANLNEXT_USE_HEPVECTOR */
 
-} /* namespace anl */
+} /* namespace anlnext */

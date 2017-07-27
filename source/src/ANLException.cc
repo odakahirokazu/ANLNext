@@ -22,7 +22,7 @@
 #include "BasicModule.hh"
 #include "VModuleParameter.hh"
 
-namespace anl
+namespace anlnext
 {
 
 int ANLException::__VerboseLevel__ = 1;
@@ -198,4 +198,4 @@ ParameterTypeError::ParameterTypeError(const VModuleParameter* param,
                   % type_tried).str());
 }
 
-} /* namespace anl */
+} /* namespace anlnext */

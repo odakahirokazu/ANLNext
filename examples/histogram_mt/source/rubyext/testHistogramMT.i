@@ -1,6 +1,6 @@
 %module testHistogramMT
 %{
-#include <anl/BasicModule.hh>
+#include <anlnext/BasicModule.hh>
 
 // include headers of my modules
 #include "CreateRootFile.hh"
@@ -9,31 +9,15 @@
 
 %}
 
-%import(module="anlnext/ANL") "anl/ruby/ANL.i"
+%import(module="anlnext/ANL") "anlnext/ruby/ANL.i"
 
 
 // interface to my modules
 
 namespace comptonsoft
 {
-
-class CreateRootFile : public anl::BasicModule
-{
-public:
-  CreateRootFile();
-  ~CreateRootFile();
-};
-
+class CreateRootFile : public anlnext::BasicModule {};
 }
 
-class GenerateEvents : public anl::BasicModule
-{
-public:
-  GenerateEvents();
-};
-
-class FillHistogram : public anl::BasicModule
-{
-public:
-  FillHistogram();
-};
+class GenerateEvents : public anlnext::BasicModule {};
+class FillHistogram : public anlnext::BasicModule {};

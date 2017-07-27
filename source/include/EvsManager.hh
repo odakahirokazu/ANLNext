@@ -17,15 +17,15 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_EvsManager_H
-#define ANL_EvsManager_H 1
+#ifndef ANLNEXT_EvsManager_H
+#define ANLNEXT_EvsManager_H 1
 
 #include <cstdint>
 #include <map>
 #include <string>
 #include <iostream>
 
-namespace anl
+namespace anlnext
 {
 
 struct EvsData
@@ -149,6 +149,6 @@ inline void EvsManager::reset(const std::string& key)
   it->second.flag = false;
 }
 
-} /* namespace anl */
+} /* namespace anlnext */
 
-#endif /* ANL_EvsManager_H */
+#endif /* ANLNEXT_EvsManager_H */

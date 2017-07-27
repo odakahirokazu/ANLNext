@@ -24,32 +24,32 @@
  * @date 2017-07-20 | update
  */
 
-#ifndef ANL_CLIUtility_H
-#define ANL_CLIUtility_H 1
+#ifndef ANLNEXT_CLIUtility_H
+#define ANLNEXT_CLIUtility_H 1
 
 #include <vector>
 #include <string>
 
-#if ANL_USE_READLINE
+#if ANLNEXT_USE_READLINE
 #include <atomic>
-#endif /* ANL_USE_READLINE */
+#endif /* ANLNEXT_USE_READLINE */
 
-#ifdef ANL_USE_TVECTOR
+#ifdef ANLNEXT_USE_TVECTOR
 #include "TVector2.h"
 #include "TVector3.h"
-#endif /* ANL_USE_TVECTOR */
+#endif /* ANLNEXT_USE_TVECTOR */
 
-#ifdef ANL_USE_HEPVECTOR
+#ifdef ANLNEXT_USE_HEPVECTOR
 #include "CLHEP/Vector/TwoVector.h"
 #include "CLHEP/Vector/ThreeVector.h"
-#endif /* ANL_USE_HEPVECTOR */
+#endif /* ANLNEXT_USE_HEPVECTOR */
 
 #include "ModuleParameter.hh"
 
-namespace anl
+namespace anlnext
 {
 
-#if ANL_USE_READLINE
+#if ANLNEXT_USE_READLINE
 class ReadLine
 {
 public:
@@ -73,7 +73,7 @@ private:
   ReadLine& operator=(const ReadLine&) = delete;
   ReadLine& operator=(ReadLine&&) = delete;  
 };
-#endif /* ANL_USE_READLINE */
+#endif /* ANLNEXT_USE_READLINE */
 
 /**
  * a function for command line read.
@@ -151,6 +151,6 @@ void cli_read_seq(const std::string& prompt, T* ptr,
   param.ask();
 }
 
-} /* namespace anl */
+} /* namespace anlnext */
 
-#endif /* ANL_CLIUtility_H */
+#endif /* ANLNEXT_CLIUtility_H */

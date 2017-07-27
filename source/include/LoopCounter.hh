@@ -17,12 +17,12 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_LoopCounter_H
-#define ANL_LoopCounter_H 1
+#ifndef ANLNEXT_LoopCounter_H
+#define ANLNEXT_LoopCounter_H 1
 
 #include "ANLStatus.hh"
 
-namespace anl
+namespace anlnext
 {
 
 /**
@@ -104,6 +104,6 @@ private:
   long int quit_ = 0;
 };
 
-} /* namespace anl */
+} /* namespace anlnext */
 
-#endif /* ANL_LoopCounter_H */
+#endif /* ANLNEXT_LoopCounter_H */

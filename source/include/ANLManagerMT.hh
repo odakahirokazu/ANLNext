@@ -17,15 +17,15 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_ANLManagerMT_H
-#define ANL_ANLManagerMT_H 1
+#ifndef ANLNEXT_ANLManagerMT_H
+#define ANLNEXT_ANLManagerMT_H 1
 
 #include "ANLManager.hh"
 #include <future>
 
 #include "ClonedChainSet.hh"
 
-namespace anl
+namespace anlnext
 {
 
 class EvsManager;
@@ -80,6 +80,6 @@ private:
   std::vector<std::unique_ptr<OrderKeeper>> orderKeepers_;
 };
 
-} /* namespace anl */
+} /* namespace anlnext */
 
-#endif /* ANL_ANLManagerMT_H */
+#endif /* ANLNEXT_ANLManagerMT_H */

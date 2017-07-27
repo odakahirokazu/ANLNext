@@ -9,23 +9,23 @@
 #ifndef MyModule_H
 #define MyModule_H 1
 
-#include <anl/BasicModule.hh>
+#include <anlnext/BasicModule.hh>
 #include <cstdint>
 
-class MyModule : public anl::BasicModule
+class MyModule : public anlnext::BasicModule
 {
   DEFINE_ANL_MODULE(MyModule, 1.0);
 public:
   MyModule();
   virtual ~MyModule();
   
-  anl::ANLStatus mod_define() override;
-  anl::ANLStatus mod_pre_initialize() override;
-  anl::ANLStatus mod_initialize() override;
-  anl::ANLStatus mod_begin_run() override;
-  anl::ANLStatus mod_analyze() override;
-  anl::ANLStatus mod_end_run() override;
-  anl::ANLStatus mod_finalize() override;
+  anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_pre_initialize() override;
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_begin_run() override;
+  anlnext::ANLStatus mod_analyze() override;
+  anlnext::ANLStatus mod_end_run() override;
+  anlnext::ANLStatus mod_finalize() override;
 
 private:
   int myParameter1_;

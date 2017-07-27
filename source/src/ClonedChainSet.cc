@@ -24,7 +24,7 @@
 #include "EvsManager.hh"
 #include "ModuleAccess.hh"
 
-namespace anl
+namespace anlnext
 {
 
 ClonedChainSet::ClonedChainSet(int chain_id, const EvsManager& evs)
@@ -78,4 +78,4 @@ BasicModule* ClonedChainSet::access_to_module(const std::string& moduleID)
   return moduleAccess_->get_module_NC(moduleID);
 }
 
-} /* namespace anl */
+} /* namespace anlnext */

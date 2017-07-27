@@ -9,19 +9,19 @@
 #ifndef MyMapModule_H
 #define MyMapModule_H 1
 
-#include <anl/BasicModule.hh>
+#include <anlnext/BasicModule.hh>
 #include <map>
 #include <tuple>
 
-class MyMapModule : public anl::BasicModule
+class MyMapModule : public anlnext::BasicModule
 {
   DEFINE_ANL_MODULE(MyMapModule, 1.0);
 public:
   MyMapModule();
   virtual ~MyMapModule();
   
-  anl::ANLStatus mod_define() override;
-  anl::ANLStatus mod_analyze() override;
+  anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_analyze() override;
 
 private:
   std::map<std::string, std::tuple<int, std::string, double, double>> myMap_;

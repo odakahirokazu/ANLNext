@@ -13,7 +13,7 @@
 %include "std_vector.i"
 %include "std_list.i"
 
-%template(ModuleVector) std::vector<anl::BasicModule*>;
+%template(ModuleVector) std::vector<anlnext::BasicModule*>;
 
 %template(VectorI) std::vector<int>;
 %template(VectorD) std::vector<double>;
@@ -29,11 +29,11 @@ namespace std
   };
 }
 
-%template(SPtrModParam) std::shared_ptr<anl::VModuleParameter>;
-%template(SPtrModParamConst) std::shared_ptr<anl::VModuleParameter const>;
-%template(ListModParam) std::list<std::shared_ptr<anl::VModuleParameter> >;
+%template(SPtrModParam) std::shared_ptr<anlnext::VModuleParameter>;
+%template(SPtrModParamConst) std::shared_ptr<anlnext::VModuleParameter const>;
+%template(ListModParam) std::list<std::shared_ptr<anlnext::VModuleParameter> >;
 
-namespace anl
+namespace anlnext
 {
 
 enum class ANLStatus {
@@ -163,7 +163,7 @@ class BasicModule
     try {
       $action
     }
-    catch (anl::ANLException& ex) {
+    catch (anlnext::ANLException& ex) {
       SWIG_exception(SWIG_RuntimeError, ex.to_string().c_str());
     }
   }
@@ -211,7 +211,7 @@ class BasicModule
       $self->expose_parameter(map_name);
       $self->set_map_key(key);
       if (rb_block_given_p()) {
-        VALUE r = swig::from<anl::BasicModule*>(self);
+        VALUE r = swig::from<anlnext::BasicModule*>(self);
         rb_yield(r);
       }
       $self->insert_to_container();
@@ -221,7 +221,7 @@ class BasicModule
     {
       $self->expose_parameter(vector_name);
       if (rb_block_given_p()) {
-        VALUE r = swig::from<anl::BasicModule*>(self);
+        VALUE r = swig::from<anlnext::BasicModule*>(self);
         rb_yield(r);
       }
       $self->insert_to_container();
@@ -241,7 +241,7 @@ class ANLManager
     try {
       $action
     }
-    catch (const anl::ANLException& ex) {
+    catch (const anlnext::ANLException& ex) {
       SWIG_exception(SWIG_RuntimeError, ex.to_string().c_str());
     }
   }
@@ -249,7 +249,7 @@ class ANLManager
   void set_display_frequency(long int v);
   int display_frequency() const;
   
-  void set_modules(std::vector<anl::BasicModule*> modules);
+  void set_modules(std::vector<anlnext::BasicModule*> modules);
 
   virtual ANLStatus Define();
   virtual ANLStatus PreInitialize();
@@ -277,4 +277,4 @@ public:
   virtual ~ANLManagerMT();
 };
  
-} /* namespace anl */
+} /* namespace anlnext */

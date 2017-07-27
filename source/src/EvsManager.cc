@@ -20,7 +20,7 @@
 #include "EvsManager.hh"
 #include <iomanip>
 
-namespace anl
+namespace anlnext
 {
 
 EvsManager::~EvsManager() = default;
@@ -97,4 +97,4 @@ void EvsManager::merge(const EvsManager& r)
   }
 }
 
-} /* namespace anl */
+} /* namespace anlnext */

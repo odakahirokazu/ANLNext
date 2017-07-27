@@ -17,7 +17,7 @@
  *                                                                       *
  *************************************************************************/
 
-#if ANL_ENABLE_INTERACTIVE_MODE
+#if ANLNEXT_ENABLE_INTERACTIVE_MODE
 
 #include "ANLManager.hh"
 #include "BasicModule.hh"
@@ -27,12 +27,12 @@
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 
-#if ANL_USE_READLINE
+#if ANLNEXT_USE_READLINE
 #include "CLIUtility.hh"
-#endif /* ANL_USE_READLINE */
+#endif /* ANLNEXT_USE_READLINE */
 
 
-namespace anl
+namespace anlnext
 {
 
 ANLStatus ANLManager::do_interactive_comunication()
@@ -42,7 +42,7 @@ ANLStatus ANLManager::do_interactive_comunication()
   std::cout << "\n ** type \"help\" if you need. ** \n" << std::endl;
 
   while (true) {
-#if ANL_USE_READLINE
+#if ANLNEXT_USE_READLINE
     ReadLine reader;
     reader.set_completion_candidates(
       {"quit", "help", "chain", "show", "review", "modify", "print", "on", "off", "initialize"}
@@ -57,7 +57,7 @@ ANLStatus ANLManager::do_interactive_comunication()
     std::string line;
     std::getline(std::cin, line);
     std::istringstream is(line);
-#endif /* ANL_USE_READLINE */
+#endif /* ANLNEXT_USE_READLINE */
 
     std::string cmd;
     is >> cmd;
@@ -312,7 +312,7 @@ ANLStatus ANLManager::do_interactive_analysis()
   std::cout << "\n ** type \"help\" if you need. ** \n" << std::endl;
 
   while (true) {
-#if ANL_USE_READLINE
+#if ANLNEXT_USE_READLINE
     ReadLine reader;
     reader.set_completion_candidates({"exit", "help", "run"});
     const int count = reader.read("iANL> ");
@@ -325,7 +325,7 @@ ANLStatus ANLManager::do_interactive_analysis()
     std::string line;
     std::getline(std::cin, line);
     std::istringstream is(line);
-#endif /* ANL_USE_READLINE */
+#endif /* ANLNEXT_USE_READLINE */
 
     std::string cmd;
     is >> cmd;
@@ -381,6 +381,6 @@ void ANLManager::interactive_analysis_help()
             << std::endl;
 }
 
-} /* namespace anl */
+} /* namespace anlnext */
 
-#endif /* ANL_ENABLE_INTERACTIVE_MODE */
+#endif /* ANLNEXT_ENABLE_INTERACTIVE_MODE */

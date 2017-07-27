@@ -17,12 +17,12 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_ClonedChainSet_H
-#define ANL_ClonedChainSet_H 1
+#ifndef ANLNEXT_ClonedChainSet_H
+#define ANLNEXT_ClonedChainSet_H 1
 
 #include "ANLManager.hh"
 
-namespace anl
+namespace anlnext
 {
 
 class EvsManager;
@@ -75,6 +75,6 @@ private:
   std::vector<LoopCounter> counters_;
 };
 
-} /* namespace anl */
+} /* namespace anlnext */
 
-#endif /* ANL_ClonedChainSet_H */
+#endif /* ANLNEXT_ClonedChainSet_H */

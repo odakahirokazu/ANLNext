@@ -17,7 +17,7 @@
  *                                                                       *
  *************************************************************************/
 
-namespace anl
+namespace anlnext
 {
 
 template <typename T>
@@ -197,4 +197,4 @@ void ModuleParameter<T>::input_impl(std::istream& is,
   __ref__() = std::move(container);
 }
 
-} /* namespace anl */
+} /* namespace anlnext */

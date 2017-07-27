@@ -21,7 +21,7 @@
 #include <utility>
 #include <tuple>
 
-namespace anl
+namespace anlnext
 {
 
 struct value_category_scalar {};
@@ -194,4 +194,4 @@ private:
   std::tuple<Ts...>* ptr_;
 };
 
-} /* namespace anl */
+} /* namespace anlnext */

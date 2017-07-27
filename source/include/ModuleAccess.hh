@@ -17,8 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_ModuleAccess_H
-#define ANL_ModuleAccess_H 1
+#ifndef ANLNEXT_ModuleAccess_H
+#define ANLNEXT_ModuleAccess_H 1
 
 #include <string>
 #include <map>
@@ -26,7 +26,7 @@
 #include <boost/format.hpp>
 #include "ANLException.hh"
 
-namespace anl
+namespace anlnext
 {
 
 class BasicModule;
@@ -74,6 +74,6 @@ bool ModuleAccess::exist(const std::string& name) const
   return (moduleMap_.find(name) != std::end(moduleMap_));
 }
 
-} /* namespace anl */
+} /* namespace anlnext */
 
-#endif /* ANL_ModuleAccess_H */
+#endif /* ANLNEXT_ModuleAccess_H */

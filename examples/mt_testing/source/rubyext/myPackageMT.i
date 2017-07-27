@@ -1,20 +1,15 @@
 %module myPackageMT
 %{
-#include <anl/BasicModule.hh>
+#include <anlnext/BasicModule.hh>
 
 // include headers of my modules
 #include "MyMTModule.hh"
   
 %}
 
-%import(module="anlnext/ANL") "anl/ruby/ANL.i"
+%import(module="anlnext/ANL") "anlnext/ruby/ANL.i"
 
 
 // interface to my modules
 
-class MyMTModule : public anl::BasicModule
-{
-public:
-  MyMTModule();
-  ~MyMTModule();
-};
+class MyMTModule : public anlnext::BasicModule {};

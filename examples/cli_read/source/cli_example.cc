@@ -1,9 +1,9 @@
 #include <iostream>
-#include <anl/CLIUtility.hh>
+#include <anlnext/CLIUtility.hh>
 
 int main()
 {
-  using namespace anl;
+  using namespace anlnext;
 
   int i = 0;
   cli_read("number", &i);

@@ -3,9 +3,9 @@ set(TARGET_LIBRARY ANLNext)
 #######
 
 ### Interactive mode
-if(ANL_ENABLE_INTERACTIVE_MODE)
-  add_definitions(-DANL_ENABLE_INTERACTIVE_MODE)
-endif(ANL_ENABLE_INTERACTIVE_MODE)
+if(ANLNEXT_ENABLE_INTERACTIVE_MODE)
+  add_definitions(-DANLNEXT_ENABLE_INTERACTIVE_MODE)
+endif(ANLNEXT_ENABLE_INTERACTIVE_MODE)
 
 ### BOOST
 find_package(Boost 1.56.0 REQUIRED COMPONENTS system chrono thread)
@@ -17,15 +17,15 @@ message("-- BOOST_LIB_DIR: ${BOOST_LIB_DIR}")
 message("-- BOOST_LIB: ${BOOST_LIB}")
 
 ### READLINE
-if(ANL_USE_READLINE)
+if(ANLNEXT_USE_READLINE)
   set(READLINE_LIB readline)
-  add_definitions(-DANL_USE_READLINE)
-else(ANL_USE_READLINE)
+  add_definitions(-DANLNEXT_USE_READLINE)
+else(ANLNEXT_USE_READLINE)
   set(READLINE_LIB edit)
-endif(ANL_USE_READLINE)
+endif(ANLNEXT_USE_READLINE)
 
 ### ROOT
-if(ANL_USE_TVECTOR)
+if(ANLNEXT_USE_TVECTOR)
   set(ROOTSYS $ENV{ROOTSYS})
   list(APPEND CMAKE_PREFIX_PATH ${ROOTSYS})
   find_package(ROOT REQUIRED COMPONENTS Core Physics)
@@ -37,28 +37,28 @@ if(ANL_USE_TVECTOR)
   message("-- ROOT_INC_DIR = ${ROOT_INC_DIR}")
   message("-- ROOT_LIB_DIR = ${ROOT_LIB_DIR}")
   message("-- ROOT libraries = ${ROOT_LIB}")
-  add_definitions(-DANL_USE_TVECTOR)
-endif(ANL_USE_TVECTOR)
+  add_definitions(-DANLNEXT_USE_TVECTOR)
+endif(ANLNEXT_USE_TVECTOR)
 
 ### CLHEP
-if(ANL_USE_HEPVECTOR)
+if(ANLNEXT_USE_HEPVECTOR)
   ### use system-CLHEP
-  add_definitions(-DANL_USE_HEPVECTOR)
+  add_definitions(-DANLNEXT_USE_HEPVECTOR)
   set(CLHEP_BASE_DIR $ENV{CLHEP_BASE_DIR})
   set(CLHEP_INC_DIR ${CLHEP_BASE_DIR}/include)
   set(CLHEP_LIB_DIR ${CLHEP_BASE_DIR}/lib)
   set(CLHEP_LIB CLHEP)
-endif(ANL_USE_HEPVECTOR)
+endif(ANLNEXT_USE_HEPVECTOR)
 
 ### Geant4
-if(ANL_USE_G4VECTOR)
+if(ANLNEXT_USE_G4VECTOR)
   ### use Geant4-CLHEP (Geant4.9.5 or later)
-  add_definitions(-DANL_USE_HEPVECTOR)
+  add_definitions(-DANLNEXT_USE_HEPVECTOR)
   find_package(Geant4 REQUIRED)
   # include(${Geant4_USE_FILE})
   set(CLHEP_INC_DIR ${Geant4_INCLUDE_DIRS})
   set(CLHEP_LIB G4clhep)
-endif(ANL_USE_G4VECTOR)
+endif(ANLNEXT_USE_G4VECTOR)
 
 ### CMake main settings
 include_directories(
@@ -101,10 +101,10 @@ install(TARGETS ${TARGET_LIBRARY}
   LIBRARY
   DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
-if(ANL_INSTALL_HEADERS)
+if(ANLNEXT_INSTALL_HEADERS)
   install(DIRECTORY include/
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/anl
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/anlnext
     FILES_MATCHING PATTERN "*.hh")
-endif(ANL_INSTALL_HEADERS)
+endif(ANLNEXT_INSTALL_HEADERS)
 
 add_subdirectory(rubyext)

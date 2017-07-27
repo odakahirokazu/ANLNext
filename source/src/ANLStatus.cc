@@ -20,32 +20,35 @@
 #include "ANLStatus.hh"
 #include <string>
 
-std::string anl::status_to_string(anl::ANLStatus status)
+namespace anlnext
+{
+
+std::string status_to_string(ANLStatus status)
 {
   switch (status) {
-    case anl::ANLStatus::ok:
+    case ANLStatus::ok:
       return "AS_OK";
-    case anl::ANLStatus::error:
+    case ANLStatus::error:
       return "AS_ERROR";
-    case anl::ANLStatus::skip:
+    case ANLStatus::skip:
       return "AS_SKIP";
-    case anl::ANLStatus::skip_error:
+    case ANLStatus::skip_error:
       return "AS_SKIP_ERROR";
-    case anl::ANLStatus::quit:
+    case ANLStatus::quit:
       return "AS_QUIT";
-    case anl::ANLStatus::quit_error:
+    case ANLStatus::quit_error:
       return "AS_QUIT_ERROR";
-    case anl::ANLStatus::quit_all:
+    case ANLStatus::quit_all:
       return "AS_QUIT_ALL";
-    case anl::ANLStatus::quit_all_error:
+    case ANLStatus::quit_all_error:
       return "AS_QUIT_ALL_ERROR";
-    case anl::ANLStatus::critical_error_to_finalize:
+    case ANLStatus::critical_error_to_finalize:
       return "AS_CRITICAL_ERROR_TO_FINALIZE";
-    case anl::ANLStatus::critical_error_to_terminate:
+    case ANLStatus::critical_error_to_terminate:
       return "AS_CRITICAL_ERROR_TO_TERMINATE";
-    case anl::ANLStatus::critical_error_to_finalize_from_exception:
+    case ANLStatus::critical_error_to_finalize_from_exception:
       return "AS_CRITICAL_ERROR_TO_FINALIZE_FROM_EXCEPTION";
-    case anl::ANLStatus::critical_error_to_terminate_from_exception:
+    case ANLStatus::critical_error_to_terminate_from_exception:
       return "AS_CRITICAL_ERROR_TO_TERMINATE_FROM_EXCEPTION";
 
     default:
@@ -53,7 +56,7 @@ std::string anl::status_to_string(anl::ANLStatus status)
   }
 }
 
-bool anl::is_normal_error(anl::ANLStatus status)
+bool is_normal_error(ANLStatus status)
 {
   return ((status==ANLStatus::error) ||
           (status==ANLStatus::skip_error) ||
@@ -61,7 +64,7 @@ bool anl::is_normal_error(anl::ANLStatus status)
           (status==ANLStatus::quit_all_error));
 }
 
-bool anl::is_critical_error(anl::ANLStatus status)
+bool is_critical_error(ANLStatus status)
 {
   return ((status==ANLStatus::critical_error_to_finalize) ||
           (status==ANLStatus::critical_error_to_terminate) ||
@@ -69,7 +72,7 @@ bool anl::is_critical_error(anl::ANLStatus status)
           (status==ANLStatus::critical_error_to_terminate_from_exception));
 }
 
-anl::ANLStatus anl::eliminate_normal_error_status(ANLStatus status)
+ANLStatus eliminate_normal_error_status(ANLStatus status)
 {
   if (status==ANLStatus::error) { return ANLStatus::ok; }
   if (status==ANLStatus::skip_error) { return ANLStatus::skip; }
@@ -78,8 +81,10 @@ anl::ANLStatus anl::eliminate_normal_error_status(ANLStatus status)
   return status;
 }
 
-std::ostream& operator<< (std::ostream& os, anl::ANLStatus status)
+} /* namespace anlnext */
+
+std::ostream& operator<< (std::ostream& os, anlnext::ANLStatus status)
 {
-  os << anl::status_to_string(status);
+  os << anlnext::status_to_string(status);
   return os;
 }

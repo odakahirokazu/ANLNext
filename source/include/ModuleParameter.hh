@@ -17,8 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_ModuleParameter_H
-#define ANL_ModuleParameter_H 1
+#ifndef ANLNEXT_ModuleParameter_H
+#define ANLNEXT_ModuleParameter_H 1
 
 #include "VModuleParameter.hh"
 
@@ -38,20 +38,20 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/ptree.hpp>
 
-#ifdef ANL_USE_TVECTOR
+#ifdef ANLNEXT_USE_TVECTOR
 #include "TVector2.h"
 #include "TVector3.h"
-#endif /* ANL_USE_TVECTOR */
+#endif /* ANLNEXT_USE_TVECTOR */
 
-#ifdef ANL_USE_HEPVECTOR
+#ifdef ANLNEXT_USE_HEPVECTOR
 #include "CLHEP/Vector/TwoVector.h"
 #include "CLHEP/Vector/ThreeVector.h"
-#endif /* ANL_USE_HEPVECTOR */
+#endif /* ANLNEXT_USE_HEPVECTOR */
 
 #include "ANLException.hh"
 #include "ANLType.hh"
 
-namespace anl
+namespace anlnext
 {
 
 /**
@@ -477,7 +477,7 @@ private:
   T* ptr_;
 };
 
-} /* namespace anl */
+} /* namespace anlnext */
 
 #include "ModuleParameter_impl.hh"
 #include "ModuleParameter_spec.hh"
@@ -486,4 +486,4 @@ private:
 #include "ModuleParameter_map.hh"
 #include "ModuleParameter_member.hh"
 
-#endif /* ANL_ModuleParameter_H */
+#endif /* ANLNEXT_ModuleParameter_H */

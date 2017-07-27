@@ -26,7 +26,7 @@
 #include <thread>
 #include <cctype>
 
-#if ANL_ANALYZE_INTERRUPT || ANL_INITIALIZE_INTERRUPT || ANL_FINALIZE_INTERRUPT
+#if ANLNEXT_ANALYZE_INTERRUPT || ANL_INITIALIZE_INTERRUPT || ANL_FINALIZE_INTERRUPT
 #include <csignal>
 #include <cstring>
 #endif
@@ -41,16 +41,16 @@
 #include "ANLManager_impl.hh"
 #include "OrderKeeper.hh"
 
-#if ANL_USE_READLINE
+#if ANLNEXT_USE_READLINE
 #include <unistd.h>
 #include <sys/select.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include "CLIUtility.hh"
-#endif /* ANL_USE_READLINE */
+#endif /* ANLNEXT_USE_READLINE */
 
 
-namespace anl
+namespace anlnext
 {
 
 /* version definition */
@@ -171,7 +171,7 @@ ANLStatus ANLManager::Initialize()
             << "        **************************************\n"
             << std::endl;
 
-#if ANL_INITIALIZE_INTERRUPT
+#if ANLNEXT_INITIALIZE_INTERRUPT
   struct sigaction sa;
   struct sigaction sa_org;
   std::memset(&sa, 0, sizeof(sa));
@@ -196,7 +196,7 @@ ANLStatus ANLManager::Initialize()
 
 final:
   std::cout << std::endl;
-#if ANL_INITIALIZE_INTERRUPT
+#if ANLNEXT_INITIALIZE_INTERRUPT
   if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
     return ANLStatus::critical_error_to_terminate;
@@ -220,7 +220,7 @@ ANLStatus ANLManager::Analyze(long int num_events, bool enable_console)
   std::cout << "Number of events: " << num_events << '\n'
             << std::endl;
 
-#if ANL_ANALYZE_INTERRUPT
+#if ANLNEXT_ANALYZE_INTERRUPT
   struct sigaction sa;
   struct sigaction sa_org;
   std::memset(&sa, 0, sizeof(sa));
@@ -290,7 +290,7 @@ final:
   evsManager_->print_summary();
   requested_ = ANLRequest::none;
 
-#if ANL_ANALYZE_INTERRUPT
+#if ANLNEXT_ANALYZE_INTERRUPT
   if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
     return ANLStatus::critical_error_to_terminate;
@@ -308,7 +308,7 @@ ANLStatus ANLManager::Finalize()
             << "        **************************************\n"
             << std::endl;
 
-#if ANL_FINALIZE_INTERRUPT
+#if ANLNEXT_FINALIZE_INTERRUPT
   struct sigaction sa;
   struct sigaction sa_org;
   std::memset(&sa, 0, sizeof(sa));
@@ -329,7 +329,7 @@ ANLStatus ANLManager::Finalize()
 final:
   std::cout << std::endl;
 
-#if ANL_FINALIZE_INTERRUPT
+#if ANLNEXT_FINALIZE_INTERRUPT
   if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
     return ANLStatus::critical_error_to_terminate;
@@ -596,7 +596,7 @@ void ANLManager::process_analysis_for_the_thread(std::promise<ANLStatus> statusP
 void ANLManager::interactive_session()
 {
   while (1) {
-#if ANL_USE_READLINE
+#if ANLNEXT_USE_READLINE
     {
       fd_set readFDSet;
       FD_ZERO(&readFDSet);
@@ -620,14 +620,14 @@ void ANLManager::interactive_session()
     if (count == -1) { return; }
     if (count == 0) { continue; }
     std::string line = reader.str();
-#else /* ANL_USE_READLINE */
+#else /* ANLNEXT_USE_READLINE */
     std::string line;
     std::getline(std::cin, line);
     std::cout << "ANL>> " << line;
     if (analysisThreadFinished_) {
       return;
     }
-#endif /* ANL_USE_READLINE */
+#endif /* ANLNEXT_USE_READLINE */
     if (line == ".q") {
       std::lock_guard<std::mutex> lock(mutex_);
       std::cout << " ---> Quit\n" << std::endl;
@@ -748,4 +748,4 @@ void count_evs(ANLStatus status, EvsManager& evsManager)
   }
 }
 
-} /* namespace anl */
+} /* namespace anlnext */

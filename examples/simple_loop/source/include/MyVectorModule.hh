@@ -9,19 +9,19 @@
 #ifndef MyVectorModule_H
 #define MyVectorModule_H 1
 
-#include <anl/BasicModule.hh>
+#include <anlnext/BasicModule.hh>
 #include <vector>
 #include <tuple>
 
-class MyVectorModule : public anl::BasicModule
+class MyVectorModule : public anlnext::BasicModule
 {
   DEFINE_ANL_MODULE(MyVectorModule, 1.0);
 public:
   MyVectorModule();
   virtual ~MyVectorModule();
   
-  anl::ANLStatus mod_define() override;
-  anl::ANLStatus mod_analyze() override;
+  anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_analyze() override;
 
 private:
   std::vector<std::tuple<int, std::string, double, double>> myVector_;

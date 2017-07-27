@@ -20,7 +20,7 @@
 #include "ModuleAccess.hh"
 #include "BasicModule.hh"
 
-namespace anl
+namespace anlnext
 {
 
 ModuleAccess::~ModuleAccess() = default;
@@ -116,4 +116,4 @@ void ModuleAccess::register_module(const std::string& name,
   }
 }
 
-} /* namespace anl */
+} /* namespace anlnext */

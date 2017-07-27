@@ -17,12 +17,12 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_ANLStatus_H
-#define ANL_ANLStatus_H 1
+#ifndef ANLNEXT_ANLStatus_H
+#define ANLNEXT_ANLStatus_H 1
 
 #include <ostream>
 
-namespace anl
+namespace anlnext
 {
 
 /**
@@ -75,8 +75,8 @@ enum class ANLRequest {
   show_evs_summary
 };
 
-} /* namespace anl */
+} /* namespace anlnext */
 
-std::ostream& operator<< (std::ostream& os, anl::ANLStatus status);
+std::ostream& operator<< (std::ostream& os, anlnext::ANLStatus status);
 
-#endif /* ANL_ANLStatus_H */
+#endif /* ANLNEXT_ANLStatus_H */

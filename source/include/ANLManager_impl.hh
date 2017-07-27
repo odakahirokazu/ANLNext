@@ -17,14 +17,14 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANL_ANLManager_impl_H
-#define ANL_ANLManager_impl_H 1
+#ifndef ANLNEXT_ANLManager_impl_H
+#define ANLNEXT_ANLManager_impl_H 1
 
 #include "ANLManager.hh"
 #include "BasicModule.hh"
 #include "ANLException.hh"
 
-namespace anl
+namespace anlnext
 {
 
 template<typename T>
@@ -123,6 +123,6 @@ ANLStatus routine_modfn_impl(T func,
   return status;
 }
 
-} /* namespace anl */
+} /* namespace anlnext */
 
-#endif /* ANL_ANLManager_impl_H */
+#endif /* ANLNEXT_ANLManager_impl_H */

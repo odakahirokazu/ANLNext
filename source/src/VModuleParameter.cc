@@ -24,9 +24,9 @@
 #include <boost/format.hpp>
 #include "ANLException.hh"
 
-#if ANL_USE_READLINE
+#if ANLNEXT_USE_READLINE
 #include "CLIUtility.hh"
-#endif /* ANL_USE_READLINE */
+#endif /* ANLNEXT_USE_READLINE */
 
 namespace {
 
@@ -41,7 +41,7 @@ void trim_right(std::string& line)
 
 } /* anonynous namespace */
 
-namespace anl {
+namespace anlnext {
 
 VModuleParameter::VModuleParameter(const std::string& name)
   : name_(name),
@@ -226,7 +226,7 @@ bool VModuleParameter::ask_base_in(std::istream& is)
   return true;
 }
 
-#if ANL_USE_READLINE
+#if ANLNEXT_USE_READLINE
 bool VModuleParameter::ask_base()
 {
   std::ostringstream os;
@@ -245,13 +245,13 @@ bool VModuleParameter::ask_base()
   }
   return true;
 }
-#else /* ANL_USE_READLINE */
+#else /* ANLNEXT_USE_READLINE */
 bool VModuleParameter::ask_base()
 {
   ask_base_out(std::cout);
   return ask_base_in(std::cin);
 }
-#endif /* ANL_USE_READLINE */
+#endif /* ANLNEXT_USE_READLINE */
 
 std::string VModuleParameter::special_message_to_ask() const
 {
@@ -259,4 +259,4 @@ std::string VModuleParameter::special_message_to_ask() const
   return message;
 }
 
-} /* namespace anl */
+} /* namespace anlnext */

@@ -1,6 +1,6 @@
 %module myPackage
 %{
-#include <anl/BasicModule.hh>
+#include <anlnext/BasicModule.hh>
 
 // include headers of my modules
 #include "MyModule.hh"
@@ -9,10 +9,10 @@
   
 %}
 
-%import(module="anlnext/ANL") "anl/ruby/ANL.i"
+%import(module="anlnext/ANL") "anlnext/ruby/ANL.i"
 
 // interface to my modules
 
-class MyModule : public anl::BasicModule {};
-class MyMapModule : public anl::BasicModule {};
-class MyVectorModule : public anl::BasicModule {};
+class MyModule : public anlnext::BasicModule {};
+class MyMapModule : public anlnext::BasicModule {};
+class MyVectorModule : public anlnext::BasicModule {};

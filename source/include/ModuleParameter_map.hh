@@ -24,7 +24,7 @@
 #include <type_traits>
 #include <boost/format.hpp>
 
-namespace anl
+namespace anlnext
 {
 
 /**
@@ -465,4 +465,4 @@ private:
   bool first_input_;
 };
 
-} /* namespace anl */
+} /* namespace anlnext */

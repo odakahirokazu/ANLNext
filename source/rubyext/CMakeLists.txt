@@ -11,10 +11,10 @@ set(ADDITIONAL_INSTALL_TARGET )
 
 include(CreateSwigRuby)
 
-if(ANL_INSTALL_HEADERS)
+if(ANLNEXT_INSTALL_HEADERS)
   install(FILES ${SWIG_IF_FILE}
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/anl/ruby)
-endif(ANL_INSTALL_HEADERS)
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/anlnext/ruby)
+endif(ANLNEXT_INSTALL_HEADERS)
 
 ########################################################
 # install Ruby libraries written in Ruby

@@ -1,7 +1,7 @@
 #include "GenerateEvents.hh"
 #include "TRandom3.h"
 
-using namespace anl;
+using namespace anlnext;
 
 GenerateEvents::GenerateEvents() :
   center_(59.5), sigma1_(1.0), sigma2_(5.0),

@@ -8,19 +8,19 @@
 #ifndef SaveData_H
 #define SaveData_H 1
 
-#include <anl/BasicModule.hh>
+#include <anlnext/BasicModule.hh>
 #include "TFile.h"
 
 
-class SaveData : public anl::BasicModule
+class SaveData : public anlnext::BasicModule
 {
   DEFINE_ANL_MODULE(SaveData, 2.0);
 public:
   SaveData();
   
-  anl::ANLStatus mod_define() override;
-  anl::ANLStatus mod_initialize() override;
-  anl::ANLStatus mod_finalize() override;
+  anlnext::ANLStatus mod_define() override;
+  anlnext::ANLStatus mod_initialize() override;
+  anlnext::ANLStatus mod_finalize() override;
 
   TDirectory* GetDirectory() { return m_RootFile->GetDirectory(0); }
   bool cd() { return m_RootFile->cd(); }

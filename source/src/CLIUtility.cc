@@ -19,17 +19,17 @@
 
 #include "CLIUtility.hh"
 
-#if ANL_USE_READLINE
+#if ANLNEXT_USE_READLINE
 #include <cstdlib>
 #include <cstring>
 #include <cctype>
 #include <functional>
 #include <readline/readline.h>
 #include <readline/history.h>
-#endif /* ANL_USE_READLINE */
+#endif /* ANLNEXT_USE_READLINE */
 
 
-#if ANL_USE_READLINE
+#if ANLNEXT_USE_READLINE
 
 namespace {
 
@@ -39,7 +39,7 @@ char* completion_key_generator(const char* text, int state);
 
 } /* anonymous namespace */
 
-namespace anl
+namespace anlnext
 {
 
 ReadLine::ReadLine()
@@ -84,7 +84,7 @@ void ReadLine::set_completion_candidates(const std::vector<std::string>& keys)
   rl_attempted_completion_function = completion_function;
 }
 
-} /* namespace anl */
+} /* namespace anlnext */
 
 namespace
 {
@@ -114,4 +114,4 @@ char* completion_key_generator(const char* text, int state)
 
 } /* anonymous namespace */
 
-#endif /* ANL_USE_READLINE */
+#endif /* ANLNEXT_USE_READLINE */
