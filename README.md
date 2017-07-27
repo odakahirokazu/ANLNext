@@ -127,6 +127,7 @@ https://github.com/odakahirokazu/ANLNext/
 - iMac 27-inch late 2015
 - macOS Sierra (10.12.5)
 - Apple LLVM version 8.1.0 (clang-802.0.42)
+- CMake 3.8.2
 - ruby 2.4.1p111 (2017-03-22 revision 58053)
 - ROOT 6.10/02
 - SWIG Version 3.0.12
@@ -237,14 +238,14 @@ install headers and libraries into the user's home directory, such as
 
 There are several options:
 
-- `ANL_ENABLE_INTERACTIVE_MODE` (Default=ON): enable an interactive mode
-- `ANL_USE_READLINE` (Default=ON): enable Readlibe library
-- `ANL_USE_RUBY` (Default=ON): enable Ruby extention library
-- `ANL_USE_TVECTOR` (Default=OFF): enable ROOT vector.
-- `ANL_USE_HEPVECTOR` (Default=OFF): enable CLHEP vector.
-- `ANL_USE_G4VECTOR` (Default=OFF): enable Geant4-CLHEP vector.
-- `ANL_INSTALL_HEADERS` (Default=ON): install all header files.
-- `ANL_INSTALL_CMAKE_FILES` (Default=ON): install all cmake files.
+- `ANLNEXT_ENABLE_INTERACTIVE_MODE` (Default=ON): enable an interactive mode
+- `ANLNEXT_USE_READLINE` (Default=ON): enable Readlibe library
+- `ANLNEXT_USE_RUBY` (Default=ON): enable Ruby extention library
+- `ANLNEXT_USE_TVECTOR` (Default=OFF): enable ROOT vector.
+- `ANLNEXT_USE_HEPVECTOR` (Default=OFF): enable CLHEP vector.
+- `ANLNEXT_USE_G4VECTOR` (Default=OFF): enable Geant4-CLHEP vector.
+- `ANLNEXT_INSTALL_HEADERS` (Default=ON): install all header files.
+- `ANLNEXT_INSTALL_CMAKE_FILES` (Default=ON): install all cmake files.
 
 #### (3) Make and install
 
