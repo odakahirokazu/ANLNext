@@ -1,10 +1,9 @@
-# ANLLib
+# anlnext/basic.rb
 # Class library written in Ruby for the ANL Next framework.
 #
 # @author: Hirokazu Odaka
 #
 
-require 'ANL'
 require 'forwardable'
 require 'rexml/document'
 require 'json'
@@ -1114,7 +1113,7 @@ module ANL
                     app_name: "MyApp")
       out = output ? File::open(output, 'w') : STDOUT
       out.puts '#!/usr/bin/env ruby'
-      out.puts "require 'ANLLib'"
+      out.puts "require 'anlnext'"
       out.puts "require '#{package}'"
       out.puts ''
       out.puts 'num_loop = 100000'
@@ -1350,7 +1349,13 @@ module ANL
       puts ''
       @includeModules.each{|s| puts '%include "'+s+'"' }
       puts ''
-      @importModules.each{|s| puts '%import "'+s+'"' }
+      @importModules.each do |s|
+        if s.is_a? Hash
+          puts '%import(module="'+s[:name]+'") "'+s[:file]+'"'
+        else
+          puts '%import "'+s+'"'
+        end
+      end
       puts ''
       puts 'namespace '+@namespace+' {' if @namespace
       puts ''

@@ -301,7 +301,7 @@ To run this application, see
 To use the extension libarary, it is necessary to *require* ANL libraries.
 
 ```ruby
-require 'ANLLib' # ANL Next library
+require 'anlnext' # ANL Next library
 require 'myPackage' # Ruby extension library using ANL Next
 ```
 
@@ -621,7 +621,7 @@ has a practical function, telling us how an ANL application works.
 ```ruby
 #!/usr/bin/env ruby
 
-require 'ANLLib'
+require 'anlnext'
 require 'testHistogram'
 
 class MyApp < ANL::ANLApp

@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'ANLLib'
+require 'anlnext'
 require 'testHistogram'
 
 class MyApp < ANL::ANLApp

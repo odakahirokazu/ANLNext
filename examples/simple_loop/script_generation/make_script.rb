@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'ANLLib'
+require 'anlnext'
 require 'myPackage'
 
 class MyApp < ANL::ANLApp

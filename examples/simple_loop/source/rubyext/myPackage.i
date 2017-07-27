@@ -9,28 +9,10 @@
   
 %}
 
-%import "anl/ruby/ANL.i"
-
+%import(module="anlnext/ANL") "anl/ruby/ANL.i"
 
 // interface to my modules
 
-class MyModule : public anl::BasicModule
-{
-public:
-  MyModule();
-  ~MyModule();
-};
-
-class MyMapModule : public anl::BasicModule
-{
-public:
-  MyMapModule();
-  ~MyMapModule();
-};
-
-class MyVectorModule : public anl::BasicModule
-{
-public:
-  MyVectorModule();
-  ~MyVectorModule();
-};
+class MyModule : public anl::BasicModule {};
+class MyMapModule : public anl::BasicModule {};
+class MyVectorModule : public anl::BasicModule {};

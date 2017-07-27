@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'ANLLib'
+require 'anlnext'
 require 'myPackage'
 
 # Define your own application class derived from ANL::ANLApp.

@@ -108,6 +108,3 @@ if(ANL_INSTALL_HEADERS)
 endif(ANL_INSTALL_HEADERS)
 
 add_subdirectory(rubyext)
-
-install(FILES scripts/ANLLib.rb
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/ruby)

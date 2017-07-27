@@ -7,7 +7,7 @@
   
 %}
 
-%import "anl/ruby/ANL.i"
+%import(module="anlnext/ANL") "anl/ruby/ANL.i"
 
 
 // interface to my modules

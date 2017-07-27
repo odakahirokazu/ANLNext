@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'ANLLib' # ANL Next library
+require 'anlnext' # ANL Next library
 require 'myPackage'# Ruby extension library using ANL Next
 require 'json'
 
