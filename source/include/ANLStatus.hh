@@ -30,26 +30,43 @@ namespace anl
  * @author Hirokazu Odaka
  * @date 2014-12-10
  * @date 2017-07-07 | add as_quit_all, as_quit_all_error
+ * @date 2017-07-26 | more flow control keywords
  */
 enum class ANLStatus {
   ok,
+  error,
   skip,
   skip_error,
   quit,
   quit_error,
   quit_all,
-  quit_all_error
+  quit_all_error,
+  critical_error_to_finalize,
+  critical_error_to_terminate,
+  critical_error_to_finalize_from_exception,
+  critical_error_to_terminate_from_exception,
 };
 
 std::string status_to_string(ANLStatus status);
 
+bool is_normal_error(ANLStatus status);
+bool is_critical_error(ANLStatus status);
+ANLStatus eliminate_normal_error_status(ANLStatus status);
+
+inline bool is_error(ANLStatus status)
+{ return is_normal_error(status) || is_critical_error(status); }
+
 constexpr ANLStatus AS_OK             = ANLStatus::ok;
+constexpr ANLStatus AS_ERROR          = ANLStatus::error;
 constexpr ANLStatus AS_SKIP           = ANLStatus::skip;
 constexpr ANLStatus AS_SKIP_ERROR     = ANLStatus::skip_error;
 constexpr ANLStatus AS_QUIT           = ANLStatus::quit;
 constexpr ANLStatus AS_QUIT_ERROR     = ANLStatus::quit_error;
 constexpr ANLStatus AS_QUIT_ALL       = ANLStatus::quit_all;
 constexpr ANLStatus AS_QUIT_ALL_ERROR = ANLStatus::quit_all_error;
+
+constexpr ANLStatus AS_CRITICAL_ERROR_TO_FINALIZE = ANLStatus::critical_error_to_finalize;
+constexpr ANLStatus AS_CRITICAL_ERROR_TO_TERMINATE = ANLStatus::critical_error_to_terminate;
 
 enum class ANLRequest {
   none,

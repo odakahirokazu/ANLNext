@@ -13,11 +13,7 @@ module ANL
   ### aliases of ANL status
   AS_OK             = ANL::ANLStatus_ok
   AS_SKIP           = ANL::ANLStatus_skip
-  AS_SKIP_ERROR     = ANL::ANLStatus_skip_error
   AS_QUIT           = ANL::ANLStatus_quit
-  AS_QUIT_ERROR     = ANL::ANLStatus_quit_error
-  AS_QUIT_ALL       = ANL::ANLStatus_quit_all
-  AS_QUIT_ALL_ERROR = ANL::ANLStatus_quit_all_error
 
   class BasicModule
     # Get a list of parameters registered in the module.
@@ -174,25 +170,6 @@ module ANL
       @z = z
     end
   end
-
-
-  # Convert ANL status interger to string.
-  #
-  # @param [Int] i ANL status ID
-  # @return [String] ANL status
-  def show_status(i)
-    {
-      ANL::ANLStatus_ok => "AS_OK",
-      ANL::ANLStatus_skip => "AS_SKIP",
-      ANL::ANLStatus_skip_error => "AS_SKIP_ERROR",
-      ANL::ANLStatus_quit => "AS_QUIT",
-      ANL::ANLStatus_quit_error => "AS_QUIT_ERROR",
-      ANL::ANLStatus_quit_all => "AS_QUIT_ALL",
-      ANL::ANLStatus_quit_all_error => "AS_QUIT_ALL_ERROR",
-    }[i] or "unknown status"
-  end
-  module_function :show_status
-
 
   # Class of ANL module + its parameters
   #
@@ -849,11 +826,30 @@ module ANL
     # param[String] function name of ANL routine.
     #
     def check_status(status, function_name)
-      if status == AS_OK
-        return true
+      message = "#{function_name} returned #{ANL.status_to_string(status)}."
+
+      case status
+      when ANL::ANLStatus_critical_error_to_finalize_from_exception, ANL::ANLStatus_critical_error_to_terminate_from_exception
+        message += "\n"
+        message += "The returned status indicates the presence of a previously caught exception.\n"
+        message += "See also that error message displayed above for details."
       end
-      if status == AS_SKIP_ERROR || status == AS_QUIT_ERROR || status == AS_QUIT_ALL_ERROR
-        raise "#{function_name} returned #{ANL.show_status(status)}."
+
+      case status
+      when AS_OK
+        return true
+      when ANL::ANLStatus_critical_error_to_finalize, ANL::ANLStatus_critical_error_to_finalize_from_exception
+        if @stage == :initialization_done || @stage == :analysis_done
+          @stage = :error_to_finalize
+        else
+          @stage = :error_to_terminate
+        end
+        raise message
+      when ANL::ANLStatus_critical_error_to_terminate, ANL::ANLStatus_critical_error_to_terminate_from_exception
+        @stage = :error_to_terminate
+        raise message
+      else
+        puts message
       end
       return false
     end
@@ -931,27 +927,20 @@ module ANL
       puts ""
       puts "<End Analysis>   | Time: " + Time.now.to_s
       $stdout.flush
-      check_status(status, "Analyze()") or return
-      @stage = :analysis_done
+
+      if check_status(status, "Analyze()")
+        @stage = :analysis_done
+      end
 
       status = anl.Finalize()
       check_status(status, "Finalize()") or return
       @stage = :finalization_done
     rescue RuntimeError => ex
-      puts ""
-      puts "################################################################"
-      puts "#                                                              #"
-      puts "#                       ANL Exception                          #"
-      puts "#                                                              #"
-      puts "################################################################"
-      puts ""
-      puts ex
-      puts ""
-      puts "################################################################"
-      puts ""
-      puts "---- displayed by <Ruby> AnalysisChain#run() ----"
-      puts ""
-
+      print_exception(ex)
+      if @stage == :error_to_finalize
+        status = anl.Finalize()
+        puts "Finalize() returned #{ANL.status_to_string(status)}."
+      end
       if ANL::ANLException.VerboseLevel >= 3
         raise
       end
@@ -986,13 +975,25 @@ module ANL
       @stage = :initialization_done
 
       status = anl.do_interactive_analysis()
-      check_status(status, "do_interactive_analysis()") or return
-      @stage = :analysis_done
+      if check_status(status, "do_interactive_analysis()")
+        @stage = :analysis_done
+      end
 
       status = anl.Finalize()
       check_status(status, "Finalize()") or return
       @stage = :finalization_done
     rescue RuntimeError => ex
+      print_exception(ex)
+      if @stage == :error_to_finalize
+        status = anl.Finalize()
+        puts "Finalize() returned #{ANL.status_to_string(status)}."
+      end
+      if ANL::ANLException.VerboseLevel >= 3
+        raise
+      end
+    end
+
+    def print_exception(ex)
       puts ""
       puts "################################################################"
       puts "#                                                              #"
@@ -1004,12 +1005,8 @@ module ANL
       puts ""
       puts "################################################################"
       puts ""
-      puts "---- displayed by <Ruby> AnalysisChain#run_interactive() ----"
+      puts "---- displayed by <Ruby> AnalysisChain#print_exception() ----"
       puts ""
-
-      if ANL::ANLException.VerboseLevel >= 3
-        raise
-      end
     end
 
     # Print all parameters of all the module in the analysis chain.

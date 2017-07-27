@@ -38,13 +38,20 @@ namespace anl
 
 enum class ANLStatus {
   ok,
+  error,
   skip,
   skip_error,
   quit,
   quit_error,
   quit_all,
-  quit_all_error
+  quit_all_error,
+  critical_error_to_finalize,
+  critical_error_to_terminate,
+  critical_error_to_finalize_from_exception,
+  critical_error_to_terminate_from_exception,
 };
+
+std::string status_to_string(ANLStatus status);
 
 struct ANLException
 {

@@ -37,14 +37,21 @@ int ANLException::VerboseLevel()
   return __VerboseLevel__;
 }
 
+ANLException::ANLException()
+{
+  *this << ExceptionTreatment(Treatment::finalize);
+}
+
 ANLException::ANLException(const BasicModule* mod)
 {
+  *this << ExceptionTreatment(Treatment::finalize);
   *this << ErrorInfoOnModuleID(mod->module_id());
   *this << ErrorInfoOnModuleName(mod->module_name());
 }
 
 ANLException::ANLException(const std::string& message)
 {
+  *this << ExceptionTreatment(Treatment::finalize);
   *this << ErrorMessage(message);
 }
 
@@ -75,6 +82,12 @@ const ANLException& ANLException::prepend_message(const std::string& message) co
   std::ostringstream oss;
   oss << message << "\n" << get_message();
   *this << ErrorMessage(oss.str());
+  return *this;
+}
+
+const ANLException& ANLException::request_treatment(ANLException::Treatment t) const
+{
+  *this << ExceptionTreatment(t);
   return *this;
 }
 

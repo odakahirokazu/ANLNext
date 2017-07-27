@@ -63,22 +63,19 @@ public:
 
   void count_up_by_result(ANLStatus status)
   {
-    if (status == AS_OK) {
+    if (is_error(status)) {
+      ++error_;
+    }
+
+    const ANLStatus statusWithoutError = eliminate_normal_error_status(status);
+    if (statusWithoutError == AS_OK) {
       ++ok_;
     }
-    else if (status == AS_SKIP) {
+    else if (statusWithoutError == AS_SKIP) {
       ++skip_;
     }
-    else if (status == AS_SKIP_ERROR) {
-      ++skip_;
-      ++error_;
-    }
-    else if (status == AS_QUIT || status == AS_QUIT_ALL) {
+    else if (statusWithoutError == AS_QUIT || statusWithoutError == AS_QUIT_ALL) {
       ++quit_;
-    }
-    else if (status == AS_QUIT_ERROR || status == AS_QUIT_ALL_ERROR) {
-      ++quit_;
-      ++error_;
     }
   }
 

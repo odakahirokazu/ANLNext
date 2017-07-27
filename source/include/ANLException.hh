@@ -55,11 +55,14 @@ struct exception_base : virtual std::exception, virtual boost::exception
 struct ANLException : virtual exception_base
 {
 public:
+  enum class Treatment { rethrow, finalize, terminate, hard_terminate };
+
+public:
   static void SetVerboseLevel(int v);
   static int VerboseLevel();
 
 public:
-  ANLException() = default;
+  ANLException();
   explicit ANLException(const BasicModule* mod);
   explicit ANLException(const std::string& message);
   ANLException(const BasicModule* mod,
@@ -73,12 +76,16 @@ public:
   const ANLException& append_message(const std::string& message) const;
   const ANLException& prepend_message(const std::string& message) const;
 
+  const ANLException& request_treatment(Treatment t) const;
+
   std::string get_message() const;
   std::string to_string() const;
 
 private:
   static int __VerboseLevel__;
 };
+
+using ExceptionTreatment = boost::error_info<struct tag_ExceptionTreatment, ANLException::Treatment>;
 
 struct ModuleCloningError : anl::ANLException
 {

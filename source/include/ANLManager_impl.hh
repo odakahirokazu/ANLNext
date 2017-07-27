@@ -37,6 +37,58 @@ ANLStatus routine_modfn(T func,
             << std::endl;
 
   ANLStatus status = AS_OK;
+  try {
+    status = routine_modfn_impl(func, func_id, modules);
+
+    if (is_critical_error(status)) {
+      return status;
+    }
+  }
+  catch (ANLException& ex) {
+    if (const ANLException::Treatment* t = boost::get_error_info<ExceptionTreatment>(ex)) {
+      if (*t == ANLException::Treatment::rethrow) {
+        throw;
+      }
+      else if (*t == ANLException::Treatment::finalize) {
+        print_exception(ex);
+        return ANLStatus::critical_error_to_finalize_from_exception;
+      }
+      else if (*t == ANLException::Treatment::terminate) {
+        print_exception(ex);
+        return ANLStatus::critical_error_to_terminate_from_exception;
+      }
+      else if (*t == ANLException::Treatment::hard_terminate) {
+        print_exception(ex);
+        std::terminate();
+      }
+    }
+    throw;
+  }
+
+  if (status == AS_QUIT || status == AS_QUIT_ALL) {
+    return AS_QUIT;
+  }
+
+  if (status == AS_SKIP) {
+    std::cout << "\n"
+              << "ANLManager: <" << func_id << "> routine successfully done,\n"
+              << "but some module(s) was skipped.\n"
+              << std::endl;
+    return AS_OK;
+  }
+
+  std::cout << "\n"
+            << "ANLManager: <" << func_id << "> routine successfully done.\n"
+            << std::endl;
+  return AS_OK;
+}
+
+template<typename T>
+ANLStatus routine_modfn_impl(T func,
+                             const std::string& func_id,
+                             const std::vector<BasicModule*>& modules)
+{
+  ANLStatus status = AS_OK;
   for (auto& mod: modules) {
     if (mod->is_off()) { continue; }
     
@@ -48,9 +100,15 @@ ANLStatus routine_modfn(T func,
       ex << ErrorInfoOnModuleID( mod->module_id() );
       ex << ErrorInfoOnModuleName( mod->module_name() );
       ex << ErrorInfoOnChainID( mod->copy_id() );
-      print_exception(ex);
-      status = AS_QUIT_ERROR;
-      break;
+      throw;
+    }
+
+    if (is_normal_error(status)) {
+      std::cout << "\n"
+                << "Error in <" << func_id << "> routine\n"
+                << mod->module_name() << "::mod_" << func_id
+                << " returned " << status << std::endl;
+      status = eliminate_normal_error_status(status);
     }
 
     if (status != AS_OK ) {
@@ -60,12 +118,6 @@ ANLStatus routine_modfn(T func,
                 << " returned " << status << std::endl;
       break;
     }
-  }
-  
-  if (status == AS_OK) {
-    std::cout << "\n"
-              << "ANLManager: <" << func_id << "> routine successfully done.\n"
-              << std::endl;
   }
 
   return status;

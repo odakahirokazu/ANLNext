@@ -83,6 +83,11 @@ public:
   void set_display_frequency(long int v) { displayFrequency_ = v; }
   long int display_frequency() const;
 
+  void set_exception_propagation(bool v)
+  { exceptionPropagation_ = v; }
+  bool exception_propagation() const
+  { return exceptionPropagation_; }
+
   virtual ANLStatus Define();
   virtual ANLStatus PreInitialize();
   virtual ANLStatus Initialize();
@@ -143,6 +148,7 @@ protected:
   std::unique_ptr<EvsManager> evsManager_;
   std::mutex mutex_;
   std::atomic<ANLRequest> requested_{ANLRequest::none};
+  bool exceptionPropagation_ = true;
 
 private:
   long int displayFrequency_ = -1;

@@ -200,24 +200,35 @@ ANLStatus ANLManagerMT::process_analysis()
                                      std::move(statusPromise));
   }
 
+  for (int i=0; i<NumParallels_; i++) {
+    analysisThreads[i].join();
+  }
+
   std::vector<ANLStatus> statusVector(NumParallels_, AS_OK);
   for (int i=0; i<NumParallels_; i++) {
     statusVector[i] = statusFutureVector[i].get();
   }
 
-  for (int i=0; i<NumParallels_; i++) {
-    analysisThreads[i].join();
-  }
-
   ANLStatus status = AS_OK;
   for (ANLStatus s: statusVector) {
-    if (s == AS_SKIP_ERROR) { status = s; }
+    if (s == ANLStatus::critical_error_to_finalize) {
+      status = s;
+    }
   }
   for (ANLStatus s: statusVector) {
-    if (s == AS_QUIT_ERROR) { status = s; }
+    if (s == ANLStatus::critical_error_to_finalize_from_exception) {
+      status = s;
+    }
   }
   for (ANLStatus s: statusVector) {
-    if (s == AS_QUIT_ALL_ERROR) { status = s; }
+    if (s == ANLStatus::critical_error_to_terminate) {
+      status = s;
+    }
+  }
+  for (ANLStatus s: statusVector) {
+    if (s == ANLStatus::critical_error_to_terminate_from_exception) {
+      status = s;
+    }
   }
 
   return status;
@@ -239,13 +250,13 @@ void ANLManagerMT::process_analysis_in_each_thread(int iThread, std::promise<ANL
     statusPromise.set_value(status);
   }
   catch (...) {
-#if 1
-    statusPromise.set_exception(std::current_exception());
-#else
-    try {
+    if (exception_propagation()) {
+      requested_ = ANLRequest::quit;
       statusPromise.set_exception(std::current_exception());
-    } catch(...) {} // ignore an exception thrown by set_exception()
-#endif
+    }
+    else {
+      throw;
+    }
   }
 }
 
@@ -258,47 +269,67 @@ ANLStatus ANLManagerMT::process_analysis_impl(const std::vector<BasicModule*>& m
   const long int displayFrequency = display_frequency();
   const long int numNvents = number_of_loops();
 
-  while (true) {
-    const long int iEvent = event_index_to_process();
-    if (iEvent == numNvents) { break; }
+  try {
+    while (true) {
+      const long int iEvent = event_index_to_process();
+      if (iEvent == numNvents) { break; }
 
-    if (displayFrequency != 0 && iEvent%displayFrequency == 0) {
-      print_event_index(iEvent);
-    }
+      if (displayFrequency != 0 && iEvent%displayFrequency == 0) {
+        print_event_index(iEvent);
+      }
 
-    status = process_one_event(iEvent, modules, counters, evsManager, orderKeepers_);
+      status = process_one_event(iEvent, modules, counters, evsManager, orderKeepers_);
 
-    if (status == AS_QUIT || status == AS_QUIT_ERROR) {
-      break;
-    }
+      if (is_critical_error(status)) {
+        requested_ = ANLRequest::quit;
+        return status;
+      }
 
-    if (status == AS_QUIT_ALL || status == AS_QUIT_ALL_ERROR) {
-      break;
-    }
-
-    if (requested_ != ANLRequest::none) {
-      std::lock_guard<std::mutex> lock(mutex_);
-      if (requested_ == ANLRequest::quit) {
+      if (status == AS_QUIT || status == AS_QUIT_ALL) {
         break;
       }
-      else if (requested_ == ANLRequest::show_event_index) {
-        print_event_index(iEvent);
+
+      if (requested_ != ANLRequest::none) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (requested_ == ANLRequest::quit) {
+          break;
+        }
+        else if (requested_ == ANLRequest::show_event_index) {
+          print_event_index(iEvent);
+        }
+        else if (requested_ == ANLRequest::show_evs_summary) {
+          print_event_index(iEvent);
+          evsManager_->print_summary();
+        }
+        requested_ = ANLRequest::none;
       }
-      else if (requested_ == ANLRequest::show_evs_summary) {
-        print_event_index(iEvent);
-        evsManager_->print_summary();
-      }
-      requested_ = ANLRequest::none;
+    }
+
+    if (status == AS_QUIT_ALL) {
+      requested_ = ANLRequest::quit;
     }
   }
-
-  if (status == AS_QUIT_ALL || status == AS_QUIT_ALL_ERROR) {
-    requested_ = ANLRequest::quit;
-    return status;
-  }
-
-  if (status==AS_SKIP_ERROR || status==AS_QUIT_ERROR) {
-    return status;
+  catch (ANLException& ex) {
+    if (const ANLException::Treatment* t = boost::get_error_info<ExceptionTreatment>(ex)) {
+      if (*t == ANLException::Treatment::rethrow) {
+        throw;
+      }
+      else if (*t == ANLException::Treatment::finalize) {
+        requested_ = ANLRequest::quit;
+        print_exception(ex);
+        return ANLStatus::critical_error_to_finalize_from_exception;
+      }
+      else if (*t == ANLException::Treatment::terminate) {
+        requested_ = ANLRequest::quit;
+        print_exception(ex);
+        return ANLStatus::critical_error_to_terminate_from_exception;
+      }
+      else if (*t == ANLException::Treatment::hard_terminate) {
+        print_exception(ex);
+        std::terminate();
+      }
+    }
+    throw;
   }
 
   return AS_OK;

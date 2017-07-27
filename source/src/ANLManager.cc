@@ -64,6 +64,7 @@ ANLManager::ANLManager()
     numEvents_(0),
     evsManager_(new EvsManager),
     requested_(ANLRequest::none),
+    exceptionPropagation_(true),
     displayFrequency_(-1),
     moduleAccess_(new ModuleAccess),
     analysisThreadFinished_(false)
@@ -179,7 +180,7 @@ ANLStatus ANLManager::Initialize()
   sa.sa_flags |= SA_RESTART;
   if ( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
-    return AS_QUIT_ERROR;
+    return ANLStatus::critical_error_to_terminate;
   }
 #endif
 
@@ -198,7 +199,7 @@ final:
 #if ANL_INITIALIZE_INTERRUPT
   if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
-    return AS_QUIT_ERROR;
+    return ANLStatus::critical_error_to_terminate;
   }
 #endif
 
@@ -228,7 +229,7 @@ ANLStatus ANLManager::Analyze(long int num_events, bool enable_console)
   sa.sa_flags |= SA_RESTART;
   if ( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
-    return AS_QUIT_ERROR;
+    return ANLStatus::critical_error_to_terminate;
   }
 #endif
 
@@ -255,10 +256,10 @@ ANLStatus ANLManager::Analyze(long int num_events, bool enable_console)
     std::thread analysisThread(std::bind(&ANLManager::process_analysis_for_the_thread, this, std::placeholders::_1),
                                std::move(statusPromise));
     std::thread interactiveThread(std::bind(&ANLManager::interactive_session, this));
-    status = statusFuture.get();
     analysisThread.join();
     analysisThreadFinished_ = true;
     interactiveThread.join();
+    status = statusFuture.get();
   }
   else {
     std::cout << "\n"
@@ -292,7 +293,7 @@ final:
 #if ANL_ANALYZE_INTERRUPT
   if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
-    return AS_QUIT_ERROR;
+    return ANLStatus::critical_error_to_terminate;
   }
 #endif
 
@@ -316,7 +317,7 @@ ANLStatus ANLManager::Finalize()
   sa.sa_flags |= SA_RESTART;
   if ( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
-    return AS_QUIT_ERROR;
+    return ANLStatus::critical_error_to_terminate;
   }
 #endif
 
@@ -331,7 +332,7 @@ final:
 #if ANL_FINALIZE_INTERRUPT
   if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
     std::cout << "sigaction(2) error!" << std::endl;
-    return AS_QUIT_ERROR;
+    return ANLStatus::critical_error_to_terminate;
   }
 #endif
 
@@ -443,38 +444,57 @@ ANLStatus ANLManager::process_analysis()
   const long int displayFrequency = display_frequency();
   const long int numEvents = number_of_loops();
 
-  for (long int iEvent=0; iEvent!=numEvents; iEvent++) {
-    if (displayFrequency != 0 && iEvent%displayFrequency == 0) {
-      print_event_index(iEvent);
-    }
+  try {
+    for (long int iEvent=0; iEvent!=numEvents; iEvent++) {
+      if (displayFrequency != 0 && iEvent%displayFrequency == 0) {
+        print_event_index(iEvent);
+      }
 
-    status = process_one_event(iEvent, modules, counters_, *evsManager_);
+      status = process_one_event(iEvent, modules, counters_, *evsManager_);
 
-    if (status==AS_QUIT_ALL) { status = AS_QUIT; }
-    if (status==AS_QUIT_ALL_ERROR) { status = AS_QUIT_ERROR; }
+      if (is_critical_error(status)) {
+        return status;
+      }
 
-    if (status==AS_QUIT || status==AS_QUIT_ERROR) {
-      break;
-    }
-
-    if (requested_ != ANLRequest::none) {
-      std::lock_guard<std::mutex> lock(mutex_);
-      if (requested_ == ANLRequest::quit) {
+      if (status==AS_QUIT || status==AS_QUIT_ALL) {
         break;
       }
-      else if (requested_ == ANLRequest::show_event_index) {
-        print_event_index(iEvent);
+
+      if (requested_ != ANLRequest::none) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (requested_ == ANLRequest::quit) {
+          break;
+        }
+        else if (requested_ == ANLRequest::show_event_index) {
+          print_event_index(iEvent);
+        }
+        else if (requested_ == ANLRequest::show_evs_summary) {
+          print_event_index(iEvent);
+          evsManager_->print_summary();
+        }
+        requested_ = ANLRequest::none;
       }
-      else if (requested_ == ANLRequest::show_evs_summary) {
-        print_event_index(iEvent);
-        evsManager_->print_summary();
-      }
-      requested_ = ANLRequest::none;
     }
   }
-
-  if (status==AS_SKIP_ERROR || status==AS_QUIT_ERROR) {
-    return status;
+  catch (ANLException& ex) {
+    if (const ANLException::Treatment* t = boost::get_error_info<ExceptionTreatment>(ex)) {
+      if (*t == ANLException::Treatment::rethrow) {
+        throw;
+      }
+      else if (*t == ANLException::Treatment::finalize) {
+        print_exception(ex);
+        return ANLStatus::critical_error_to_finalize_from_exception;
+      }
+      else if (*t == ANLException::Treatment::terminate) {
+        print_exception(ex);
+        return ANLStatus::critical_error_to_terminate_from_exception;
+      }
+      else if (*t == ANLException::Treatment::hard_terminate) {
+        print_exception(ex);
+        std::terminate();
+      }
+    }
+    throw;
   }
 
   return AS_OK;
@@ -564,13 +584,12 @@ void ANLManager::process_analysis_for_the_thread(std::promise<ANLStatus> statusP
     statusPromise.set_value(s);
   }
   catch (...) {
-#if 1
-    statusPromise.set_exception(std::current_exception());
-#else
-    try {
+    if (exception_propagation()) {
       statusPromise.set_exception(std::current_exception());
-    } catch(...) {} // ignore an exception thrown by set_exception()
-#endif
+    }
+    else {
+      throw;
+    }
   }
 }
 
@@ -637,7 +656,6 @@ ANLStatus process_one_event(long int iEvent,
                             EvsManager& evsManager)
 {
   evsManager.reset_all_flags();
-
   ANLStatus status = AS_OK;
 
   const std::size_t NumberOfModules = modules.size();
@@ -651,19 +669,18 @@ ANLStatus process_one_event(long int iEvent,
       try {
         status = mod->mod_analyze();
       }
-      catch (ANLException& ex) {
+      catch (boost::exception& ex) {
         ex << ErrorInfoOnLoopIndex(iEvent);
         ex << ErrorInfoOnMethod( mod->module_name() + "::mod_analyze" );
         ex << ErrorInfoOnModuleID( mod->module_id() );
         ex << ErrorInfoOnModuleName( mod->module_name() );
         ex << ErrorInfoOnChainID( mod->copy_id() );
-        print_exception(ex);
-        status = AS_QUIT_ERROR;
-        break;
+        throw;
       }
-        
+
       counters[iModule].count_up_by_result(status);
-        
+      status = eliminate_normal_error_status(status);
+
       if (status != AS_OK) {
         break;
       }
@@ -671,7 +688,6 @@ ANLStatus process_one_event(long int iEvent,
   }
 
   count_evs(status, evsManager);
-
   return status;
 }
 
@@ -682,7 +698,6 @@ ANLStatus process_one_event(long int iEvent,
                             std::vector<std::unique_ptr<OrderKeeper>>& order_keepers)
 {
   evsManager.reset_all_flags();
-
   ANLStatus status = AS_OK;
 
   const std::size_t NumberOfModules = modules.size();
@@ -704,17 +719,15 @@ ANLStatus process_one_event(long int iEvent,
         ex << ErrorInfoOnModuleID( mod->module_id() );
         ex << ErrorInfoOnModuleName( mod->module_name() );
         ex << ErrorInfoOnChainID( mod->copy_id() );
-        print_exception(ex);
-        status = AS_QUIT_ERROR;
-        break;
+        throw;
       }
 
       counters[iModule].count_up_by_result(status);
+      status = eliminate_normal_error_status(status);
     }
   }
 
   count_evs(status, evsManager);
-
   return status;
 }
 
