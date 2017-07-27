@@ -14,7 +14,7 @@ module ANL
       @name = name
       @manual = manual
       @option = option
-      @include_path = ['../include']
+      @include_path = ['../include', '../../include']
     end
 
     attr_reader :name, :manual, :option
