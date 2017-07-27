@@ -6,3 +6,5 @@
 
 require 'anlnext/ANL'
 require 'anlnext/basic'
+require 'anlnext/chain'
+require 'anlnext/utility'
