@@ -22,7 +22,7 @@ News
 
 - **multi-thread mode (parallel computing)**
 - new interactive mode (beginner friendly)
-- more flexible Ruby scripting enviroment
+- more flexible Ruby scripting environment
 - clearer messages
 - API reviewed and changed
 
@@ -119,10 +119,10 @@ https://github.com/odakahirokazu/ANLNext/
 
 ### Platforms
 
-- Mac (the author's main enviroment for development and testing)
+- Mac (the author's main environment for development and testing)
 - Linux
 
-#### Test environmemt (Mac)
+#### Test environment (Mac)
 
 - iMac 27-inch late 2015
 - macOS Sierra (10.12.5)
@@ -133,7 +133,7 @@ https://github.com/odakahirokazu/ANLNext/
 - SWIG Version 3.0.12
 - Boost 1.64.0
 
-#### Test environmemt (Linux)
+#### Test environment (Linux)
 
 - Red Hat Enterprise Linux Server release 6.9 (Santiago)
 - Boost 1.58.0
@@ -151,9 +151,9 @@ http://web.stanford.edu/~hodaka/anlnext/doxygen/
 
 - ComptonSoft (simulation and data analysis suite for X-ray/gamma-ray detectors)
 - MONACO (astrophysical Monte-Carlo radiative transfer simulations)
-- HXISGDDataReceiver (online data aquisition system of HXI/SGD onboard the ASTRO-H satellite, used at a ground facility)
+- HXISGDDataReceiver (online data acquisition system of HXI/SGD onboard the ASTRO-H satellite, used at a ground facility)
 
-### Licence
+### License
 
 ANL Next is distributed under the GNU General Public License version 3.
 
@@ -170,8 +170,8 @@ Installation
 
 ### Required Software
 
-#### (1) C++ compliler
-*comformation to C++11 required*
+#### (1) C++ compiler
+*conformation to C++11 required*
 
 #### (2) [Boost C++ library](http://www.boost.org/)
 *version 1.61.0 or later.*
@@ -249,7 +249,7 @@ There are several options:
 
 #### (3) Make and install
 
-    $ make -jN (N: number of parallel complilation processes)
+    $ make -jN (N: number of parallel compilation processes)
     $ make install
 
 #### (4) Set environment variables
@@ -260,7 +260,7 @@ you need to set the following environment variables:
 
     export RUBYLIB=${HOME}/lib/ruby:${RUBYLIB}
 
-Otherwise, you need to set the following envrionment variables:
+Otherwise, you need to set the following environment variables:
 
     export ANLNEXT_INSTALL=/path/to/install
     export RUBYLIB=${ANLNEXT_INSTALL}/lib/ruby:${RUBYLIB}
@@ -299,7 +299,7 @@ a simple loop in which nothing happens. To build it, you can use cmake:
 
 To run this application, see
 [run/run_simple_loop.rb](./examples/simple_loop/run/run_simple_loop.rb).
-To use the extension libarary, it is necessary to *require* ANL libraries.
+To use the extension library, it is necessary to *require* ANL libraries.
 
 ```ruby
 require 'anlnext' # ANL Next library
