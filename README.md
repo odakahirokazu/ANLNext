@@ -18,7 +18,7 @@ News
 
 ### Version 2.0
 
-**released on July xx, 2017**
+**released on August 28, 2017**
 
 - **multi-thread mode (parallel computing)**
 - new interactive mode (beginner friendly)
@@ -125,13 +125,13 @@ https://github.com/odakahirokazu/ANLNext/
 #### Test environment (Mac)
 
 - iMac 27-inch late 2015
-- macOS Sierra (10.12.5)
+- macOS Sierra (10.12.6)
 - Apple LLVM version 8.1.0 (clang-802.0.42)
-- CMake 3.8.2
+- CMake 3.9.1
 - ruby 2.4.1p111 (2017-03-22 revision 58053)
-- ROOT 6.10/02
+- ROOT 6.10/04
 - SWIG Version 3.0.12
-- Boost 1.64.0
+- Boost 1.65.0
 
 #### Test environment (Linux)
 
