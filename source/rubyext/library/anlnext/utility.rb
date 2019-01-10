@@ -51,7 +51,7 @@ module ANL
         classOpen = nil
         constructor = nil
         constructor2 = nil
-        numNestedClasses = 0
+        braceCount = 0
 
         fin.each_line do |l|
           if !className && l=~/^class\s+(\w+)(\s+|\:)/
@@ -59,57 +59,45 @@ module ANL
             puts l.sub(/,.+/, '')
             if l.include? '{'
               classOpen = true
+              braceCount = ANL.count_braces(l)
             end
             next
           end
 
-          if className
-            if !classOpen
+          if className && !classOpen
+            puts l
+            if l.include? '{'
+              classOpen = true
+              braceCount = ANL.count_braces(l)
+              puts 'public:'
+            end
+            next
+          end
+
+          if className && classOpen
+            braceCount += ANL.count_braces(l)
+
+            if l.include?(className+'(') && !l.include?('&')
               puts l
-              if l.include? '{'
-                classOpen = true
-                puts 'public:'
-              end
-            else
-              if l.include?("class")
-                if l.include? '};'
-                  # nested class closed
-                else
-                  numNestedClasses += 1
-                end
-                next
-              end
+              constructor = true
+            elsif constructor
+              puts l
+            end
 
-              if numNestedClasses > 0
-                if l.include? '};'
-                  # nested class closed
-                  numNestedClasses -= 1
-                end
-                next
+            if constructor
+              constructor = nil if !constructor2 && l.include?(';')
+              constructor2 = true if l.include?('{')
+              if constructor2 && l.include?('}')
+                constructor = nil
+                constructor2 = nil
               end
+            end
 
-              if l.include?(className+'(') && !l.include?('&')
-                puts l
-                constructor = true
-              elsif constructor
-                puts l
-              end
-
-              if constructor
-                constructor = nil if !constructor2 && l.include?(';')
-                constructor2 = true if l.include?('{')
-                if constructor2 && l.include?('}')
-                  constructor = nil
-                  constructor2 = nil
-                end
-              end
-
-              if l.include?('};')
-                puts l
-                puts ''
-                classOpen = nil
-                className = nil
-              end
+            if braceCount == 0 && l.include?('};')
+              puts l
+              puts ''
+              classOpen = nil
+              className = nil
             end
           end
         end
@@ -117,6 +105,18 @@ module ANL
     end
   end
 
+  def count_braces(line)
+    braceCount = 0
+    line.chars.each do |x|
+      if x=='{'
+        braceCount += 1
+      elsif x=='}'
+        braceCount -= 1
+      end
+    end
+    braceCount
+  end
+  module_function :count_braces
 
   # Class of a SWIG Interface to a list of ANL modules.
   # This produces one Ruby extension module interface to be processed by SWIG.
