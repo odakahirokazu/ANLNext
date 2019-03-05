@@ -2,6 +2,9 @@
 ### 2013-06-02 | Hirokazu Odaka
 ###
 
+### policy
+cmake_policy(SET CMP0078 NEW)
+
 ### pre-process
 if (NOT DEFINED TARGET_EXT_LIBRARY_OUTPUT)
   set(TARGET_EXT_LIBRARY_OUTPUT ${TARGET_EXT_LIBRARY})
