@@ -186,11 +186,13 @@ module ANL
 
       def initialize()
         @num_processes = Parallel.processor_count
+        @num_threads = Parallel.processor_count
+        @isolation = false
         @make_log_name = nil
         @log_name = nil
       end
 
-      attr_accessor :num_processes
+      attr_accessor :num_processes, :num_threads, :isolation
 
       def set_log(filename=nil, &block)
         if filename==nil && block_given?
@@ -204,7 +206,7 @@ module ANL
         yield list.shift
       end
 
-      def run(list, testrun: false)
+      def run_with_processes(list, testrun: false)
         if testrun
           yield list[0]
           return
@@ -212,7 +214,8 @@ module ANL
 
         until list.empty?
           Parallel.map(list.shift(@num_processes),
-                       :in_processes => @num_processes) do |run|
+                       :in_processes => @num_processes,
+                       :isolation => @isolation) do |run|
             if @log_name
               log_file = @log_name % run
             else
@@ -226,6 +229,31 @@ module ANL
           end
         end
       end
+
+      def run_with_threads(list, testrun: false)
+        if testrun
+          yield list[0]
+          return
+        end
+
+        until list.empty?
+          Parallel.map(list.shift(@num_threads),
+                       :in_threads => @num_threads) do |run|
+            if @log_name
+              log_file = @log_name % run
+            else
+              log_file = @make_log_name.(run)
+            end
+            File.open(log_file, 'w') do |fo|
+              STDOUT.reopen(fo); STDOUT.sync = true
+              STDERR.reopen(fo); STDERR.sync = true
+              yield run
+            end
+          end
+        end
+      end
+
+      alias run run_with_processes
     end
   rescue LoadError
     # do nothing
