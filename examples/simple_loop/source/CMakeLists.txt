@@ -12,7 +12,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 ### Definition of project
 project(MyPackage)
-add_definitions("-std=c++11")
+add_definitions("-std=c++14")
 
 set(MY_LIBRARY MyPackage)
 set(USE_RUBY ON)

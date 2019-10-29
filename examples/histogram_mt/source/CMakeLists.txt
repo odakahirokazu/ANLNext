@@ -11,7 +11,7 @@ set(CMAKE_MACOSX_RPATH 0)
 
 ### Definition of project
 project(TestHistogramMT)
-add_definitions("-std=c++11")
+add_definitions("-std=c++14")
 
 set(MY_LIBRARY TestHistogramMT)
 set(USE_RUBY ON)
