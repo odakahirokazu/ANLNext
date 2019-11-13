@@ -37,6 +37,7 @@ enum class ANLStatus {
   error,
   skip,
   skip_error,
+  redo,
   quit,
   quit_error,
   quit_all,
@@ -60,6 +61,7 @@ constexpr ANLStatus AS_OK             = ANLStatus::ok;
 constexpr ANLStatus AS_ERROR          = ANLStatus::error;
 constexpr ANLStatus AS_SKIP           = ANLStatus::skip;
 constexpr ANLStatus AS_SKIP_ERROR     = ANLStatus::skip_error;
+constexpr ANLStatus AS_REDO           = ANLStatus::redo;
 constexpr ANLStatus AS_QUIT           = ANLStatus::quit;
 constexpr ANLStatus AS_QUIT_ERROR     = ANLStatus::quit_error;
 constexpr ANLStatus AS_QUIT_ALL       = ANLStatus::quit_all;

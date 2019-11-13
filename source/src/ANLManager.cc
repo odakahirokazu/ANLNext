@@ -474,6 +474,13 @@ ANLStatus ANLManager::process_analysis()
         }
         requested_ = ANLRequest::none;
       }
+
+      if (status==ANLStatus::skip) {
+        ;
+      }
+      else if (status==ANLStatus::redo) {
+        iEvent--;
+      }
     }
   }
   catch (ANLException& ex) {

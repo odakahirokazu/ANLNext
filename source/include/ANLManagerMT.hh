@@ -62,6 +62,7 @@ protected:
   ANLStatus process_analysis() override;
   virtual void process_analysis_in_each_thread(int iThread, std::promise<ANLStatus> statusPromise);
   virtual long int event_index_to_process();
+  void decrement_event_index();
 
   boost::property_tree::ptree parameters_to_property_tree() const override;
 

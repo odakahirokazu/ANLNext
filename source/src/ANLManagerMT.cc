@@ -189,6 +189,12 @@ long int ANLManagerMT::event_index_to_process()
   return loopIndex_;
 }
 
+void ANLManagerMT::decrement_event_index()
+{
+  std::lock_guard<std::mutex> lock(mutex_);
+  --loopIndex_;
+}
+
 ANLStatus ANLManagerMT::process_analysis()
 {
   std::vector<std::future<ANLStatus>> statusFutureVector;
@@ -302,6 +308,13 @@ ANLStatus ANLManagerMT::process_analysis_impl(const std::vector<BasicModule*>& m
           evsManager_->print_summary();
         }
         requested_ = ANLRequest::none;
+      }
+
+      if (status==ANLStatus::skip) {
+        ;
+      }
+      else if (status==ANLStatus::redo) {
+        decrement_event_index();
       }
     }
 

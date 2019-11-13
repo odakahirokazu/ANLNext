@@ -34,6 +34,8 @@ std::string status_to_string(ANLStatus status)
       return "AS_SKIP";
     case ANLStatus::skip_error:
       return "AS_SKIP_ERROR";
+    case ANLStatus::redo:
+      return "AS_REDO";
     case ANLStatus::quit:
       return "AS_QUIT";
     case ANLStatus::quit_error:
