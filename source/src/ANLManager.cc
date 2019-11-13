@@ -658,10 +658,13 @@ ANLStatus process_one_event(long int iEvent,
   evsManager.reset_all_flags();
   ANLStatus status = AS_OK;
 
+  for (BasicModule* mod: modules) {
+    mod->set_loop_index(iEvent);
+  }
+
   const std::size_t NumberOfModules = modules.size();
   for (std::size_t iModule=0; iModule<NumberOfModules; iModule++) {
     BasicModule* mod = modules[iModule];
-    mod->set_loop_index(iEvent);
 
     if (mod->is_on()) {
       counters[iModule].count_up_by_entry();
@@ -700,11 +703,14 @@ ANLStatus process_one_event(long int iEvent,
   evsManager.reset_all_flags();
   ANLStatus status = AS_OK;
 
+  for (BasicModule* mod: modules) {
+    mod->set_loop_index(iEvent);
+  }
+
   const std::size_t NumberOfModules = modules.size();
   for (std::size_t iModule=0; iModule<NumberOfModules; iModule++) {
     BasicModule* mod = modules[iModule];
-    mod->set_loop_index(iEvent);
-
+  
     const KeeperBlock<OrderKeeper, long int> block(order_keepers[iModule].get(), iEvent);
 
     if (status == AS_OK && mod->is_on()) {
