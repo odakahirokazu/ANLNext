@@ -29,44 +29,44 @@ namespace anlnext
 {
 
 BasicModule::BasicModule()
-  : orderSensitive_(false),
-    moduleID_(""),
-    accessPermission_(ModuleAccess::Permission::full_access),
-    moduleDescription_(""),
-    moduleOn_(true),
-    evsManager_(nullptr),
-    moduleAccess_(nullptr),
-    currentParameter_(nullptr),
-    currentValueElement_(nullptr),
-    loopIndex_(-1),
-    copyID_(0),
-    lastCopy_(0)
+  : order_sensitive_(false),
+    module_ID_(""),
+    access_permission_(ModuleAccess::Permission::full_access),
+    module_description_(""),
+    module_on_(true),
+    evs_manager_(nullptr),
+    module_access_(nullptr),
+    current_parameter_(nullptr),
+    current_value_element_(nullptr),
+    loop_index_(-1),
+    copy_ID_(0),
+    last_copy_(0)
 {
-  moduleIDMethod_ = &BasicModule::module_name;
+  module_ID_method_ = &BasicModule::module_name;
 }
 
 BasicModule::~BasicModule() = default;
 
 BasicModule::BasicModule(const BasicModule& r)
-  : orderSensitive_(r.orderSensitive_),
-    moduleID_(r.moduleID_),
+  : order_sensitive_(r.order_sensitive_),
+    module_ID_(r.module_ID_),
     aliases_(r.aliases_),
-    accessPermission_(r.accessPermission_),
-    moduleDescription_(r.moduleDescription_),
-    moduleOn_(r.moduleOn_),
-    evsManager_(nullptr),
-    moduleAccess_(nullptr),
-    currentParameter_(nullptr),
-    currentValueElement_(nullptr),
-    loopIndex_(-1),
-    copyID_(r.lastCopy_+1),
-    lastCopy_(0)
+    access_permission_(r.access_permission_),
+    module_description_(r.module_description_),
+    module_on_(r.module_on_),
+    evs_manager_(nullptr),
+    module_access_(nullptr),
+    current_parameter_(nullptr),
+    current_value_element_(nullptr),
+    loop_index_(-1),
+    copy_ID_(r.last_copy_+1),
+    last_copy_(0)
 {
-  if (moduleID_=="") {
-    moduleIDMethod_ = &BasicModule::module_name;
+  if (module_ID_=="") {
+    module_ID_method_ = &BasicModule::module_name;
   }
   else {
-    moduleIDMethod_ = &BasicModule::get_module_id;
+    module_ID_method_ = &BasicModule::get_module_id;
   }
 }
 
@@ -81,18 +81,18 @@ std::unique_ptr<BasicModule> BasicModule::clone()
 
 void BasicModule::copy_parameters(const BasicModule& r)
 {
-  moduleParameters_.clear();
-  for (ModuleParam_sptr p: r.moduleParameters_) {
-    ModuleParam_sptr newParam = p->clone();
+  module_parameters_.clear();
+  for (ModuleParam_sptr p: r.module_parameters_) {
+    ModuleParam_sptr new_param = p->clone();
     p->set_module_pointer(this);
-    moduleParameters_.push_back(newParam);
+    module_parameters_.push_back(new_param);
   }
 }
 
 void BasicModule::set_module_id(const std::string& module_id)
 {
-  moduleID_ = module_id;
-  moduleIDMethod_ = &BasicModule::get_module_id;
+  module_ID_ = module_id;
+  module_ID_method_ = &BasicModule::get_module_id;
 }
 
 ANLStatus BasicModule::mod_reduce(const std::list<BasicModule*>& parallel_modules)
@@ -116,7 +116,7 @@ std::vector<std::string> BasicModule::get_aliases_string() const
 
 void BasicModule::print_parameters() const
 {
-  for (const auto& param: moduleParameters_) {
+  for (const auto& param: module_parameters_) {
     param->print(std::cout);
     std::cout << std::endl;
   }
@@ -124,7 +124,7 @@ void BasicModule::print_parameters() const
 
 void BasicModule::ask_parameters()
 {
-  for (const auto& param: moduleParameters_) {
+  for (const auto& param: module_parameters_) {
     if (param->is_hidden()) { continue; }
     param->ask();
   }
@@ -133,13 +133,13 @@ void BasicModule::ask_parameters()
 void BasicModule::undefine_parameter(const std::string& name)
 {
   ModuleParamIter it = find_parameter(name);
-  moduleParameters_.erase(it);
+  module_parameters_.erase(it);
 }
 
 void BasicModule::hide_parameter(const std::string& name, bool hidden)
 {
   ModuleParamIter it = find_parameter(name);
-  if (!hidden) { currentParameter_ = *it; }
+  if (!hidden) { current_parameter_ = *it; }
   (*it)->set_hidden(hidden);
 }
 
@@ -147,7 +147,7 @@ void BasicModule::ask_parameter(const std::string& name,
                                 const std::string& question)
 {
   ModuleParamIter it = find_parameter(name);
-  currentParameter_ = *it;
+  current_parameter_ = *it;
   if (question!="") {
     (*it)->set_question(question);
   }
@@ -156,32 +156,32 @@ void BasicModule::ask_parameter(const std::string& name,
 
 void BasicModule::define_evs(const std::string& key)
 {
-  evsManager_->define(key);
+  evs_manager_->define(key);
 }
 
 void BasicModule::undefine_evs(const std::string& key)
 {
-  evsManager_->undefine(key);
+  evs_manager_->undefine(key);
 }
 
 bool BasicModule::is_evs_defined(const std::string& key) const
 {
-  return evsManager_->is_defined(key);
+  return evs_manager_->is_defined(key);
 }
 
 bool BasicModule::evs(const std::string& key) const
 {
-  return evsManager_->get(key);
+  return evs_manager_->get(key);
 }
 
 void BasicModule::set_evs(const std::string& key)
 {
-  evsManager_->set(key);
+  evs_manager_->set(key);
 }
 
 void BasicModule::reset_evs(const std::string& key)
 {
-  evsManager_->reset(key);
+  evs_manager_->reset(key);
 }
 
 boost::property_tree::ptree BasicModule::parameters_to_property_tree() const
@@ -191,7 +191,7 @@ boost::property_tree::ptree BasicModule::parameters_to_property_tree() const
   pt.put("name", module_name());
   pt.put("version", module_version());
   boost::property_tree::ptree pt_parameters;
-  for (const auto& parameter: moduleParameters_) {
+  for (const auto& parameter: module_parameters_) {
     pt_parameters.push_back(std::make_pair("", parameter->to_property_tree()));
   }
   pt.add_child("parameter_list", std::move(pt_parameters));

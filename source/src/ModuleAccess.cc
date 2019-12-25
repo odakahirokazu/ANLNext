@@ -27,8 +27,8 @@ ModuleAccess::~ModuleAccess() = default;
 
 const BasicModule* ModuleAccess::get_module(const std::string& name) const
 {
-  ANLModuleMap::const_iterator it = moduleMap_.find(name);
-  if (it != std::end(moduleMap_)) {
+  ANLModuleMap::const_iterator it = module_map_.find(name);
+  if (it != std::end(module_map_)) {
     const BasicModule* const m = it->second;
     const Permission permission = m->access_permission();
     if (permission == Permission::full_access || permission == Permission::read_only_access) {
@@ -46,8 +46,8 @@ const BasicModule* ModuleAccess::get_module(const std::string& name) const
 
 BasicModule* ModuleAccess::get_module_NC(const std::string& name) const
 {
-  ANLModuleMap::const_iterator it = moduleMap_.find(name);
-  if (it != std::end(moduleMap_)) {
+  ANLModuleMap::const_iterator it = module_map_.find(name);
+  if (it != std::end(module_map_)) {
     BasicModule* const m = it->second;
     if (m->access_permission() == Permission::full_access) {
       return m;
@@ -64,8 +64,8 @@ BasicModule* ModuleAccess::get_module_NC(const std::string& name) const
 
 const BasicModule* ModuleAccess::request_module(const std::string& name) const
 {
-  ANLModuleMap::const_iterator it = moduleMap_.find(name);
-  if (it != std::end(moduleMap_)) {
+  ANLModuleMap::const_iterator it = module_map_.find(name);
+  if (it != std::end(module_map_)) {
     const BasicModule* const m = it->second;
     const Permission permission = m->access_permission();
     if (permission == Permission::full_access || permission == Permission::read_only_access) {
@@ -77,8 +77,8 @@ const BasicModule* ModuleAccess::request_module(const std::string& name) const
 
 BasicModule* ModuleAccess::request_module_NC(const std::string& name) const
 {
-  ANLModuleMap::const_iterator it = moduleMap_.find(name);
-  if (it != std::end(moduleMap_)) {
+  ANLModuleMap::const_iterator it = module_map_.find(name);
+  if (it != std::end(module_map_)) {
     BasicModule* const m = it->second;
     if (m->access_permission() == Permission::full_access) {
       return m;
@@ -96,10 +96,10 @@ void ModuleAccess::register_module(const std::string& name,
       case ConflictOption::yield:
         break;
       case ConflictOption::overwrite:
-        moduleMap_[name] = module;
+        module_map_[name] = module;
         break;
       case ConflictOption::remove:
-        moduleMap_.erase(name);
+        module_map_.erase(name);
         break;
       case ConflictOption::error:
         BOOST_THROW_EXCEPTION( ANLException((boost::format("Module ID or alias %s already exists.") % name).str()) );
@@ -111,7 +111,7 @@ void ModuleAccess::register_module(const std::string& name,
       case ConflictOption::remove:
         break;
       default:
-        moduleMap_[name] = module;
+        module_map_[name] = module;
     }
   }
 }

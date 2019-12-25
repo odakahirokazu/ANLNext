@@ -246,8 +246,8 @@ class ANLManager
     }
   }
 
-  void set_display_frequency(long int v);
-  int display_frequency() const;
+  void set_display_period(long int v);
+  int display_period() const;
   
   void set_modules(std::vector<anlnext::BasicModule*> modules);
 

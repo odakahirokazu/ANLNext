@@ -43,4 +43,4 @@ end
 
 a = MyApp.new
 a.write_parameters_to_json "parameters.json"
-a.run(1000000, display_frequency=100000)
+a.run(1000000, display_period=100000)

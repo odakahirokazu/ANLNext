@@ -29,7 +29,7 @@ namespace anlnext
 template <typename T>
 ANLStatus ClonedChainSet::process(T func)
 {
-  return func(modules_ref_, counters_, *evsManager_);
+  return func(modules_ref_, counters_, *evs_manager_);
 }
 
 } /* namespace anlnext */

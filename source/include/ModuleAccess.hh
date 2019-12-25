@@ -65,13 +65,13 @@ public:
 
 private:
   using ANLModuleMap = std::map<std::string, BasicModule*>;
-  ANLModuleMap moduleMap_;
+  ANLModuleMap module_map_;
 };
 
 inline
 bool ModuleAccess::exist(const std::string& name) const
 {
-  return (moduleMap_.find(name) != std::end(moduleMap_));
+  return (module_map_.find(name) != std::end(module_map_));
 }
 
 } /* namespace anlnext */

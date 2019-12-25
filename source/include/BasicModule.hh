@@ -96,13 +96,13 @@ public:
   std::string module_version() const { return __module_version__(); }
   
   void set_module_id(const std::string& v);
-  std::string module_id() const { return (this->*moduleIDMethod_)(); }
+  std::string module_id() const { return (this->*module_ID_method_)(); }
 
-  int copy_id() const { return copyID_; }
-  bool is_master() const { return (copyID_ == 0); }
+  int copy_id() const { return copy_ID_; }
+  bool is_master() const { return (copy_ID_ == 0); }
 
-  void set_order_sensitive(bool v) { orderSensitive_ = v; }
-  bool is_order_sensitive() const { return orderSensitive_; }
+  void set_order_sensitive(bool v) { order_sensitive_ = v; }
+  bool is_order_sensitive() const { return order_sensitive_; }
   
   virtual ANLStatus mod_define()         { return AS_OK; }
   virtual ANLStatus mod_pre_initialize() { return AS_OK; }
@@ -125,37 +125,37 @@ public:
     aliases_.emplace_back(name, conflict);
   }
 
-  std::string module_description() const { return moduleDescription_; }
-  void set_module_description(const std::string& v) { moduleDescription_ = v; }
+  std::string module_description() const { return module_description_; }
+  void set_module_description(const std::string& v) { module_description_ = v; }
 
-  void set_evs_manager(EvsManager* man) { evsManager_ = man; }
-  void set_module_access(const ModuleAccess* aa) { moduleAccess_ = aa; }
+  void set_evs_manager(EvsManager* man) { evs_manager_ = man; }
+  void set_module_access(const ModuleAccess* aa) { module_access_ = aa; }
 
   ModuleAccess::Permission access_permission() const
-  { return accessPermission_; }
+  { return access_permission_; }
 
   /**
    * enable this module.
    */
-  void on() { moduleOn_ = true; }
+  void on() { module_on_ = true; }
   
   /**
    * disable this module.
    */
-  void off() { moduleOn_ = false; }
+  void off() { module_on_ = false; }
 
   /**
    * @return true if this module is on.
    */
-  bool is_on() const { return moduleOn_; }
+  bool is_on() const { return module_on_; }
 
   /**
    * @return true if this module is off.
    */
-  bool is_off() const { return !moduleOn_; }
+  bool is_off() const { return !module_on_; }
 
-  void set_loop_index(long int index) { loopIndex_ = index; }
-  long int get_loop_index() const { return loopIndex_; }
+  void set_loop_index(long int index) { loop_index_ = index; }
+  long int get_loop_index() const { return loop_index_; }
   
   /**
    * expose a module parameter specified by "name" and set it as the current parameter.
@@ -165,9 +165,9 @@ public:
   { hide_parameter(name, false); }
   
   ModuleParamConstIter parameter_begin() const
-  { return std::begin(moduleParameters_); }
+  { return std::begin(module_parameters_); }
   ModuleParamConstIter parameter_end() const
-  { return std::end(moduleParameters_); }
+  { return std::end(module_parameters_); }
   ModuleParamConstIter find_parameter(const std::string& name) const;
   const VModuleParameter* get_parameter(const std::string& name) const
   {
@@ -184,13 +184,13 @@ public:
   void clear_array(const std::string& name);
   void set_map_key(const std::string& key)
   {
-    currentParameter_->set_map_key(key);
+    current_parameter_->set_map_key(key);
   }
   
   template <typename T>
   void set_value_element(const std::string& name, T val);
 
-  void insert_to_container() { currentParameter_->insert_to_container(); }
+  void insert_to_container() { current_parameter_->insert_to_container(); }
 
   void print_parameters() const;
   void ask_parameters();
@@ -214,25 +214,25 @@ protected:
                         const std::string& unit_name);
 
   void define_map_key(const std::string& name, const std::string& default_key="")
-  { currentParameter_->set_map_key_properties(name, default_key); }
+  { current_parameter_->set_map_key_properties(name, default_key); }
 
   void undefine_parameter(const std::string& name);
   void hide_parameter(const std::string& name, bool hidden=true);
 
   void set_parameter_unit(double unit, const std::string& unit_name)
-  { currentParameter_->set_unit(unit, unit_name); }
+  { current_parameter_->set_unit(unit, unit_name); }
 
   void set_parameter_expression(const std::string& v)
-  { currentParameter_->set_expression(v); }
+  { current_parameter_->set_expression(v); }
 
   void set_parameter_question(const std::string& v)
-  { currentParameter_->set_question(v); }
+  { current_parameter_->set_question(v); }
 
   void set_parameter_default_string(const std::string& v)
-  { currentParameter_->set_default_string(v); }
+  { current_parameter_->set_default_string(v); }
 
   void set_parameter_description(const std::string& v)
-  { currentParameter_->set_description(v); }
+  { current_parameter_->set_description(v); }
 
   template <typename ModuleClass, typename T>
   void add_value_element(const std::string& name,
@@ -245,22 +245,22 @@ protected:
                          const std::string& unit_name);
 
   void enable_value_elements(int type, const std::vector<std::size_t>& enable)
-  { currentValueElement_->enable_value_elements(type, enable); }
+  { current_value_element_->enable_value_elements(type, enable); }
 
   void set_value_element_unit(double unit, const std::string& unit_name)
-  { currentValueElement_->set_unit(unit, unit_name); }
+  { current_value_element_->set_unit(unit, unit_name); }
 
   void set_value_element_expression(const std::string& v)
-  { currentValueElement_->set_expression(v); }
+  { current_value_element_->set_expression(v); }
 
   void set_value_element_question(const std::string& v)
-  { currentValueElement_->set_question(v); }
+  { current_value_element_->set_question(v); }
 
   void set_value_element_default_string(const std::string& v)
-  { currentValueElement_->set_default_string(v); }
+  { current_value_element_->set_default_string(v); }
 
   void set_value_element_description(const std::string& v)
-  { currentValueElement_->set_description(v); }
+  { current_value_element_->set_description(v); }
 
   void ask_parameter(const std::string& name, const std::string& question="");
 
@@ -293,7 +293,7 @@ protected:
    * access permission
    */
   void set_access_permission(ModuleAccess::Permission v)
-  { accessPermission_ = v; }
+  { access_permission_ = v; }
   
   /*
    * get-module methods
@@ -301,19 +301,19 @@ protected:
 
   template <typename T>
   void get_module(const std::string& name, const T** ptr)
-  { *ptr = static_cast<const T*>(moduleAccess_->get_module(name)); }
+  { *ptr = static_cast<const T*>(module_access_->get_module(name)); }
 
   template <typename T>
   void get_module_NC(const std::string& name, T** ptr)
-  { *ptr = static_cast<T*>(moduleAccess_->get_module_NC(name)); }
+  { *ptr = static_cast<T*>(module_access_->get_module_NC(name)); }
 
   template <typename T>
   const T* get_module(const std::string& name)
-  { return static_cast<const T*>(moduleAccess_->get_module(name)); }
+  { return static_cast<const T*>(module_access_->get_module(name)); }
 
   template <typename T>
   T* get_module_NC(const std::string& name)
-  { return static_cast<T*>(moduleAccess_->get_module_NC(name)); }
+  { return static_cast<T*>(module_access_->get_module_NC(name)); }
 
   template <typename T>
   void get_module_IF(const std::string& name, const T** ptr);
@@ -322,23 +322,23 @@ protected:
   void get_module_IFNC(const std::string& name, T** ptr);
 
   bool exist_module(const std::string& name)
-  { return moduleAccess_->exist(name); }
+  { return module_access_->exist(name); }
 
   template <typename T>
   void request_module(const std::string& name, const T** ptr)
-  { *ptr = static_cast<const T*>(moduleAccess_->request_module(name)); }
+  { *ptr = static_cast<const T*>(module_access_->request_module(name)); }
 
   template <typename T>
   void request_module_NC(const std::string& name, T** ptr)
-  { *ptr = static_cast<T*>(moduleAccess_->request_module_NC(name)); }
+  { *ptr = static_cast<T*>(module_access_->request_module_NC(name)); }
 
   template <typename T>
   const T* request_module(const std::string& name)
-  { return static_cast<const T*>(moduleAccess_->request_module(name)); }
+  { return static_cast<const T*>(module_access_->request_module(name)); }
 
   template <typename T>
   T* request_module_NC(const std::string& name)
-  { return static_cast<T*>(moduleAccess_->request_module_NC(name)); }
+  { return static_cast<T*>(module_access_->request_module_NC(name)); }
 
   template <typename T>
   void request_module_IF(const std::string& name, const T** ptr);
@@ -363,27 +363,27 @@ protected:
 
 private:
   ModuleParamIter find_parameter(const std::string& name);
-  std::string get_module_id() const { return moduleID_; }
+  std::string get_module_id() const { return module_ID_; }
   void copy_parameters(const BasicModule& r);
 
 private:
-  bool orderSensitive_ = false;
-  std::string moduleID_;
+  bool order_sensitive_ = false;
+  std::string module_ID_;
   std::vector<std::pair<std::string, ModuleAccess::ConflictOption>> aliases_;
-  ModuleAccess::Permission accessPermission_ = ModuleAccess::Permission::full_access;
-  std::string moduleDescription_;
-  bool moduleOn_ = true;
-  EvsManager* evsManager_ = nullptr;
-  const ModuleAccess* moduleAccess_ = nullptr;
-  ModuleParamList moduleParameters_;
-  ModuleParam_sptr currentParameter_;
-  ModuleParam_sptr currentValueElement_;
-  long int loopIndex_ = -1;
+  ModuleAccess::Permission access_permission_ = ModuleAccess::Permission::full_access;
+  std::string module_description_;
+  bool module_on_ = true;
+  EvsManager* evs_manager_ = nullptr;
+  const ModuleAccess* module_access_ = nullptr;
+  ModuleParamList module_parameters_;
+  ModuleParam_sptr current_parameter_;
+  ModuleParam_sptr current_value_element_;
+  long int loop_index_ = -1;
 
-  const int copyID_ = 0;
-  int lastCopy_ = 0;
+  const int copy_ID_ = 0;
+  int last_copy_ = 0;
 
-  std::string (BasicModule::*moduleIDMethod_)() const;
+  std::string (BasicModule::*module_ID_method_)() const;
 };
 
 using AMIter = std::vector<BasicModule*>::iterator;
@@ -393,8 +393,8 @@ template <typename ModuleClass, typename T>
 void BasicModule::define_parameter(const std::string& name, T ModuleClass::* ptr)
 {
   ModuleParam_sptr p(new ModuleParameterMember<ModuleClass, T>(name, dynamic_cast<ModuleClass*>(this), ptr));
-  moduleParameters_.push_back(p);
-  currentParameter_ = p;
+  module_parameters_.push_back(p);
+  current_parameter_ = p;
 }
 
 template <typename ModuleClass, typename T>
@@ -403,8 +403,8 @@ void BasicModule::define_parameter(const std::string& name, T ModuleClass::* ptr
 {
   ModuleParam_sptr p(new ModuleParameterMember<ModuleClass, T>(name, dynamic_cast<ModuleClass*>(this), ptr));
   p->set_unit(unit, unit_name);
-  moduleParameters_.push_back(p);
-  currentParameter_ = p;
+  module_parameters_.push_back(p);
+  current_parameter_ = p;
 }
 
 template <typename ModuleClass, typename T>
@@ -412,8 +412,8 @@ void BasicModule::add_value_element(const std::string& name,
                                     T ModuleClass::* ptr)
 {
   ModuleParam_sptr p(new ModuleParameterMember<ModuleClass, T>(name, dynamic_cast<ModuleClass*>(this), ptr));
-  currentParameter_->add_value_element(p);
-  currentValueElement_ = p;
+  current_parameter_->add_value_element(p);
+  current_value_element_ = p;
 }
 
 template <typename ModuleClass, typename T>
@@ -424,16 +424,16 @@ void BasicModule::add_value_element(const std::string& name,
 {
   ModuleParam_sptr p(new ModuleParameterMember<ModuleClass, T>(name, dynamic_cast<ModuleClass*>(this), ptr));
   p->set_unit(unit, unit_name);
-  currentParameter_->add_value_element(p);
-  currentValueElement_ = p;
+  current_parameter_->add_value_element(p);
+  current_value_element_ = p;
 }
 
 template<typename T>
 void BasicModule::register_parameter(T* ptr, const std::string& name)
 {
   ModuleParam_sptr p(new ModuleParameter<T>(name, ptr));
-  moduleParameters_.push_back(p);
-  currentParameter_ = p;
+  module_parameters_.push_back(p);
+  current_parameter_ = p;
 }
 
 template<typename T>
@@ -442,8 +442,8 @@ void BasicModule::register_parameter(T* ptr, const std::string& name,
 {
   ModuleParam_sptr p(new ModuleParameter<T>(name, ptr));
   p->set_unit(unit, unit_name);
-  moduleParameters_.push_back(p);
-  currentParameter_ = p;
+  module_parameters_.push_back(p);
+  current_parameter_ = p;
 }
 
 template <typename T>
@@ -453,16 +453,16 @@ void BasicModule::register_parameter_map(T* ptr, const std::string& name,
 {
   ModuleParam_sptr p(new ModuleParameter<T>(name, ptr));
   p->set_map_key_properties(key_name, key_default);
-  moduleParameters_.push_back(p);
-  currentParameter_ = p;
+  module_parameters_.push_back(p);
+  current_parameter_ = p;
 }
 
 template <typename T>
 void BasicModule::add_value_element(T* ptr, const std::string& name)
 {
   ModuleParam_sptr p(new ModuleParameter<T>(name, ptr));
-  currentParameter_->add_value_element(p);
-  currentValueElement_ = p;
+  current_parameter_->add_value_element(p);
+  current_value_element_ = p;
 }
 
 template <typename T>
@@ -471,20 +471,20 @@ void BasicModule::add_value_element(T* ptr, const std::string& name,
 {
   ModuleParam_sptr p(new ModuleParameter<T>(name, ptr));
   p->set_unit(unit, unit_name);
-  currentParameter_->add_value_element(p);
-  currentValueElement_ = p;
+  current_parameter_->add_value_element(p);
+  current_value_element_ = p;
 }
 
 inline
 ModuleParamIter BasicModule::find_parameter(const std::string& name)
 {
-  ModuleParamIter it = std::begin(moduleParameters_);
-  for (; it!=std::end(moduleParameters_); ++it) {
+  ModuleParamIter it = std::begin(module_parameters_);
+  for (; it!=std::end(module_parameters_); ++it) {
     if ((*it)->name() == name) {
       return it;
     }
   }
-  if (it == std::end(moduleParameters_)) {
+  if (it == std::end(module_parameters_)) {
     BOOST_THROW_EXCEPTION( ParameterNotFoundError(this, name) );
   }
   return it;
@@ -493,13 +493,13 @@ ModuleParamIter BasicModule::find_parameter(const std::string& name)
 inline
 ModuleParamConstIter BasicModule::find_parameter(const std::string& name) const
 {
-  ModuleParamConstIter it = std::begin(moduleParameters_);
-  for (; it!=std::end(moduleParameters_); ++it) {
+  ModuleParamConstIter it = std::begin(module_parameters_);
+  for (; it!=std::end(module_parameters_); ++it) {
     if ((*it)->name() == name) {
       return it;
     }
   }
-  if (it == std::end(moduleParameters_)) {
+  if (it == std::end(module_parameters_)) {
     BOOST_THROW_EXCEPTION( ParameterNotFoundError(this, name) );
   }
   return it;
@@ -546,7 +546,7 @@ template <typename T>
 void BasicModule::set_value_element(const std::string& name, T val)
 {
   try {
-    currentParameter_->set_value_element(name, val);
+    current_parameter_->set_value_element(name, val);
   }
   catch (ANLException& e) {
     e.set_module_info(this);
@@ -558,7 +558,7 @@ template <typename T>
 inline
 void BasicModule::get_module_IF(const std::string& name, const T** ptr)
 {
-  *ptr = dynamic_cast<const T*>(moduleAccess_->get_module(name));
+  *ptr = dynamic_cast<const T*>(module_access_->get_module(name));
   if (*ptr==0) {
     BOOST_THROW_EXCEPTION( ModuleAccessError("Dynamic cast failed -- Module", name) );
   }
@@ -568,7 +568,7 @@ template <typename T>
 inline
 void BasicModule::get_module_IFNC(const std::string& name, T** ptr)
 {
-  *ptr = dynamic_cast<T*>(moduleAccess_->get_module_NC(name));
+  *ptr = dynamic_cast<T*>(module_access_->get_module_NC(name));
   if (*ptr==0) {
     BOOST_THROW_EXCEPTION( ModuleAccessError("Dynamic cast failed -- Module", name) );
   }
@@ -578,7 +578,7 @@ template <typename T>
 inline
 void BasicModule::request_module_IF(const std::string& name, const T** ptr)
 {
-  const BasicModule* m = moduleAccess_->request_module(name);
+  const BasicModule* m = module_access_->request_module(name);
   if (m) {
     *ptr = dynamic_cast<const T*>(m);
   }
@@ -591,7 +591,7 @@ template <typename T>
 inline
 void BasicModule::request_module_IFNC(const std::string& name, T** ptr)
 {
-  BasicModule* m = moduleAccess_->request_module_NC(name);
+  BasicModule* m = module_access_->request_module_NC(name);
   if (m) {
     *ptr = dynamic_cast<T*>(m);
   }
@@ -606,7 +606,7 @@ std::unique_ptr<BasicModule> BasicModule::make_clone(ModuleType*&& copied)
   std::unique_ptr<BasicModule> m(copied);
   if (this->is_master()) {
     m->copy_parameters(*this);
-    this->lastCopy_ += 1;
+    this->last_copy_ += 1;
   }
   else {
     m.reset(nullptr);

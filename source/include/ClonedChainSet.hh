@@ -62,14 +62,14 @@ public:
   { return counters_[i]; }
 
   const EvsManager& get_evs() const
-  { return *evsManager_; }
+  { return *evs_manager_; }
 
-  BasicModule* access_to_module(const std::string& moduleID);
+  BasicModule* access_to_module(const std::string& module_ID);
   
 private:
   int id_;
-  std::unique_ptr<EvsManager> evsManager_;
-  std::unique_ptr<ModuleAccess> moduleAccess_;
+  std::unique_ptr<EvsManager> evs_manager_;
+  std::unique_ptr<ModuleAccess> module_access_;
   std::vector<std::unique_ptr<BasicModule>> modules_;
   std::vector<BasicModule*> modules_ref_;
   std::vector<LoopCounter> counters_;

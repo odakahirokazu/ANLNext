@@ -35,10 +35,10 @@ module ANL
     # Run this application.
     #
     # @param [Integer] num_loop number of loops. :all or -1 for infinite loops.
-    # @param [Integer] display_frequency frequency of displaying loop ID
+    # @param [Integer] display_period period of displaying loop ID
     #     to STDOUT.
     #
-    def run(num_loop, display_frequency=nil)
+    def run(num_loop, display_period=nil)
       if @_anlapp_analysis_chain.finalization_done?
         @_anlapp_analysis_chain.clear()
       end
@@ -47,8 +47,8 @@ module ANL
         setup()
       end
 
-      if display_frequency
-        @_anlapp_analysis_chain.display_frequency = display_frequency
+      if display_period
+        @_anlapp_analysis_chain.display_period = display_period
       end
 
       @_anlapp_analysis_chain.run(num_loop)
@@ -79,7 +79,7 @@ module ANL
       :define, :load_all_parameters,
       :print_all_parameters, :parameters_to_object, :make_doc,
       :num_parallels, :num_parallels=,
-      :display_frequency=,
+      :display_period=,
     ]
     def_delegators :@_anlapp_analysis_chain, *anlapp_methods
     alias :with :with_parameters
@@ -165,7 +165,7 @@ module ANL
     def initialize()
       @console = true
       @num_parallels = 1
-      @display_frequency = nil
+      @display_period = nil
       @parameters_json_filename = nil
       @parameters_json_master = true
       @module_list = []
@@ -181,13 +181,13 @@ module ANL
     attr_accessor :console
     attr_accessor :num_parallels
     attr_accessor :current_module
-    attr_accessor :display_frequency
+    attr_accessor :display_period
     attr_accessor :parameters_json_filename
     attr_accessor :parameters_json_master
 
     # Clear all internal information on the analysis chain.
     # But it keeps setting not strongly related to the chain.
-    # (e.g., console, parallel number, display frequency)
+    # (e.g., console, parallel number, display period)
     #
     def clear()
       @module_list.clear
@@ -605,23 +605,23 @@ module ANL
       end
     end
 
-    # Proposed display frequency based on the number of loops.
+    # Proposed display period based on the number of loops.
     # This method is private.
     #
     # @param [Integer] num_loop number of loops. -1 for infinite loops.
-    # @return [Integer] frequency of displaying loop ID to STDOUT.
+    # @return [Integer] period of displaying loop ID to STDOUT.
     #
-    def proposed_display_frequency(num_loop)
+    def proposed_display_period(num_loop)
       if num_loop < 0
-        display_frequency = 10000
+        display_period = 10000
       elsif num_loop < 100
-        display_frequency = 1
+        display_period = 1
       else
-        display_frequency = 10**((Math.log10(num_loop)-1.5).to_i)
+        display_period = 10**((Math.log10(num_loop)-1.5).to_i)
       end
-      return display_frequency
+      return display_period
     end
-    private :proposed_display_frequency
+    private :proposed_display_period
 
     # Check ANL status if we can go ahead.
     # If it is OK, return true,
@@ -698,7 +698,7 @@ module ANL
     #
     def run(num_loop)
       if num_loop == :all; num_loop = -1; end
-      @display_frequency ||= proposed_display_frequency(num_loop)
+      @display_period ||= proposed_display_period(num_loop)
 
       anl = define() unless self.definition_already_done?
 
@@ -729,7 +729,7 @@ module ANL
       puts ""
       puts "<Begin Analysis> | Time: " + Time.now.to_s
       $stdout.flush
-      anl.set_display_frequency(@display_frequency)
+      anl.set_display_period(@display_period)
       status = anl.Analyze(num_loop, @console)
       puts ""
       puts "<End Analysis>   | Time: " + Time.now.to_s

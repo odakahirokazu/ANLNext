@@ -344,13 +344,13 @@ ANLStatus ANLManager::do_interactive_analysis()
       is >> num_loops;
       if (!is) {
         std::cout << "usage: run <number>" << std::endl;
-        std::cout << "usage: run <number> <display_frequence>" << std::endl;
+        std::cout << "usage: run <number> <display_period>" << std::endl;
       }
       else {
         int disp(0);
         is >> disp;
         if (is) {
-          set_display_frequency(disp);
+          set_display_period(disp);
         }
         else {
           is.clear();
@@ -374,7 +374,7 @@ void ANLManager::interactive_analysis_help()
             << "  help              : show this help\n"
             << "  run <N> <display> : start analysis\n"
             << "                      <N>: number of loops\n"
-            << "                      <display>: display frequency\n"
+            << "                      <display>: display period\n"
             << "  exit              : exit this program\n"
             << "                      (enter <finalize> stage)\n"
             << "-------------------------------------------------------\n"

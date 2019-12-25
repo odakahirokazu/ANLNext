@@ -44,12 +44,12 @@ public:
   explicit ANLManagerMT(int num_parallels=1);
   virtual ~ANLManagerMT();
 
-  int number_of_parallels() const override { return NumParallels_; }
-  BasicModule* access_to_module(int chainID,
-                                const std::string& moduleID) override;
+  int number_of_parallels() const override { return num_parallels_; }
+  BasicModule* access_to_module(int chain_ID,
+                                const std::string& module_ID) override;
 
 protected:
-  void clone_modules(int chainID);
+  void clone_modules(int chain_ID);
 
   ANLStatus routine_initialize() override;
   ANLStatus routine_begin_run() override;
@@ -60,7 +60,7 @@ protected:
   void reset_counters() override;
   
   ANLStatus process_analysis() override;
-  virtual void process_analysis_in_each_thread(int iThread, std::promise<ANLStatus> statusPromise);
+  virtual void process_analysis_in_each_thread(int i_thread, std::promise<ANLStatus> status_promise);
   virtual long int event_index_to_process();
   void decrement_event_index();
 
@@ -70,15 +70,15 @@ private:
   void duplicate_chains() override;
   ANLStatus process_analysis_impl(const std::vector<BasicModule*>& modules,
                                   std::vector<LoopCounter>& counters,
-                                  EvsManager& evsManager);
+                                  EvsManager& evs_manager);
   ANLStatus reduce_modules() override;
   void reduce_statistics() override;
 
 private:
-  const int NumParallels_ = 1;
-  long int loopIndex_ = -1;
-  std::vector<ClonedChainSet> clonedChains_;
-  std::vector<std::unique_ptr<OrderKeeper>> orderKeepers_;
+  const int num_parallels_ = 1;
+  long int loop_index_ = -1;
+  std::vector<ClonedChainSet> cloned_chains_;
+  std::vector<std::unique_ptr<OrderKeeper>> order_keepers_;
 };
 
 } /* namespace anlnext */

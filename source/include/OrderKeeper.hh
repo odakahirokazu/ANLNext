@@ -45,20 +45,20 @@ public:
   void wait(long int index)
   {
     std::unique_lock<std::mutex> lock(mutex_);
-    cv_.wait(lock, [=](){ return (index-1 == lastDoneIndex_); });
+    cv_.wait(lock, [=](){ return (index-1 == last_done_index_); });
   }
 
   void send_done(long int index)
   {
     std::unique_lock<std::mutex> lock(mutex_);
-    lastDoneIndex_ = index;
+    last_done_index_ = index;
     cv_.notify_all();
   }
 
 private:
   std::mutex mutex_;
   std::condition_variable cv_;
-  long int lastDoneIndex_ = -1;
+  long int last_done_index_ = -1;
 };
 
 template<typename KeeperType, typename IndexType>

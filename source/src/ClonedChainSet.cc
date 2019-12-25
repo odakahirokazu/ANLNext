@@ -29,18 +29,18 @@ namespace anlnext
 
 ClonedChainSet::ClonedChainSet(int chain_id, const EvsManager& evs)
   : id_(chain_id),
-    evsManager_(new EvsManager(evs)),
-    moduleAccess_(new ModuleAccess)
+    evs_manager_(new EvsManager(evs)),
+    module_access_(new ModuleAccess)
 {
 }
 
 ClonedChainSet::~ClonedChainSet() = default;
 
-void ClonedChainSet::push(std::unique_ptr<BasicModule>&& clonedModule)
+void ClonedChainSet::push(std::unique_ptr<BasicModule>&& cloned_module)
 {
-  std::unique_ptr<BasicModule> m = std::move(clonedModule);
-  m->set_evs_manager(evsManager_.get());
-  m->set_module_access(moduleAccess_.get());
+  std::unique_ptr<BasicModule> m = std::move(cloned_module);
+  m->set_evs_manager(evs_manager_.get());
+  m->set_module_access(module_access_.get());
   modules_ref_.push_back(m.get());
   modules_.push_back(std::move(m));
   counters_.push_back(LoopCounter());
@@ -50,16 +50,16 @@ void ClonedChainSet::setup_module_access()
 {
   for (BasicModule* mod: modules_ref_) {
     if (mod->access_permission() != ModuleAccess::Permission::privacy) {
-      const std::string moduleID = mod->module_id();
-      moduleAccess_->register_module(moduleID,
-                                     mod,
-                                     ModuleAccess::ConflictOption::error);
+      const std::string module_ID = mod->module_id();
+      module_access_->register_module(module_ID,
+                                      mod,
+                                      ModuleAccess::ConflictOption::error);
     
       for (const std::pair<std::string, ModuleAccess::ConflictOption>& alias: mod->get_aliases()) {
-        if (alias.first != moduleID) {
-          moduleAccess_->register_module(alias.first,
-                                         mod,
-                                         alias.second);
+        if (alias.first != module_ID) {
+          module_access_->register_module(alias.first,
+                                          mod,
+                                          alias.second);
         }
       }
     }
@@ -73,9 +73,9 @@ void ClonedChainSet::reset_counters()
   }
 }
 
-BasicModule* ClonedChainSet::access_to_module(const std::string& moduleID)
+BasicModule* ClonedChainSet::access_to_module(const std::string& module_ID)
 {
-  return moduleAccess_->get_module_NC(moduleID);
+  return module_access_->get_module_NC(module_ID);
 }
 
 } /* namespace anlnext */

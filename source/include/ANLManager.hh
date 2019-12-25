@@ -78,15 +78,15 @@ public:
    */
   void set_modules(std::vector<BasicModule*> modules);
 
-  long int number_of_loops() const { return numEvents_; }
+  long int number_of_loops() const { return num_events_; }
 
-  void set_display_frequency(long int v) { displayFrequency_ = v; }
-  long int display_frequency() const;
+  void set_display_period(long int v) { display_period_ = v; }
+  long int display_period() const;
 
   void set_exception_propagation(bool v)
-  { exceptionPropagation_ = v; }
+  { exception_propagation_ = v; }
   bool exception_propagation() const
-  { return exceptionPropagation_; }
+  { return exception_propagation_; }
 
   virtual ANLStatus Define();
   virtual ANLStatus PreInitialize();
@@ -96,9 +96,9 @@ public:
 
   virtual int number_of_parallels() const { return 1; }
   void set_print_parallel_modules(bool v=true)
-  { printCloneParameters_ = v; }
-  virtual BasicModule* access_to_module(int chainID,
-                                        const std::string& moduleID);
+  { print_clone_parameters_ = v; }
+  virtual BasicModule* access_to_module(int chain_ID,
+                                        const std::string& module_ID);
 
   virtual ANLStatus do_interactive_comunication();
   virtual ANLStatus do_interactive_analysis();
@@ -137,23 +137,23 @@ private:
 
   // thread mode
 private:
-  void process_analysis_for_the_thread(std::promise<ANLStatus> statusPromise);
+  void process_analysis_for_the_thread(std::promise<ANLStatus> status_promise);
   void interactive_session();
 
 protected:
-  bool printCloneParameters_ = false;
-  long int numEvents_ = 0;
+  bool print_clone_parameters_ = false;
+  long int num_events_ = 0;
   std::vector<BasicModule*> modules_;
   std::vector<LoopCounter> counters_;
-  std::unique_ptr<EvsManager> evsManager_;
+  std::unique_ptr<EvsManager> evs_manager_;
   std::mutex mutex_;
   std::atomic<ANLRequest> requested_{ANLRequest::none};
-  bool exceptionPropagation_ = true;
+  bool exception_propagation_ = true;
 
 private:
-  long int displayFrequency_ = -1;
-  std::unique_ptr<ModuleAccess> moduleAccess_;
-  std::atomic<bool> analysisThreadFinished_{false};
+  long int display_period_ = -1;
+  std::unique_ptr<ModuleAccess> module_access_;
+  std::atomic<bool> analysis_thread_finished_{false};
 };
 
 /**
@@ -165,18 +165,18 @@ ANLStatus routine_modfn(T func,
                         const std::string& func_id,
                         const std::vector<BasicModule*>& modules);
 
-ANLStatus process_one_event(long int iEvent,
+ANLStatus process_one_event(long int i_event,
                             const std::vector<BasicModule*>& modules,
                             std::vector<LoopCounter>& counters,
                             EvsManager& evsManager);
 
-ANLStatus process_one_event(long int iEvent,
+ANLStatus process_one_event(long int i_event,
                             const std::vector<BasicModule*>& modules,
                             std::vector<LoopCounter>& counters,
-                            EvsManager& evsManager,
+                            EvsManager& evs_manager,
                             std::vector<std::unique_ptr<OrderKeeper>>& order_keepers);
 
-void count_evs(ANLStatus status, EvsManager& evsManager);
+void count_evs(ANLStatus status, EvsManager& evs_manager);
 
 inline void print_event_index(long int index, std::ostream& os=std::cout)
 {
