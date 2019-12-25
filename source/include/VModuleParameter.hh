@@ -48,6 +48,7 @@ class BasicModule;
  * @date 2015-11-11 | review set/get-value methods.
  * @date 2017-07-03 | rename get/set to __get__/__set__
  * @date 2017-07-10 | review ctor. define_parameter() for data member pointer
+ * @date 2019-12-25 | result property
  */
 class VModuleParameter
 {
@@ -71,6 +72,9 @@ public:
   void set_hidden(bool v=true) { hidden_ = v; }
   void set_exposed() { hidden_ = false; }
   bool is_hidden() const { return hidden_; }
+
+  void set_result(bool v=true) { result_ = v; }
+  bool is_result() const { return result_; }
 
   void set_unit(double unit, const std::string& unit_name)
   { unit_ = unit; unit_name_ = unit_name; }
@@ -182,6 +186,7 @@ protected:
 private:
   std::string name_;
   bool hidden_;
+  bool result_;
   double unit_ = 1.0;
   std::string unit_name_;
   std::string expr_;

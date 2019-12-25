@@ -105,6 +105,21 @@ void ANLManagerMT::print_parameters()
   }
 }
 
+void ANLManagerMT::print_results()
+{
+  ANLManager::print_results();
+
+  if (print_clone_parameters_) {
+    for (auto& chain: cloned_chains_) {
+      for (const BasicModule* mod: chain.modules_reference()) {
+        std::cout << "--- " << mod->module_id() << "[" << chain.chain_id() << "] ---"<< std::endl;
+        mod->print_results();
+        std::cout << std::endl;
+      }
+    }
+  }
+}
+
 void ANLManagerMT::reset_counters()
 {
   ANLManager::reset_counters();

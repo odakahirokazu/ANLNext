@@ -66,6 +66,7 @@ class EvsManager;
  * @date 2015-11-10 | review parameter setter/getter methods
  * @date 2017-07-02 | do not own ModuleAccess, always fully accessible
  * @date 2017-07-07 | new model (mod-methods are renamed)
+ * @date 2019-12-25 | get-result
  */
 class BasicModule
 {
@@ -194,6 +195,7 @@ public:
 
   void print_parameters() const;
   void ask_parameters();
+  void print_results() const;
 
   boost::property_tree::ptree parameters_to_property_tree() const;
 
@@ -288,6 +290,20 @@ protected:
   template <typename T>
   void add_value_element(T* ptr, const std::string& name,
                          double unit, const std::string& unit_name);
+
+  /*
+   * define-result methods
+   */
+
+  template <typename ModuleClass, typename T>
+  void define_result(const std::string& name,
+                     T ModuleClass::* ptr);
+
+  template <typename ModuleClass, typename T>
+  void define_result(const std::string& name,
+                     T ModuleClass::* ptr,
+                     double unit,
+                     const std::string& unit_name);
 
   /*
    * access permission
@@ -405,6 +421,21 @@ void BasicModule::define_parameter(const std::string& name, T ModuleClass::* ptr
   p->set_unit(unit, unit_name);
   module_parameters_.push_back(p);
   current_parameter_ = p;
+}
+
+template <typename ModuleClass, typename T>
+void BasicModule::define_result(const std::string& name, T ModuleClass::* ptr)
+{
+  define_parameter(name, ptr);
+  current_parameter_->set_result();
+}
+
+template <typename ModuleClass, typename T>
+void BasicModule::define_result(const std::string& name, T ModuleClass::* ptr,
+                                double unit, const std::string& unit_name)
+{
+  define_parameter(name, ptr, unit, unit_name);
+  current_parameter_->set_result();
 }
 
 template <typename ModuleClass, typename T>

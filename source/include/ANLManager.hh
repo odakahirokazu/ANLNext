@@ -56,6 +56,7 @@ class OrderKeeper;
  * @date 2017-07-04 | new model, for multi-thread mode
  * @date 2017-07-07 | rename methods
  * @date 2017-07-19 | introduce user request, modify print messages.
+ * @date 2019-12-25 | add module results feature
  */
 class ANLManager
 {
@@ -116,6 +117,7 @@ protected:
 
   void show_analysis();
   virtual void print_parameters();
+  virtual void print_results();
   virtual void reset_counters();
   virtual ANLStatus process_analysis();
   void print_summary();

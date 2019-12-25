@@ -117,6 +117,7 @@ std::vector<std::string> BasicModule::get_aliases_string() const
 void BasicModule::print_parameters() const
 {
   for (const auto& param: module_parameters_) {
+    if (param->is_result()) { continue; }
     param->print(std::cout);
     std::cout << std::endl;
   }
@@ -126,7 +127,18 @@ void BasicModule::ask_parameters()
 {
   for (const auto& param: module_parameters_) {
     if (param->is_hidden()) { continue; }
+    if (param->is_result()) { continue; }
     param->ask();
+  }
+}
+
+void BasicModule::print_results() const
+{
+  for (const auto& param: module_parameters_) {
+    if (param->is_result()) {
+      param->print(std::cout);
+      std::cout << std::endl;
+    }
   }
 }
 

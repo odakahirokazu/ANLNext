@@ -288,6 +288,7 @@ ANLStatus ANLManager::Analyze(long int num_events, bool enable_console)
   reduce_statistics();
   print_summary();
   evs_manager_->print_summary();
+  print_results();
   requested_ = ANLRequest::none;
 
 #if ANLNEXT_ANALYZE_INTERRUPT
@@ -424,6 +425,21 @@ void ANLManager::print_parameters()
   for (BasicModule* mod: modules_) {
     std::cout << "--- " << mod->module_id() << " ---"<< std::endl;
     mod->print_parameters();
+    std::cout << std::endl;
+  }
+}
+
+void ANLManager::print_results()
+{
+  std::cout << '\n'
+            << "        **************************************\n"
+            << "        ****       Module results         ****\n"
+            << "        **************************************\n"
+            << std::endl;
+  
+  for (BasicModule* mod: modules_) {
+    std::cout << "--- " << mod->module_id() << " ---"<< std::endl;
+    mod->print_results();
     std::cout << std::endl;
   }
 }

@@ -46,6 +46,7 @@ namespace anlnext {
 VModuleParameter::VModuleParameter(const std::string& name)
   : name_(name),
     hidden_(false),
+    result_(false),
     unit_(1.0), unit_name_(""),
     expr_(""), question_(""), default_string_(""),
     description_("")

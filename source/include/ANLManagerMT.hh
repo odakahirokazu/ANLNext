@@ -57,6 +57,7 @@ protected:
   ANLStatus routine_finalize() override;
 
   void print_parameters() override;
+  void print_results() override;
   void reset_counters() override;
   
   ANLStatus process_analysis() override;

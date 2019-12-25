@@ -34,6 +34,7 @@ module ANL
     def get_parameter_value(name)
       get_parameter(name).to_value_object()
     end
+    alias :get_result_value :get_parameter_value
 
     def parameters_to_object()
       o = {}
