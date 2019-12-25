@@ -315,7 +315,7 @@ module ANL
     # @return [ANLModule] ANL module.
     #
     def get_module(module_id)
-      @module_hash[module_id]
+      @module_hash[module_id.to_sym]
     end
 
     def get_parallel_module(chain_id, module_id)
@@ -329,7 +329,7 @@ module ANL
     # @return [Integer] Position.
     #
     def index(module_id)
-      @module_list.index{|mod| mod.module_id.to_sym==module_id }
+      @module_list.index{|mod| mod.module_id.to_sym==module_id.to_sym }
     end
 
     # Get position of the last ANL module which has the specified name
@@ -339,7 +339,7 @@ module ANL
     # @return [Integer] Position.
     #
     def rindex(module_id)
-      @module_list.rindex{|mod| mod.module_id.to_sym==module_id }
+      @module_list.rindex{|mod| mod.module_id.to_sym==module_id.to_sym }
     end
 
     # Set a text describing the current module.
