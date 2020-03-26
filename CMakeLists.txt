@@ -12,7 +12,7 @@ set(CMAKE_MACOSX_RPATH 1)
 
 ### Definition of project
 project(ANLNext)
-add_definitions("-std=c++14")
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_MODULE_PATH ${ANLNext_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 message("-- Install destination prefix: ${CMAKE_INSTALL_PREFIX}")
