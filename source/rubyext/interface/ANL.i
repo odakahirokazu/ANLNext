@@ -12,6 +12,7 @@
 %include "std_string.i"
 %include "std_vector.i"
 %include "std_list.i"
+%include "std_pair.i"
 
 %template(ModuleVector) std::vector<anlnext::BasicModule*>;
 
@@ -20,6 +21,11 @@
 %template(VectorStr) std::vector<std::string>;
 
 %template(ListI) std::list<int>;
+
+%template(PairII) std::pair<int, int>;
+%template(PairDD) std::pair<double, double>;
+%template(VectorPairII) std::vector<std::pair<int, int>>;
+%template(VectorPairDD) std::vector<std::pair<double, double>>;
 
 namespace std
 {
