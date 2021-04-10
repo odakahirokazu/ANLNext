@@ -56,7 +56,7 @@ namespace anlnext
 /* version definition */
 const int ANLManager::__version1__ = 2;
 const int ANLManager::__version2__ = 1;
-const int ANLManager::__version3__ = 0;
+const int ANLManager::__version3__ = 2;
 
 
 ANLManager::ANLManager()
@@ -251,15 +251,24 @@ ANLStatus ANLManager::Analyze(long int num_events, bool enable_console)
               << std::endl;
 
     analysis_thread_finished_ = false;
-    std::promise<ANLStatus> status_promise;
-    std::future<ANLStatus> status_future = status_promise.get_future();
-    std::thread analysis_thread(std::bind(&ANLManager::process_analysis_for_the_thread, this, std::placeholders::_1),
-                                std::move(status_promise));
     std::thread interactive_thread(std::bind(&ANLManager::interactive_session, this));
-    analysis_thread.join();
+
+    const bool use_analysis_thread = false;
+    if (use_analysis_thread) {
+      std::promise<ANLStatus> status_promise;
+      std::future<ANLStatus> status_future = status_promise.get_future();
+      std::thread analysis_thread(std::bind(&ANLManager::process_analysis_for_the_thread,
+                                            this,
+                                            std::placeholders::_1),
+                                  std::move(status_promise));
+      analysis_thread.join();
+      status = status_future.get();
+    }
+    else {
+      status = process_analysis();
+    }
     analysis_thread_finished_ = true;
     interactive_thread.join();
-    status = status_future.get();
   }
   else {
     std::cout << "\n"
