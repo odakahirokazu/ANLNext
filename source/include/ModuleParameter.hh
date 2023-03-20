@@ -84,7 +84,11 @@ class ModuleParameter : public VModuleParameter
   using call_type =
     typename std::conditional<is_integer_type::value,
                               int,
-                              typename boost::call_traits<T>::param_type>::type;
+                              typename std::conditional<is_floating_point_type::value,
+                                                        double,
+                                                        typename boost::call_traits<T>::param_type
+                                                        >::type
+                              >::type;
   using get_return_type =
     typename std::conditional<is_integer_type::value, int, T>::type;
   
