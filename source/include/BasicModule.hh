@@ -67,6 +67,7 @@ class EvsManager;
  * @date 2017-07-02 | do not own ModuleAccess, always fully accessible
  * @date 2017-07-07 | new model (mod-methods are renamed)
  * @date 2019-12-25 | get-result
+ * @date 2023-05-10 | singleton module
  */
 class BasicModule
 {
@@ -104,6 +105,22 @@ public:
 
   void set_order_sensitive(bool v) { order_sensitive_ = v; }
   bool is_order_sensitive() const { return order_sensitive_; }
+
+  void set_singleton(int copyID)
+  {
+    singleton_ = true;
+    singleton_copy_ID_ = copyID;
+  }
+  void unset_singleton()
+  {
+    singleton_ = false;
+    singleton_copy_ID_ = -1;
+  }
+
+  bool is_singleton() const { return singleton_; }
+  int singleton_copy_id() const { return singleton_copy_ID_; }
+
+  void automatic_switch_for_singleton();
   
   virtual ANLStatus mod_define()         { return AS_OK; }
   virtual ANLStatus mod_pre_initialize() { return AS_OK; }
@@ -363,6 +380,12 @@ protected:
   void request_module_IFNC(const std::string& name, T** ptr);
 
   /*
+   * access to singleton
+   */
+  const BasicModule* __singleton_ptr__() const { return *singleton_ptr_; }
+  BasicModule* __singleton_ptr__() { return *singleton_ptr_; }
+
+  /*
    * EVS methods
    */
 
@@ -398,6 +421,10 @@ private:
 
   const int copy_ID_ = 0;
   int last_copy_ = 0;
+
+  bool singleton_ = false;
+  int singleton_copy_ID_ = 0;
+  std::shared_ptr<BasicModule*> singleton_ptr_;
 
   std::string (BasicModule::*module_ID_method_)() const;
 };

@@ -8,8 +8,12 @@
   std::string __module_version__() const override \
   { return #VERSION; }
 
-#define ENABLE_PARALLEL_RUN()                         \
-  std::unique_ptr<BasicModule> __clone__() override   \
-  { return make_clone(new mod_class(*this)); }
+#define ENABLE_PARALLEL_RUN()                                    \
+  std::unique_ptr<BasicModule> __clone__() override              \
+  { return make_clone(new mod_class(*this)); }                   \
+  mod_class* singleton_self()                                    \
+  { return static_cast<mod_class*>(__singleton_ptr__()); }       \
+  const mod_class* singleton_self() const                        \
+  { return static_cast<const mod_class*>(__singleton_ptr__()); }
 
 #endif /* ANLNEXT_ANLMacro_H */

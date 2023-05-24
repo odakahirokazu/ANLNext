@@ -153,6 +153,11 @@ class BasicModule
 
   void set_order_sensitive(bool v);
   bool is_order_sensitive() const;
+
+  void set_singleton(int copyID);
+  void unset_singleton();
+  bool is_singleton() const;
+  int singleton_copy_id() const;
   
   std::vector<std::string> get_aliases_string() const;
   void add_alias(const std::string& name);

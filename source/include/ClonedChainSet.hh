@@ -65,6 +65,8 @@ public:
   { return *evs_manager_; }
 
   BasicModule* access_to_module(const std::string& module_ID);
+
+  void automatic_switch_for_singletons();
   
 private:
   int id_;

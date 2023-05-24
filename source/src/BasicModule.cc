@@ -40,9 +40,12 @@ BasicModule::BasicModule()
     current_value_element_(nullptr),
     loop_index_(-1),
     copy_ID_(0),
-    last_copy_(0)
+    last_copy_(0),
+    singleton_(false),
+    singleton_copy_ID_(0)
 {
   module_ID_method_ = &BasicModule::module_name;
+  singleton_ptr_ = std::make_shared<BasicModule*>(this);
 }
 
 BasicModule::~BasicModule() = default;
@@ -60,13 +63,20 @@ BasicModule::BasicModule(const BasicModule& r)
     current_value_element_(nullptr),
     loop_index_(-1),
     copy_ID_(r.last_copy_+1),
-    last_copy_(0)
+    last_copy_(0),
+    singleton_(r.singleton_),
+    singleton_copy_ID_(r.singleton_copy_ID_),
+    singleton_ptr_(r.singleton_ptr_)
 {
   if (module_ID_=="") {
     module_ID_method_ = &BasicModule::module_name;
   }
   else {
     module_ID_method_ = &BasicModule::get_module_id;
+  }
+
+  if (singleton_copy_ID_ == copy_ID_) {
+    *singleton_ptr_ = this;
   }
 }
 
@@ -208,6 +218,18 @@ boost::property_tree::ptree BasicModule::parameters_to_property_tree() const
   }
   pt.add_child("parameter_list", std::move(pt_parameters));
   return pt;
+}
+
+void BasicModule::automatic_switch_for_singleton()
+{
+  if (is_singleton()) {
+    if (singleton_copy_id() == copy_id()) {
+      on();
+    }
+    else {
+      off();
+    }
+  }
 }
 
 // instantiation of function templates

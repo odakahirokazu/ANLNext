@@ -88,6 +88,18 @@ void ANLManagerMT::duplicate_chains()
             << (num_parallels_-1) << " chains have been duplicated. => "
             << "Total: " << num_parallels_ << " chains.\n"
             << std::endl;
+
+  automatic_switch_for_singletons();
+}
+
+void ANLManagerMT::automatic_switch_for_singletons()
+{
+  for (BasicModule* mod: modules_) {
+    mod->automatic_switch_for_singleton();
+  }
+  for (ClonedChainSet& chain: cloned_chains_) {
+    chain.automatic_switch_for_singletons();
+  }
 }
 
 void ANLManagerMT::print_parameters()

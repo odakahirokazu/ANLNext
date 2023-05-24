@@ -1,7 +1,7 @@
 ANL Next
 ========================================
 
-- Version: 2.1.3
+- Version: 2.2.0
 - Author: Hirokazu Odaka
 
 ## Table of Contents

@@ -78,4 +78,11 @@ BasicModule* ClonedChainSet::access_to_module(const std::string& module_ID)
   return module_access_->get_module_NC(module_ID);
 }
 
+void ClonedChainSet::automatic_switch_for_singletons()
+{
+  for (auto& mod: modules_) {
+    mod->automatic_switch_for_singleton();
+  }
+}
+
 } /* namespace anlnext */
