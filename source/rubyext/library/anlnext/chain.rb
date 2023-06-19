@@ -72,7 +72,7 @@ module ANL
     anlapp_methods = [
       :console, :console=, :add_namespace,
       :push, :insert, :insert_before, :insert_after, :chain,
-      :expose_module, :get_module, :index, :rindex,
+      :expose_module, :get_module, :get_parallel_module, :index, :rindex,
       :insert_to_map, :push_to_vector,
       :set_parameters, :with_parameters, :chain_with_parameters,
       :modify, :modify_parameters,
