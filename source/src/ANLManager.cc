@@ -55,7 +55,7 @@ namespace anlnext
 
 /* version definition */
 const int ANLManager::__version1__ = 2;
-const int ANLManager::__version2__ = 1;
+const int ANLManager::__version2__ = 2;
 const int ANLManager::__version3__ = 2;
 
 
