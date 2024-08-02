@@ -1,5 +1,5 @@
 ####### CMakeLists.txt for ANL Next
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.30)
 
 ### Initial definition of cmake variables
 set(CMAKE_INSTALL_PREFIX $ENV{HOME} CACHE PATH "install prefix")
@@ -12,7 +12,7 @@ set(CMAKE_MACOSX_RPATH 1)
 
 ### Definition of project
 project(ANLNext)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${ANLNext_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 message("-- Install destination prefix: ${CMAKE_INSTALL_PREFIX}")

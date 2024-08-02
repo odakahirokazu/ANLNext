@@ -8,7 +8,8 @@ if(ANLNEXT_ENABLE_INTERACTIVE_MODE)
 endif(ANLNEXT_ENABLE_INTERACTIVE_MODE)
 
 ### BOOST
-find_package(Boost 1.56.0 REQUIRED COMPONENTS system chrono thread)
+find_package(Boost CONFIG 1.80.0)
+# find_package(Boost 1.56.0 REQUIRED COMPONENTS system chrono thread)
 set(BOOST_INC_DIR ${Boost_INCLUDE_DIRS})
 set(BOOST_LIB_DIR ${Boost_LIBRARY_DIRS})
 set(BOOST_LIB ${Boost_LIBRARIES})
