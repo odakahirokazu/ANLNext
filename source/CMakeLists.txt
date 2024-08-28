@@ -109,3 +109,4 @@ if(ANLNEXT_INSTALL_HEADERS)
 endif(ANLNEXT_INSTALL_HEADERS)
 
 add_subdirectory(rubyext)
+add_subdirectory(pyext)
