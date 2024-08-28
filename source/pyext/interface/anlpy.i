@@ -125,8 +125,13 @@ class VModuleParameter
   std::vector<std::string> map_key_list() const;
   void retrieve_from_container(const std::string& /* key */) const;
   void retrieve_from_container(std::size_t /* index */) const;
-    
-  void print(std::ostream& os) const;
+
+  %extend {
+    std::string __str__()
+    {
+      return $self->value_string();
+    }
+  }
   std::string value_string() const;
 };
 
