@@ -1,4 +1,4 @@
-install(FILES CreateSwigRuby.cmake
+install(FILES CreateSwigRuby.cmake CreateSwigPython.cmake
   DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/anlnext)
 
 if(ANL_USE_EXE)

@@ -234,22 +234,22 @@ class BasicModule
         for (int i=0; i<n; i++) {
           PyObject* key = PyList_GetItem(keys, i);
           PyObject* val = PyDict_GetItem(dict, key);
-          const std::string name(PyString_AsString(key));
+          const std::string name(PyUnicode_AsUTF8(key));
           if (PyInt_Check(val)) {
             const int v = PyInt_AsLong(val);
             $self->set_value_element(name, v);
           }
-          else if (PyInt_Check(val)) {
+          else if (PyFloat_Check(val)) {
             const double v = PyFloat_AsDouble(val);
             $self->set_value_element(name, v);
           }
-          else if (PyString_Check(val)) {
-            const std::string v(PyString_AsString(val));
+          else if (PyUnicode_Check(val)) {
+            const std::string v(PyUnicode_AsUTF8(val));
             $self->set_value_element(name, v);
           }
         }
       }
-
+      
       $self->insert_to_container();
     }
 
@@ -263,22 +263,22 @@ class BasicModule
         for (int i=0; i<n; i++) {
           PyObject* key = PyList_GetItem(keys, i);
           PyObject* val = PyDict_GetItem(dict, key);
-          const std::string name(PyString_AsString(key));
+          const std::string name(PyUnicode_AsUTF8(key));
           if (PyInt_Check(val)) {
             const int v = PyInt_AsLong(val);
             $self->set_value_element(name, v);
           }
-          else if (PyInt_Check(val)) {
+          else if (PyFloat_Check(val)) {
             const double v = PyFloat_AsDouble(val);
             $self->set_value_element(name, v);
           }
-          else if (PyString_Check(val)) {
-            const std::string v(PyString_AsString(val));
+          else if (PyUnicode_Check(val)) {
+            const std::string v(PyUnicode_AsUTF8(val));
             $self->set_value_element(name, v);
           }
         }
       }
-
+      
       $self->insert_to_container();
     }
   }

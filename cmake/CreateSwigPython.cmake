@@ -3,6 +3,8 @@
 ###
 
 ### policy
+cmake_policy(SET CMP0078 NEW)
+cmake_policy(SET CMP0086 NEW)
 
 ### pre-process
 if (NOT DEFINED TARGET_EXT_LIBRARY_OUTPUT)
