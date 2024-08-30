@@ -20,7 +20,7 @@ def proposed_display_period(num_loop):
     elif num_loop < 100:
         display_period = 1
     else:
-        display_period = int(10**((math.log10(num_loop)-1.5)))
+        display_period = 10**(int(math.log10(num_loop)-1.5))
     return display_period
 
 

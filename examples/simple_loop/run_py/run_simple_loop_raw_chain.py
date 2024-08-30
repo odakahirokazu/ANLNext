@@ -40,6 +40,7 @@ m5.set_parameter("my_parameter11", -301)
 m5.set_parameter("my_parameter12", 1000000000)
 m5.set_parameter("my_parameter13", 876543210)
 
+am.PreInitialize()
 am.Initialize()
 am.Analyze(10000)
 am.Finalize()

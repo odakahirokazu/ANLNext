@@ -40,7 +40,7 @@ def setup(module):
 ### run analysis chain
 a = anlnext.AnalysisChain()
 setup(a)
-a.run(1000)
+a.run(10000)
 
 
 ### to peek a parameter
