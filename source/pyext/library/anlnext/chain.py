@@ -43,6 +43,11 @@ class AnalysisChain:
         self.parameter_setter_list = []
 
 
+    def setup(self, func):
+        func(self)
+        return self
+
+
     def chain(self, anl_module_class, module_id=None):
         mod = anl_module_class()
         if module_id:
