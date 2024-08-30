@@ -45,6 +45,6 @@ am.Analyze(10000)
 am.Finalize()
 
 ### to peek a parameter
-print(anlnext.module_parameter.get_value(m1.get_parameter("my_parameter11")))
-print(anlnext.module_parameter.get_value(m2.get_parameter("my_vector")))
-print(anlnext.module_parameter.get_value(m3.get_parameter("my_map")))
+print(anlnext.get_value(m1.get_parameter("my_parameter11")))
+print(anlnext.get_value(m2.get_parameter("my_vector")))
+print(anlnext.get_value(m3.get_parameter("my_map")))

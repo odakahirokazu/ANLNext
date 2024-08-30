@@ -38,12 +38,12 @@ def setup(module):
 
 
 ### run analysis chain
-a = anlnext.chain.AnalysisChain()
+a = anlnext.AnalysisChain()
 setup(a)
 a.run(1000)
 
 
 ### to peek a parameter
-print(anlnext.module_parameter.get_value(a.get_module("MyModule").get_parameter("my_parameter11")))
-print(anlnext.module_parameter.get_value(a.get_module("MyVectorModule").get_parameter("my_vector")))
-print(anlnext.module_parameter.get_value(a.get_module("MyMapModule").get_parameter("my_map")))
+print(anlnext.get_value(a.get_module("MyModule").get_parameter("my_parameter11")))
+print(anlnext.get_value(a.get_module("MyVectorModule").get_parameter("my_vector")))
+print(anlnext.get_value(a.get_module("MyMapModule").get_parameter("my_map")))

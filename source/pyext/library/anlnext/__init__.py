@@ -1,4 +1,4 @@
 from anlnext.anlnextpy import *
 import anlnext.status
-import anlnext.module_parameter
-import anlnext.chain
+from anlnext.module_parameter import get_value
+from anlnext.chain import AnalysisChain
