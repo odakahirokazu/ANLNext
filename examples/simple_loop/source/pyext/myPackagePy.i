@@ -9,7 +9,7 @@
   
 %}
 
-%import(module="anlnext.anlpy") "anlnext/python/anlpy.i"
+%import(module="anlnext.anlnextpy") "anlnext/python/anlnextpy.i"
 
 // interface to my modules
 

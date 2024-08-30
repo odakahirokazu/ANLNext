@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from anlnext import anlpy # ANL Next library
+import anlnext # ANL Next library
 import myPackagePy as myp # Python extension library using ANL Next
 
-am = anlpy.ANLManager()
+am = anlnext.ANLManager()
 
 m1 = myp.MyModule()
 m2 = myp.MyVectorModule()

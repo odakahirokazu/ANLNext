@@ -1,4 +1,4 @@
-%module anlpy
+%module anlnextpy
 %{
 #define SWIG_FILE_WITH_INIT
 #include "ANLManager.hh"

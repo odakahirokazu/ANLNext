@@ -1,5 +1,5 @@
 ########################################################
-set(TARGET_EXT_LIBRARY anlpy)
+set(TARGET_EXT_LIBRARY anlnextpy)
 set(EXT_LIB_INSTALL_DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/python/anlnext)
 set(SWIG_IF_FILE interface/${TARGET_EXT_LIBRARY}.i)
 set(PYTHON_EXT_INCLUDE_DIRS ../include ${BOOST_INC_DIR})
