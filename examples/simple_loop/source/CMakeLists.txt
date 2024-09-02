@@ -12,7 +12,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 ### Definition of project
 project(MyPackage)
-add_definitions("-std=c++14")
+set(CMAKE_CXX_STANDARD 17)
 
 set(MY_LIBRARY MyPackage)
 set(USE_RUBY ON)
@@ -76,5 +76,8 @@ install(TARGETS ${MY_LIBRARY} LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
 if(USE_RUBY)
   add_subdirectory(rubyext)
-  add_subdirectory(pyext)
 endif(USE_RUBY)
+
+if(USE_PYTHON)
+  add_subdirectory(pyext)
+endif(USE_PYTHON)

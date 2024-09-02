@@ -12,14 +12,14 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 ### Definition of project
 project(TestHistogram)
-add_definitions("-std=c++14")
+set(CMAKE_CXX_STANDARD 17)
 
 set(MY_LIBRARY TestHistogram)
 set(USE_RUBY ON)
 
 ### External libraries
 ### BOOST ###
-find_package(Boost 1.56.0 REQUIRED COMPONENTS system chrono thread)
+find_package(Boost CONFIG 1.80.0)
 set(BOOST_INC_DIR ${Boost_INCLUDE_DIRS})
 set(BOOST_LIB_DIR ${Boost_LIBRARY_DIRS})
 set(BOOST_LIB ${Boost_LIBRARIES})
@@ -89,3 +89,7 @@ install(TARGETS ${MY_LIBRARY} LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 if(USE_RUBY)
   add_subdirectory(rubyext)
 endif(USE_RUBY)
+
+if(USE_PYTHON)
+  add_subdirectory(pyext)
+endif(USE_PYTHON)
