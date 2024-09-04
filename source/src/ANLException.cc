@@ -85,6 +85,14 @@ const ANLException& ANLException::prepend_message(const std::string& message) co
   return *this;
 }
 
+const ANLException& ANLException::prepend_parameter_name(const VModuleParameter* param) const
+{
+  std::ostringstream oss;
+  oss << param->name() << "/" << get_parameter_name();
+  *this << ErrorInfoOnParameter(oss.str());
+  return *this;
+}
+
 const ANLException& ANLException::request_treatment(ANLException::Treatment t) const
 {
   *this << ExceptionTreatment(t);
@@ -98,6 +106,15 @@ std::string ANLException::get_message() const
     return std::string();
   }
   return *message;
+}
+
+std::string ANLException::get_parameter_name() const
+{
+  const std::string* parameter_name = boost::get_error_info<ErrorInfoOnParameter>(*this);
+  if (parameter_name==nullptr) {
+    return std::string();
+  }
+  return *parameter_name;
 }
 
 const ANLException& ANLException::set_module_info(const BasicModule* mod) const
@@ -126,7 +143,7 @@ std::string ANLException::to_string() const
     if (moduleName) { oss << "Module Name: " << *moduleName << "\n"; }
     if (method)     { oss << "Method: " << *method << "\n"; }
     if (loopIndex)  { oss << "Loop index: " << *loopIndex << "\n"; }
-    if (parameter)  { oss << "Parameter:" << *parameter << "\n"; }
+    if (parameter)  { oss << "Parameter: " << *parameter << "\n"; }
     return oss.str();
   }
   else if (VerboseLevel() >= 2) {

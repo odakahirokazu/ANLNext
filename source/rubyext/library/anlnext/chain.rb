@@ -123,21 +123,21 @@ module ANL
       end
 
       if module_class
-        define_method(setter_name) do |*args, &set_param|
+        define_method(setter_name) do |*args, &parameter_setter|
           module_id, parameters = resolve_arguments(args)
           mi = ModuleInitializer.new(module_class, module_id)
           set_function.(self, variable_name, mi, array)
           @_anlapp_analysis_chain.current_module = mi
-          mi.with(parameters, &set_param)
+          mi.with(parameters, &parameter_setter)
           mi
         end
       else
-        define_method(setter_name) do |mod1, *args, &set_param|
+        define_method(setter_name) do |mod1, *args, &parameter_setter|
           module_id, parameters = resolve_arguments(args)
           mi = ModuleInitializer.new(mod1, module_id)
           set_function.(self, variable_name, mi, array)
           @_anlapp_analysis_chain.current_module = mi
-          mi.with(parameters, &set_param)
+          mi.with(parameters, &parameter_setter)
           mi
         end
       end
@@ -171,7 +171,7 @@ module ANL
       @module_list = []
       @module_hash = {}
       @current_module = nil
-      @set_param_list = []
+      @parameter_setter_list = []
       @namespace_list = [Object]
       @modification_block = nil
       @stage = nil
@@ -193,7 +193,7 @@ module ANL
       @module_list.clear
       @module_hash = {}
       @current_module = nil
-      @set_param_list.clear
+      @parameter_setter_list.clear
       @namespace_list.clear; @namespace_list << Object
       @modification_block = nil
       @stage = nil
@@ -376,7 +376,7 @@ module ANL
         return
       end
 
-      set_param =
+      parameter_setter =
         if value.is_a? Vector
           if value.z
             lambda{ mod.set_parameter(name, value.x, value.y, value.z) }
@@ -406,19 +406,10 @@ module ANL
           end
         end
 
-      set_param_or_raise = lambda do
-        begin
-          set_param.call
-        rescue
-          puts "AnalysisChain#set_parameter(): exception detected ===> #{name} in module #{mod.module_id}"
-          raise
-        end
-      end
-
       if self.definition_already_done?
-        set_param_or_raise.call
+        parameter_setter.call
       else
-        @set_param_list << set_param_or_raise
+        @parameter_setter_list << parameter_setter
       end
 
       return
@@ -442,7 +433,7 @@ module ANL
         return
       end
 
-      set_param = lambda do
+      parameter_setter = lambda do
         mod.insert_to_map(map_name.to_s, key.to_s) do |v|
           map_values.each do |value_name, value|
             if value_name.is_a? Integer
@@ -453,19 +444,10 @@ module ANL
         end
       end
 
-      set_param_or_raise = lambda do
-        begin
-          set_param.call
-        rescue
-          puts "AnalysisChain#insert_to_map(): exception detected ===> #{map_name}/#{key} in module #{mod.module_id}"
-          raise
-        end
-      end
-
       if self.definition_already_done?
-        set_param_or_raise.call
+        parameter_setter.call
       else
-        @set_param_list << set_param_or_raise
+        @parameter_setter_list << parameter_setter
       end
 
       return
@@ -488,7 +470,7 @@ module ANL
         return
       end
 
-      set_param = lambda do
+      parameter_setter = lambda do
         mod.push_to_vector(vector_name.to_s) do |v|
           values.each do |value_name, value|
             if value_name.is_a? Integer
@@ -499,19 +481,10 @@ module ANL
         end
       end
 
-      set_param_or_raise = lambda do
-        begin
-          set_param.call
-        rescue
-          puts "AnalysisChain#insert_to_map(): exception detected ===> #{vector_name} in module #{mod.module_id}"
-          raise
-        end
-      end
-
       if self.definition_already_done?
-        set_param_or_raise.call
+        parameter_setter.call
       else
-        @set_param_list << set_param_or_raise
+        @parameter_setter_list << parameter_setter
       end
 
       return
@@ -529,9 +502,9 @@ module ANL
     # @yield [mod] a block can be given for additional process.
     # @yieldparam mod the current module is given.
     #
-    def set_parameters(module_id, parameters=nil, &set_param)
+    def set_parameters(module_id, parameters=nil, &parameter_setter)
       expose_module(module_id)
-      with_parameters(parameters, &set_param)
+      with_parameters(parameters, &parameter_setter)
     end
 
     # Utility method to set parameters of the current module.
@@ -545,10 +518,10 @@ module ANL
     # @yield [mod] a block can be given for additional process.
     # @yieldparam mod the current module is given.
     #
-    def with_parameters(parameters=nil, &set_param)
+    def with_parameters(parameters=nil, &parameter_setter)
       mod = @current_module
       if mod.is_a? ModuleInitializer
-        mod.with_parameters(parameters, &set_param)
+        mod.with_parameters(parameters, &parameter_setter)
         return
       end
 
@@ -557,9 +530,9 @@ module ANL
       end
       if block_given?
         if self.definition_already_done?
-          set_param.(mod)
+          parameter_setter.(mod)
         else
-          @set_param_list << lambda{ set_param.(mod) }
+          @parameter_setter_list << lambda{ parameter_setter.(mod) }
         end
       end
       return
@@ -591,14 +564,14 @@ module ANL
     # This method is supposed to be called in the block given to
     # modify method. This block is executed just after pre-initialization.
     #
-    def modify_parameters(chain_id, module_id, parameters=nil, &set_param)
+    def modify_parameters(chain_id, module_id, parameters=nil, &parameter_setter)
       begin
         if chain_id == 0
           expose_module(module_id)
-          with_parameters(parameters, &set_param)
+          with_parameters(parameters, &parameter_setter)
         else
           @current_module = get_parallel_module(chain_id, module_id)
-          with_parameters(parameters, &set_param)
+          with_parameters(parameters, &parameter_setter)
         end
       ensure
         @current_module = nil
@@ -686,7 +659,7 @@ module ANL
         raise "Definition stage is not completed."
       end
 
-      while s = @set_param_list.shift
+      while s = @parameter_setter_list.shift
         s.call
       end
       @stage = :loading_parameters_done

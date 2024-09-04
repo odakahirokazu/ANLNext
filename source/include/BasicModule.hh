@@ -68,6 +68,7 @@ class EvsManager;
  * @date 2017-07-07 | new model (mod-methods are renamed)
  * @date 2019-12-25 | get-result
  * @date 2023-05-10 | singleton module
+ * @date 2024-09-02 | add module information in set_parameter() exception
  */
 class BasicModule
 {
@@ -567,7 +568,13 @@ template <typename T>
 void BasicModule::set_parameter(const std::string& name, T val)
 {
   ModuleParamIter it = find_parameter(name);
-  (*it)->set_value(val);
+  try {
+    (*it)->set_value(val);
+  }
+  catch (ANLException& e) {
+    e.set_module_info(this);
+    throw;
+  }
 }
 
 inline
@@ -582,14 +589,26 @@ void BasicModule::set_parameter(const std::string& name,
                                 double x, double y)
 {
   ModuleParamIter it = find_parameter(name);
-  (*it)->set_value(x, y);
+  try {
+    (*it)->set_value(x, y);
+  }
+  catch (ANLException& e) {
+    e.set_module_info(this);
+    throw;
+  }
 }
 
 inline
 void BasicModule::set_parameter_integer(const std::string& name, intmax_t val)
 {
   ModuleParamIter it = find_parameter(name);
-  (*it)->set_value_integer(val);
+  try {
+    (*it)->set_value_integer(val);
+  }
+  catch (ANLException& e) {
+    e.set_module_info(this);
+    throw;
+  }
 }
 
 inline
@@ -597,7 +616,13 @@ void BasicModule::set_parameter(const std::string& name,
                                 double x, double y, double z)
 {
   ModuleParamIter it = find_parameter(name);
-  (*it)->set_value(x, y, z);
+  try {
+    (*it)->set_value(x, y, z);
+  }
+  catch (ANLException& e) {
+    e.set_module_info(this);
+    throw;
+  }
 }
 
 template <typename T>
@@ -607,6 +632,7 @@ void BasicModule::set_value_element(const std::string& name, T val)
     current_parameter_->set_value_element(name, val);
   }
   catch (ANLException& e) {
+    e.prepend_parameter_name(current_parameter_.get());
     e.set_module_info(this);
     throw;
   }

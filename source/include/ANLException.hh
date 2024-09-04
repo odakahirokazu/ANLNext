@@ -71,14 +71,16 @@ public:
   virtual ~ANLException() = default;
 
   /* apply const specifiers similarly to operator<<(const boost::exception&, v) */
-  const ANLException& set_module_info(const BasicModule* module) const;
+  const ANLException& set_module_info(const BasicModule* mod) const;
   const ANLException& set_message(const std::string& message) const;
   const ANLException& append_message(const std::string& message) const;
   const ANLException& prepend_message(const std::string& message) const;
+  const ANLException& prepend_parameter_name(const VModuleParameter* param) const;
 
   const ANLException& request_treatment(Treatment t) const;
 
   std::string get_message() const;
+  std::string get_parameter_name() const;
   std::string to_string() const;
 
 private:
