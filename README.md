@@ -1,7 +1,7 @@
 ANL Next
 ========================================
 
-- Version: 2.2.2
+- Version: 2.3.0
 - Author: Hirokazu Odaka
 
 ## Table of Contents
@@ -15,6 +15,13 @@ ANL Next
 
 News
 ----------------------------------------
+
+### Version 2.3
+
+**released on September 5, 2024**
+
+ANLNext supports python binding, almost compatible with Ruby binding. 
+
 
 ### Version 2.0
 
