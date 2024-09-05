@@ -37,10 +37,12 @@ def check_status(status, text):
 class AnalysisChain:
     def __init__(self):
         self.console = True
+        self.num_parallels = 1
         self.display_period = None
         self.module_list = []
         self.current_module = None
         self.parameter_setter_list = []
+        self.parameter_modifier = None
 
 
     def setup(self, func):
@@ -50,7 +52,7 @@ class AnalysisChain:
 
     def chain(self, anl_module_class, module_id=None):
         mod = anl_module_class()
-        if module_id:
+        if module_id is not None:
             mod.set_module_id(module_id)
         self.module_list.append(mod)
         self.current_module = mod
@@ -63,6 +65,10 @@ class AnalysisChain:
                 return mod
         else:
             return None
+
+
+    def get_parallel_module(self, chain_id, module_id):
+        return self.anl.access_to_module(chain_id, module_id)
 
 
     def expose_module(self, module_id):
@@ -104,7 +110,11 @@ class AnalysisChain:
                         mod.set_parameter_vector_i(name, value)
                     self.parameter_setter_list.append(set_param)
         else:
-            if isinstance(value, int):
+            if isinstance(value, bool):
+                def set_param():
+                    mod.set_parameter(name, value)
+                self.parameter_setter_list.append(set_param)
+            elif isinstance(value, int):
                 def set_param():
                     mod.set_parameter_integer(name, value)
                 self.parameter_setter_list.append(set_param)
@@ -130,8 +140,15 @@ class AnalysisChain:
         return self
 
 
+    def modify(self, func):
+        self.parameter_modifier = func
+
+
     def define(self):
-        self.anl = anlnext.ANLManager()
+        if self.num_parallels > 1:
+            self.anl = anlnext.ANLManagerMT(self.num_parallels)
+        else:
+            self.anl = anlnext.ANLManager()
         self.anl.set_modules(self.module_list)
         self.anl.Define()
 
@@ -143,14 +160,19 @@ class AnalysisChain:
 
 
     def run(self, num_loop):
-        if self.display_period==None:
+        if self.display_period is None:
             self.display_period = proposed_display_period(num_loop)
 
         self.define()
         self.load_all_parameters()
+
         status = self.anl.PreInitialize()
         if not check_status(status, "PreInitialize()"):
             return
+
+        if self.parameter_modifier is not None:
+            self.parameter_modifier(self)
+
         status = self.anl.Initialize()
         if not check_status(status, "Initialize()"):
             return

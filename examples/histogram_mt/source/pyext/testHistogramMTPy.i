@@ -1,9 +1,9 @@
-%module testHistogramPy
+%module testHistogramMTPy
 %{
 #include <anlnext/BasicModule.hh>
 
 // include headers of my modules
-#include "SaveData.hh"
+#include "CreateRootFile.hh"
 #include "GenerateEvents.hh"
 #include "FillHistogram.hh"
 
@@ -14,6 +14,10 @@
 
 // interface to my modules
 
-class SaveData : public anlnext::BasicModule {};
+namespace comptonsoft
+{
+class CreateRootFile : public anlnext::BasicModule {};
+}
+
 class GenerateEvents : public anlnext::BasicModule {};
 class FillHistogram : public anlnext::BasicModule {};

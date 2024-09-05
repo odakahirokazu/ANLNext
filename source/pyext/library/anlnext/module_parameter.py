@@ -8,7 +8,7 @@ import anlnext
 
 def get_value(param):
     if param.type_name()=="bool":
-        return param.get_value(false)
+        return param.get_value(False)
     elif param.type_name()=="int":
         return param.get_value(0)
     elif param.type_name()=="integer":
