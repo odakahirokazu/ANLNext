@@ -38,7 +38,7 @@ class BasicModule;
 class ClonedChainSet
 {
 public:
-  ClonedChainSet(int chain_id, const EvsManager& evs);
+  ClonedChainSet(std::size_t chain_id, const EvsManager& evs);
   ~ClonedChainSet();
   ClonedChainSet(ClonedChainSet&&) = default;
   ClonedChainSet& operator=(ClonedChainSet&&) = default;
@@ -46,7 +46,7 @@ public:
   ClonedChainSet(const ClonedChainSet&) = delete;
   ClonedChainSet& operator=(const ClonedChainSet&) = delete;
 
-  int chain_id() const { return id_; }
+  std::size_t chain_id() const { return id_; }
   
   void push(std::unique_ptr<BasicModule>&& mod);
   void setup_module_access();
@@ -69,7 +69,7 @@ public:
   void automatic_switch_for_singletons();
   
 private:
-  int id_;
+  std::size_t id_;
   std::unique_ptr<EvsManager> evs_manager_;
   std::unique_ptr<ModuleAccess> module_access_;
   std::vector<std::unique_ptr<BasicModule>> modules_;

@@ -91,7 +91,7 @@ ANLStatus ANLManager::do_interactive_comunication()
     }
     else if (cmd == "modify") {
       std::string moduleID;
-      int n;
+      int n = 0;
       is >> moduleID;
       if (is) {
         try {
@@ -99,8 +99,8 @@ ANLStatus ANLManager::do_interactive_comunication()
             n = boost::lexical_cast<int>(moduleID);
           }
           else {
-            n = module_index(moduleID, false);
-            if (n<0) {
+            n = static_cast<int>(module_index(moduleID, false));
+            if (n==static_cast<int>(modules_.size())) {
               std::cout << "Module not found: " << moduleID << std::endl;
               continue;
             }
@@ -118,15 +118,15 @@ ANLStatus ANLManager::do_interactive_comunication()
     }
     else if (cmd == "print") {
       std::string moduleID;
-      int n;
+      int n = 0;
       is >> moduleID;
       if (is) {
         if (std::isdigit(moduleID[0])) {
           n = boost::lexical_cast<int>(moduleID);
         }
         else {
-          n = module_index(moduleID, false);
-          if (n<0) {
+          n = static_cast<int>(module_index(moduleID, false));
+          if (n==static_cast<int>(modules_.size())) {
             std::cout << "Module not found: " << moduleID << std::endl;
             continue;
           }
@@ -139,15 +139,15 @@ ANLStatus ANLManager::do_interactive_comunication()
     }
     else if (cmd == "on") {
       std::string moduleID;
-      int n;
+      int n = 0;
       is >> moduleID;
       if (is) {
         if (std::isdigit(moduleID[0])) {
           n = boost::lexical_cast<int>(moduleID);
         }
         else {
-          n = module_index(moduleID, false);
-          if (n<0) {
+          n = static_cast<int>(module_index(moduleID, false));
+          if (n==static_cast<int>(modules_.size())) {
             std::cout << "Module not found: " << moduleID << std::endl;
             continue;
           }
@@ -160,15 +160,15 @@ ANLStatus ANLManager::do_interactive_comunication()
     }
     else if (cmd == "off") {
       std::string moduleID;
-      int n;
+      int n = 0;
       is >> moduleID;
       if (is) {
         if (std::isdigit(moduleID[0])) {
           n = boost::lexical_cast<int>(moduleID);
         }
         else {
-          n = module_index(moduleID, false);
-          if (n<0) {
+          n = static_cast<int>(module_index(moduleID, false));
+          if (n==static_cast<int>(modules_.size())) {
             std::cout << "Module not found: " << moduleID << std::endl;
             continue;
           }

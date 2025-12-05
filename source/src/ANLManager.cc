@@ -55,8 +55,8 @@ namespace anlnext
 
 /* version definition */
 const int ANLManager::__version1__ = 2;
-const int ANLManager::__version2__ = 2;
-const int ANLManager::__version3__ = 2;
+const int ANLManager::__version2__ = 4;
+const int ANLManager::__version3__ = 0;
 
 
 ANLManager::ANLManager()
@@ -65,7 +65,7 @@ ANLManager::ANLManager()
     evs_manager_(new EvsManager),
     requested_(ANLRequest::none),
     exception_propagation_(true),
-    display_period_(-1),
+    display_period_(0),
     module_access_(new ModuleAccess),
     analysis_thread_finished_(false)
 {
@@ -86,9 +86,9 @@ void ANLManager::set_modules(std::vector<BasicModule*> modules)
   reset_counters();
 }
 
-long int ANLManager::display_period() const
+std::size_t ANLManager::display_period() const
 {
-  if (display_period_ < 0) {
+  if (display_period_ == 0) {
     return (num_events_ > 0) ? (num_events_/100) : 10000;
   }
   return display_period_;
@@ -206,7 +206,7 @@ ANLStatus ANLManager::Initialize()
   return status;
 }
 
-ANLStatus ANLManager::Analyze(long int num_events, bool enable_console)
+ANLStatus ANLManager::Analyze(std::size_t num_events, bool enable_console)
 {
   std::cout << '\n'
             << "        **************************************\n"
@@ -349,7 +349,7 @@ ANLStatus ANLManager::Finalize()
   return status;
 }
 
-BasicModule* ANLManager::access_to_module(int chain_ID,
+BasicModule* ANLManager::access_to_module(std::size_t chain_ID,
                                           const std::string& module_ID)
 {
   if (chain_ID == 0) {
@@ -360,15 +360,13 @@ BasicModule* ANLManager::access_to_module(int chain_ID,
   return nullptr;
 }
 
-int ANLManager::module_index(const std::string& module_ID, bool strict) const
+std::size_t ANLManager::module_index(const std::string& module_ID, bool strict) const
 {
-  int index = -1;
+  std::size_t index = 0;
   if (strict) {
     AMConstIter module_iter = std::find_if(std::begin(modules_), std::end(modules_),
                                            [&](const BasicModule* m){ return (m->module_id() == module_ID); });
-    if (module_iter != modules_.cend()) {
-      index = module_iter - modules_.cbegin();
-    }
+    index = std::distance(modules_.begin(), module_iter);
   }
   else {
     std::string lower1(module_ID);
@@ -380,9 +378,7 @@ int ANLManager::module_index(const std::string& module_ID, bool strict) const
                                              std::transform(lower2.begin(), lower2.end(), lower2.begin(),
                                                             [](unsigned char c){ return std::tolower(c);});
                                              return (lower2 == lower1); });
-    if (module_iter != modules_.cend()) {
-      index = module_iter - modules_.cbegin();
-    }
+    index = std::distance(modules_.begin(), module_iter);
   }
   return index;
 }
@@ -466,17 +462,19 @@ ANLStatus ANLManager::process_analysis()
   ANLStatus status = AS_OK;
 
   const std::vector<BasicModule*>& modules = modules_;
-  const long int period_disp = display_period();
-  const long int num_events = number_of_loops();
+  const std::size_t period_disp = display_period();
+  const std::size_t num_events = number_of_loops();
 
   try {
-    for (long int i_event=0; i_event!=num_events; i_event++) {
+    for (std::size_t i_event=0; i_event<num_events; ++i_event) {
       if (period_disp != 0 && i_event%period_disp == 0) {
         print_event_index(i_event);
       }
 
-      status = process_one_event(i_event, modules, counters_, *evs_manager_);
-
+      do {
+        status = process_one_event(i_event, modules, counters_, *evs_manager_);
+      } while (status == ANLStatus::redo);
+      
       if (is_critical_error(status)) {
         return status;
       }
@@ -498,13 +496,6 @@ ANLStatus ANLManager::process_analysis()
           evs_manager_->print_summary();
         }
         requested_ = ANLRequest::none;
-      }
-
-      if (status==ANLStatus::skip) {
-        ;
-      }
-      else if (status==ANLStatus::redo) {
-        i_event--;
       }
     }
   }
@@ -682,7 +673,7 @@ void ANLManager::interactive_session()
   }
 }
 
-ANLStatus process_one_event(long int i_event,
+ANLStatus process_one_event(std::size_t i_event,
                             const std::vector<BasicModule*>& modules,
                             std::vector<LoopCounter>& counters,
                             EvsManager& evs_manager)
@@ -726,7 +717,7 @@ ANLStatus process_one_event(long int i_event,
   return status;
 }
 
-ANLStatus process_one_event(long int i_event,
+ANLStatus process_one_event(std::size_t i_event,
                             const std::vector<BasicModule*>& modules,
                             std::vector<LoopCounter>& counters,
                             EvsManager& evs_manager,
@@ -743,7 +734,7 @@ ANLStatus process_one_event(long int i_event,
   for (std::size_t i_module=0; i_module<NumberOfModules; i_module++) {
     BasicModule* mod = modules[i_module];
   
-    const KeeperBlock<OrderKeeper, long int> block(order_keepers[i_module].get(), i_event);
+    const KeeperBlock<OrderKeeper, std::size_t> block(order_keepers[i_module].get(), i_event);
 
     if (status == AS_OK && mod->is_on()) {
       counters[i_module].count_up_by_entry();

@@ -34,16 +34,16 @@
 namespace anlnext
 {
 
-ANLManagerMT::ANLManagerMT(int num_parallels)
+ANLManagerMT::ANLManagerMT(std::size_t num_parallels)
   : num_parallels_(num_parallels),
-    loop_index_(-1)
+    loop_index_(0)
 {
   set_print_parallel_modules();
 }
 
 ANLManagerMT::~ANLManagerMT() = default;
 
-BasicModule* ANLManagerMT::access_to_module(int chain_ID, const std::string& module_ID)
+BasicModule* ANLManagerMT::access_to_module(std::size_t chain_ID, const std::string& module_ID)
 {
   if (chain_ID==0) {
     return ANLManager::access_to_module(chain_ID, module_ID);
@@ -58,7 +58,7 @@ BasicModule* ANLManagerMT::access_to_module(int chain_ID, const std::string& mod
   return nullptr;
 }
 
-void ANLManagerMT::clone_modules(int chain_ID)
+void ANLManagerMT::clone_modules(std::size_t chain_ID)
 {
   ClonedChainSet chain(chain_ID, *evs_manager_);
   for (BasicModule* mod: modules_) {
@@ -80,7 +80,7 @@ void ANLManagerMT::duplicate_chains()
     }
   }
 
-  for (int i=1; i<num_parallels_; i++) {
+  for (std::size_t i=1; i<num_parallels_; i++) {
     clone_modules(i);
   }
   std::cout << "\n"
@@ -200,45 +200,38 @@ ANLStatus ANLManagerMT::routine_finalize()
   return status;
 }
 
-long int ANLManagerMT::event_index_to_process()
+std::size_t ANLManagerMT::event_index_to_process()
 {
   std::lock_guard<std::mutex> lock(mutex_);
 
-  const long int N = number_of_loops();
-  ++loop_index_;
-  if (loop_index_ >= N) {
-    return N;
+  const std::size_t index_end = number_of_loops();
+  if (loop_index_ >= index_end) {
+    return index_end;
   }
   if (requested_ == ANLRequest::quit) {
-    return N;
+    return index_end;
   }
 
-  return loop_index_;
-}
-
-void ANLManagerMT::decrement_event_index()
-{
-  std::lock_guard<std::mutex> lock(mutex_);
-  --loop_index_;
+  return loop_index_++;
 }
 
 ANLStatus ANLManagerMT::process_analysis()
 {
   std::vector<std::future<ANLStatus>> status_future_vector;
   std::vector<std::thread> analysis_threads(num_parallels_);
-  for (int i=0; i<num_parallels_; i++) {
+  for (std::size_t i=0; i<num_parallels_; i++) {
     std::promise<ANLStatus> status_promise;
     status_future_vector.push_back(status_promise.get_future());
     analysis_threads[i] = std::thread(std::bind(&ANLManagerMT::process_analysis_in_each_thread, this, i, std::placeholders::_1),
                                       std::move(status_promise));
   }
 
-  for (int i=0; i<num_parallels_; i++) {
+  for (std::size_t i=0; i<num_parallels_; i++) {
     analysis_threads[i].join();
   }
 
   std::vector<ANLStatus> status_vector(num_parallels_, AS_OK);
-  for (int i=0; i<num_parallels_; i++) {
+  for (std::size_t i=0; i<num_parallels_; i++) {
     status_vector[i] = status_future_vector[i].get();
   }
 
@@ -267,7 +260,7 @@ ANLStatus ANLManagerMT::process_analysis()
   return status;
 }
 
-void ANLManagerMT::process_analysis_in_each_thread(int i_thread, std::promise<ANLStatus> status_promise)
+void ANLManagerMT::process_analysis_in_each_thread(std::size_t i_thread, std::promise<ANLStatus> status_promise)
 {
   try {
     ANLStatus status = AS_OK;
@@ -299,20 +292,22 @@ ANLStatus ANLManagerMT::process_analysis_impl(const std::vector<BasicModule*>& m
 {
   ANLStatus status = AS_OK;
 
-  const long int period_disp = display_period();
-  const long int num_events = number_of_loops();
+  const std::size_t period_disp = display_period();
+  const std::size_t index_end = number_of_loops();
 
   try {
     while (true) {
-      const long int i_event = event_index_to_process();
-      if (i_event == num_events) { break; }
+      const std::size_t i_event = event_index_to_process();
+      if (i_event == index_end) { break; }
 
       if (period_disp != 0 && i_event%period_disp == 0) {
         print_event_index(i_event);
       }
 
-      status = process_one_event(i_event, modules, counters, evs_manager, order_keepers_);
-
+      do {
+        status = process_one_event(i_event, modules, counters, evs_manager, order_keepers_);
+      } while (status == ANLStatus::redo);
+      
       if (is_critical_error(status)) {
         requested_ = ANLRequest::quit;
         return status;
@@ -335,13 +330,6 @@ ANLStatus ANLManagerMT::process_analysis_impl(const std::vector<BasicModule*>& m
           evs_manager_->print_summary();
         }
         requested_ = ANLRequest::none;
-      }
-
-      if (status==ANLStatus::skip) {
-        ;
-      }
-      else if (status==ANLStatus::redo) {
-        decrement_event_index();
       }
     }
 

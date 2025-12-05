@@ -37,19 +37,20 @@ class BasicModule;
  *
  * @author Hirokazu Odaka
  * @date 2017-07-05
+ * @date 2025-12-05 | analysis loop reviewed
  */
 class ANLManagerMT : public ANLManager
 {
 public:
-  explicit ANLManagerMT(int num_parallels=1);
+  explicit ANLManagerMT(std::size_t num_parallels=1);
   virtual ~ANLManagerMT();
 
-  int number_of_parallels() const override { return num_parallels_; }
-  BasicModule* access_to_module(int chain_ID,
+  std::size_t number_of_parallels() const override { return num_parallels_; }
+  BasicModule* access_to_module(std::size_t chain_ID,
                                 const std::string& module_ID) override;
 
 protected:
-  void clone_modules(int chain_ID);
+  void clone_modules(std::size_t chain_ID);
 
   ANLStatus routine_initialize() override;
   ANLStatus routine_begin_run() override;
@@ -61,9 +62,8 @@ protected:
   void reset_counters() override;
   
   ANLStatus process_analysis() override;
-  virtual void process_analysis_in_each_thread(int i_thread, std::promise<ANLStatus> status_promise);
-  virtual long int event_index_to_process();
-  void decrement_event_index();
+  virtual void process_analysis_in_each_thread(std::size_t i_thread, std::promise<ANLStatus> status_promise);
+  virtual std::size_t event_index_to_process();
 
   boost::property_tree::ptree parameters_to_property_tree() const override;
 
@@ -77,8 +77,8 @@ private:
   void reduce_statistics() override;
 
 private:
-  const int num_parallels_ = 1;
-  long int loop_index_ = -1;
+  const std::size_t num_parallels_ = 1;
+  std::size_t loop_index_ = 0;
   std::vector<ClonedChainSet> cloned_chains_;
   std::vector<std::unique_ptr<OrderKeeper>> order_keepers_;
 };

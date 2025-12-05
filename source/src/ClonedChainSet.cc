@@ -27,7 +27,7 @@
 namespace anlnext
 {
 
-ClonedChainSet::ClonedChainSet(int chain_id, const EvsManager& evs)
+ClonedChainSet::ClonedChainSet(std::size_t chain_id, const EvsManager& evs)
   : id_(chain_id),
     evs_manager_(new EvsManager(evs)),
     module_access_(new ModuleAccess)
