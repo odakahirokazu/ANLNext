@@ -670,8 +670,17 @@ module ANL
     # @param [Integer] num_loop number of loops. :all or -1 for infinite loops.
     #
     def run(num_loop)
-      if num_loop == :all; num_loop = -1; end
+      if num_loop == :max || num_loop == :all
+        num_loop = -1
+      end
+
       @display_period ||= proposed_display_period(num_loop)
+
+      if num_loop == -1
+        ptr_size = [nil].pack('p').size # size of nullptr (= size of size_t)
+        nbits = ptr_size * 8
+        num_loop = (1<<nbits)-1 # maximum value of size_t
+      end
 
       anl = define() unless self.definition_already_done?
 

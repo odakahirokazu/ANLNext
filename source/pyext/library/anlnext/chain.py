@@ -9,6 +9,7 @@ import anlnext
 import math
 import datetime
 import sys
+import ctypes
 
 #
 # utility
@@ -162,6 +163,9 @@ class AnalysisChain:
     def run(self, num_loop):
         if self.display_period is None:
             self.display_period = proposed_display_period(num_loop)
+
+        if num_loop == -1:
+            num_loop = ctypes.c_size_t(-1).value # maximum value of size_t
 
         self.define()
         self.load_all_parameters()

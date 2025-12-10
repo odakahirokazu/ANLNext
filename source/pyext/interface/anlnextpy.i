@@ -301,20 +301,20 @@ class ANLManager
     }
   }
 
-  void set_display_period(long int v);
-  int display_period() const;
+  void set_display_period(std::size_t v);
+  std::size_t display_period() const;
   
   void set_modules(std::vector<anlnext::BasicModule*> modules);
 
   virtual ANLStatus Define();
   virtual ANLStatus PreInitialize();
   virtual ANLStatus Initialize();
-  virtual ANLStatus Analyze(long int num_events, bool enable_console=true);
+  virtual ANLStatus Analyze(std::size_t num_events, bool enable_console=true);
   virtual ANLStatus Finalize();
 
-  virtual int number_of_parallels() const;
+  virtual std::size_t number_of_parallels() const;
   void set_print_parallel_modules(bool v=true);
-  virtual BasicModule* access_to_module(int chainID,
+  virtual BasicModule* access_to_module(std::size_t chainID,
                                         const std::string& moduleID);
 
   void parameters_to_json(const std::string& filename) const;
@@ -328,7 +328,7 @@ class ANLManager
 class ANLManagerMT : public ANLManager
 {
 public:
-  explicit ANLManagerMT(int num_parallels=1);
+  explicit ANLManagerMT(std::size_t num_parallels=1);
   virtual ~ANLManagerMT();
 };
  

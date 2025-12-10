@@ -1,4 +1,5 @@
 #include "MyMTModule.hh"
+#include <limits>
 
 using namespace anlnext;
 
@@ -17,6 +18,10 @@ ANLStatus MyMTModule::mod_define()
 
 ANLStatus MyMTModule::mod_pre_initialize()
 {
+  if (m_QuitIndex < 0) {
+    m_QuitIndex = std::numeric_limits<int>().max();
+  }
+  
   return AS_OK;
 }
 
@@ -33,11 +38,13 @@ ANLStatus MyMTModule::mod_begin_run()
 
 ANLStatus MyMTModule::mod_analyze()
 {
-  if (get_loop_index() == m_QuitIndex) {
+  if (get_loop_index() >= m_QuitIndex) {
     if (m_QuitAll) {
+      std::cout << "i = " << get_loop_index() << " -> AS_QUIT_ALL" << std::endl;
       return AS_QUIT_ALL;
     }
     else {
+      std::cout << "i = " << get_loop_index() << " -> AS_QUIT" << std::endl;
       return AS_QUIT;
     }
   }
