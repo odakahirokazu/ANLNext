@@ -73,9 +73,8 @@ endif()
 swig_add_library(${TARGET_EXT_LIBRARY}
   LANGUAGE ruby
   SOURCES ${SWIG_IF_FILE})
-swig_link_libraries(${TARGET_EXT_LIBRARY}
-  ${RUBY_LIBRARY}
-  ${RUBY_EXT_LIBRARIES})
+target_link_libraries(${TARGET_EXT_LIBRARY}
+  PRIVATE ${RUBY_LIBRARY} ${RUBY_EXT_LIBRARIES})
 
 if(APPLE)
   set(RUBY_BINDING_SUFFIX ".bundle")

@@ -59,9 +59,8 @@ endif()
 swig_add_library(${TARGET_EXT_LIBRARY}
   LANGUAGE python
   SOURCES ${SWIG_IF_FILE})
-swig_link_libraries(${TARGET_EXT_LIBRARY}
-  ${Python3_LIBRARIES}
-  ${PYTHON_EXT_LIBRARIES})
+target_link_libraries(${TARGET_EXT_LIBRARY}
+  PRIVATE ${Python3_LIBRARIES} ${PYTHON_EXT_LIBRARIES})
 
 ### install setting
 if(NOT EXT_LIB_INSTALL_DESTINATION)
