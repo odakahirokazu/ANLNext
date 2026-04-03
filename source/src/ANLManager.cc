@@ -25,6 +25,7 @@
 #include <memory>
 #include <thread>
 #include <cctype>
+#include <limits>
 
 #if ANLNEXT_ANALYZE_INTERRUPT || ANL_INITIALIZE_INTERRUPT || ANL_FINALIZE_INTERRUPT
 #include <csignal>
@@ -217,8 +218,12 @@ ANLStatus ANLManager::Analyze(std::size_t num_events, bool enable_console)
   num_events_ = num_events;
   requested_ = ANLRequest::none;
 
-  std::cout << "Number of events: " << num_events << '\n'
-            << std::endl;
+  if (num_events==std::numeric_limits<std::size_t>::max()) {
+    std::cout << "Number of loops: " << "max" << '\n' << std::endl;
+  }
+  else {
+    std::cout << "Number of loops: " << num_events << '\n' << std::endl;
+  }
 
 #if ANLNEXT_ANALYZE_INTERRUPT
   struct sigaction sa;
