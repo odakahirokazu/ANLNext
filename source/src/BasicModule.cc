@@ -80,13 +80,18 @@ BasicModule::BasicModule(const BasicModule& r)
   }
 }
 
-std::unique_ptr<BasicModule> BasicModule::clone()
+std::unique_ptr<BasicModule> BasicModule::duplicate()
 {
-  std::unique_ptr<BasicModule> m(__clone__());
-  if (m==nullptr) {
-    BOOST_THROW_EXCEPTION( ModuleCloningError(this) );
+  std::unique_ptr<BasicModule> m = __duplicate__();
+  if (!m) {
+    BOOST_THROW_EXCEPTION( ModuleDuplicationError(this) );
   }
   return m;
+}
+
+std::unique_ptr<BasicModule> BasicModule::clone() const
+{
+  return __clone__();
 }
 
 void BasicModule::copy_parameters(const BasicModule& r)

@@ -9,8 +9,10 @@
   { return #VERSION; }
 
 #define ENABLE_PARALLEL_RUN()                                    \
-  std::unique_ptr<BasicModule> __clone__() override              \
-  { return make_clone(new mod_class(*this)); }                   \
+  std::unique_ptr<BasicModule> __clone__() const override        \
+  { return std::unique_ptr<mod_class>(new mod_class(*this)); }   \
+  std::unique_ptr<BasicModule> __duplicate__() override          \
+  { return help_duplication(__clone__()); }                      \
   mod_class* singleton_self()                                    \
   { return static_cast<mod_class*>(__singleton_ptr__()); }       \
   const mod_class* singleton_self() const                        \

@@ -89,9 +89,9 @@ private:
 
 using ExceptionTreatment = boost::error_info<struct tag_ExceptionTreatment, ANLException::Treatment>;
 
-struct ModuleCloningError : anlnext::ANLException
+struct ModuleDuplicationError : anlnext::ANLException
 {
-  explicit ModuleCloningError(const BasicModule* mod);
+  explicit ModuleDuplicationError(const BasicModule* mod);
 };
 
 struct ModuleAccessError : anlnext::ANLException

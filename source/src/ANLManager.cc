@@ -56,7 +56,7 @@ namespace anlnext
 
 /* version definition */
 const int ANLManager::__version1__ = 2;
-const int ANLManager::__version2__ = 4;
+const int ANLManager::__version2__ = 5;
 const int ANLManager::__version3__ = 0;
 
 
@@ -102,20 +102,19 @@ ANLStatus ANLManager::Define()
             << "#                                                    #\n"
             << "#          ANL Next Data Analysis Framework          #\n"
             << "#                                                    #\n"
-            <<
-    boost::format("#    version: %2d.%02d.%02d%31s#\n")
-    % __version1__ % __version2__ % __version3__ % " "
+            << boost::format("#    version: %2d.%02d.%02d%31s#\n") % __version1__ % __version2__ % __version3__ % " "
             << "#    author: Hirokazu Odaka                          #\n"
             << "#    URL: https://github.com/odakahirokazu/ANLNext   #\n"
             << "#                                                    #\n"
             << "######################################################\n"
-            << std::endl;
+            << '\n';
 
   std::cout << '\n'
             << "        **************************************\n"
             << "        ****          Definition          ****\n"
             << "        **************************************\n"
-            << std::endl;
+            << '\n'
+            << std::flush;
 
   ANLStatus status = routine_define();
   if (status != AS_OK) {
@@ -140,7 +139,8 @@ ANLStatus ANLManager::Define()
   }
 
   final:
-    std::cout << std::endl;
+  std::cout << std::endl;
+
   return status;
 }
 
@@ -150,7 +150,8 @@ ANLStatus ANLManager::PreInitialize()
             << "        **************************************\n"
             << "        ****      Pre-Initialization      ****\n"
             << "        **************************************\n"
-            << std::endl;
+            << '\n'
+            << std::flush;
 
   ANLStatus status =  routine_pre_initialize();
   if (status != AS_OK) {
@@ -161,6 +162,7 @@ ANLStatus ANLManager::PreInitialize()
 
   final:
     std::cout << std::endl;
+
   return status;
 }
 
@@ -170,7 +172,8 @@ ANLStatus ANLManager::Initialize()
             << "        **************************************\n"
             << "        ****        Initialization        ****\n"
             << "        **************************************\n"
-            << std::endl;
+            << '\n'
+            << std::flush;
 
 #if ANLNEXT_INITIALIZE_INTERRUPT
   struct sigaction sa;
@@ -180,7 +183,7 @@ ANLStatus ANLManager::Initialize()
   sa.sa_handler = SIG_DFL;
   sa.sa_flags |= SA_RESTART;
   if ( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
-    std::cout << "sigaction(2) error!" << std::endl;
+    std::cout << "sigaction(2) error!\n" << std::flush;
     return ANLStatus::critical_error_to_terminate;
   }
 #endif
@@ -197,9 +200,10 @@ ANLStatus ANLManager::Initialize()
 
   final:
     std::cout << std::endl;
+
 #if ANLNEXT_INITIALIZE_INTERRUPT
   if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
-    std::cout << "sigaction(2) error!" << std::endl;
+    std::cout << "sigaction(2) error!\n" << std::flush;
     return ANLStatus::critical_error_to_terminate;
   }
 #endif
@@ -213,17 +217,19 @@ ANLStatus ANLManager::Analyze(std::size_t num_events, bool enable_console)
             << "        **************************************\n"
             << "        ****        Main Analysis         ****\n"
             << "        **************************************\n"
-            << std::endl;
+            << '\n';
 
   num_events_ = num_events;
   requested_ = ANLRequest::none;
 
   if (num_events==std::numeric_limits<std::size_t>::max()) {
-    std::cout << "Number of loops: " << "max" << '\n' << std::endl;
+    std::cout << "Number of loops: " << "max" << '\n';
   }
   else {
-    std::cout << "Number of loops: " << num_events << '\n' << std::endl;
+    std::cout << "Number of loops: " << num_events << '\n';
   }
+
+  std::cout << '\n' << std::flush;
 
 #if ANLNEXT_ANALYZE_INTERRUPT
   struct sigaction sa;
@@ -233,7 +239,7 @@ ANLStatus ANLManager::Analyze(std::size_t num_events, bool enable_console)
   sa.sa_handler = SIG_DFL;
   sa.sa_flags |= SA_RESTART;
   if ( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
-    std::cout << "sigaction(2) error!" << std::endl;
+    std::cout << "sigaction(2) error!\n" << std::flush;
     return ANLStatus::critical_error_to_terminate;
   }
 #endif
@@ -246,14 +252,15 @@ ANLStatus ANLManager::Analyze(std::size_t num_events, bool enable_console)
   }
 
   if (enable_console) {
-    std::cout << "\n"
+    std::cout << '\n'
               << "ANLManager: starting analysis loop (with user-console mode on).\n"
               << "----------------------------------------------------------------------------\n"
               << "  input '.q' => quit the analysis loop\n"
               << "  input '.i' => show the current event index\n"
               << "  input '.s' => show the status of event selections (of the master thread)\n"
               << "----------------------------------------------------------------------------\n"
-              << std::endl;
+              << '\n'
+              << std::flush;
 
     analysis_thread_finished_ = false;
     std::thread interactive_thread(std::bind(&ANLManager::interactive_session, this));
@@ -276,9 +283,9 @@ ANLStatus ANLManager::Analyze(std::size_t num_events, bool enable_console)
     interactive_thread.join();
   }
   else {
-    std::cout << "\n"
-              << "ANLManager: starting analysis loop.\n"
-              << std::endl;
+    std::cout << '\n'
+              << "ANLManager: starting analysis loop.\n\n"
+              << std::flush;
     status = process_analysis();
   }
 
@@ -286,9 +293,9 @@ ANLStatus ANLManager::Analyze(std::size_t num_events, bool enable_console)
     goto final;
   }
 
-  std::cout << "\n"
-            << "ANLManager: analysis loop successfully done.\n"
-            << std::endl;
+  std::cout << '\n'
+            << "ANLManager: analysis loop successfully done.\n\n"
+            << std::flush;
 
   status = routine_end_run();
   if (status != AS_OK) {
@@ -297,8 +304,8 @@ ANLStatus ANLManager::Analyze(std::size_t num_events, bool enable_console)
 
   reduce_modules();
 
-  final:
-    std::cout << std::endl;
+final:
+  std::cout << '\n' << std::flush;
   reduce_statistics();
   print_summary();
   evs_manager_->print_summary();
@@ -307,7 +314,7 @@ ANLStatus ANLManager::Analyze(std::size_t num_events, bool enable_console)
 
 #if ANLNEXT_ANALYZE_INTERRUPT
   if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
-    std::cout << "sigaction(2) error!" << std::endl;
+    std::cout << "sigaction(2) error!\n" << std::flush;
     return ANLStatus::critical_error_to_terminate;
   }
 #endif
@@ -321,7 +328,8 @@ ANLStatus ANLManager::Finalize()
             << "        **************************************\n"
             << "        ****         Finalization         ****\n"
             << "        **************************************\n"
-            << std::endl;
+            << '\n'
+            << std::flush;
 
 #if ANLNEXT_FINALIZE_INTERRUPT
   struct sigaction sa;
@@ -331,7 +339,7 @@ ANLStatus ANLManager::Finalize()
   sa.sa_handler = SIG_DFL;
   sa.sa_flags |= SA_RESTART;
   if ( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
-    std::cout << "sigaction(2) error!" << std::endl;
+    std::cout << "sigaction(2) error!\n" << std::flush;
     return ANLStatus::critical_error_to_terminate;
   }
 #endif
@@ -346,7 +354,7 @@ ANLStatus ANLManager::Finalize()
 
 #if ANLNEXT_FINALIZE_INTERRUPT
   if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
-    std::cout << "sigaction(2) error!" << std::endl;
+    std::cout << "sigaction(2) error!\n" << std::flush;
     return ANLStatus::critical_error_to_terminate;
   }
 #endif
@@ -394,18 +402,18 @@ void ANLManager::show_analysis()
             << "        **************************************\n"
             << "        ****        Analysis chain        ****\n"
             << "        **************************************\n"
-            << std::endl;
+            << '\n';
   
   if (modules_.size() < 1) {
-    std::cout << "No analysis chain is defined. " << std::endl;
+    std::cout << "No analysis chain is defined. \n";
   }
   else {
     std::cout
       << "   #" << "    "
       << "    Module ID                                " << "  "
       << " Version " << "  " << " ON/OFF \n"
-      << "----------------------------------------------------------------------------"
-      << std::endl;
+      << "----------------------------------------------------------------------------\n";
+
     for (std::size_t i=0; i<modules_.size(); i++) {
       std::cout << std::right << std::setw(4) << i << "    ";
       std::string module_ID(modules_[i]->module_id());
@@ -421,7 +429,7 @@ void ANLManager::show_analysis()
                 << '\n';
     }
   }
-  std::cout << std::right << std::setw(0) << std::endl;
+  std::cout << std::right << '\n' << std::flush;
 }
 
 void ANLManager::print_parameters()
@@ -430,13 +438,14 @@ void ANLManager::print_parameters()
             << "        **************************************\n"
             << "        ****      Module parameters       ****\n"
             << "        **************************************\n"
-            << std::endl;
+            << '\n';
   
   for (BasicModule* mod: modules_) {
-    std::cout << "--- " << mod->module_id() << " ---"<< std::endl;
+    std::cout << "--- " << mod->module_id() << " ---\n";
     mod->print_parameters();
-    std::cout << std::endl;
+    std::cout << '\n';
   }
+  std::cout << std::flush;
 }
 
 void ANLManager::print_results()
@@ -445,13 +454,14 @@ void ANLManager::print_results()
             << "        **************************************\n"
             << "        ****       Module results         ****\n"
             << "        **************************************\n"
-            << std::endl;
+            << '\n';
   
   for (BasicModule* mod: modules_) {
-    std::cout << "--- " << mod->module_id() << " ---"<< std::endl;
+    std::cout << "--- " << mod->module_id() << " ---\n";
     mod->print_results();
-    std::cout << std::endl;
+    std::cout << '\n';
   }
+  std::cout << std::flush;
 }
 
 void ANLManager::reset_counters()
@@ -555,7 +565,7 @@ void ANLManager::print_summary()
     std::cout << '\n';
   }
   std::cout << "               Get: " << counters_[n-1].ok() << '\n';
-  std::cout << std::endl;
+  std::cout << '\n' << std::flush;
 }
 
 boost::property_tree::ptree ANLManager::parameters_to_property_tree() const
@@ -632,7 +642,7 @@ void ANLManager::interactive_session()
       struct timeval timeout{1, 0}; // 1 s, 0 us
       const int retval = select(1, &readFDSet, nullptr, nullptr, &timeout);
       if (retval == -1) {
-        std::cout << "Error by select() in ANLManager::interactive_sesson()" << std::endl;
+        std::cout << "Error by select() in ANLManager::interactive_sesson()\n" << std::flush;
         return;
       }
       if (retval == 0) {
@@ -658,18 +668,18 @@ void ANLManager::interactive_session()
 #endif /* ANLNEXT_USE_READLINE */
     if (line == ".q") {
       std::lock_guard<std::mutex> lock(mutex_);
-      std::cout << " ---> Quit\n" << std::endl;
+      std::cout << " ---> Quit\n\n" << std::flush;
       requested_ = ANLRequest::quit;
       return;
     }
     else if (line == ".i") {
       std::lock_guard<std::mutex> lock(mutex_);
-      std::cout << " ---> Show event index\n" << std::endl;
+      std::cout << " ---> Show event index\n\n" << std::flush;
       requested_ = ANLRequest::show_event_index;
     }
     else if (line == ".s") {
       std::lock_guard<std::mutex> lock(mutex_);
-      std::cout << " ---> Show evs summary\n" << std::endl;
+      std::cout << " ---> Show evs summary\n\n" << std::flush;
       requested_ = ANLRequest::show_evs_summary;
     }
     else {

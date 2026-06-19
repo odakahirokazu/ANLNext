@@ -77,8 +77,10 @@ private:
   { return "BasicModule"; }
   virtual std::string __module_version__() const
   { return "0.0"; }
-  virtual std::unique_ptr<BasicModule> __clone__()
-  { return nullptr; }
+  virtual std::unique_ptr<BasicModule> __clone__() const
+  { return std::unique_ptr<BasicModule>(nullptr); }
+  virtual std::unique_ptr<BasicModule> __duplicate__()
+  { return std::unique_ptr<BasicModule>(nullptr); }
   virtual BasicModule* __this_ptr__() { return this; }
 
 public:
@@ -89,7 +91,7 @@ public:
   BasicModule& operator=(const BasicModule& r) = delete;
   BasicModule& operator=(BasicModule&& r) = delete;
 
-  virtual std::unique_ptr<BasicModule> clone();
+  virtual std::unique_ptr<BasicModule> duplicate();
 
 protected:
   BasicModule(const BasicModule& r);
@@ -399,7 +401,9 @@ protected:
 
 protected:
   template <typename ModuleType>
-  std::unique_ptr<BasicModule> make_clone(ModuleType*&& copied);
+  std::unique_ptr<BasicModule> help_duplication(std::unique_ptr<ModuleType>&& cloned);
+
+  std::unique_ptr<BasicModule> clone() const;
 
 private:
   ModuleParamIter find_parameter(const std::string& name);
@@ -685,17 +689,16 @@ void BasicModule::request_module_IFNC(const std::string& name, T** ptr)
 }
 
 template <typename ModuleType>
-std::unique_ptr<BasicModule> BasicModule::make_clone(ModuleType*&& copied)
+std::unique_ptr<BasicModule> BasicModule::help_duplication(std::unique_ptr<ModuleType>&& cloned)
 {
-  std::unique_ptr<BasicModule> m(copied);
   if (this->is_master()) {
-    m->copy_parameters(*this);
+    cloned->copy_parameters(*this);
     this->last_copy_ += 1;
   }
   else {
-    m.reset(nullptr);
+    cloned.reset();
   }
-  return m;
+  return cloned;
 }
 
 } /* namespace anlnext */

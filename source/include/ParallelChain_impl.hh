@@ -17,21 +17,21 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLNEXT_ClonedChainSet_impl_H
-#define ANLNEXT_ClonedChainSet_impl_H 1
+#ifndef ANLNEXT_ParallelChain_impl_H
+#define ANLNEXT_ParallelChain_impl_H 1
 
-#include "ClonedChainSet.hh"
+#include "ParallelChain.hh"
 #include "EvsManager.hh"
 
 namespace anlnext
 {
 
 template <typename T>
-ANLStatus ClonedChainSet::process(T func)
+ANLStatus ParallelChain::process(T func)
 {
   return func(modules_ref_, counters_, *evs_manager_);
 }
 
 } /* namespace anlnext */
 
-#endif /* ANLNEXT_ClonedChainSet_impl_H */
+#endif /* ANLNEXT_ParallelChain_impl_H */

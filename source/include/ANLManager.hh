@@ -184,8 +184,7 @@ void count_evs(ANLStatus status, EvsManager& evs_manager);
 
 inline void print_event_index(std::size_t index, std::ostream& os=std::cout)
 {
-  os << "Event : " << std::dec << std::setw(10) << index << std::endl;
-  os.width(0);
+  os << "Index : " << std::setw(12) << index << '\n' << std::flush;
 }
 
 inline void print_exception(const ANLException& ex, std::ostream& os=std::cout)
@@ -195,14 +194,14 @@ inline void print_exception(const ANLException& ex, std::ostream& os=std::cout)
      << "#                       ANL Exception                          #\n"
      << "#                                                              #\n"
      << "################################################################\n"
-     << "\n"
+     << '\n'
      << ex.to_string()
-     << "\n"
+     << '\n'
      << "################################################################\n"
-     << "\n"
+     << '\n'
      << "---- displayed by ANLManager::print_exception() ----\n"
-     << "\n"
-     << std::endl;
+     << '\n'
+     << std::flush;
 }
 
 } /* namespace anlnext */

@@ -153,11 +153,11 @@ std::string ANLException::to_string() const
   return "";
 }
 
-ModuleCloningError::ModuleCloningError(const BasicModule* mod)
+ModuleDuplicationError::ModuleDuplicationError(const BasicModule* mod)
   : ANLException(mod)
 {
-  set_message("<ModuleCloningError>");
-  append_message((boost::format("Module %s (ID: %s) can not be cloned.")
+  set_message("<ModuleDuplicationError>");
+  append_message((boost::format("Module %s (ID: %s) can not be duplicated.")
                   % mod->module_name()
                   % mod->module_id()).str());
 }

@@ -17,8 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-#ifndef ANLNEXT_ClonedChainSet_H
-#define ANLNEXT_ClonedChainSet_H 1
+#ifndef ANLNEXT_ParallelChain_H
+#define ANLNEXT_ParallelChain_H 1
 
 #include "ANLManager.hh"
 
@@ -35,16 +35,16 @@ class BasicModule;
  * @author Hirokazu Odaka
  * @date 2017-07-05
  */
-class ClonedChainSet
+class ParallelChain
 {
 public:
-  ClonedChainSet(std::size_t chain_id, const EvsManager& evs);
-  ~ClonedChainSet();
-  ClonedChainSet(ClonedChainSet&&) = default;
-  ClonedChainSet& operator=(ClonedChainSet&&) = default;
+  ParallelChain(std::size_t chain_id, const EvsManager& evs);
+  ~ParallelChain();
+  ParallelChain(ParallelChain&&) = default;
+  ParallelChain& operator=(ParallelChain&&) = default;
   
-  ClonedChainSet(const ClonedChainSet&) = delete;
-  ClonedChainSet& operator=(const ClonedChainSet&) = delete;
+  ParallelChain(const ParallelChain&) = delete;
+  ParallelChain& operator=(const ParallelChain&) = delete;
 
   std::size_t chain_id() const { return id_; }
   
@@ -79,4 +79,4 @@ private:
 
 } /* namespace anlnext */
 
-#endif /* ANLNEXT_ClonedChainSet_H */
+#endif /* ANLNEXT_ParallelChain_H */

@@ -23,7 +23,7 @@
 #include "ANLManager.hh"
 #include <future>
 
-#include "ClonedChainSet.hh"
+#include "ParallelChain.hh"
 
 namespace anlnext
 {
@@ -79,7 +79,7 @@ private:
 private:
   const std::size_t num_parallels_ = 1;
   std::size_t loop_index_ = 0;
-  std::vector<ClonedChainSet> cloned_chains_;
+  std::vector<ParallelChain> parallel_chains_;
   std::vector<std::unique_ptr<OrderKeeper>> order_keepers_;
 };
 

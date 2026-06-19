@@ -17,8 +17,8 @@
  *                                                                       *
  *************************************************************************/
 
-#include "ClonedChainSet.hh"
-#include "ClonedChainSet_impl.hh"
+#include "ParallelChain.hh"
+#include "ParallelChain_impl.hh"
 
 #include "BasicModule.hh"
 #include "EvsManager.hh"
@@ -27,16 +27,16 @@
 namespace anlnext
 {
 
-ClonedChainSet::ClonedChainSet(std::size_t chain_id, const EvsManager& evs)
+ParallelChain::ParallelChain(std::size_t chain_id, const EvsManager& evs)
   : id_(chain_id),
     evs_manager_(new EvsManager(evs)),
     module_access_(new ModuleAccess)
 {
 }
 
-ClonedChainSet::~ClonedChainSet() = default;
+ParallelChain::~ParallelChain() = default;
 
-void ClonedChainSet::push(std::unique_ptr<BasicModule>&& cloned_module)
+void ParallelChain::push(std::unique_ptr<BasicModule>&& cloned_module)
 {
   std::unique_ptr<BasicModule> m = std::move(cloned_module);
   m->set_evs_manager(evs_manager_.get());
@@ -46,7 +46,7 @@ void ClonedChainSet::push(std::unique_ptr<BasicModule>&& cloned_module)
   counters_.push_back(LoopCounter());
 }
 
-void ClonedChainSet::setup_module_access()
+void ParallelChain::setup_module_access()
 {
   for (BasicModule* mod: modules_ref_) {
     if (mod->access_permission() != ModuleAccess::Permission::privacy) {
@@ -66,19 +66,19 @@ void ClonedChainSet::setup_module_access()
   }
 }
 
-void ClonedChainSet::reset_counters()
+void ParallelChain::reset_counters()
 {
   for (LoopCounter& c: counters_) {
     c.reset();
   }
 }
 
-BasicModule* ClonedChainSet::access_to_module(const std::string& module_ID)
+BasicModule* ParallelChain::access_to_module(const std::string& module_ID)
 {
   return module_access_->get_module_NC(module_ID);
 }
 
-void ClonedChainSet::automatic_switch_for_singletons()
+void ParallelChain::automatic_switch_for_singletons()
 {
   for (auto& mod: modules_) {
     mod->automatic_switch_for_singleton();

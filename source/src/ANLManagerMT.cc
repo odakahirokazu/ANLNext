@@ -28,7 +28,7 @@
 #include "ModuleAccess.hh"
 #include "ANLException.hh"
 #include "ANLManager_impl.hh"
-#include "ClonedChainSet_impl.hh"
+#include "ParallelChain_impl.hh"
 #include "OrderKeeper.hh"
 
 namespace anlnext
@@ -48,7 +48,7 @@ BasicModule* ANLManagerMT::access_to_module(std::size_t chain_ID, const std::str
   if (chain_ID==0) {
     return ANLManager::access_to_module(chain_ID, module_ID);
   }
-  for (auto& chain: cloned_chains_) {
+  for (auto& chain: parallel_chains_) {
     if (chain.chain_id() == chain_ID) {
       return chain.access_to_module(module_ID);
     }
@@ -60,12 +60,12 @@ BasicModule* ANLManagerMT::access_to_module(std::size_t chain_ID, const std::str
 
 void ANLManagerMT::clone_modules(std::size_t chain_ID)
 {
-  ClonedChainSet chain(chain_ID, *evs_manager_);
+  ParallelChain chain(chain_ID, *evs_manager_);
   for (BasicModule* mod: modules_) {
-    chain.push(mod->clone());
+    chain.push(mod->duplicate());
   }
   chain.setup_module_access();
-  cloned_chains_.push_back(std::move(chain));
+  parallel_chains_.push_back(std::move(chain));
 }
 
 void ANLManagerMT::duplicate_chains()
@@ -83,11 +83,12 @@ void ANLManagerMT::duplicate_chains()
   for (std::size_t i=1; i<num_parallels_; i++) {
     clone_modules(i);
   }
-  std::cout << "\n"
+  std::cout << '\n'
             << "<Module chain duplication>\n"
             << (num_parallels_-1) << " chains have been duplicated. => "
             << "Total: " << num_parallels_ << " chains.\n"
-            << std::endl;
+            << '\n'
+            << std::flush;
 
   automatic_switch_for_singletons();
 }
@@ -97,7 +98,7 @@ void ANLManagerMT::automatic_switch_for_singletons()
   for (BasicModule* mod: modules_) {
     mod->automatic_switch_for_singleton();
   }
-  for (ClonedChainSet& chain: cloned_chains_) {
+  for (ParallelChain& chain: parallel_chains_) {
     chain.automatic_switch_for_singletons();
   }
 }
@@ -107,7 +108,7 @@ void ANLManagerMT::print_parameters()
   ANLManager::print_parameters();
 
   if (print_clone_parameters_) {
-    for (auto& chain: cloned_chains_) {
+    for (auto& chain: parallel_chains_) {
       for (const BasicModule* mod: chain.modules_reference()) {
         std::cout << "--- " << mod->module_id() << "[" << chain.chain_id() << "] ---"<< std::endl;
         mod->print_parameters();
@@ -122,7 +123,7 @@ void ANLManagerMT::print_results()
   ANLManager::print_results();
 
   if (print_clone_parameters_) {
-    for (auto& chain: cloned_chains_) {
+    for (auto& chain: parallel_chains_) {
       for (const BasicModule* mod: chain.modules_reference()) {
         std::cout << "--- " << mod->module_id() << "[" << chain.chain_id() << "] ---"<< std::endl;
         mod->print_results();
@@ -135,7 +136,7 @@ void ANLManagerMT::print_results()
 void ANLManagerMT::reset_counters()
 {
   ANLManager::reset_counters();
-  for (auto& chain: cloned_chains_) {
+  for (auto& chain: parallel_chains_) {
     chain.reset_counters();
   }
 }
@@ -145,7 +146,7 @@ ANLStatus ANLManagerMT::routine_initialize()
   ANLStatus status = AS_OK;
   status = ANLManager::routine_initialize();
   if (status == AS_OK) {
-    for (auto& chain: cloned_chains_) {
+    for (auto& chain: parallel_chains_) {
       status = routine_modfn(&BasicModule::mod_initialize,
                              boost::str(boost::format("initialize:%d")%chain.chain_id()),
                              chain.modules_reference());
@@ -160,7 +161,7 @@ ANLStatus ANLManagerMT::routine_begin_run()
   ANLStatus status = AS_OK;
   status = ANLManager::routine_begin_run();
   if (status == AS_OK) {
-    for (auto& chain: cloned_chains_) {
+    for (auto& chain: parallel_chains_) {
       status = routine_modfn(&BasicModule::mod_begin_run,
                              boost::str(boost::format("begin_run:%d")%chain.chain_id()),
                              chain.modules_reference());
@@ -175,7 +176,7 @@ ANLStatus ANLManagerMT::routine_end_run()
   ANLStatus status = AS_OK;
   status = ANLManager::routine_end_run();
   if (status == AS_OK) {
-    for (auto& chain: cloned_chains_) {
+    for (auto& chain: parallel_chains_) {
       status = routine_modfn(&BasicModule::mod_end_run,
                              boost::str(boost::format("end_run:%d")%chain.chain_id()),
                              chain.modules_reference());
@@ -190,7 +191,7 @@ ANLStatus ANLManagerMT::routine_finalize()
   ANLStatus status = AS_OK;
   status = ANLManager::routine_finalize();
   if (status == AS_OK) {
-    for (auto& chain: cloned_chains_) {
+    for (auto& chain: parallel_chains_) {
       status = routine_modfn(&BasicModule::mod_finalize,
                              boost::str(boost::format("finalize:%d")%chain.chain_id()),
                              chain.modules_reference());
@@ -204,12 +205,19 @@ std::size_t ANLManagerMT::event_index_to_process()
 {
   std::lock_guard<std::mutex> lock(mutex_);
 
+  const std::size_t period_disp = display_period();
   const std::size_t index_end = number_of_loops();
-  if (loop_index_ >= index_end) {
+  const std::size_t index = loop_index_;
+
+  if (index >= index_end) {
     return index_end;
   }
   if (requested_ == ANLRequest::quit) {
     return index_end;
+  }
+
+  if (period_disp != 0 && index % period_disp == 0) {
+    print_event_index(index);
   }
 
   return loop_index_++;
@@ -271,7 +279,7 @@ void ANLManagerMT::process_analysis_in_each_thread(std::size_t i_thread, std::pr
       using std::placeholders::_1;
       using std::placeholders::_2;
       using std::placeholders::_3;
-      status = cloned_chains_[i_thread-1].process(std::bind(&ANLManagerMT::process_analysis_impl, this, _1, _2, _3));
+      status = parallel_chains_[i_thread-1].process(std::bind(&ANLManagerMT::process_analysis_impl, this, _1, _2, _3));
     }
     status_promise.set_value(status);
   }
@@ -292,17 +300,12 @@ ANLStatus ANLManagerMT::process_analysis_impl(const std::vector<BasicModule*>& m
 {
   ANLStatus status = AS_OK;
 
-  const std::size_t period_disp = display_period();
   const std::size_t index_end = number_of_loops();
 
   try {
     while (true) {
       const std::size_t i_event = event_index_to_process();
       if (i_event == index_end) { break; }
-
-      if (period_disp != 0 && i_event%period_disp == 0) {
-        print_event_index(i_event);
-      }
 
       do {
         status = process_one_event(i_event, modules, counters, evs_manager, order_keepers_);
@@ -369,7 +372,7 @@ ANLStatus ANLManagerMT::reduce_modules()
   for (std::size_t i_module=0; i_module<modules_.size(); i_module++) {
     BasicModule* mod = modules_[i_module];
     std::list<BasicModule*> module_list;
-    for (const ClonedChainSet& chain: cloned_chains_) {
+    for (const ParallelChain& chain: parallel_chains_) {
       module_list.push_back(chain.modules_reference()[i_module]);
     }
     status = mod->mod_reduce(module_list);
@@ -382,7 +385,7 @@ ANLStatus ANLManagerMT::reduce_modules()
 
 void ANLManagerMT::reduce_statistics()
 {
-  for (const ClonedChainSet& chain: cloned_chains_) {
+  for (const ParallelChain& chain: parallel_chains_) {
     for (std::size_t i=0; i<modules_.size(); i++) {
       counters_[i] += chain.get_counter(i);
     }
@@ -393,7 +396,7 @@ void ANLManagerMT::reduce_statistics()
 boost::property_tree::ptree ANLManagerMT::parameters_to_property_tree() const
 {
   boost::property_tree::ptree pt = ANLManager::parameters_to_property_tree();
-  for (const ClonedChainSet& chain: cloned_chains_) {
+  for (const ParallelChain& chain: parallel_chains_) {
     boost::property_tree::ptree pt_modules;
     for (const BasicModule* module: chain.modules_reference()) {
       pt_modules.push_back(std::make_pair("", module->parameters_to_property_tree()));
