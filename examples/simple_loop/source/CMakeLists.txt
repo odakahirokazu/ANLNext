@@ -13,9 +13,11 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 ### Definition of project
 project(MyPackage)
 set(CMAKE_CXX_STANDARD 17)
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 set(MY_LIBRARY MyPackage)
 set(USE_RUBY ON)
+set(USE_PYTHON ON)
 
 message("-- Install destination prefix: ${CMAKE_INSTALL_PREFIX}")
 list(APPEND CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
@@ -44,40 +46,41 @@ set(ANLNEXT_LIB ANLNext)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ANLNEXT_LIB_DIR}/anlnext)
 message("-- ANLNEXT_INSTALL = ${ANLNEXT_INSTALL}")
 
-# add_definitions(-DANL_USE_TVECTOR -DANL_USE_HEPVECTOR)
+################################
+### Main
+add_library(${MY_LIBRARY})
 
-include_directories(
-  include
-  ${ANLNEXT_INC_DIR}
-  ${BOOST_INC_DIR}
-  )
-
-link_directories(
-  ${ANLNEXT_LIB_DIR}
-  ${BOOST_LIB_DIR}
-  )
-
-set(ANL_MODULES
+target_sources(${MY_LIBRARY}
+  PRIVATE
   src/MyModule.cc
   src/MyVectorModule.cc
   src/MyMapModule.cc
-  )
+)
 
-add_library(${MY_LIBRARY} SHARED
-  ${ANL_MODULES}
+target_include_directories(${MY_LIBRARY}
+  PUBLIC
+  ${BOOST_INC_DIR}
+  ${ANLNEXT_INC_DIR}
+  include
+)
+
+target_link_directories(${MY_LIBRARY}
+  PUBLIC
+  ${ANLNEXT_LIB_DIR}
 )
 
 target_link_libraries(${MY_LIBRARY}
+  PUBLIC
   ${BOOST_LIB}
   ANLNext
-  )
+)
 
 install(TARGETS ${MY_LIBRARY} LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
 if(USE_RUBY)
-  add_subdirectory(rubyext)
+  add_subdirectory(bindings/ruby)
 endif(USE_RUBY)
 
 if(USE_PYTHON)
-  add_subdirectory(pyext)
+  add_subdirectory(bindings/python)
 endif(USE_PYTHON)

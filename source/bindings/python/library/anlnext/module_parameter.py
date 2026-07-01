@@ -4,7 +4,7 @@
 # @date: 2024-08-30
 #
 
-import anlnext
+import anlnext.anlnextpy
 
 def get_value(param):
     if param.type_name()=="bool":

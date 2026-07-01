@@ -5,7 +5,7 @@
 # @date: 2024-08-30
 #
 
-import anlnext
+import anlnext.anlnextpy
 import math
 import datetime
 import sys

@@ -662,7 +662,7 @@ void ANLManager::interactive_session()
     std::string line;
     std::getline(std::cin, line);
     std::cout << "ANL>> " << line;
-    if (analysisThreadFinished_) {
+    if (analysis_thread_finished_) {
       return;
     }
 #endif /* ANLNEXT_USE_READLINE */

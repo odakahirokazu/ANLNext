@@ -13,9 +13,11 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 ### Definition of project
 project(TestHistogram)
 set(CMAKE_CXX_STANDARD 17)
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 
 set(MY_LIBRARY TestHistogram)
 set(USE_RUBY ON)
+set(USE_PYTHON ON)
 
 ### External libraries
 ### BOOST ###
@@ -53,43 +55,44 @@ message("-- ROOTSYS = ${ROOTSYS}")
 message("-- ROOT_INC_DIR = ${ROOT_INC_DIR}")
 message("-- ROOT_LIB_DIR = ${ROOT_LIB_DIR}")
 message("-- ROOT libraries = ${ROOT_LIB}")
-# add_definitions(-DANL_USE_TVECTOR -DANL_USE_HEPVECTOR)
 
-include_directories(
-  include
-  ${ANLNEXT_INC_DIR}
-  ${BOOST_INC_DIR}
-  ${ROOT_INC_DIR}
-  )
+################################
+### Main
+add_library(${MY_LIBRARY})
 
-link_directories(
-  ${ANLNEXT_LIB_DIR}
-  ${BOOST_LIB_DIR}
-  ${ROOT_LIB_DIR}
-  )
-
-set(ANL_MODULES
+target_sources(${MY_LIBRARY}
+  PRIVATE
   src/SaveData.cc
   src/GenerateEvents.cc
   src/FillHistogram.cc
-  )
+)
 
-add_library(${MY_LIBRARY} SHARED
-  ${ANL_MODULES}
+target_include_directories(${MY_LIBRARY}
+  PUBLIC
+  ${BOOST_INC_DIR}
+  ${ROOT_INC_DIR}
+  ${ANLNEXT_INC_DIR}
+  include
+)
+
+target_link_directories(${MY_LIBRARY}
+  PUBLIC
+  ${ANLNEXT_LIB_DIR}
 )
 
 target_link_libraries(${MY_LIBRARY}
+  PUBLIC
   ${BOOST_LIB}
   ${ROOT_LIB}
   ANLNext
-  )
+)
 
 install(TARGETS ${MY_LIBRARY} LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 
 if(USE_RUBY)
-  add_subdirectory(rubyext)
+  add_subdirectory(bindings/ruby)
 endif(USE_RUBY)
 
 if(USE_PYTHON)
-  add_subdirectory(pyext)
+  add_subdirectory(bindings/python)
 endif(USE_PYTHON)
