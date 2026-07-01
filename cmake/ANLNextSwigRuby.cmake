@@ -23,7 +23,7 @@ function(anlnext_add_swig_ruby_binding target)
   cmake_parse_arguments(ARG
     ""
     "MODULE_NAME;INTERFACE_FILE;INSTALL_DESTINATION"
-    "LIBRARIES;INCLUDE_DIRECTORIES;SWIG_FLAGS;INSTALL_FILES"
+    "LIBRARIES;INCLUDE_DIRECTORIES;SWIG_FLAGS;COMPILE_DEFINITIONS;INSTALL_FILES"
     ${ARGN}
   )
 
@@ -55,39 +55,44 @@ function(anlnext_add_swig_ruby_binding target)
 
   set_target_properties(${target}
     PROPERTIES
-      LINKER_LANGUAGE CXX
-      OUTPUT_NAME ${ARG_MODULE_NAME}
-      PREFIX ""
+    LINKER_LANGUAGE CXX
+    OUTPUT_NAME ${ARG_MODULE_NAME}
+    PREFIX ""
   )
 
   target_include_directories(${target}
     PRIVATE
-      ${ARG_INCLUDE_DIRECTORIES}
-      ${Ruby_INCLUDE_DIRS}
+    ${ARG_INCLUDE_DIRECTORIES}
+    ${Ruby_INCLUDE_DIRS}
+  )
+
+  target_compile_definitions(${target}
+    PRIVATE
+    ${ARG_COMPILE_DEFINITIONS}
   )
 
   target_link_libraries(${target}
     PRIVATE
-      ${ARG_LIBRARIES}
-      ${Ruby_LIBRARIES}
+    ${ARG_LIBRARIES}
+    ${Ruby_LIBRARIES}
   )
 
   if(APPLE)
     target_link_options(${target}
       PRIVATE
-        -Wl,-undefined,dynamic_lookup
-        -Wl,-multiply_defined,suppress
-        -Wl,-flat_namespace
+      -Wl,-undefined,dynamic_lookup
+      -Wl,-multiply_defined,suppress
+      -Wl,-flat_namespace
     )
 
     set_target_properties(${target}
       PROPERTIES
-        SUFFIX ".bundle"
+      SUFFIX ".bundle"
     )
   else()
     set_target_properties(${target}
       PROPERTIES
-        SUFFIX ".so"
+      SUFFIX ".so"
     )
   endif()
 

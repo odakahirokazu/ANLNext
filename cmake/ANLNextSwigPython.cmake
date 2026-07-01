@@ -17,7 +17,7 @@ function(anlnext_add_swig_python_binding target)
   cmake_parse_arguments(ARG
     ""
     "INTERFACE_FILE;INSTALL_DESTINATION"
-    "LIBRARIES;INCLUDE_DIRECTORIES;SWIG_FLAGS;INSTALL_FILES"
+    "LIBRARIES;INCLUDE_DIRECTORIES;COMPILE_DEFINITIONS;SWIG_FLAGS;INSTALL_FILES"
     ${ARGN}
   )
 
@@ -47,19 +47,24 @@ function(anlnext_add_swig_python_binding target)
 
   set_target_properties(${target}
     PROPERTIES
-      LINKER_LANGUAGE CXX
+    LINKER_LANGUAGE CXX
   )
 
   target_include_directories(${target}
     PRIVATE
-      ${ARG_INCLUDE_DIRECTORIES}
-      ${Python3_INCLUDE_DIRS}
+    ${ARG_INCLUDE_DIRECTORIES}
+    ${Python3_INCLUDE_DIRS}
+  )
+
+  target_compile_definitions(${target}
+    PRIVATE
+    ${ARG_COMPILE_DEFINITIONS}
   )
 
   target_link_libraries(${target}
     PRIVATE
-      ${Python3_LIBRARIES}
-      ${ARG_LIBRARIES}
+    ${Python3_LIBRARIES}
+    ${ARG_LIBRARIES}
   )
 
   install(TARGETS ${target}
