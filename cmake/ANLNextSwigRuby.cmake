@@ -81,8 +81,6 @@ function(anlnext_add_swig_ruby_binding target)
     target_link_options(${target}
       PRIVATE
       -Wl,-undefined,dynamic_lookup
-      -Wl,-multiply_defined,suppress
-      -Wl,-flat_namespace
     )
 
     set_target_properties(${target}
