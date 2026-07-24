@@ -4,6 +4,7 @@
 #include "ANLManagerMT.hh"
 #include "VModuleParameter.hh"
 #include "ParameterRegistry.hh"
+#include "BasicSubModule.hh"
 #include "BasicModule.hh"
 #include "ANLException.hh"
 %}
@@ -227,6 +228,13 @@ public:
   void set_module_description(const std::string& v);
 };
 
+class BasicSubModule : public ParameterRegistry, public ModuleDescription
+{
+ public:
+  BasicSubModule();
+  virtual ~BasicSubModule();
+};
+
 class BasicModule : public ParameterRegistry, public ModuleDescription
 {
  public:
@@ -259,6 +267,11 @@ class BasicModule : public ParameterRegistry, public ModuleDescription
   void off();
   bool is_on();
   bool is_off();
+
+  virtual void set_submodule_by_key(const std::string& /* name */, const std::string& /* keyword */);
+  bool is_submodule_defined(const std::string& name) const;
+  const BasicSubModule* get_submodule(const std::string& name) const;
+  std::vector<std::string> submodule_names() const;
 };
 
 class ANLManager

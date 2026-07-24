@@ -39,6 +39,7 @@ using ErrorInfoOnParameter  = boost::error_info<struct tag_ErrorParameter, std::
 class VModuleParameter;
 class ParameterRegistry;
 class BasicModule;
+class BasicSubModule;
 
 struct exception_base : virtual std::exception, virtual boost::exception
 {
@@ -73,6 +74,7 @@ public:
 
   /* apply const specifiers similarly to operator<<(const boost::exception&, v) */
   const ANLException& set_module_info(const BasicModule* mod) const;
+  const ANLException& set_module_info(const BasicSubModule* mod) const;
   const ANLException& set_message(const std::string& message) const;
   const ANLException& append_message(const std::string& message) const;
   const ANLException& prepend_message(const std::string& message) const;
@@ -93,11 +95,17 @@ using ExceptionTreatment = boost::error_info<struct tag_ExceptionTreatment, ANLE
 struct ModuleDuplicationError : anlnext::ANLException
 {
   explicit ModuleDuplicationError(const BasicModule* mod);
+  explicit ModuleDuplicationError(const BasicSubModule* mod);
 };
 
 struct ModuleAccessError : anlnext::ANLException
 {
   explicit ModuleAccessError(const std::string& message, const std::string& module_key);
+};
+
+struct SubModuleUndefinedError : anlnext::ANLException
+{
+  SubModuleUndefinedError(const BasicModule* mod, const std::string& name);
 };
 
 struct ParameterNotFoundError : anlnext::ANLException

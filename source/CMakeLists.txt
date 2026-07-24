@@ -86,6 +86,7 @@ target_sources(ANLNext
   src/ModuleDescription.cc
   src/EvsInterface.cc
   src/BasicModule.cc
+  src/BasicSubModule.cc
   src/ANLManager.cc
   src/ANLManager_interactive.cc
   src/ParallelChain.cc

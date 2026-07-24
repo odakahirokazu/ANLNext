@@ -21,6 +21,7 @@
 #include <boost/format.hpp>
 #include "VModuleParameter.hh"
 #include "BasicModule.hh"
+#include "BasicSubModule.hh"
 
 namespace anlnext
 {
@@ -124,6 +125,12 @@ const ANLException& ANLException::set_module_info(const BasicModule* mod) const
   return *this;
 }
 
+const ANLException& ANLException::set_module_info(const BasicSubModule* mod) const
+{
+  *this << ErrorInfoOnModuleName(mod->submodule_name());
+  return *this;
+}
+
 std::string ANLException::to_string() const
 {
   if (VerboseLevel() == 1) {
@@ -162,10 +169,25 @@ ModuleDuplicationError::ModuleDuplicationError(const BasicModule* mod)
                   % mod->module_id()).str());
 }
 
+ModuleDuplicationError::ModuleDuplicationError(const BasicSubModule* mod)
+  : ANLException()
+{
+  set_message("<ModuleDuplicationError>");
+  append_message((boost::format("Submodule %s can not be duplicated.")
+                  % mod->submodule_name()).str());
+}
+
 ModuleAccessError::ModuleAccessError(const std::string& message, const std::string& module_key)
 {
   set_message("<ModuleAccessError>");
   append_message(message+": "+module_key);
+}
+
+SubModuleUndefinedError::SubModuleUndefinedError(const BasicModule* mod, const std::string& name)
+ : ANLException(mod)
+{
+  set_message("<SubModuleUndefinedError>");
+  append_message((boost::format("Submodule is not defined: %s") % name).str());
 }
 
 ParameterNotFoundError::ParameterNotFoundError(const std::string& name)

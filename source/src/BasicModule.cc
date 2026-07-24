@@ -23,6 +23,7 @@
 #include <boost/format.hpp>
 
 #include "ANLManager.hh"
+#include "BasicSubModule.hh"
 
 namespace anlnext
 {
@@ -33,8 +34,6 @@ BasicModule::BasicModule()
     access_permission_(ModuleAccess::Permission::full_access),
     module_on_(true),
     module_access_(nullptr),
-    current_parameter_(nullptr),
-    current_value_element_(nullptr),
     loop_index_(-1),
     copy_ID_(0),
     last_copy_(0),
@@ -54,8 +53,6 @@ BasicModule::BasicModule(const BasicModule& r)
     access_permission_(r.access_permission_),
     module_on_(r.module_on_),
     module_access_(nullptr),
-    current_parameter_(nullptr),
-    current_value_element_(nullptr),
     loop_index_(-1),
     copy_ID_(r.last_copy_+1),
     last_copy_(0),
@@ -140,6 +137,63 @@ void BasicModule::automatic_switch_for_singleton()
 void BasicModule::add_parameter_error_info(ANLException& ex) const
 {
   ex.set_module_info(this);
+}
+
+void BasicModule::define_submodule(const std::string& name)
+{
+  submodule_map_[name] = std::make_unique<BasicSubModule>();
+}
+
+bool BasicModule::is_submodule_defined(const std::string& name) const
+{
+  auto it = submodule_map_.find(name);
+  if (it != submodule_map_.end()) {
+    return true;
+  }
+  return false;
+}
+
+std::vector<std::string> BasicModule::submodule_names() const
+{
+  std::vector<std::string> names;
+  for (auto& kv : submodule_map_) {
+    names.push_back(kv.first);
+  }
+  return names;
+}
+
+void BasicModule::set_submodule(const std::string& name, std::unique_ptr<BasicSubModule>&& submod)
+{
+  auto it = submodule_map_.find(name);
+  if (it == submodule_map_.end()) {
+    BOOST_THROW_EXCEPTION( SubModuleUndefinedError(this, name) );
+  }
+
+  (*it).second = std::move(submod);
+}
+
+const BasicSubModule* BasicModule::get_submodule(const std::string& name) const
+{
+  auto it = submodule_map_.find(name);
+  if (it == submodule_map_.end()) {
+    BOOST_THROW_EXCEPTION( SubModuleUndefinedError(this, name) );
+  }
+
+  return (*it).second.get();
+}
+
+ANLStatus BasicModule::mod_define_with_submodules()
+{
+  ANLStatus status = mod_define();
+  submodules_define_parameters();
+  return status;
+}
+
+void BasicModule::submodules_define_parameters()
+{
+  for (auto& kv : submodule_map_) {
+    kv.second->define_parameters();
+  }
 }
 
 } /* namespace anlnext */

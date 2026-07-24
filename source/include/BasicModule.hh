@@ -17,16 +17,14 @@
  *                                                                       *
  *************************************************************************/
 
-#include "EvsInterface.hh"
 #ifndef ANLNEXT_BasicModule_H
 #define ANLNEXT_BasicModule_H 1
 
-#include <iostream>
 #include <string>
 #include <utility>
 #include <vector>
-#include <list>
 #include <memory>
+#include <iostream>
 
 #include <boost/format.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -35,20 +33,9 @@
 #include "ModuleDescription.hh"
 #include "EvsInterface.hh"
 #include "ANLStatus.hh"
-#include "ModuleParameter.hh"
 #include "ANLException.hh"
 #include "ModuleAccess.hh"
 #include "ANLMacro.hh"
-
-#ifdef ANLNEXT_USE_TVECTOR
-#include "TVector2.h"
-#include "TVector3.h"
-#endif /* ANLNEXT_USE_TVECTOR */
-
-#ifdef ANLNEXT_USE_HEPVECTOR
-#include "CLHEP/Vector/TwoVector.h"
-#include "CLHEP/Vector/ThreeVector.h"
-#endif /* ANLNEXT_USE_HEPVECTOR */
 
 namespace anlnext
 {
@@ -141,6 +128,8 @@ public:
 
   virtual ANLStatus mod_communicate() { ask_parameters(); return AS_OK; }
 
+  ANLStatus mod_define_with_submodules();
+
   std::vector<std::pair<std::string, ModuleAccess::ConflictOption>> get_aliases() const { return aliases_; }
   std::vector<std::string> get_aliases_string() const;
   void add_alias(const std::string& name,
@@ -177,6 +166,14 @@ public:
   void set_loop_index(long int index) { loop_index_ = index; }
   long int get_loop_index() const { return loop_index_; }
 
+  /*
+   * Sub module
+   */
+  virtual void set_submodule_by_key(const std::string& /* name */, const std::string& /* keyword */) {}
+  bool is_submodule_defined(const std::string& name) const;
+  const BasicSubModule* get_submodule(const std::string& name) const;
+  std::vector<std::string> submodule_names() const;
+
   boost::property_tree::ptree parameters_to_property_tree() const override;
   
 protected:
@@ -189,7 +186,6 @@ protected:
   /*
    * get-module methods
    */
-
   template <typename T>
   void get_module(const std::string& name, const T** ptr)
   { *ptr = static_cast<const T*>(module_access_->get_module(name)); }
@@ -244,18 +240,10 @@ protected:
   BasicModule* __singleton_ptr__() { return *singleton_ptr_; }
 
   /*
-   * Sub module
+   * Submodule
    */
-#if 0
   void define_submodule(const std::string& name);
-  void set_submodule(const std::string& name, BasicSubModule* submod);
-  virtual void set_submodule_by_key(const std::string& name, const std::string& keyword);
-
-  template <typename T>
-  void get_submodule(const std::string& name, const T* submod) const;
-  template <typename T>
-  void get_submodule_NC(const std::string& name, T* submod);
-#endif
+  void set_submodule(const std::string& name, std::unique_ptr<BasicSubModule>&& submod);
 
 protected:
   template <typename ModuleType>
@@ -266,6 +254,7 @@ protected:
 private:
   std::string get_module_id() const { return module_ID_; }
   void add_parameter_error_info(ANLException& ex) const override final;
+  void submodules_define_parameters();
 
 private:
   bool order_sensitive_ = false;
@@ -274,9 +263,6 @@ private:
   ModuleAccess::Permission access_permission_ = ModuleAccess::Permission::full_access;
   bool module_on_ = true;
   const ModuleAccess* module_access_ = nullptr;
-  ModuleParamList module_parameters_;
-  ModuleParam_sptr current_parameter_;
-  ModuleParam_sptr current_value_element_;
   long int loop_index_ = -1;
 
   const int copy_ID_ = 0;
@@ -285,6 +271,8 @@ private:
   bool singleton_ = false;
   int singleton_copy_ID_ = 0;
   std::shared_ptr<BasicModule*> singleton_ptr_;
+
+  std::map<std::string, std::unique_ptr<BasicSubModule>> submodule_map_;
 
   std::string (BasicModule::*module_ID_method_)() const;
 };
