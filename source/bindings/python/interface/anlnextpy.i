@@ -257,7 +257,17 @@ class ParameterRegistry
   %exception;
 };
 
-class BasicModule : public ParameterRegistry
+class ModuleDescription
+{
+public:
+  ModuleDescription();
+  virtual ~ModuleDescription();
+
+  std::string module_description() const;
+  void set_module_description(const std::string& v);
+};
+
+class BasicModule : public ParameterRegistry, public ModuleDescription
 {
  public:
   BasicModule();
@@ -284,9 +294,6 @@ class BasicModule : public ParameterRegistry
   
   std::vector<std::string> get_aliases_string() const;
   void add_alias(const std::string& name);
-
-  std::string module_description() const;
-  void set_module_description(const std::string& v);
   
   void on();
   void off();

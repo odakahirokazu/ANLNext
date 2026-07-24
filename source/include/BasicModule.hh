@@ -17,6 +17,7 @@
  *                                                                       *
  *************************************************************************/
 
+#include "EvsInterface.hh"
 #ifndef ANLNEXT_BasicModule_H
 #define ANLNEXT_BasicModule_H 1
 
@@ -25,16 +26,14 @@
 #include <utility>
 #include <vector>
 #include <list>
-#include <deque>
-#include <set>
-#include <algorithm>
-#include <iterator>
 #include <memory>
 
 #include <boost/format.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 #include "ParameterRegistry.hh"
+#include "ModuleDescription.hh"
+#include "EvsInterface.hh"
 #include "ANLStatus.hh"
 #include "ModuleParameter.hh"
 #include "ANLException.hh"
@@ -74,7 +73,7 @@ class BasicSubModule;
  * @date 2026-06-24 | seperate module registry
  * @date 2026-06-24 | new feature: sub module
  */
-class BasicModule : public ParameterRegistry
+class BasicModule : public ParameterRegistry, public ModuleDescription, public EvsInterface
 {
 private:
   virtual std::string __module_name__() const
@@ -150,10 +149,6 @@ public:
     aliases_.emplace_back(name, conflict);
   }
 
-  std::string module_description() const { return module_description_; }
-  void set_module_description(const std::string& v) { module_description_ = v; }
-
-  void set_evs_manager(EvsManager* man) { evs_manager_ = man; }
   void set_module_access(const ModuleAccess* aa) { module_access_ = aa; }
 
   ModuleAccess::Permission access_permission() const
@@ -249,17 +244,6 @@ protected:
   BasicModule* __singleton_ptr__() { return *singleton_ptr_; }
 
   /*
-   * EVS methods
-   */
-
-  void define_evs(const std::string& key);
-  void undefine_evs(const std::string& key);
-  bool is_evs_defined(const std::string& key) const;
-  bool evs(const std::string& key) const;
-  void set_evs(const std::string& key);
-  void reset_evs(const std::string& key);
-
-  /*
    * Sub module
    */
 #if 0
@@ -288,9 +272,7 @@ private:
   std::string module_ID_;
   std::vector<std::pair<std::string, ModuleAccess::ConflictOption>> aliases_;
   ModuleAccess::Permission access_permission_ = ModuleAccess::Permission::full_access;
-  std::string module_description_;
   bool module_on_ = true;
-  EvsManager* evs_manager_ = nullptr;
   const ModuleAccess* module_access_ = nullptr;
   ModuleParamList module_parameters_;
   ModuleParam_sptr current_parameter_;

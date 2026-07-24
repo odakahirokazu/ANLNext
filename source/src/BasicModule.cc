@@ -22,7 +22,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 
-#include "EvsManager.hh"
 #include "ANLManager.hh"
 
 namespace anlnext
@@ -32,9 +31,7 @@ BasicModule::BasicModule()
   : order_sensitive_(false),
     module_ID_(""),
     access_permission_(ModuleAccess::Permission::full_access),
-    module_description_(""),
     module_on_(true),
-    evs_manager_(nullptr),
     module_access_(nullptr),
     current_parameter_(nullptr),
     current_value_element_(nullptr),
@@ -55,9 +52,7 @@ BasicModule::BasicModule(const BasicModule& r)
     module_ID_(r.module_ID_),
     aliases_(r.aliases_),
     access_permission_(r.access_permission_),
-    module_description_(r.module_description_),
     module_on_(r.module_on_),
-    evs_manager_(nullptr),
     module_access_(nullptr),
     current_parameter_(nullptr),
     current_value_element_(nullptr),
@@ -117,36 +112,6 @@ std::vector<std::string> BasicModule::get_aliases_string() const
     v.push_back(alias.first);
   }
   return v;
-}
-
-void BasicModule::define_evs(const std::string& key)
-{
-  evs_manager_->define(key);
-}
-
-void BasicModule::undefine_evs(const std::string& key)
-{
-  evs_manager_->undefine(key);
-}
-
-bool BasicModule::is_evs_defined(const std::string& key) const
-{
-  return evs_manager_->is_defined(key);
-}
-
-bool BasicModule::evs(const std::string& key) const
-{
-  return evs_manager_->get(key);
-}
-
-void BasicModule::set_evs(const std::string& key)
-{
-  evs_manager_->set(key);
-}
-
-void BasicModule::reset_evs(const std::string& key)
-{
-  evs_manager_->reset(key);
 }
 
 boost::property_tree::ptree BasicModule::parameters_to_property_tree() const
