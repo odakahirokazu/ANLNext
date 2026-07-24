@@ -36,8 +36,9 @@ using ErrorInfoOnLoopIndex  = boost::error_info<struct tag_ErrorLoopIndex, int64
 using ErrorInfoOnChainID    = boost::error_info<struct tag_ErrorChainID, int>;
 using ErrorInfoOnParameter  = boost::error_info<struct tag_ErrorParameter, std::string>;
 
-class BasicModule;
 class VModuleParameter;
+class ParameterRegistry;
+class BasicModule;
 
 struct exception_base : virtual std::exception, virtual boost::exception
 {
@@ -101,7 +102,7 @@ struct ModuleAccessError : anlnext::ANLException
 
 struct ParameterNotFoundError : anlnext::ANLException
 {
-  ParameterNotFoundError(const BasicModule* mod, const std::string& name);
+  ParameterNotFoundError(const std::string& name);
 };
 
 struct ParameterError : anlnext::ANLException

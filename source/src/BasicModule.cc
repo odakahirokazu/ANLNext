@@ -94,16 +94,6 @@ std::unique_ptr<BasicModule> BasicModule::clone() const
   return __clone__();
 }
 
-void BasicModule::copy_parameters(const BasicModule& r)
-{
-  module_parameters_.clear();
-  for (ModuleParam_sptr p: r.module_parameters_) {
-    ModuleParam_sptr new_param = p->clone();
-    p->set_module_pointer(this);
-    module_parameters_.push_back(new_param);
-  }
-}
-
 void BasicModule::set_module_id(const std::string& module_id)
 {
   module_ID_ = module_id;
@@ -127,58 +117,6 @@ std::vector<std::string> BasicModule::get_aliases_string() const
     v.push_back(alias.first);
   }
   return v;
-}
-
-void BasicModule::print_parameters() const
-{
-  for (const auto& param: module_parameters_) {
-    if (param->is_result()) { continue; }
-    param->print(std::cout);
-    std::cout << std::endl;
-  }
-}
-
-void BasicModule::ask_parameters()
-{
-  for (const auto& param: module_parameters_) {
-    if (param->is_hidden()) { continue; }
-    if (param->is_result()) { continue; }
-    param->ask();
-  }
-}
-
-void BasicModule::print_results() const
-{
-  for (const auto& param: module_parameters_) {
-    if (param->is_result()) {
-      param->print(std::cout);
-      std::cout << std::endl;
-    }
-  }
-}
-
-void BasicModule::undefine_parameter(const std::string& name)
-{
-  ModuleParamIter it = find_parameter(name);
-  module_parameters_.erase(it);
-}
-
-void BasicModule::hide_parameter(const std::string& name, bool hidden)
-{
-  ModuleParamIter it = find_parameter(name);
-  if (!hidden) { current_parameter_ = *it; }
-  (*it)->set_hidden(hidden);
-}
-
-void BasicModule::ask_parameter(const std::string& name,
-                                const std::string& question)
-{
-  ModuleParamIter it = find_parameter(name);
-  current_parameter_ = *it;
-  if (question!="") {
-    (*it)->set_question(question);
-  }
-  (*it)->ask();
 }
 
 void BasicModule::define_evs(const std::string& key)
@@ -217,10 +155,7 @@ boost::property_tree::ptree BasicModule::parameters_to_property_tree() const
   pt.put("module_id", module_id());
   pt.put("name", module_name());
   pt.put("version", module_version());
-  boost::property_tree::ptree pt_parameters;
-  for (const auto& parameter: module_parameters_) {
-    pt_parameters.push_back(std::make_pair("", parameter->to_property_tree()));
-  }
+  boost::property_tree::ptree pt_parameters = ParameterRegistry::parameters_to_property_tree();
   pt.add_child("parameter_list", std::move(pt_parameters));
   return pt;
 }
@@ -237,43 +172,9 @@ void BasicModule::automatic_switch_for_singleton()
   }
 }
 
-// instantiation of function templates
-template
-void BasicModule::set_parameter(const std::string& name, bool val);
-
-template
-void BasicModule::set_parameter(const std::string& name, int val);
-
-template
-void BasicModule::set_parameter(const std::string& name, double val);
-
-template
-void BasicModule::set_parameter(const std::string& name,
-                                const std::string& val);
-
-template
-void BasicModule::set_parameter(const std::string& name,
-                                const std::vector<int>& val);
-
-template
-void BasicModule::set_parameter(const std::string& name,
-                                const std::vector<double>& val);
-
-template
-void BasicModule::set_parameter(const std::string& name,
-                                const std::vector<std::string>& val);
-
-template
-void BasicModule::set_value_element(const std::string& name, bool val);
-
-template
-void BasicModule::set_value_element(const std::string& name, int val);
-
-template
-void BasicModule::set_value_element(const std::string& name, double val);
-
-template
-void BasicModule::set_value_element(const std::string& name,
-                                    const std::string& val);
+void BasicModule::add_parameter_error_info(ANLException& ex) const
+{
+  ex.set_module_info(this);
+}
 
 } /* namespace anlnext */

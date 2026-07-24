@@ -278,7 +278,7 @@ protected:
   virtual container_type& __ref__() { return *ptr_; }
   virtual const container_type& __ref__() const { return *ptr_; }
 
-  void set_module_pointer_of_value_info(BasicModule* o) override
+  void set_module_pointer_of_value_info(ParameterRegistry* o) override
   {
     for (ModuleParam_sptr& element: value_info_) {
       element->set_module_pointer(o);

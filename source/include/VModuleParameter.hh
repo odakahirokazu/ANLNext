@@ -26,16 +26,14 @@
 #include <string>
 #include <vector>
 #include <list>
-#include <map>
 #include <memory>
-#include <utility>
 
 #include <boost/property_tree/ptree.hpp>
 
 namespace anlnext
 {
 
-class BasicModule;
+class ParameterRegistry;
 
 
 /**
@@ -173,7 +171,7 @@ public:
   virtual boost::property_tree::ptree to_property_tree() const
   { return boost::property_tree::ptree(); }
 
-  virtual void set_module_pointer(BasicModule*) {};
+  virtual void set_module_pointer(ParameterRegistry*) {};
 
 protected:
   virtual bool ask_base();
@@ -181,7 +179,7 @@ protected:
   virtual bool ask_base_in(std::istream& is);
   std::string special_message_to_ask() const;
 
-  virtual void set_module_pointer_of_value_info(BasicModule*) {}
+  virtual void set_module_pointer_of_value_info(ParameterRegistry*) {}
   
 private:
   std::string name_;

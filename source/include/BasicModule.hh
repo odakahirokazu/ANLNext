@@ -34,6 +34,7 @@
 #include <boost/format.hpp>
 #include <boost/property_tree/ptree.hpp>
 
+#include "ParameterRegistry.hh"
 #include "ANLStatus.hh"
 #include "ModuleParameter.hh"
 #include "ANLException.hh"
@@ -54,6 +55,7 @@ namespace anlnext
 {
 
 class EvsManager;
+class BasicSubModule;
 
 /**
  * A basic class for an ANL Next module.
@@ -69,8 +71,10 @@ class EvsManager;
  * @date 2019-12-25 | get-result
  * @date 2023-05-10 | singleton module
  * @date 2024-09-02 | add module information in set_parameter() exception
+ * @date 2026-06-24 | seperate module registry
+ * @date 2026-06-24 | new feature: sub module
  */
-class BasicModule
+class BasicModule : public ParameterRegistry
 {
 private:
   virtual std::string __module_name__() const
@@ -177,154 +181,10 @@ public:
 
   void set_loop_index(long int index) { loop_index_ = index; }
   long int get_loop_index() const { return loop_index_; }
-  
-  /**
-   * expose a module parameter specified by "name" and set it as the current parameter.
-   * @param name module parameter name
-   */
-  void expose_parameter(const std::string& name)
-  { hide_parameter(name, false); }
-  
-  ModuleParamConstIter parameter_begin() const
-  { return std::begin(module_parameters_); }
-  ModuleParamConstIter parameter_end() const
-  { return std::end(module_parameters_); }
-  ModuleParamConstIter find_parameter(const std::string& name) const;
-  const VModuleParameter* get_parameter(const std::string& name) const
-  {
-    return find_parameter(name)->get();
-  }
-  
-  template<typename T>
-  void set_parameter(const std::string& name, T val);
-  void set_parameter(const std::string& name,
-                     double x, double y);
-  void set_parameter(const std::string& name,
-                     double x, double y, double z);
-  void set_parameter_integer(const std::string& name, intmax_t val);
-  void clear_array(const std::string& name);
-  void set_map_key(const std::string& key)
-  {
-    current_parameter_->set_map_key(key);
-  }
-  
-  template <typename T>
-  void set_value_element(const std::string& name, T val);
 
-  void insert_to_container() { current_parameter_->insert_to_container(); }
-
-  void print_parameters() const;
-  void ask_parameters();
-  void print_results() const;
-
-  boost::property_tree::ptree parameters_to_property_tree() const;
-
+  boost::property_tree::ptree parameters_to_property_tree() const override;
+  
 protected:
-
-  /*
-   * define-parameter methods
-   */
-
-  template <typename ModuleClass, typename T>
-  void define_parameter(const std::string& name,
-                        T ModuleClass::* ptr);
-
-  template <typename ModuleClass, typename T>
-  void define_parameter(const std::string& name,
-                        T ModuleClass::* ptr,
-                        double unit,
-                        const std::string& unit_name);
-
-  void define_map_key(const std::string& name, const std::string& default_key="")
-  { current_parameter_->set_map_key_properties(name, default_key); }
-
-  void undefine_parameter(const std::string& name);
-  void hide_parameter(const std::string& name, bool hidden=true);
-
-  void set_parameter_unit(double unit, const std::string& unit_name)
-  { current_parameter_->set_unit(unit, unit_name); }
-
-  void set_parameter_expression(const std::string& v)
-  { current_parameter_->set_expression(v); }
-
-  void set_parameter_question(const std::string& v)
-  { current_parameter_->set_question(v); }
-
-  void set_parameter_default_string(const std::string& v)
-  { current_parameter_->set_default_string(v); }
-
-  void set_parameter_description(const std::string& v)
-  { current_parameter_->set_description(v); }
-
-  template <typename ModuleClass, typename T>
-  void add_value_element(const std::string& name,
-                         T ModuleClass::* ptr);
-
-  template <typename ModuleClass, typename T>
-  void add_value_element(const std::string& name,
-                         T ModuleClass::* ptr,
-                         double unit,
-                         const std::string& unit_name);
-
-  void enable_value_elements(int type, const std::vector<std::size_t>& enable)
-  { current_value_element_->enable_value_elements(type, enable); }
-
-  void set_value_element_unit(double unit, const std::string& unit_name)
-  { current_value_element_->set_unit(unit, unit_name); }
-
-  void set_value_element_expression(const std::string& v)
-  { current_value_element_->set_expression(v); }
-
-  void set_value_element_question(const std::string& v)
-  { current_value_element_->set_question(v); }
-
-  void set_value_element_default_string(const std::string& v)
-  { current_value_element_->set_default_string(v); }
-
-  void set_value_element_description(const std::string& v)
-  { current_value_element_->set_description(v); }
-
-  void ask_parameter(const std::string& name, const std::string& question="");
-
-  /*
-   * define-parameter methods (non-member pointer) [conventional]
-   */
-
-  template <typename T>
-  void register_parameter(T* ptr, const std::string& name);
-
-  template <typename T>
-  void register_parameter(T* ptr, const std::string& name,
-                          double unit, const std::string& unit_name);
-
-  template <typename T>
-  void register_parameter_map(T* ptr, const std::string& name,
-                              const std::string& key_name,
-                              const std::string& key_default);
-
-  void unregister_parameter(const std::string& name)
-  { undefine_parameter(name); }
-
-  template <typename T>
-  void add_value_element(T* ptr, const std::string& name);
-  template <typename T>
-  void add_value_element(T* ptr, const std::string& name,
-                         double unit, const std::string& unit_name);
-
-  /*
-   * define-result methods
-   */
-
-  template <typename ModuleClass, typename T>
-  void define_result(const std::string& name,
-                     T ModuleClass::* ptr);
-
-  template <typename ModuleClass, typename T>
-  void define_result(const std::string& name,
-                     T ModuleClass::* ptr,
-                     double unit,
-                     const std::string& unit_name);
-
   /*
    * access permission
    */
@@ -399,6 +259,20 @@ protected:
   void set_evs(const std::string& key);
   void reset_evs(const std::string& key);
 
+  /*
+   * Sub module
+   */
+#if 0
+  void define_submodule(const std::string& name);
+  void set_submodule(const std::string& name, BasicSubModule* submod);
+  virtual void set_submodule_by_key(const std::string& name, const std::string& keyword);
+
+  template <typename T>
+  void get_submodule(const std::string& name, const T* submod) const;
+  template <typename T>
+  void get_submodule_NC(const std::string& name, T* submod);
+#endif
+
 protected:
   template <typename ModuleType>
   std::unique_ptr<BasicModule> help_duplication(std::unique_ptr<ModuleType>&& cloned);
@@ -406,9 +280,8 @@ protected:
   std::unique_ptr<BasicModule> clone() const;
 
 private:
-  ModuleParamIter find_parameter(const std::string& name);
   std::string get_module_id() const { return module_ID_; }
-  void copy_parameters(const BasicModule& r);
+  void add_parameter_error_info(ANLException& ex) const override final;
 
 private:
   bool order_sensitive_ = false;
@@ -437,213 +310,7 @@ private:
 using AMIter = std::vector<BasicModule*>::iterator;
 using AMConstIter = std::vector<BasicModule*>::const_iterator;
 
-template <typename ModuleClass, typename T>
-void BasicModule::define_parameter(const std::string& name, T ModuleClass::* ptr)
-{
-  ModuleParam_sptr p(new ModuleParameterMember<ModuleClass, T>(name, dynamic_cast<ModuleClass*>(this), ptr));
-  module_parameters_.push_back(p);
-  current_parameter_ = p;
-}
-
-template <typename ModuleClass, typename T>
-void BasicModule::define_parameter(const std::string& name, T ModuleClass::* ptr,
-                                   double unit, const std::string& unit_name)
-{
-  ModuleParam_sptr p(new ModuleParameterMember<ModuleClass, T>(name, dynamic_cast<ModuleClass*>(this), ptr));
-  p->set_unit(unit, unit_name);
-  module_parameters_.push_back(p);
-  current_parameter_ = p;
-}
-
-template <typename ModuleClass, typename T>
-void BasicModule::define_result(const std::string& name, T ModuleClass::* ptr)
-{
-  define_parameter(name, ptr);
-  current_parameter_->set_result();
-}
-
-template <typename ModuleClass, typename T>
-void BasicModule::define_result(const std::string& name, T ModuleClass::* ptr,
-                                double unit, const std::string& unit_name)
-{
-  define_parameter(name, ptr, unit, unit_name);
-  current_parameter_->set_result();
-}
-
-template <typename ModuleClass, typename T>
-void BasicModule::add_value_element(const std::string& name,
-                                    T ModuleClass::* ptr)
-{
-  ModuleParam_sptr p(new ModuleParameterMember<ModuleClass, T>(name, dynamic_cast<ModuleClass*>(this), ptr));
-  current_parameter_->add_value_element(p);
-  current_value_element_ = p;
-}
-
-template <typename ModuleClass, typename T>
-void BasicModule::add_value_element(const std::string& name,
-                                    T ModuleClass::* ptr,
-                                    double unit,
-                                    const std::string& unit_name)
-{
-  ModuleParam_sptr p(new ModuleParameterMember<ModuleClass, T>(name, dynamic_cast<ModuleClass*>(this), ptr));
-  p->set_unit(unit, unit_name);
-  current_parameter_->add_value_element(p);
-  current_value_element_ = p;
-}
-
-template<typename T>
-void BasicModule::register_parameter(T* ptr, const std::string& name)
-{
-  ModuleParam_sptr p(new ModuleParameter<T>(name, ptr));
-  module_parameters_.push_back(p);
-  current_parameter_ = p;
-}
-
-template<typename T>
-void BasicModule::register_parameter(T* ptr, const std::string& name,
-                                     double unit, const std::string& unit_name)
-{
-  ModuleParam_sptr p(new ModuleParameter<T>(name, ptr));
-  p->set_unit(unit, unit_name);
-  module_parameters_.push_back(p);
-  current_parameter_ = p;
-}
-
 template <typename T>
-void BasicModule::register_parameter_map(T* ptr, const std::string& name,
-                                         const std::string& key_name,
-                                         const std::string& key_default)
-{
-  ModuleParam_sptr p(new ModuleParameter<T>(name, ptr));
-  p->set_map_key_properties(key_name, key_default);
-  module_parameters_.push_back(p);
-  current_parameter_ = p;
-}
-
-template <typename T>
-void BasicModule::add_value_element(T* ptr, const std::string& name)
-{
-  ModuleParam_sptr p(new ModuleParameter<T>(name, ptr));
-  current_parameter_->add_value_element(p);
-  current_value_element_ = p;
-}
-
-template <typename T>
-void BasicModule::add_value_element(T* ptr, const std::string& name,
-                                    double unit, const std::string& unit_name)
-{
-  ModuleParam_sptr p(new ModuleParameter<T>(name, ptr));
-  p->set_unit(unit, unit_name);
-  current_parameter_->add_value_element(p);
-  current_value_element_ = p;
-}
-
-inline
-ModuleParamIter BasicModule::find_parameter(const std::string& name)
-{
-  ModuleParamIter it = std::begin(module_parameters_);
-  for (; it!=std::end(module_parameters_); ++it) {
-    if ((*it)->name() == name) {
-      return it;
-    }
-  }
-  if (it == std::end(module_parameters_)) {
-    BOOST_THROW_EXCEPTION( ParameterNotFoundError(this, name) );
-  }
-  return it;
-}
-
-inline
-ModuleParamConstIter BasicModule::find_parameter(const std::string& name) const
-{
-  ModuleParamConstIter it = std::begin(module_parameters_);
-  for (; it!=std::end(module_parameters_); ++it) {
-    if ((*it)->name() == name) {
-      return it;
-    }
-  }
-  if (it == std::end(module_parameters_)) {
-    BOOST_THROW_EXCEPTION( ParameterNotFoundError(this, name) );
-  }
-  return it;
-}
-
-template <typename T>
-void BasicModule::set_parameter(const std::string& name, T val)
-{
-  ModuleParamIter it = find_parameter(name);
-  try {
-    (*it)->set_value(val);
-  }
-  catch (ANLException& e) {
-    e.set_module_info(this);
-    throw;
-  }
-}
-
-inline
-void BasicModule::clear_array(const std::string& name)
-{
-  ModuleParamIter it = find_parameter(name);
-  (*it)->clear_array();
-}
-
-inline
-void BasicModule::set_parameter(const std::string& name,
-                                double x, double y)
-{
-  ModuleParamIter it = find_parameter(name);
-  try {
-    (*it)->set_value(x, y);
-  }
-  catch (ANLException& e) {
-    e.set_module_info(this);
-    throw;
-  }
-}
-
-inline
-void BasicModule::set_parameter_integer(const std::string& name, intmax_t val)
-{
-  ModuleParamIter it = find_parameter(name);
-  try {
-    (*it)->set_value_integer(val);
-  }
-  catch (ANLException& e) {
-    e.set_module_info(this);
-    throw;
-  }
-}
-
-inline
-void BasicModule::set_parameter(const std::string& name,
-                                double x, double y, double z)
-{
-  ModuleParamIter it = find_parameter(name);
-  try {
-    (*it)->set_value(x, y, z);
-  }
-  catch (ANLException& e) {
-    e.set_module_info(this);
-    throw;
-  }
-}
-
-template <typename T>
-void BasicModule::set_value_element(const std::string& name, T val)
-{
-  try {
-    current_parameter_->set_value_element(name, val);
-  }
-  catch (ANLException& e) {
-    e.prepend_parameter_name(current_parameter_.get());
-    e.set_module_info(this);
-    throw;
-  }
-}
-
-template <typename T>
-inline
 void BasicModule::get_module_IF(const std::string& name, const T** ptr)
 {
   *ptr = dynamic_cast<const T*>(module_access_->get_module(name));
@@ -653,7 +320,6 @@ void BasicModule::get_module_IF(const std::string& name, const T** ptr)
 }
 
 template <typename T>
-inline
 void BasicModule::get_module_IFNC(const std::string& name, T** ptr)
 {
   *ptr = dynamic_cast<T*>(module_access_->get_module_NC(name));
@@ -663,7 +329,6 @@ void BasicModule::get_module_IFNC(const std::string& name, T** ptr)
 }
 
 template <typename T>
-inline
 void BasicModule::request_module_IF(const std::string& name, const T** ptr)
 {
   const BasicModule* m = module_access_->request_module(name);
@@ -676,7 +341,6 @@ void BasicModule::request_module_IF(const std::string& name, const T** ptr)
 }
 
 template <typename T>
-inline
 void BasicModule::request_module_IFNC(const std::string& name, T** ptr)
 {
   BasicModule* m = module_access_->request_module_NC(name);

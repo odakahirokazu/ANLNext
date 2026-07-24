@@ -19,8 +19,8 @@
 
 #include "ANLException.hh"
 #include <boost/format.hpp>
-#include "BasicModule.hh"
 #include "VModuleParameter.hh"
+#include "BasicModule.hh"
 
 namespace anlnext
 {
@@ -168,13 +168,10 @@ ModuleAccessError::ModuleAccessError(const std::string& message, const std::stri
   append_message(message+": "+module_key);
 }
 
-ParameterNotFoundError::ParameterNotFoundError(const BasicModule* mod, const std::string& name)
-  : ANLException(mod)
+ParameterNotFoundError::ParameterNotFoundError(const std::string& name)
 {
   set_message("<ParameterNotFound>");
-  append_message((boost::format("Parameter is not found: %s / %s")
-                  % mod->module_id()
-                  % name).str());
+  append_message((boost::format("Parameter is not found: %s") % name).str());
 }
 
 ParameterError::ParameterError(const VModuleParameter* param, const std::string& message)

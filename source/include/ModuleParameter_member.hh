@@ -73,7 +73,7 @@ public:
 protected:
   ModuleParameterMember(const ModuleParameterMember& r) = default;
 
-  void set_module_pointer(BasicModule* o) override
+  void set_module_pointer(ParameterRegistry* o) override
   {
     MemberPointerPair<ModuleClass, T>::set_object(dynamic_cast<ModuleClass*>(o));
     ModuleParameter<T>::set_module_pointer_of_value_info(o);

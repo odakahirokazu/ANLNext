@@ -3,6 +3,7 @@
 #include "ANLManager.hh"
 #include "ANLManagerMT.hh"
 #include "VModuleParameter.hh"
+#include "ParameterRegistry.hh"
 #include "BasicModule.hh"
 #include "ANLException.hh"
 %}
@@ -13,8 +14,6 @@
 %include "std_vector.i"
 %include "std_list.i"
 %include "std_pair.i"
-
-%template(ModuleVector) std::vector<anlnext::BasicModule*>;
 
 %template(VectorI) std::vector<int>;
 %template(VectorD) std::vector<double>;
@@ -38,6 +37,15 @@ namespace std
 %template(SPtrModParam) std::shared_ptr<anlnext::VModuleParameter>;
 %template(SPtrModParamConst) std::shared_ptr<anlnext::VModuleParameter const>;
 %template(ListModParam) std::list<std::shared_ptr<anlnext::VModuleParameter> >;
+
+%template(ModuleVector) std::vector<anlnext::BasicModule*>;
+
+/*
+ * Generate type traits for anlnext::ParameterRegistry,
+ * required by swig::from<ParameterRegistry*>() in the %extend section.
+ */
+%traits_swigtype(anlnext::ParameterRegistry);
+%fragment(SWIG_Traits_frag(anlnext::ParameterRegistry));
 
 namespace anlnext
 {
@@ -134,7 +142,82 @@ using ModuleParamList = std::list<ModuleParam_sptr>;
 using ModuleParamIter = ModuleParamList::iterator;
 using ModuleParamConstIter = ModuleParamList::const_iterator;
 
-class BasicModule
+class ParameterRegistry
+{
+ public:
+  ParameterRegistry();
+  virtual ~ParameterRegistry();
+
+  %exception{
+    try {
+      $action
+    }
+    catch (anlnext::ANLException& ex) {
+      SWIG_exception(SWIG_RuntimeError, ex.to_string().c_str());
+    }
+  }
+
+  void expose_parameter(const std::string& name);
+  
+  ModuleParamConstIter parameter_begin() const;
+  ModuleParamConstIter parameter_end() const;
+  const VModuleParameter* get_parameter(const std::string& name) const;
+
+  %rename(set_parameter_vector_i)
+  set_parameter(const std::string&, const std::vector<int>&);
+  %rename(set_parameter_vector_d)
+  set_parameter(const std::string&, const std::vector<double>&);
+  %rename(set_parameter_vector_str)
+  set_parameter(const std::string&, const std::vector<std::string>&);
+
+  void set_parameter(const std::string& name, bool val);
+  void set_parameter(const std::string& name, int val);
+  void set_parameter(const std::string& name, double val);
+  void set_parameter(const std::string& name, const std::string& val);
+  void set_parameter(const std::string& name, const std::vector<int>& val);
+  void set_parameter(const std::string& name, const std::vector<double>& val);
+  void set_parameter(const std::string& name, const std::vector<std::string>& val);
+  void set_parameter(const std::string& name, double x, double y);
+  void set_parameter(const std::string& name, double x, double y, double z);
+  void set_parameter_integer(const std::string& name, intmax_t val);
+
+  void clear_array(const std::string& name);
+
+  void set_map_key(const std::string& key);
+  void set_value_element(const std::string& name, int val);
+  void set_value_element(const std::string& name, double val);
+  void set_value_element(const std::string& name, const std::string& val);
+  void insert_to_container();
+
+  void print_parameters() const;
+
+  %extend {
+    void insert_to_map(const std::string& map_name, const std::string& key)
+    {
+      $self->expose_parameter(map_name);
+      $self->set_map_key(key);
+      if (rb_block_given_p()) {
+        VALUE r = swig::from<anlnext::ParameterRegistry*>($self);
+        rb_yield(r);
+      }
+      $self->insert_to_container();
+    }
+
+    void push_to_vector(const std::string& vector_name)
+    {
+      $self->expose_parameter(vector_name);
+      if (rb_block_given_p()) {
+        VALUE r = swig::from<anlnext::ParameterRegistry*>($self);
+        rb_yield(r);
+      }
+      $self->insert_to_container();
+    }
+  }
+
+  %exception;
+};
+
+class BasicModule : public ParameterRegistry
 {
  public:
   BasicModule();
@@ -169,77 +252,6 @@ class BasicModule
   void off();
   bool is_on();
   bool is_off();
-  
-  %exception{
-    try {
-      $action
-    }
-    catch (anlnext::ANLException& ex) {
-      SWIG_exception(SWIG_RuntimeError, ex.to_string().c_str());
-    }
-  }
-
-  void expose_parameter(const std::string& name);
-  
-  ModuleParamConstIter parameter_begin() const;
-  ModuleParamConstIter parameter_end() const;
-  const VModuleParameter* get_parameter(const std::string& name) const;
-
-  %rename(set_parameter_vector_i)
-  set_parameter(const std::string&, const std::vector<int>&);
-  %rename(set_parameter_vector_d)
-  set_parameter(const std::string&, const std::vector<double>&);
-  %rename(set_parameter_vector_str)
-  set_parameter(const std::string&, const std::vector<std::string>&);
-
-  void set_parameter(const std::string& name, bool val);
-  void set_parameter(const std::string& name, int val);
-  void set_parameter(const std::string& name, double val);
-  void set_parameter(const std::string& name, const std::string& val);
-  void set_parameter(const std::string& name,
-                     const std::vector<int>& val);
-  void set_parameter(const std::string& name,
-                     const std::vector<double>& val);
-  void set_parameter(const std::string& name,
-                     const std::vector<std::string>& val);
-  void set_parameter(const std::string& name, double x, double y);
-  void set_parameter(const std::string& name, double x, double y, double z);
-  void set_parameter_integer(const std::string& name, intmax_t val);
-
-  void clear_array(const std::string& name);
-
-  void set_map_key(const std::string& key);
-  void set_value_element(const std::string& name, int val);
-  void set_value_element(const std::string& name, double val);
-  void set_value_element(const std::string& name, const std::string& val);
-  void insert_to_container();
-
-  void print_parameters() const;
-
-  %extend {
-    void insert_to_map(const std::string& map_name, const std::string& key)
-    {
-      $self->expose_parameter(map_name);
-      $self->set_map_key(key);
-      if (rb_block_given_p()) {
-        VALUE r = swig::from<anlnext::BasicModule*>(self);
-        rb_yield(r);
-      }
-      $self->insert_to_container();
-    }
-
-    void push_to_vector(const std::string& vector_name)
-    {
-      $self->expose_parameter(vector_name);
-      if (rb_block_given_p()) {
-        VALUE r = swig::from<anlnext::BasicModule*>(self);
-        rb_yield(r);
-      }
-      $self->insert_to_container();
-    }
-  }
-
-  %exception;
 };
 
 class ANLManager

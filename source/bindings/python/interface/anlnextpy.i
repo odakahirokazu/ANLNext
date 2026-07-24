@@ -4,6 +4,7 @@
 #include "ANLManager.hh"
 #include "ANLManagerMT.hh"
 #include "VModuleParameter.hh"
+#include "ParameterRegistry.hh"
 #include "BasicModule.hh"
 #include "ANLException.hh"
 %}
@@ -140,42 +141,12 @@ using ModuleParamList = std::list<ModuleParam_sptr>;
 using ModuleParamIter = ModuleParamList::iterator;
 using ModuleParamConstIter = ModuleParamList::const_iterator;
 
-class BasicModule
+class ParameterRegistry
 {
  public:
-  BasicModule();
-  virtual ~BasicModule();
+  ParameterRegistry();
+  virtual ~ParameterRegistry();
 
-  virtual ANLStatus mod_pre_initialize();
-
-  std::string module_name() const;
-  std::string module_version() const;
-  
-  void set_module_id(const std::string& v);
-  std::string module_id() const;
-
-  int copy_id() const;
-  bool is_master() const;
-
-  void set_order_sensitive(bool v);
-  bool is_order_sensitive() const;
-
-  void set_singleton(int copyID);
-  void unset_singleton();
-  bool is_singleton() const;
-  int singleton_copy_id() const;
-  
-  std::vector<std::string> get_aliases_string() const;
-  void add_alias(const std::string& name);
-
-  std::string module_description() const;
-  void set_module_description(const std::string& v);
-  
-  void on();
-  void off();
-  bool is_on();
-  bool is_off();
-  
   %exception{
     try {
       $action
@@ -284,6 +255,43 @@ class BasicModule
   }
 
   %exception;
+};
+
+class BasicModule : public ParameterRegistry
+{
+ public:
+  BasicModule();
+  virtual ~BasicModule();
+
+  virtual ANLStatus mod_pre_initialize();
+
+  std::string module_name() const;
+  std::string module_version() const;
+  
+  void set_module_id(const std::string& v);
+  std::string module_id() const;
+
+  int copy_id() const;
+  bool is_master() const;
+
+  void set_order_sensitive(bool v);
+  bool is_order_sensitive() const;
+
+  void set_singleton(int copyID);
+  void unset_singleton();
+  bool is_singleton() const;
+  int singleton_copy_id() const;
+  
+  std::vector<std::string> get_aliases_string() const;
+  void add_alias(const std::string& name);
+
+  std::string module_description() const;
+  void set_module_description(const std::string& v);
+  
+  void on();
+  void off();
+  bool is_on();
+  bool is_off();
 };
 
 class ANLManager
