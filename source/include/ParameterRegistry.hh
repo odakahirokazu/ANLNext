@@ -165,14 +165,18 @@ protected:
    */
 
   template <typename T>
+  [[deprecated]]
   void register_parameter(T* ptr, const std::string& name);
 
   template <typename T>
+  [[deprecated]]
   void register_parameter(T* ptr, const std::string& name, double unit, const std::string& unit_name);
 
   template <typename T>
+  [[deprecated]]
   void register_parameter_map(T* ptr, const std::string& name, const std::string& key_name, const std::string& key_default);
 
+  [[deprecated]]
   void unregister_parameter(const std::string& name)
   { undefine_parameter(name); }
 
