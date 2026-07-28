@@ -158,7 +158,27 @@ protected:
   void set_value_element_description(const std::string& v)
   { current_value_element_->set_description(v); }
 
+  template <typename T>
+  void add_value_element(T* ptr, const std::string& name);
+  template <typename T>
+  void add_value_element(T* ptr, const std::string& name, double unit, const std::string& unit_name);
+
   void ask_parameter(const std::string& name, const std::string& question="");
+
+  /*
+   * define-result methods
+   */
+
+  template <typename ModuleClass, typename T>
+  void define_result(const std::string& name, T ModuleClass::* ptr);
+
+  template <typename ModuleClass, typename T>
+  void define_result(const std::string& name, T ModuleClass::* ptr, double unit, const std::string& unit_name);
+
+  /*
+   * copy parameters
+   */
+  void copy_parameters(const ParameterRegistry& r);
 
   /*
    * define-parameter methods (non-member pointer) [conventional]
@@ -180,24 +200,8 @@ protected:
   void unregister_parameter(const std::string& name)
   { undefine_parameter(name); }
 
-  template <typename T>
-  void add_value_element(T* ptr, const std::string& name);
-  template <typename T>
-  void add_value_element(T* ptr, const std::string& name, double unit, const std::string& unit_name);
-
-  /*
-   * define-result methods
-   */
-
-  template <typename ModuleClass, typename T>
-  void define_result(const std::string& name, T ModuleClass::* ptr);
-
-  template <typename ModuleClass, typename T>
-  void define_result(const std::string& name, T ModuleClass::* ptr, double unit, const std::string& unit_name);
-
 private:
   ModuleParamIter find_parameter(const std::string& name);
-  void copy_parameters(const ParameterRegistry& r);
   virtual void add_parameter_error_info(ANLException&) const {}
 
 private:
