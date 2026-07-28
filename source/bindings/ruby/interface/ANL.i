@@ -218,24 +218,18 @@ class ParameterRegistry
   %exception;
 };
 
-class ModuleDescription
-{
-public:
-  ModuleDescription();
-  virtual ~ModuleDescription();
-
-  std::string module_description() const;
-  void set_module_description(const std::string& v);
-};
-
-class BasicSubModule : public ParameterRegistry, public ModuleDescription
+class BasicSubModule : public ParameterRegistry
 {
  public:
   BasicSubModule();
   virtual ~BasicSubModule();
+
+  // mix-in ModuleDescription
+  std::string module_description() const;
+  void set_module_description(const std::string& v);
 };
 
-class BasicModule : public ParameterRegistry, public ModuleDescription
+class BasicModule : public ParameterRegistry
 {
  public:
   BasicModule();
@@ -272,6 +266,10 @@ class BasicModule : public ParameterRegistry, public ModuleDescription
   bool is_submodule_defined(const std::string& name) const;
   const BasicSubModule* get_submodule(const std::string& name) const;
   std::vector<std::string> submodule_names() const;
+
+  // mix-in ModuleDescription
+  std::string module_description() const;
+  void set_module_description(const std::string& v);
 };
 
 class ANLManager
