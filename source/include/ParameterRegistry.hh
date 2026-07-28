@@ -158,11 +158,6 @@ protected:
   void set_value_element_description(const std::string& v)
   { current_value_element_->set_description(v); }
 
-  template <typename T>
-  void add_value_element(T* ptr, const std::string& name);
-  template <typename T>
-  void add_value_element(T* ptr, const std::string& name, double unit, const std::string& unit_name);
-
   void ask_parameter(const std::string& name, const std::string& question="");
 
   /*
@@ -199,6 +194,14 @@ protected:
   [[deprecated]]
   void unregister_parameter(const std::string& name)
   { undefine_parameter(name); }
+
+  template <typename T>
+  [[deprecated]]
+  void add_value_element(T* ptr, const std::string& name);
+
+  template <typename T>
+  [[deprecated]]
+  void add_value_element(T* ptr, const std::string& name, double unit, const std::string& unit_name);
 
 private:
   ModuleParamIter find_parameter(const std::string& name);
