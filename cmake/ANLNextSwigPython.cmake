@@ -53,12 +53,23 @@ function(anlnext_add_swig_python_binding target)
   target_include_directories(${target}
     PRIVATE
     ${ARG_INCLUDE_DIRECTORIES}
+  )
+
+  target_include_directories(${target}
+    SYSTEM PRIVATE
     ${Python3_INCLUDE_DIRS}
   )
 
   target_compile_definitions(${target}
     PRIVATE
     ${ARG_COMPILE_DEFINITIONS}
+  )
+
+  target_compile_options(${target}
+    PRIVATE
+    $<$<COMPILE_LANG_AND_ID:CXX,AppleClang,Clang>:
+      -Wno-unused-parameter
+    >
   )
 
   target_link_libraries(${target}

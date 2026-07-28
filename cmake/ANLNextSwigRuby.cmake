@@ -66,9 +66,24 @@ function(anlnext_add_swig_ruby_binding target)
     ${Ruby_INCLUDE_DIRS}
   )
 
+  target_include_directories(${target}
+    SYSTEM PRIVATE
+    ${Ruby_INCLUDE_DIRS}
+  )
+
   target_compile_definitions(${target}
     PRIVATE
     ${ARG_COMPILE_DEFINITIONS}
+  )
+
+  target_compile_options(${target}
+    PRIVATE
+    $<$<COMPILE_LANG_AND_ID:CXX,AppleClang,Clang>:
+      -Wno-unused-parameter
+      -Wno-deprecated-declarations
+      -Wno-ignored-qualifiers
+      -Wno-deprecated-copy-with-user-provided-copy
+    >
   )
 
   target_link_libraries(${target}

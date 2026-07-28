@@ -33,7 +33,6 @@ BasicModule::BasicModule()
     module_ID_(""),
     access_permission_(ModuleAccess::Permission::full_access),
     module_on_(true),
-    module_access_(nullptr),
     loop_index_(-1),
     copy_ID_(0),
     last_copy_(0),
@@ -52,7 +51,6 @@ BasicModule::BasicModule(const BasicModule& r)
     aliases_(r.aliases_),
     access_permission_(r.access_permission_),
     module_on_(r.module_on_),
-    module_access_(nullptr),
     loop_index_(-1),
     copy_ID_(r.last_copy_+1),
     last_copy_(0),
@@ -193,6 +191,24 @@ void BasicModule::submodules_define_parameters()
 {
   for (auto& kv : submodule_map_) {
     kv.second->define_parameters();
+  }
+}
+
+void BasicModule::set_evs_manager(EvsManager* evs_manager)
+{
+  EvsInterface::set_evs_manager(evs_manager);
+  
+  for (auto& kv : submodule_map_) {
+    kv.second->set_evs_manager(evs_manager);
+  }
+}
+
+void BasicModule::set_module_access(const ModuleAccess* module_access)
+{
+  ModuleAccessInterface::set_module_access(module_access);
+  
+  for (auto& kv : submodule_map_) {
+    kv.second->set_module_access(module_access);
   }
 }
 

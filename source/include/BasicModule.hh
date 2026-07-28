@@ -21,8 +21,8 @@
 #define ANLNEXT_BasicModule_H 1
 
 #include <string>
-#include <utility>
 #include <vector>
+#include <utility>
 #include <memory>
 #include <iostream>
 
@@ -32,15 +32,17 @@
 #include "ParameterRegistry.hh"
 #include "ModuleDescription.hh"
 #include "EvsInterface.hh"
+#include "ModuleAccessInterface.hh"
+
 #include "ANLStatus.hh"
 #include "ANLException.hh"
 #include "ModuleAccess.hh"
+
 #include "ANLMacro.hh"
 
 namespace anlnext
 {
 
-class EvsManager;
 class BasicSubModule;
 
 /**
@@ -60,7 +62,7 @@ class BasicSubModule;
  * @date 2026-06-24 | seperate module registry
  * @date 2026-06-24 | new feature: sub module
  */
-class BasicModule : public ParameterRegistry, public ModuleDescription, public EvsInterface
+class BasicModule : public ParameterRegistry, public ModuleDescription, public EvsInterface, public ModuleAccessInterface
 {
 private:
   virtual std::string __module_name__() const
@@ -138,8 +140,6 @@ public:
     aliases_.emplace_back(name, conflict);
   }
 
-  void set_module_access(const ModuleAccess* aa) { module_access_ = aa; }
-
   ModuleAccess::Permission access_permission() const
   { return access_permission_; }
 
@@ -175,6 +175,9 @@ public:
   std::vector<std::string> submodule_names() const;
 
   boost::property_tree::ptree parameters_to_property_tree() const override;
+
+  void set_evs_manager(EvsManager* evs_manager) override;
+  void set_module_access(const ModuleAccess* module_access) override;
   
 protected:
   /*
@@ -183,56 +186,6 @@ protected:
   void set_access_permission(ModuleAccess::Permission v)
   { access_permission_ = v; }
   
-  /*
-   * get-module methods
-   */
-  template <typename T>
-  void get_module(const std::string& name, const T** ptr)
-  { *ptr = static_cast<const T*>(module_access_->get_module(name)); }
-
-  template <typename T>
-  void get_module_NC(const std::string& name, T** ptr)
-  { *ptr = static_cast<T*>(module_access_->get_module_NC(name)); }
-
-  template <typename T>
-  const T* get_module(const std::string& name)
-  { return static_cast<const T*>(module_access_->get_module(name)); }
-
-  template <typename T>
-  T* get_module_NC(const std::string& name)
-  { return static_cast<T*>(module_access_->get_module_NC(name)); }
-
-  template <typename T>
-  void get_module_IF(const std::string& name, const T** ptr);
-
-  template <typename T>
-  void get_module_IFNC(const std::string& name, T** ptr);
-
-  bool exist_module(const std::string& name)
-  { return module_access_->exist(name); }
-
-  template <typename T>
-  void request_module(const std::string& name, const T** ptr)
-  { *ptr = static_cast<const T*>(module_access_->request_module(name)); }
-
-  template <typename T>
-  void request_module_NC(const std::string& name, T** ptr)
-  { *ptr = static_cast<T*>(module_access_->request_module_NC(name)); }
-
-  template <typename T>
-  const T* request_module(const std::string& name)
-  { return static_cast<const T*>(module_access_->request_module(name)); }
-
-  template <typename T>
-  T* request_module_NC(const std::string& name)
-  { return static_cast<T*>(module_access_->request_module_NC(name)); }
-
-  template <typename T>
-  void request_module_IF(const std::string& name, const T** ptr);
-
-  template <typename T>
-  void request_module_IFNC(const std::string& name, T** ptr);
-
   /*
    * access to singleton
    */
@@ -262,7 +215,6 @@ private:
   std::vector<std::pair<std::string, ModuleAccess::ConflictOption>> aliases_;
   ModuleAccess::Permission access_permission_ = ModuleAccess::Permission::full_access;
   bool module_on_ = true;
-  const ModuleAccess* module_access_ = nullptr;
   long int loop_index_ = -1;
 
   const int copy_ID_ = 0;
@@ -279,48 +231,6 @@ private:
 
 using AMIter = std::vector<BasicModule*>::iterator;
 using AMConstIter = std::vector<BasicModule*>::const_iterator;
-
-template <typename T>
-void BasicModule::get_module_IF(const std::string& name, const T** ptr)
-{
-  *ptr = dynamic_cast<const T*>(module_access_->get_module(name));
-  if (*ptr==0) {
-    BOOST_THROW_EXCEPTION( ModuleAccessError("Dynamic cast failed -- Module", name) );
-  }
-}
-
-template <typename T>
-void BasicModule::get_module_IFNC(const std::string& name, T** ptr)
-{
-  *ptr = dynamic_cast<T*>(module_access_->get_module_NC(name));
-  if (*ptr==0) {
-    BOOST_THROW_EXCEPTION( ModuleAccessError("Dynamic cast failed -- Module", name) );
-  }
-}
-
-template <typename T>
-void BasicModule::request_module_IF(const std::string& name, const T** ptr)
-{
-  const BasicModule* m = module_access_->request_module(name);
-  if (m) {
-    *ptr = dynamic_cast<const T*>(m);
-  }
-  else {
-    *ptr = m;
-  }
-}
-
-template <typename T>
-void BasicModule::request_module_IFNC(const std::string& name, T** ptr)
-{
-  BasicModule* m = module_access_->request_module_NC(name);
-  if (m) {
-    *ptr = dynamic_cast<T*>(m);
-  }
-  else {
-    *ptr = m;
-  }
-}
 
 template <typename ModuleType>
 std::unique_ptr<BasicModule> BasicModule::help_duplication(std::unique_ptr<ModuleType>&& cloned)

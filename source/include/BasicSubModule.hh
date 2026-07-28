@@ -23,7 +23,7 @@
 #include "ParameterRegistry.hh"
 #include "ModuleDescription.hh"
 #include "EvsInterface.hh"
-#include "ANLStatus.hh"
+#include "ModuleAccessInterface.hh"
 #include "ANLException.hh"
 #include "ANLMacro.hh"
 
@@ -36,7 +36,7 @@ namespace anlnext
  * @author Hirokazu Odaka
  * @date 2026-06-24
  */
-class BasicSubModule : public ParameterRegistry, public ModuleDescription, public EvsInterface
+class BasicSubModule : public ParameterRegistry, public ModuleDescription, public EvsInterface, public ModuleAccessInterface
 {
 private:
   virtual std::string __submodule_name__() const

@@ -17,57 +17,26 @@
  *                                                                       *
  *************************************************************************/
 
-#include "EvsInterface.hh"
-#include "EvsManager.hh"
+#include "ModuleAccessInterface.hh"
 
 namespace anlnext
 {
 
-EvsInterface::EvsInterface()
-  : evs_manager_(nullptr)
+ModuleAccessInterface::ModuleAccessInterface()
+  : module_access_(nullptr)
 {
 }
 
-EvsInterface::~EvsInterface() = default;
+ModuleAccessInterface::~ModuleAccessInterface() = default;
 
-EvsInterface::EvsInterface(const EvsInterface&)
-  : evs_manager_(nullptr)
+ModuleAccessInterface::ModuleAccessInterface(const ModuleAccessInterface&)
+  : module_access_(nullptr)
 {
 }
 
-void EvsInterface::set_evs_manager(EvsManager* evs_manager)
+void ModuleAccessInterface::set_module_access(const ModuleAccess* module_access)
 {
-  evs_manager_ = evs_manager;
-}
-
-void EvsInterface::define_evs(const std::string& key)
-{
-  evs_manager_->define(key);
-}
-
-void EvsInterface::undefine_evs(const std::string& key)
-{
-  evs_manager_->undefine(key);
-}
-
-bool EvsInterface::is_evs_defined(const std::string& key) const
-{
-  return evs_manager_->is_defined(key);
-}
-
-bool EvsInterface::evs(const std::string& key) const
-{
-  return evs_manager_->get(key);
-}
-
-void EvsInterface::set_evs(const std::string& key)
-{
-  evs_manager_->set(key);
-}
-
-void EvsInterface::reset_evs(const std::string& key)
-{
-  evs_manager_->reset(key);
+  module_access_ = module_access;
 }
 
 } /* namespace anlnext */

@@ -41,8 +41,7 @@ public:
   EvsInterface(const EvsInterface& r);
   EvsInterface& operator=(const EvsInterface& r) = delete;
 
-public:
-  virtual void set_evs_manager(EvsManager* man);
+  virtual void set_evs_manager(EvsManager* evs_manager);
   
 protected:
   void define_evs(const std::string& key);

@@ -1,7 +1,7 @@
 ANL Next
 ========================================
 
-- Version: 2.5.2
+- Version: 3.a.1
 - Author: Hirokazu Odaka
 
 ## Table of Contents
@@ -15,6 +15,13 @@ ANL Next
 
 News
 ----------------------------------------
+
+### Version 3.0
+
+**released on X**
+
+- **submodule**: A module can have submodules, and each submodule has parameter registry system 
+
 
 ### Version 2.3
 

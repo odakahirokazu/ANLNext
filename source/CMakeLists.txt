@@ -82,6 +82,7 @@ target_sources(ANLNext
   src/CLIUtility.cc
   src/VModuleParameter.cc
   src/ModuleAccess.cc
+  src/ModuleAccessInterface.cc
   src/ParameterRegistry.cc
   src/ModuleDescription.cc
   src/EvsInterface.cc
