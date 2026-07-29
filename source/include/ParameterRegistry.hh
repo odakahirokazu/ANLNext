@@ -134,10 +134,18 @@ protected:
   void set_parameter_description(const std::string& v)
   { current_parameter_->set_description(v); }
 
+  template <typename T>
+  void add_value_element(const std::string& name, T value);
+
+  template <typename T>
+  void add_value_element(const std::string& name, T value, double unit, const std::string& unit_name);
+
   template <typename ModuleClass, typename T>
+  [[deprecated]]
   void add_value_element(const std::string& name, T ModuleClass::* ptr);
 
   template <typename ModuleClass, typename T>
+  [[deprecated]]
   void add_value_element(const std::string& name, T ModuleClass::* ptr, double unit, const std::string& unit_name);
 
   void enable_value_elements(int type, const std::vector<std::size_t>& enable)
@@ -242,6 +250,23 @@ void ParameterRegistry::define_result(const std::string& name, T ModuleClass::* 
 {
   define_parameter(name, ptr, unit, unit_name);
   current_parameter_->set_result();
+}
+
+template <typename T>
+void ParameterRegistry::add_value_element(const std::string& name, T value)
+{
+  ModuleParam_sptr p(new ModuleParameterUnique<T>(name, value));
+  current_parameter_->add_value_element(p);
+  current_value_element_ = p;
+}
+
+template <typename T>
+void ParameterRegistry::add_value_element(const std::string& name, T value, double unit, const std::string& unit_name)
+{
+  ModuleParam_sptr p(new ModuleParameterUnique<T>(name, value));
+  p->set_unit(unit, unit_name);
+  current_parameter_->add_value_element(p);
+  current_value_element_ = p;
 }
 
 template <typename ModuleClass, typename T>

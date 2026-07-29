@@ -180,6 +180,11 @@ public:
 protected:
   virtual T& __ref__() { return *ptr_; }
   virtual const T& __ref__() const { return *ptr_; }
+
+  void __set_pointer__(T* p)
+  {
+    ptr_ = p;
+  }
   
   template <bool b0>
   bool ask_sequential(const std::integral_constant<bool, b0>&)
@@ -489,5 +494,6 @@ private:
 #include "ModuleParameter_vector.hh"
 #include "ModuleParameter_map.hh"
 #include "ModuleParameter_member.hh"
+#include "ModuleParameter_unique.hh"
 
 #endif /* ANLNEXT_ModuleParameter_H */
