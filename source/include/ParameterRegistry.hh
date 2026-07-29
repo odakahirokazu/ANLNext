@@ -183,34 +183,6 @@ protected:
    */
   void copy_parameters(const ParameterRegistry& r);
 
-  /*
-   * define-parameter methods (non-member pointer) [conventional]
-   */
-
-  template <typename T>
-  [[deprecated]]
-  void register_parameter(T* ptr, const std::string& name);
-
-  template <typename T>
-  [[deprecated]]
-  void register_parameter(T* ptr, const std::string& name, double unit, const std::string& unit_name);
-
-  template <typename T>
-  [[deprecated]]
-  void register_parameter_map(T* ptr, const std::string& name, const std::string& key_name, const std::string& key_default);
-
-  [[deprecated]]
-  void unregister_parameter(const std::string& name)
-  { undefine_parameter(name); }
-
-  template <typename T>
-  [[deprecated]]
-  void add_value_element(T* ptr, const std::string& name);
-
-  template <typename T>
-  [[deprecated]]
-  void add_value_element(T* ptr, const std::string& name, double unit, const std::string& unit_name);
-
 private:
   ModuleParamIter find_parameter(const std::string& name);
   virtual void add_parameter_error_info(ANLException&) const {}
@@ -281,49 +253,6 @@ template <typename ModuleClass, typename T>
 void ParameterRegistry::add_value_element(const std::string& name, T ModuleClass::* ptr, double unit, const std::string& unit_name)
 {
   ModuleParam_sptr p(new ModuleParameterMember<ModuleClass, T>(name, dynamic_cast<ModuleClass*>(this), ptr));
-  p->set_unit(unit, unit_name);
-  current_parameter_->add_value_element(p);
-  current_value_element_ = p;
-}
-
-template<typename T>
-void ParameterRegistry::register_parameter(T* ptr, const std::string& name)
-{
-  ModuleParam_sptr p(new ModuleParameter<T>(name, ptr));
-  module_parameters_.push_back(p);
-  current_parameter_ = p;
-}
-
-template<typename T>
-void ParameterRegistry::register_parameter(T* ptr, const std::string& name, double unit, const std::string& unit_name)
-{
-  ModuleParam_sptr p(new ModuleParameter<T>(name, ptr));
-  p->set_unit(unit, unit_name);
-  module_parameters_.push_back(p);
-  current_parameter_ = p;
-}
-
-template <typename T>
-void ParameterRegistry::register_parameter_map(T* ptr, const std::string& name, const std::string& key_name, const std::string& key_default)
-{
-  ModuleParam_sptr p(new ModuleParameter<T>(name, ptr));
-  p->set_map_key_properties(key_name, key_default);
-  module_parameters_.push_back(p);
-  current_parameter_ = p;
-}
-
-template <typename T>
-void ParameterRegistry::add_value_element(T* ptr, const std::string& name)
-{
-  ModuleParam_sptr p(new ModuleParameter<T>(name, ptr));
-  current_parameter_->add_value_element(p);
-  current_value_element_ = p;
-}
-
-template <typename T>
-void ParameterRegistry::add_value_element(T* ptr, const std::string& name, double unit, const std::string& unit_name)
-{
-  ModuleParam_sptr p(new ModuleParameter<T>(name, ptr));
   p->set_unit(unit, unit_name);
   current_parameter_->add_value_element(p);
   current_value_element_ = p;
