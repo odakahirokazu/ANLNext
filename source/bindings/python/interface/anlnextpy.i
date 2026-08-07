@@ -207,8 +207,8 @@ class ParameterRegistry
           PyObject* key = PyList_GetItem(keys, i);
           PyObject* val = PyDict_GetItem(dict, key);
           const std::string name(PyUnicode_AsUTF8(key));
-          if (PyInt_Check(val)) {
-            const int v = PyInt_AsLong(val);
+          if (PyLong_Check(val)) {
+            const int v = PyLong_AsLong(val);
             $self->set_value_element(name, v);
           }
           else if (PyFloat_Check(val)) {
@@ -236,8 +236,8 @@ class ParameterRegistry
           PyObject* key = PyList_GetItem(keys, i);
           PyObject* val = PyDict_GetItem(dict, key);
           const std::string name(PyUnicode_AsUTF8(key));
-          if (PyInt_Check(val)) {
-            const int v = PyInt_AsLong(val);
+          if (PyLong_Check(val)) {
+            const int v = PyLong_AsLong(val);
             $self->set_value_element(name, v);
           }
           else if (PyFloat_Check(val)) {
