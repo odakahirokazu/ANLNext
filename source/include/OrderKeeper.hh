@@ -20,6 +20,7 @@
 #ifndef ANLNEXT_OrderKeeper_H
 #define ANLNEXT_OrderKeeper_H 1
 
+#include <cstddef>
 #include <mutex>
 #include <condition_variable>
 
@@ -42,23 +43,43 @@ public:
   OrderKeeper& operator=(const OrderKeeper&) = delete;
   OrderKeeper& operator=(OrderKeeper&&) = delete;
 
-  void wait(long int index)
+  // False means that the run was cancelled; the caller must not execute.
+  bool wait(std::size_t index)
   {
     std::unique_lock<std::mutex> lock(mutex_);
-    cv_.wait(lock, [=](){ return (index-1 == last_done_index_); });
+    cv_.wait(lock, [this, index](){ return cancelled_ || index == next_index_; });
+    return !cancelled_;
   }
 
-  void send_done(long int index)
+  void send_done(std::size_t index)
   {
-    std::unique_lock<std::mutex> lock(mutex_);
-    last_done_index_ = index;
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!cancelled_) {
+      next_index_ = index + 1;
+    }
     cv_.notify_all();
+  }
+
+  void cancel()
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    cancelled_ = true;
+    cv_.notify_all();
+  }
+
+  // Only call between runs, after all workers have joined.
+  void reset()
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    next_index_ = 0;
+    cancelled_ = false;
   }
 
 private:
   std::mutex mutex_;
   std::condition_variable cv_;
-  long int last_done_index_ = -1;
+  std::size_t next_index_ = 0;
+  bool cancelled_ = false;
 };
 
 template<typename KeeperType, typename IndexType>
@@ -69,18 +90,23 @@ public:
     : keeper_(keeper), index_(index)
   {
     if (keeper) {
-      keeper->wait(index);
+      acquired_ = keeper->wait(index);
     }
   }
 
   ~KeeperBlock()
   {
-    if (keeper_) {
+    if (keeper_ && acquired_) {
       keeper_->send_done(index_);
     }
   }
 
+  KeeperBlock(const KeeperBlock&) = delete;
+  KeeperBlock& operator=(const KeeperBlock&) = delete;
+  explicit operator bool() const { return acquired_; }
+
 private:
+  bool acquired_ = true;
   KeeperType* keeper_;
   IndexType index_;
 };

@@ -44,4 +44,9 @@ endif(ANLNEXT_USE_ALL)
 add_subdirectory(source)
 add_subdirectory(cmake)
 
+include(CTest)
+if(BUILD_TESTING)
+  add_subdirectory(tests)
+endif()
+
 ### END

@@ -225,13 +225,27 @@ std::size_t ANLManagerMT::event_index_to_process()
 
 ANLStatus ANLManagerMT::process_analysis()
 {
+  loop_index_ = 0;
+  for (auto& keeper: order_keepers_) {
+    if (keeper) { keeper->reset(); }
+  }
+
   std::vector<std::future<ANLStatus>> status_future_vector;
   std::vector<std::thread> analysis_threads(num_parallels_);
-  for (std::size_t i=0; i<num_parallels_; i++) {
-    std::promise<ANLStatus> status_promise;
-    status_future_vector.push_back(status_promise.get_future());
-    analysis_threads[i] = std::thread(std::bind(&ANLManagerMT::process_analysis_in_each_thread, this, i, std::placeholders::_1),
-                                      std::move(status_promise));
+  try {
+    for (std::size_t i=0; i<num_parallels_; i++) {
+      std::promise<ANLStatus> status_promise;
+      status_future_vector.push_back(status_promise.get_future());
+      analysis_threads[i] = std::thread(std::bind(&ANLManagerMT::process_analysis_in_each_thread, this, i, std::placeholders::_1),
+                                        std::move(status_promise));
+    }
+  }
+  catch (...) {
+    cancel_analysis();
+    for (auto& thread: analysis_threads) {
+      if (thread.joinable()) { thread.join(); }
+    }
+    throw;
   }
 
   for (std::size_t i=0; i<num_parallels_; i++) {
@@ -268,6 +282,17 @@ ANLStatus ANLManagerMT::process_analysis()
   return status;
 }
 
+void ANLManagerMT::cancel_analysis()
+{
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    requested_ = ANLRequest::quit;
+  }
+  for (auto& keeper: order_keepers_) {
+    if (keeper) { keeper->cancel(); }
+  }
+}
+
 void ANLManagerMT::process_analysis_in_each_thread(std::size_t i_thread, std::promise<ANLStatus> status_promise)
 {
   try {
@@ -285,7 +310,7 @@ void ANLManagerMT::process_analysis_in_each_thread(std::size_t i_thread, std::pr
   }
   catch (...) {
     if (exception_propagation()) {
-      requested_ = ANLRequest::quit;
+      cancel_analysis();
       status_promise.set_exception(std::current_exception());
     }
     else {
@@ -307,12 +332,10 @@ ANLStatus ANLManagerMT::process_analysis_impl(const std::vector<BasicModule*>& m
       const std::size_t i_event = event_index_to_process();
       if (i_event == index_end) { break; }
 
-      do {
-        status = process_one_event(i_event, modules, counters, evs_manager, order_keepers_);
-      } while (status == ANLStatus::redo);
+      status = process_one_event(i_event, modules, counters, evs_manager, order_keepers_);
       
       if (is_critical_error(status)) {
-        requested_ = ANLRequest::quit;
+        cancel_analysis();
         return status;
       }
 
@@ -346,12 +369,12 @@ ANLStatus ANLManagerMT::process_analysis_impl(const std::vector<BasicModule*>& m
         throw;
       }
       else if (*t == ANLException::Treatment::finalize) {
-        requested_ = ANLRequest::quit;
+        cancel_analysis();
         print_exception(ex);
         return ANLStatus::critical_error_to_finalize_from_exception;
       }
       else if (*t == ANLException::Treatment::terminate) {
-        requested_ = ANLRequest::quit;
+        cancel_analysis();
         print_exception(ex);
         return ANLStatus::critical_error_to_terminate_from_exception;
       }

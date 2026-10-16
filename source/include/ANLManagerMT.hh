@@ -70,6 +70,7 @@ protected:
 private:
   void duplicate_chains() override;
   void automatic_switch_for_singletons();
+  void cancel_analysis();
   ANLStatus process_analysis_impl(const std::vector<BasicModule*>& modules,
                                   std::vector<LoopCounter>& counters,
                                   EvsManager& evs_manager);

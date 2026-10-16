@@ -486,9 +486,7 @@ ANLStatus ANLManager::process_analysis()
         print_event_index(i_event);
       }
 
-      do {
-        status = process_one_event(i_event, modules, counters_, *evs_manager_);
-      } while (status == ANLStatus::redo);
+      status = process_one_event(i_event, modules, counters_, *evs_manager_);
       
       if (is_critical_error(status)) {
         return status;
@@ -750,6 +748,9 @@ ANLStatus process_one_event(std::size_t i_event,
     BasicModule* mod = modules[i_module];
   
     const KeeperBlock<OrderKeeper, std::size_t> block(order_keepers[i_module].get(), i_event);
+    if (!block) {
+      return is_critical_error(status) ? status : AS_QUIT_ALL;
+    }
 
     if (status == AS_OK && mod->is_on()) {
       counters[i_module].count_up_by_entry();
