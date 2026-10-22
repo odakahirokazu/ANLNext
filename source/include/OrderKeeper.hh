@@ -47,14 +47,14 @@ public:
   bool wait(std::size_t index)
   {
     std::unique_lock<std::mutex> lock(mutex_);
-    cv_.wait(lock, [this, index](){ return cancelled_ || index == next_index_; });
-    return !cancelled_;
+    cv_.wait(lock, [this, index](){ return !normal_ || index == next_index_; });
+    return normal_;
   }
 
   void send_done(std::size_t index)
   {
     std::lock_guard<std::mutex> lock(mutex_);
-    if (!cancelled_) {
+    if (normal_) {
       next_index_ = index + 1;
     }
     cv_.notify_all();
@@ -63,7 +63,7 @@ public:
   void cancel()
   {
     std::lock_guard<std::mutex> lock(mutex_);
-    cancelled_ = true;
+    normal_ = false;
     cv_.notify_all();
   }
 
@@ -72,14 +72,14 @@ public:
   {
     std::lock_guard<std::mutex> lock(mutex_);
     next_index_ = 0;
-    cancelled_ = false;
+    normal_ = true;
   }
 
 private:
   std::mutex mutex_;
   std::condition_variable cv_;
   std::size_t next_index_ = 0;
-  bool cancelled_ = false;
+  bool normal_ = true;  // Normal sequencing; false after cancel().
 };
 
 template<typename KeeperType, typename IndexType>
@@ -90,23 +90,24 @@ public:
     : keeper_(keeper), index_(index)
   {
     if (keeper) {
-      acquired_ = keeper->wait(index);
+      can_proceed_ = keeper->wait(index);
     }
   }
 
   ~KeeperBlock()
   {
-    if (keeper_ && acquired_) {
+    if (keeper_ && can_proceed_) {
       keeper_->send_done(index_);
     }
   }
 
   KeeperBlock(const KeeperBlock&) = delete;
   KeeperBlock& operator=(const KeeperBlock&) = delete;
-  explicit operator bool() const { return acquired_; }
+  // Result of the initial wait (true without a keeper), not a live cancellation check.
+  bool can_proceed() const { return can_proceed_; }
 
 private:
-  bool acquired_ = true;
+  bool can_proceed_ = true;
   KeeperType* keeper_;
   IndexType index_;
 };

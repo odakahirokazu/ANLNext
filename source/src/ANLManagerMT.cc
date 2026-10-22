@@ -248,8 +248,8 @@ ANLStatus ANLManagerMT::process_analysis()
     throw;
   }
 
-  for (std::size_t i=0; i<num_parallels_; i++) {
-    analysis_threads[i].join();
+  for (auto& thread: analysis_threads) {
+    thread.join();
   }
 
   std::vector<ANLStatus> status_vector(num_parallels_, AS_OK);

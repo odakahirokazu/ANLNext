@@ -748,7 +748,7 @@ ANLStatus process_one_event(std::size_t i_event,
     BasicModule* mod = modules[i_module];
   
     const KeeperBlock<OrderKeeper, std::size_t> block(order_keepers[i_module].get(), i_event);
-    if (!block) {
+    if (!block.can_proceed()) {
       return is_critical_error(status) ? status : AS_QUIT_ALL;
     }
 
