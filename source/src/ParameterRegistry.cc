@@ -76,7 +76,7 @@ void ParameterRegistry::copy_parameters(const ParameterRegistry& r)
   module_parameters_.clear();
   for (ModuleParam_sptr p: r.module_parameters_) {
     ModuleParam_sptr new_param = p->clone();
-    p->set_module_pointer(this);
+    new_param->set_module_pointer(this);
     module_parameters_.push_back(new_param);
   }
 }
