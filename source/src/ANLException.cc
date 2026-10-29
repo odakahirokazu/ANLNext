@@ -190,6 +190,34 @@ SubModuleUndefinedError::SubModuleUndefinedError(const BasicModule* mod, const s
   append_message((boost::format("Submodule is not defined: %s") % name).str());
 }
 
+SubModuleAlreadyDefinedError::SubModuleAlreadyDefinedError(const BasicModule* mod, const std::string& name)
+  : ANLException(mod)
+{
+  set_message("<SubModuleAlreadyDefinedError>");
+  append_message("Submodule already declared: " + name);
+}
+
+SubModuleConfigurationError::SubModuleConfigurationError(const BasicModule* mod, const std::string& name)
+  : ANLException(mod)
+{
+  set_message("<SubModuleConfigurationError>");
+  append_message("Cannot change submodule configuration after duplication: " + name);
+}
+
+SubModuleNullError::SubModuleNullError(const BasicModule* mod, const std::string& name)
+  : ANLException(mod)
+{
+  set_message("<SubModuleNullError>");
+  append_message("Cannot set a null submodule: " + name);
+}
+
+SubModuleNotSetError::SubModuleNotSetError(const BasicModule* mod, const std::string& name)
+  : ANLException(mod)
+{
+  set_message("<SubModuleNotSetError>");
+  append_message("Submodule is not set: " + name);
+}
+
 ParameterNotFoundError::ParameterNotFoundError(const std::string& name)
 {
   set_message("<ParameterNotFound>");

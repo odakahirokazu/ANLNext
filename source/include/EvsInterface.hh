@@ -44,6 +44,8 @@ public:
   virtual void set_evs_manager(EvsManager* evs_manager);
   
 protected:
+  void connect_evs_to(EvsInterface& target) const;
+
   void define_evs(const std::string& key);
   void undefine_evs(const std::string& key);
   bool is_evs_defined(const std::string& key) const;

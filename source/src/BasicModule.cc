@@ -143,7 +143,11 @@ void BasicModule::add_parameter_error_info(ANLException& ex) const
 
 void BasicModule::define_submodule(const std::string& name)
 {
-  submodule_map_[name] = std::make_unique<BasicSubModule>();
+  check_submodule_configuration(name);
+  if (is_submodule_defined(name)) {
+    BOOST_THROW_EXCEPTION(SubModuleAlreadyDefinedError(this, name));
+  }
+  submodule_map_.emplace(name, nullptr);
 }
 
 bool BasicModule::is_submodule_defined(const std::string& name) const
@@ -153,6 +157,22 @@ bool BasicModule::is_submodule_defined(const std::string& name) const
     return true;
   }
   return false;
+}
+
+bool BasicModule::is_submodule_set(const std::string& name) const
+{
+  auto it = submodule_map_.find(name);
+  if (it == submodule_map_.end()) {
+    BOOST_THROW_EXCEPTION(SubModuleUndefinedError(this, name));
+  }
+  return static_cast<bool>(it->second);
+}
+
+void BasicModule::check_submodule_configuration(const std::string& name) const
+{
+  if (!is_master() || last_copy_ != 0) {
+    BOOST_THROW_EXCEPTION(SubModuleConfigurationError(this, name));
+  }
 }
 
 std::vector<std::string> BasicModule::submodule_names() const
@@ -166,12 +186,30 @@ std::vector<std::string> BasicModule::submodule_names() const
 
 void BasicModule::set_submodule(const std::string& name, std::unique_ptr<BasicSubModule>&& submod)
 {
+  check_submodule_configuration(name);
   auto it = submodule_map_.find(name);
   if (it == submodule_map_.end()) {
     BOOST_THROW_EXCEPTION( SubModuleUndefinedError(this, name) );
   }
+  if (!submod) {
+    BOOST_THROW_EXCEPTION(SubModuleNullError(this, name));
+  }
+  connect_evs_to(*submod);
+  connect_module_access_to(*submod);
+  submod->define_parameters();
+  it->second = std::move(submod);
+}
 
-  (*it).second = std::move(submod);
+BasicSubModule* BasicModule::get_submodule(const std::string& name)
+{
+  auto it = submodule_map_.find(name);
+  if (it == submodule_map_.end()) {
+    BOOST_THROW_EXCEPTION(SubModuleUndefinedError(this, name));
+  }
+  if (!it->second) {
+    BOOST_THROW_EXCEPTION(SubModuleNotSetError(this, name));
+  }
+  return it->second.get();
 }
 
 const BasicSubModule* BasicModule::get_submodule(const std::string& name) const
@@ -181,20 +219,17 @@ const BasicSubModule* BasicModule::get_submodule(const std::string& name) const
     BOOST_THROW_EXCEPTION( SubModuleUndefinedError(this, name) );
   }
 
-  return (*it).second.get();
+  if (!it->second) {
+    BOOST_THROW_EXCEPTION(SubModuleNotSetError(this, name));
+  }
+  return it->second.get();
 }
 
-ANLStatus BasicModule::mod_define_with_submodules()
+void BasicModule::copy_submodules(const BasicModule& source)
 {
-  ANLStatus status = mod_define();
-  submodules_define_parameters();
-  return status;
-}
-
-void BasicModule::submodules_define_parameters()
-{
-  for (auto& kv : submodule_map_) {
-    kv.second->define_parameters();
+  for (const auto& entry: source.submodule_map_) {
+    submodule_map_.emplace(entry.first,
+                          entry.second ? entry.second->duplicate() : nullptr);
   }
 }
 
@@ -203,7 +238,7 @@ void BasicModule::set_evs_manager(EvsManager* evs_manager)
   EvsInterface::set_evs_manager(evs_manager);
   
   for (auto& kv : submodule_map_) {
-    kv.second->set_evs_manager(evs_manager);
+    if (kv.second) { kv.second->set_evs_manager(evs_manager); }
   }
 }
 
@@ -212,7 +247,7 @@ void BasicModule::set_module_access(const ModuleAccess* module_access)
   ModuleAccessInterface::set_module_access(module_access);
   
   for (auto& kv : submodule_map_) {
-    kv.second->set_module_access(module_access);
+    if (kv.second) { kv.second->set_module_access(module_access); }
   }
 }
 

@@ -304,6 +304,8 @@ class BasicModule : public ParameterRegistry
 
   virtual void set_submodule_by_key(const std::string& /* name */, const std::string& /* keyword */);
   bool is_submodule_defined(const std::string& name) const;
+  bool is_submodule_set(const std::string& name) const;
+  BasicSubModule* get_submodule(const std::string& name);
   const BasicSubModule* get_submodule(const std::string& name) const;
   std::vector<std::string> submodule_names() const;
 

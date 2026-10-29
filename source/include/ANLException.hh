@@ -108,6 +108,26 @@ struct SubModuleUndefinedError : anlnext::ANLException
   SubModuleUndefinedError(const BasicModule* mod, const std::string& name);
 };
 
+struct SubModuleAlreadyDefinedError : anlnext::ANLException
+{
+  SubModuleAlreadyDefinedError(const BasicModule* mod, const std::string& name);
+};
+
+struct SubModuleConfigurationError : anlnext::ANLException
+{
+  SubModuleConfigurationError(const BasicModule* mod, const std::string& name);
+};
+
+struct SubModuleNullError : anlnext::ANLException
+{
+  SubModuleNullError(const BasicModule* mod, const std::string& name);
+};
+
+struct SubModuleNotSetError : anlnext::ANLException
+{
+  SubModuleNotSetError(const BasicModule* mod, const std::string& name);
+};
+
 struct ParameterNotFoundError : anlnext::ANLException
 {
   ParameterNotFoundError(const std::string& name);

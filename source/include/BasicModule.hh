@@ -130,8 +130,6 @@ public:
 
   virtual ANLStatus mod_communicate() { ask_parameters(); return AS_OK; }
 
-  ANLStatus mod_define_with_submodules();
-
   std::vector<std::pair<std::string, ModuleAccess::ConflictOption>> get_aliases() const { return aliases_; }
   std::vector<std::string> get_aliases_string() const;
   void add_alias(const std::string& name,
@@ -171,6 +169,8 @@ public:
    */
   virtual void set_submodule_by_key(const std::string& /* name */, const std::string& /* keyword */) {}
   bool is_submodule_defined(const std::string& name) const;
+  bool is_submodule_set(const std::string& name) const;
+  BasicSubModule* get_submodule(const std::string& name);
   const BasicSubModule* get_submodule(const std::string& name) const;
   std::vector<std::string> submodule_names() const;
 
@@ -207,7 +207,8 @@ protected:
 private:
   std::string get_module_id() const { return module_ID_; }
   void add_parameter_error_info(ANLException& ex) const override final;
-  void submodules_define_parameters();
+  void copy_submodules(const BasicModule& source);
+  void check_submodule_configuration(const std::string& name) const;
 
 private:
   bool order_sensitive_ = false;
@@ -237,6 +238,7 @@ std::unique_ptr<BasicModule> BasicModule::help_duplication(std::unique_ptr<Modul
 {
   if (this->is_master()) {
     cloned->copy_parameters(*this);
+    cloned->copy_submodules(*this);
     this->last_copy_ += 1;
   }
   else {

@@ -20,3 +20,8 @@ add_executable(anlnext_parameter_rebinding parameter_rebinding.cc)
 target_link_libraries(anlnext_parameter_rebinding PRIVATE ANLNext)
 add_test(NAME parameter_rebinding COMMAND anlnext_parameter_rebinding)
 set_tests_properties(parameter_rebinding PROPERTIES TIMEOUT 15)
+
+add_executable(anlnext_submodule submodule.cc)
+target_link_libraries(anlnext_submodule PRIVATE ANLNext)
+add_test(NAME submodule COMMAND anlnext_submodule)
+set_tests_properties(submodule PROPERTIES TIMEOUT 15)

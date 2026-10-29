@@ -585,7 +585,7 @@ void ANLManager::parameters_to_json(const std::string& filename) const
 
 ANLStatus ANLManager::routine_define()
 {
-  return routine_modfn(&BasicModule::mod_define_with_submodules, "define", modules_);
+  return routine_modfn(&BasicModule::mod_define, "define", modules_);
 }
 
 ANLStatus ANLManager::routine_pre_initialize()

@@ -43,6 +43,8 @@ public:
   virtual void set_module_access(const ModuleAccess* module_access);
 
 protected:
+  void connect_module_access_to(ModuleAccessInterface& target) const;
+
   template <typename T>
   void get_module(const std::string& name, const T** ptr) const
   { *ptr = static_cast<const T*>(module_access_->get_module(name)); }

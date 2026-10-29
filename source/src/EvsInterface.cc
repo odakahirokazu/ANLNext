@@ -40,6 +40,11 @@ void EvsInterface::set_evs_manager(EvsManager* evs_manager)
   evs_manager_ = evs_manager;
 }
 
+void EvsInterface::connect_evs_to(EvsInterface& target) const
+{
+  target.set_evs_manager(evs_manager_);
+}
+
 void EvsInterface::define_evs(const std::string& key)
 {
   evs_manager_->define(key);

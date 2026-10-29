@@ -39,4 +39,9 @@ void ModuleAccessInterface::set_module_access(const ModuleAccess* module_access)
   module_access_ = module_access;
 }
 
+void ModuleAccessInterface::connect_module_access_to(ModuleAccessInterface& target) const
+{
+  target.set_module_access(module_access_);
+}
+
 } /* namespace anlnext */
