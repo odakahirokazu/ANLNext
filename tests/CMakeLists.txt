@@ -10,3 +10,8 @@ add_executable(anlnext_parameter_selection parameter_selection.cc)
 target_link_libraries(anlnext_parameter_selection PRIVATE ANLNext)
 add_test(NAME parameter_selection COMMAND anlnext_parameter_selection)
 set_tests_properties(parameter_selection PROPERTIES TIMEOUT 15)
+
+add_executable(anlnext_parameter_defaults parameter_defaults.cc)
+target_link_libraries(anlnext_parameter_defaults PRIVATE ANLNext)
+add_test(NAME parameter_defaults COMMAND anlnext_parameter_defaults)
+set_tests_properties(parameter_defaults PROPERTIES TIMEOUT 15)

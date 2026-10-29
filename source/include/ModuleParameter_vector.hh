@@ -68,7 +68,7 @@ protected:
     : VModuleParameter(r),
       ptr_(r.ptr_),
       default_value_(r.default_value_),
-      first_input_(false)
+      first_input_(r.first_input_)
   {
     value_info_.clear();
     for (ModuleParam_sptr p: r.value_info_) {
@@ -110,6 +110,7 @@ public:
 
   void insert_to_container() override
   {
+    if (first_input()) { initialize_default_value_elements(); }
     value_type t;
     value_info_get<0>(&t, value_category());
     __ref__().push_back(t);
@@ -384,7 +385,7 @@ private:
 
 private:
   container_type* ptr_;
-  value_type default_value_;
+  value_type default_value_{};
   std::vector<ModuleParam_sptr> value_info_;
   bool first_input_;
 };

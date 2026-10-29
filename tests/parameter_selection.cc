@@ -33,7 +33,6 @@ public:
     this->define_parameter("value", &Parameters::value_);
     this->define_parameter("rows", &Parameters::rows_);
     this->add_value_element("entry", 0);
-    // Initialize the existing container defaults before duplication (issue 3 is separate).
     this->set_value_element("entry", 7);
     this->insert_to_container();
   }
