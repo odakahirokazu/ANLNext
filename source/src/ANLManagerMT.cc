@@ -54,7 +54,7 @@ BasicModule* ANLManagerMT::access_to_module(std::size_t chain_ID, const std::str
     }
   }
 
-  BOOST_THROW_EXCEPTION( ANLException((boost::format("Chain does not exist ===> Chain ID: %d") % chain_ID).str()) );
+  BOOST_THROW_EXCEPTION( ChainNotFoundError(chain_ID) );
   return nullptr;
 }
 

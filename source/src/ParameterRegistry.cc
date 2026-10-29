@@ -36,7 +36,7 @@ ParameterRegistry::~ParameterRegistry() = default;
 VModuleParameter& ParameterRegistry::current_parameter()
 {
   if (!current_parameter_) {
-    ANLException ex("No current parameter is selected.");
+    ParameterNotSelectedError ex;
     add_parameter_error_info(ex);
     BOOST_THROW_EXCEPTION(ex);
   }
@@ -46,7 +46,7 @@ VModuleParameter& ParameterRegistry::current_parameter()
 VModuleParameter& ParameterRegistry::current_value_element()
 {
   if (!current_value_element_) {
-    ANLException ex("No current value element is selected.");
+    ValueElementNotSelectedError ex;
     add_parameter_error_info(ex);
     BOOST_THROW_EXCEPTION(ex);
   }

@@ -22,6 +22,7 @@
 
 #include <stdexcept>
 #include <cstdint>
+#include <cstddef>
 #include <string>
 #include <boost/exception/all.hpp>
 
@@ -92,6 +93,11 @@ private:
 
 using ExceptionTreatment = boost::error_info<struct tag_ExceptionTreatment, ANLException::Treatment>;
 
+struct ChainNotFoundError : anlnext::ANLException
+{
+  explicit ChainNotFoundError(std::size_t chain_id);
+};
+
 struct ModuleDuplicationError : anlnext::ANLException
 {
   explicit ModuleDuplicationError(const BasicModule* mod);
@@ -126,6 +132,16 @@ struct SubModuleNullError : anlnext::ANLException
 struct SubModuleNotSetError : anlnext::ANLException
 {
   SubModuleNotSetError(const BasicModule* mod, const std::string& name);
+};
+
+struct ParameterNotSelectedError : anlnext::ANLException
+{
+  ParameterNotSelectedError();
+};
+
+struct ValueElementNotSelectedError : anlnext::ANLException
+{
+  ValueElementNotSelectedError();
 };
 
 struct ParameterNotFoundError : anlnext::ANLException

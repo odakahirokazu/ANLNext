@@ -160,6 +160,12 @@ std::string ANLException::to_string() const
   return "";
 }
 
+ChainNotFoundError::ChainNotFoundError(std::size_t chain_id)
+{
+  set_message("<ChainNotFoundError>");
+  append_message((boost::format("Chain does not exist ===> Chain ID: %d") % chain_id).str());
+}
+
 ModuleDuplicationError::ModuleDuplicationError(const BasicModule* mod)
   : ANLException(mod)
 {
@@ -216,6 +222,18 @@ SubModuleNotSetError::SubModuleNotSetError(const BasicModule* mod, const std::st
 {
   set_message("<SubModuleNotSetError>");
   append_message("Submodule is not set: " + name);
+}
+
+ParameterNotSelectedError::ParameterNotSelectedError()
+{
+  set_message("<ParameterNotSelectedError>");
+  append_message("No current parameter is selected.");
+}
+
+ValueElementNotSelectedError::ValueElementNotSelectedError()
+{
+  set_message("<ValueElementNotSelectedError>");
+  append_message("No current value element is selected.");
 }
 
 ParameterNotFoundError::ParameterNotFoundError(const std::string& name)
