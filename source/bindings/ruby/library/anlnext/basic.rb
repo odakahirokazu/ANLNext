@@ -25,7 +25,7 @@ module ANL
       if values.size == 1 && values.first.is_a?(Hash)
         type = get_parameter(name).type_name()
         suffix = MAP_PARAMETER_TYPES[type]
-        raise TypeError, "#{name} is not a scalar map parameter: #{type}" unless suffix
+        raise TypeError, "#{name} is not a map parameter: #{type}" unless suffix
         public_send("set_parameter_map_#{suffix}", name.to_s, values.first)
       else
         set_parameter_original(name.to_s, *values)
@@ -119,7 +119,7 @@ module ANL
 
     def to_value_object(children_into_hash: true, value_element_to_object: false)
       case type_name()
-      when "vector"
+      when "record_vector"
         values = []
         size_of_container.times do |k|
           values <<
@@ -130,7 +130,7 @@ module ANL
             end
         end
         return values
-      when "map"
+      when "record_map"
         values = {}
         map_key_list.each do |k|
           values[k] =

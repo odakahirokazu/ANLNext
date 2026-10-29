@@ -59,6 +59,10 @@ void run(const std::string& name, bool initialized, bool direct)
 {
   DefaultsModule source;
   source.setup();
+  const auto expected_type = name == "table" ? "record_map" : "record_vector";
+  require(source.get_parameter(name)->type_name() == expected_type, "record container type mismatch");
+  require(source.get_parameter(name)->to_property_tree().get<std::string>("type") == expected_type,
+          "record container JSON type mismatch");
   source.expose_parameter(name);
   if (initialized) { source.set_value_element("number", 23); }
   auto copy = source.duplicate();

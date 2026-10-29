@@ -1,5 +1,6 @@
 require 'anlnext'
 require 'submodule_ruby'
+require 'tmpdir'
 
 values = {
   'map_i_i' => { -1 => 3, 2147483647 => -2147483648 },
@@ -12,11 +13,15 @@ values = {
 chain = ANL::AnalysisChain.new
 chain.console = false
 chain.num_parallels = 2
-chain.chain(Submodule_ruby::ScalarMapExample, :maps)
+chain.chain(Submodule_ruby::MapExample, :maps)
 chain.with_parameters(values.merge('table' => { 'row' => [3, 0.5] }))
+chain.push_to_vector('rows', count: 4)
 chain.modify do |c|
   original = c.get_parallel_module(0, :maps)
   copied = c.get_parallel_module(1, :maps)
+  raise unless original.get_parameter('table').type_name == 'record_map'
+  raise unless original.get_parameter('rows').type_name == 'record_vector'
+  raise unless original.get_parameter_value('rows') == [{ 'count' => 4 }]
   values.each do |name, expected|
     raise unless original.get_parameter_value(name) == expected
     raise unless copied.get_parameter_value(name) == expected
@@ -50,4 +55,18 @@ parameters.each do |param|
   next unless values.key?(param[:name])
   raise unless param[:value].map { |entry| [entry[:key], entry[:value]] }.to_h == values[param[:name]]
   raise unless param[:unit] == 10.0 if param[:name].end_with?('_d')
+end
+
+Dir.mktmpdir do |directory|
+  document = File.join(directory, 'parameters.xml')
+  script = File.join(directory, 'analysis.rb')
+  chain.make_doc(output: document)
+  xml = REXML::Document.new(File.read(document))
+  %w[record_map record_vector].each do |type|
+    raise unless REXML::XPath.first(xml, "//param[@container_type='#{type}']/type").text == type
+  end
+  chain.make_script(output: script)
+  text = File.read(script)
+  RubyVM::InstructionSequence.compile(text)
+  raise unless text.include?('insert_to_map "table"') && text.include?('push_to_vector "rows"')
 end

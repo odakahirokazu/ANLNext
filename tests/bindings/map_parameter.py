@@ -2,7 +2,7 @@ import json
 import tempfile
 from pathlib import Path
 import anlnext
-from submodule_python import ScalarMapExample
+from submodule_python import MapExample
 
 values = {
     'map_i_i': {-1: 3, 2147483647: -2147483648},
@@ -15,11 +15,17 @@ values = {
 chain = anlnext.AnalysisChain()
 chain.console = False
 chain.num_parallels = 2
-chain.chain(ScalarMapExample, 'maps').with_parameters(values)
+chain.chain(MapExample, 'maps').with_parameters(values)
+chain.with_setter(lambda m: m.insert_to_map('table', 'row', {'count': 3, 'weight': 0.5}))
+chain.push_to_vector('rows', {'count': 4})
 
 def modify(c):
     original = c.get_parallel_module(0, 'maps')
     copied = c.get_parallel_module(1, 'maps')
+    assert original.get_parameter('table').type_name() == 'record_map'
+    assert original.get_parameter('rows').type_name() == 'record_vector'
+    assert anlnext.get_value(original.get_parameter('table')) == {'row': {'count': 3, 'weight': 0.5}}
+    assert anlnext.get_value(original.get_parameter('rows')) == [{'count': 4}]
     for name, expected in values.items():
         assert anlnext.get_value(original.get_parameter(name)) == expected
         assert anlnext.get_value(copied.get_parameter(name)) == expected

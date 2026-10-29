@@ -36,16 +36,16 @@ void write_map_element(std::ostream& os, const T& value)
 }
 
 template <typename K, typename V>
-ModuleParameterScalarMap<K, V>::ModuleParameterScalarMap(const std::string& name, map_type* ptr)
+ModuleParameterMap<K, V>::ModuleParameterMap(const std::string& name, map_type* ptr)
   : VModuleParameter(name), ptr_(ptr)
 {}
 
 template <typename K, typename V>
-std::string ModuleParameterScalarMap<K, V>::type_name() const
+std::string ModuleParameterMap<K, V>::type_name() const
 { return param_type_info<map_type>::name(); }
 
 template <typename K, typename V>
-void ModuleParameterScalarMap<K, V>::set_value(const map_type& value)
+void ModuleParameterMap<K, V>::set_value(const map_type& value)
 {
   map_type converted = value;
   if constexpr (std::is_same<V, double>::value) {
@@ -55,7 +55,7 @@ void ModuleParameterScalarMap<K, V>::set_value(const map_type& value)
 }
 
 template <typename K, typename V>
-std::map<K, V> ModuleParameterScalarMap<K, V>::get_value(const map_type&) const
+std::map<K, V> ModuleParameterMap<K, V>::get_value(const map_type&) const
 {
   map_type converted = __ref__();
   if constexpr (std::is_same<V, double>::value) {
@@ -65,22 +65,22 @@ std::map<K, V> ModuleParameterScalarMap<K, V>::get_value(const map_type&) const
 }
 
 template <typename K, typename V>
-void ModuleParameterScalarMap<K, V>::add_value_element(ModuleParam_sptr)
+void ModuleParameterMap<K, V>::add_value_element(ModuleParam_sptr)
 {
-  BOOST_THROW_EXCEPTION(ParameterError(this, "Scalar map parameters do not have value elements."));
+  BOOST_THROW_EXCEPTION(ParameterError(this, "Map parameters do not have value elements."));
 }
 
 template <typename K, typename V>
-void ModuleParameterScalarMap<K, V>::clear_array() { __ref__().clear(); }
+void ModuleParameterMap<K, V>::clear_array() { __ref__().clear(); }
 
 template <typename K, typename V>
-void ModuleParameterScalarMap<K, V>::clear_container() { __ref__().clear(); }
+void ModuleParameterMap<K, V>::clear_container() { __ref__().clear(); }
 
 template <typename K, typename V>
-std::size_t ModuleParameterScalarMap<K, V>::size_of_container() const { return __ref__().size(); }
+std::size_t ModuleParameterMap<K, V>::size_of_container() const { return __ref__().size(); }
 
 template <typename K, typename V>
-void ModuleParameterScalarMap<K, V>::output(std::ostream& os) const
+void ModuleParameterMap<K, V>::output(std::ostream& os) const
 {
   bool first = true;
   for (const auto& entry: get_value(map_type{})) {
@@ -93,7 +93,7 @@ void ModuleParameterScalarMap<K, V>::output(std::ostream& os) const
 }
 
 template <typename K, typename V>
-void ModuleParameterScalarMap<K, V>::input(std::istream& is)
+void ModuleParameterMap<K, V>::input(std::istream& is)
 {
   if (is.fail()) { return; }
   map_type value;
@@ -112,28 +112,28 @@ void ModuleParameterScalarMap<K, V>::input(std::istream& is)
 }
 
 template <typename K, typename V>
-void ModuleParameterScalarMap<K, V>::__get__(void* ptr) const
+void ModuleParameterMap<K, V>::__get__(void* ptr) const
 { *static_cast<map_type*>(ptr) = __ref__(); }
 
 template <typename K, typename V>
-void ModuleParameterScalarMap<K, V>::__set__(const void* ptr)
+void ModuleParameterMap<K, V>::__set__(const void* ptr)
 { __ref__() = *static_cast<const map_type*>(ptr); }
 
 template <typename K, typename V>
-std::map<K, V>& ModuleParameterScalarMap<K, V>::__ref__() { return *ptr_; }
+std::map<K, V>& ModuleParameterMap<K, V>::__ref__() { return *ptr_; }
 
 template <typename K, typename V>
-const std::map<K, V>& ModuleParameterScalarMap<K, V>::__ref__() const { return *ptr_; }
+const std::map<K, V>& ModuleParameterMap<K, V>::__ref__() const { return *ptr_; }
 
 template <typename K, typename V>
-bool ModuleParameterScalarMap<K, V>::ask()
+bool ModuleParameterMap<K, V>::ask()
 {
   std::cout << "  key value pairs... (quote strings containing spaces)\n";
   return ask_base();
 }
 
 template <typename K, typename V>
-boost::property_tree::ptree ModuleParameterScalarMap<K, V>::to_property_tree() const
+boost::property_tree::ptree ModuleParameterMap<K, V>::to_property_tree() const
 {
   boost::property_tree::ptree pt;
   pt.put("name", name());
@@ -153,32 +153,32 @@ boost::property_tree::ptree ModuleParameterScalarMap<K, V>::to_property_tree() c
   return pt;
 }
 
-template class ModuleParameterScalarMap<int, int>;
+template class ModuleParameterMap<int, int>;
 
 std::shared_ptr<VModuleParameter> ModuleParameter<std::map<int, int>>::clone()
 { return std::shared_ptr<VModuleParameter>(new ModuleParameter(*this)); }
 
-template class ModuleParameterScalarMap<int, double>;
+template class ModuleParameterMap<int, double>;
 
 std::shared_ptr<VModuleParameter> ModuleParameter<std::map<int, double>>::clone()
 { return std::shared_ptr<VModuleParameter>(new ModuleParameter(*this)); }
 
-template class ModuleParameterScalarMap<int, std::string>;
+template class ModuleParameterMap<int, std::string>;
 
 std::shared_ptr<VModuleParameter> ModuleParameter<std::map<int, std::string>>::clone()
 { return std::shared_ptr<VModuleParameter>(new ModuleParameter(*this)); }
 
-template class ModuleParameterScalarMap<std::string, int>;
+template class ModuleParameterMap<std::string, int>;
 
 std::shared_ptr<VModuleParameter> ModuleParameter<std::map<std::string, int>>::clone()
 { return std::shared_ptr<VModuleParameter>(new ModuleParameter(*this)); }
 
-template class ModuleParameterScalarMap<std::string, double>;
+template class ModuleParameterMap<std::string, double>;
 
 std::shared_ptr<VModuleParameter> ModuleParameter<std::map<std::string, double>>::clone()
 { return std::shared_ptr<VModuleParameter>(new ModuleParameter(*this)); }
 
-template class ModuleParameterScalarMap<std::string, std::string>;
+template class ModuleParameterMap<std::string, std::string>;
 
 std::shared_ptr<VModuleParameter> ModuleParameter<std::map<std::string, std::string>>::clone()
 { return std::shared_ptr<VModuleParameter>(new ModuleParameter(*this)); }

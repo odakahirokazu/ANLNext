@@ -83,9 +83,9 @@
     <version>1.0</version>
     <text></text>
     <parameters>
-      <param container_type='map'>
+      <param container_type='record_map'>
         <name>my_map</name>
-        <type>map</type>
+        <type>record_map</type>
         <unit></unit>
         <default_value> </default_value>
         <description></description>
@@ -132,9 +132,9 @@
     <version>1.0</version>
     <text></text>
     <parameters>
-      <param container_type='vector'>
+      <param container_type='record_vector'>
         <name>my_vector</name>
-        <type>vector</type>
+        <type>record_vector</type>
         <unit></unit>
         <default_value> </default_value>
         <description></description>

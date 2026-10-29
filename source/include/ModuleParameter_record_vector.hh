@@ -78,7 +78,7 @@ protected:
 
 public:
   std::string type_name() const override
-  { return "vector"; }
+  { return "record_vector"; }
 
   void output(std::ostream& os) const override
   {

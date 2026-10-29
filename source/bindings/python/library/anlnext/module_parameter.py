@@ -19,7 +19,7 @@ _map_types = {
 def set_map_parameter(module, name, value):
     parameter_type = module.get_parameter(name).type_name()
     if parameter_type not in _map_types:
-        raise TypeError(f"{name} is not a scalar map parameter: {parameter_type}")
+        raise TypeError(f"{name} is not a map parameter: {parameter_type}")
     suffix = _map_types[parameter_type]
     getattr(module, "set_parameter_map_" + suffix)(name, value)
 
@@ -47,9 +47,9 @@ def get_value(param):
         return param.get_value(0.0, 0.0)
     elif param.type_name()=="3-vector":
         return param.get_value(0.0, 0.0, 0.0)
-    elif param.type_name()=="vector":
+    elif param.type_name()=="record_vector":
         return get_vector_value(param)
-    elif param.type_name()=="map":
+    elif param.type_name()=="record_map":
         return get_map_value(param)
     else:
         return None

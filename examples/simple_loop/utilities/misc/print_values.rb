@@ -40,7 +40,7 @@ def print_params(mod)
   mod.parameter_list.each do |param|
     type = param.type_name
     case type
-    when "vector"
+    when "record_vector"
       puts "#{param.name} #{param.type_name} #{param.get_value_auto}"
       param.size_of_container.times do |k|
         puts "  index: #{k}"
@@ -50,7 +50,7 @@ def print_params(mod)
           puts "    #{value_element.name} #{value_element.type_name} #{value_element.get_value_auto}"
         end
       end
-    when "map"
+    when "record_map"
       puts "#{param.name} #{param.type_name} #{param.get_value_auto}"
       param.map_key_list.each do |k|
         puts "  key: #{k}"

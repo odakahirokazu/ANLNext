@@ -491,9 +491,9 @@ private:
 #include "ModuleParameter_impl.hh"
 #include "ModuleParameter_spec.hh"
 #include "ModuleParameter_tuple.hh"
-#include "ModuleParameter_vector.hh"
+#include "ModuleParameter_record_vector.hh"
+#include "ModuleParameter_record_map.hh"
 #include "ModuleParameter_map.hh"
-#include "ModuleParameter_scalar_map.hh"
 #include "ModuleParameter_member.hh"
 #include "ModuleParameter_unique.hh"
 

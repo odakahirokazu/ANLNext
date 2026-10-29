@@ -367,7 +367,7 @@ module ANL
       parameter_setter =
         if value.is_a? Hash
           lambda do
-            if mod.get_parameter(name).type_name() == 'map'
+            if mod.get_parameter(name).type_name() == 'record_map'
               value.each do |key, elements|
                 elements = [elements] unless elements.is_a?(Array)
                 mod.insert_to_map(name.to_s, key.to_s) do |registry|
@@ -835,7 +835,7 @@ module ANL
         mod.parameter_list.each do |param|
           type = param.type_name
           container_type = ""
-          if type=="map" || type=="vector"
+          if type=="record_map" || type=="record_vector"
             container_type = type.to_sym
           end
 
@@ -850,7 +850,7 @@ module ANL
           end
           p.add_element("description").add_text param.description
 
-          if container_type == :map
+          if container_type == :record_map
             p = ps.add_element("param", {"container_type" => "key"})
             p.add_element("name").add_text param.map_key_name
             p.add_element("type").add_text "string"
@@ -867,7 +867,7 @@ module ANL
               p.add_element("default_value").add_text value.value_string
               p.add_element("description").add_text value.description
             end
-          elsif container_type == :vector
+          elsif container_type == :record_vector
             param.num_value_elements.times do |i|
               value = param.value_element_info(i)
               p = ps.add_element("param", {"container_type" => "value"})
@@ -919,7 +919,7 @@ module ANL
       @module_list.each do |mod|
         out.puts '    chain :'+mod.module_name
         with_parameters_string = '    with_parameters('+ mod.parameter_list.select{|param|
-          param.type_name != 'map' && param.type_name != 'vector'
+          param.type_name != 'record_map' && param.type_name != 'record_vector'
         }.map do |param|
           type = param.type_name
           default_string =
@@ -928,6 +928,8 @@ module ANL
               '["'+param.default_string+'"]'
             when 'vector<int>', 'vector<double>'
               '[]'
+            when *MAP_PARAMETER_TYPES.keys
+              param.get_value_auto.inspect
             when 'string'
               '"'+param.value_string+'"'
             when 'double'
@@ -948,7 +950,7 @@ module ANL
         out.puts with_parameters_string
 
         mod.parameter_list.select{|param|
-          param.type_name == 'map'
+          param.type_name == 'record_map'
         }.each do |param|
           default_string = param.default_string
           out.puts '    insert_to_map "'+param.name+'", "'+default_string+'", {'
@@ -970,7 +972,7 @@ module ANL
         end
 
         mod.parameter_list.select{|param|
-          param.type_name == 'vector'
+          param.type_name == 'record_vector'
         }.each do |param|
           default_string = param.default_string
           out.puts '    push_to_vector "'+param.name+'", {'

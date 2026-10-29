@@ -2,7 +2,7 @@
 
 `std::map<K, V>`のうち、Kが`int`または`std::string`、Vが`int`、`double`、
 `std::string`の6通りを、vector<int>などと同様の値型パラメータとして扱います。
-既存の`ModuleParameter_map.hh`が扱う表形式のmapとは別の特殊化です。
+`ModuleParameter_record_map.hh`が扱う表形式のmapとは別の特殊化です。
 これらの6通りに`add_value_element()`を使うとエラーになります。
 従来の`map<string,int>`などを表形式として使っていた場合は、
 `map<string,tuple<int>>`などに変更して値要素の登録を維持できます。
@@ -56,5 +56,8 @@ JSONの型名は`map<int,double>`などです。`value`は`key`と`value`を持�
 空のコンテナは`[]`です。
 
 ```sh
-ctest --test-dir <build-directory> -R scalar_map --output-on-failure
+ctest --test-dir <build-directory> -R map_parameter --output-on-failure
 ```
+
+表形式の型名は`record_map`／`record_vector`です。通常のコンテナは
+`map<int,double>`／`vector<int>`など、キーや値の型を含む名前を使います。

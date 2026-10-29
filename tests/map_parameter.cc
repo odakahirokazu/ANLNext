@@ -1,4 +1,4 @@
-#include "ScalarMapExample.hh"
+#include "MapExample.hh"
 #include <limits>
 #include <sstream>
 #include <stdexcept>
@@ -10,7 +10,7 @@ void require(bool condition, const char* message)
 }
 
 template <typename K, typename V>
-void verify(ScalarMapExample& module, const std::string& name, const std::map<K, V>& values)
+void verify(MapExample& module, const std::string& name, const std::map<K, V>& values)
 {
   using Map = std::map<K, V>;
   module.set_parameter(name, values);
@@ -55,7 +55,7 @@ void verify(ScalarMapExample& module, const std::string& name, const std::map<K,
 int main()
 {
   try {
-    ScalarMapExample module;
+    MapExample module;
     module.mod_define();
     verify(module, "map_i_i", std::map<int, int>{{-1, 3}, {std::numeric_limits<int>::max(), std::numeric_limits<int>::min()}});
     verify(module, "map_i_d", std::map<int, double>{{-1, 0.5}, {2, 1.5}});
@@ -74,7 +74,7 @@ int main()
     bool rejected = false;
     try { param.add_value_element(std::make_shared<ModuleParameterUnique<int>>("number", 17)); }
     catch (const ParameterError&) { rejected = true; }
-    require(rejected, "table-style registration must be rejected for scalar maps");
+    require(rejected, "table-style registration must be rejected for maps");
     std::istringstream duplicate("1 7 1 9");
     param.input(duplicate);
     require(raw.at(1) == 9 && raw.size() == 1, "repeated key must use last value");

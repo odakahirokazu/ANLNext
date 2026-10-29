@@ -1,9 +1,9 @@
 %module submodule_python
 %{
 #include "SubmoduleExample.hh"
-#include "ScalarMapExample.hh"
+#include "MapExample.hh"
 %}
 %import(module="anlnext.anlnextpy") "anlnextpy.i"
 class SubmoduleExample : public anlnext::BasicModule {};
 
-class ScalarMapExample : public anlnext::BasicModule {};
+class MapExample : public anlnext::BasicModule {};

@@ -1,9 +1,9 @@
-#ifndef ANLNEXT_TEST_SCALAR_MAP_EXAMPLE_H
-#define ANLNEXT_TEST_SCALAR_MAP_EXAMPLE_H
+#ifndef ANLNEXT_TEST_MAP_EXAMPLE_H
+#define ANLNEXT_TEST_MAP_EXAMPLE_H
 #include "BasicModule.hh"
 
-class ScalarMapExample : public anlnext::BasicModule {
-  DEFINE_ANL_MODULE(ScalarMapExample, 1.0);
+class MapExample : public anlnext::BasicModule {
+  DEFINE_ANL_MODULE(MapExample, 1.0);
   ENABLE_PARALLEL_RUN();
 public:
   anlnext::ANLStatus mod_define() override;
@@ -14,5 +14,6 @@ public:
   std::map<std::string, double> map_str_d;
   std::map<std::string, std::string> map_str_str;
   std::map<std::string, std::tuple<int, double>> table;
+  std::vector<std::tuple<int>> rows;
 };
 #endif
