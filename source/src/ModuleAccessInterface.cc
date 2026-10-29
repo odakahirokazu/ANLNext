@@ -44,4 +44,13 @@ void ModuleAccessInterface::connect_module_access_to(ModuleAccessInterface& targ
   target.set_module_access(module_access_);
 }
 
+void ModuleAccessInterface::check_module_requirement(const std::string& name, ModulePosition position,
+                                                    const BasicModule* requester) const
+{
+  if (!module_access_) {
+    BOOST_THROW_EXCEPTION(ModuleRequirementError(requester, name, position, "Module access is not connected."));
+  }
+  module_access_->require_module(name, requester, position);
+}
+
 } /* namespace anlnext */

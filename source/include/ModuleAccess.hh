@@ -22,6 +22,8 @@
 
 #include <string>
 #include <map>
+#include <vector>
+#include <cstddef>
 #include <iterator>
 #include <boost/format.hpp>
 #include "ANLException.hh"
@@ -30,6 +32,8 @@ namespace anlnext
 {
 
 class BasicModule;
+
+enum class ModulePosition { before, after, any };
 
 /**
  * Interface to access other ANL modules.
@@ -62,10 +66,14 @@ public:
                        ConflictOption conflict=ConflictOption::yield);
 
   bool exist(const std::string& name) const;
+  void set_module_order(const std::vector<BasicModule*>& modules);
+  void require_module(const std::string& name, const BasicModule* requester,
+                      ModulePosition position=ModulePosition::any) const;
 
 private:
   using ANLModuleMap = std::map<std::string, BasicModule*>;
   ANLModuleMap module_map_;
+  std::map<const BasicModule*, std::size_t> module_positions_;
 };
 
 inline

@@ -3,7 +3,7 @@ include(UseSWIG)
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 find_package(Ruby 3.0 REQUIRED COMPONENTS Interpreter Development)
 
-add_library(submodule_example STATIC SubmoduleExample.cc MapExample.cc UnsignedIntegerExample.cc)
+add_library(submodule_example STATIC SubmoduleExample.cc MapExample.cc UnsignedIntegerExample.cc RequirementExample.cc)
 set_target_properties(submodule_example PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(submodule_example PUBLIC ANLNext)
 target_include_directories(submodule_example PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -69,4 +69,11 @@ set_tests_properties(unsigned_integer_python PROPERTIES TIMEOUT 15
   ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python:${CMAKE_CURRENT_BINARY_DIR}")
 add_test(NAME unsigned_integer_ruby COMMAND ${Ruby_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/unsigned_integer.rb)
 set_tests_properties(unsigned_integer_ruby PROPERTIES TIMEOUT 15
+  ENVIRONMENT "RUBYLIB=${CMAKE_CURRENT_BINARY_DIR}/ruby:${CMAKE_CURRENT_BINARY_DIR}")
+
+add_test(NAME module_requirements_python COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/module_requirements.py)
+set_tests_properties(module_requirements_python PROPERTIES TIMEOUT 15
+  ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python:${CMAKE_CURRENT_BINARY_DIR}")
+add_test(NAME module_requirements_ruby COMMAND ${Ruby_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/module_requirements.rb)
+set_tests_properties(module_requirements_ruby PROPERTIES TIMEOUT 15
   ENVIRONMENT "RUBYLIB=${CMAKE_CURRENT_BINARY_DIR}/ruby:${CMAKE_CURRENT_BINARY_DIR}")

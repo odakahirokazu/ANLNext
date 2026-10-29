@@ -189,6 +189,21 @@ ModuleAccessError::ModuleAccessError(const std::string& message, const std::stri
   append_message(message+": "+module_key);
 }
 
+ModuleRequirementError::ModuleRequirementError(const BasicModule* requester, const std::string& name,
+                                               ModulePosition position, const std::string& reason)
+  : ANLException(requester)
+{
+  std::string position_name;
+  switch (position) {
+  case ModulePosition::before: position_name = "before"; break;
+  case ModulePosition::after: position_name = "after"; break;
+  case ModulePosition::any: position_name = "any"; break;
+  }
+  set_message("<ModuleRequirementError>");
+  append_message("Required module: " + name + " (position: " + position_name + ")");
+  append_message(reason);
+}
+
 SubModuleUndefinedError::SubModuleUndefinedError(const BasicModule* mod, const std::string& name)
  : ANLException(mod)
 {

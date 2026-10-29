@@ -41,6 +41,7 @@ class VModuleParameter;
 class ParameterRegistry;
 class BasicModule;
 class BasicSubModule;
+enum class ModulePosition;
 
 struct exception_base : virtual std::exception, virtual boost::exception
 {
@@ -107,6 +108,12 @@ struct ModuleDuplicationError : anlnext::ANLException
 struct ModuleAccessError : anlnext::ANLException
 {
   explicit ModuleAccessError(const std::string& message, const std::string& module_key);
+};
+
+struct ModuleRequirementError : anlnext::ANLException
+{
+  ModuleRequirementError(const BasicModule* requester, const std::string& name,
+                         ModulePosition position, const std::string& reason);
 };
 
 struct SubModuleUndefinedError : anlnext::ANLException

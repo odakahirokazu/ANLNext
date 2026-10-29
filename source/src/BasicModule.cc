@@ -53,6 +53,7 @@ BasicModule::BasicModule(const BasicModule& r)
     order_sensitive_(r.order_sensitive_),
     module_ID_(r.module_ID_),
     aliases_(r.aliases_),
+    module_requirements_(r.module_requirements_),
     access_permission_(r.access_permission_),
     module_on_(r.module_on_),
     loop_index_(-1),
@@ -111,6 +112,18 @@ std::vector<std::string> BasicModule::get_aliases_string() const
     v.push_back(alias.first);
   }
   return v;
+}
+
+void BasicModule::require_module(const std::string& name, ModulePosition position)
+{
+  module_requirements_.emplace_back(name, position);
+}
+
+void BasicModule::check_module_requirements() const
+{
+  for (const auto& requirement: module_requirements_) {
+    check_module_requirement(requirement.first, requirement.second, this);
+  }
 }
 
 void BasicModule::print_parameters() const

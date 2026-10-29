@@ -116,4 +116,42 @@ void ModuleAccess::register_module(const std::string& name,
   }
 }
 
+void ModuleAccess::set_module_order(const std::vector<BasicModule*>& modules)
+{
+  module_positions_.clear();
+  for (std::size_t index=0; index<modules.size(); ++index) {
+    module_positions_.emplace(modules[index], index);
+  }
+}
+
+void ModuleAccess::require_module(const std::string& name, const BasicModule* requester,
+                                ModulePosition position) const
+{
+  auto target = module_map_.find(name);
+  if (target == module_map_.end()) {
+    BOOST_THROW_EXCEPTION(ModuleRequirementError(requester, name, position, "Module is not found."));
+  }
+  auto source_position = module_positions_.find(requester);
+  auto target_position = module_positions_.find(target->second);
+  if (source_position == module_positions_.end() || target_position == module_positions_.end()) {
+    BOOST_THROW_EXCEPTION(ModuleRequirementError(requester, name, position, "Module position is not registered."));
+  }
+  bool satisfied = false;
+  switch (position) {
+  case ModulePosition::before:
+    satisfied = target_position->second < source_position->second;
+    break;
+  case ModulePosition::after:
+    satisfied = target_position->second > source_position->second;
+    break;
+  case ModulePosition::any:
+    satisfied = true;
+    break;
+  }
+  if (!satisfied) {
+    BOOST_THROW_EXCEPTION(ModuleRequirementError(requester, name, position,
+      "Module order does not satisfy the requirement. Target module ID: " + target->second->module_id()));
+  }
+}
+
 } /* namespace anlnext */

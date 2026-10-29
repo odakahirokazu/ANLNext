@@ -27,3 +27,8 @@ add_test(NAME submodule COMMAND anlnext_submodule)
 set_tests_properties(submodule PROPERTIES TIMEOUT 15)
 
 add_subdirectory(bindings)
+
+add_executable(anlnext_module_requirements module_requirements.cc)
+target_link_libraries(anlnext_module_requirements PRIVATE ANLNext)
+add_test(NAME module_requirements COMMAND anlnext_module_requirements)
+set_tests_properties(module_requirements PROPERTIES TIMEOUT 15)

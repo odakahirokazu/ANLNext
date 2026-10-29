@@ -2,6 +2,7 @@
 %{
 #include "SubmoduleExample.hh"
 #include "MapExample.hh"
+#include "RequirementExample.hh"
 #include "UnsignedIntegerExample.hh"
 %}
 %import(module="anlnext.anlnextpy") "anlnextpy.i"
@@ -14,3 +15,5 @@ public:
   static uintmax_t maximum();
   static uintmax_t signed_maximum();
 };
+
+class RequirementExample : public anlnext::BasicModule {};

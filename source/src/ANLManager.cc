@@ -138,6 +138,11 @@ ANLStatus ANLManager::Define()
     }
   }
 
+  module_access_->set_module_order(modules_);
+  for (const BasicModule* mod: modules_) {
+    mod->check_module_requirements();
+  }
+
   final:
   std::cout << std::endl;
 

@@ -44,6 +44,8 @@ public:
 
 protected:
   void connect_module_access_to(ModuleAccessInterface& target) const;
+  void check_module_requirement(const std::string& name, ModulePosition position,
+                                const BasicModule* requester) const;
 
   template <typename T>
   void get_module(const std::string& name, const T** ptr) const

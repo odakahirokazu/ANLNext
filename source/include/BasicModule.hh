@@ -174,6 +174,7 @@ public:
   const BasicSubModule* get_submodule(const std::string& name) const;
   std::vector<std::string> submodule_names() const;
 
+  void check_module_requirements() const;
   void print_parameters() const override;
   boost::property_tree::ptree parameters_to_property_tree() const override;
 
@@ -181,6 +182,8 @@ public:
   void set_module_access(const ModuleAccess* module_access) override;
   
 protected:
+  void require_module(const std::string& name, ModulePosition position=ModulePosition::any);
+
   /*
    * access permission
    */
@@ -215,6 +218,7 @@ private:
   bool order_sensitive_ = false;
   std::string module_ID_;
   std::vector<std::pair<std::string, ModuleAccess::ConflictOption>> aliases_;
+  std::vector<std::pair<std::string, ModulePosition>> module_requirements_;
   ModuleAccess::Permission access_permission_ = ModuleAccess::Permission::full_access;
   bool module_on_ = true;
   long int loop_index_ = -1;

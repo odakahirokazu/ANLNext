@@ -48,6 +48,7 @@ void ParallelChain::push(std::unique_ptr<BasicModule>&& cloned_module)
 
 void ParallelChain::setup_module_access()
 {
+  module_access_->set_module_order(modules_ref_);
   for (BasicModule* mod: modules_ref_) {
     if (mod->access_permission() != ModuleAccess::Permission::privacy) {
       const std::string module_ID = mod->module_id();
@@ -63,6 +64,9 @@ void ParallelChain::setup_module_access()
         }
       }
     }
+  }
+  for (const BasicModule* mod: modules_ref_) {
+    mod->check_module_requirements();
   }
 }
 
