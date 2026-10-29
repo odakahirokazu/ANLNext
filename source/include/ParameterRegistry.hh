@@ -57,10 +57,10 @@ public:
   ParameterRegistry();
   virtual ~ParameterRegistry();
 
-  ParameterRegistry(const ParameterRegistry& r) = default;
-  ParameterRegistry(ParameterRegistry&& r) = default;
-  ParameterRegistry& operator=(const ParameterRegistry& r) = default;
-  ParameterRegistry& operator=(ParameterRegistry&& r) = default;
+  ParameterRegistry(const ParameterRegistry& r) = delete;
+  ParameterRegistry(ParameterRegistry&& r) = delete;
+  ParameterRegistry& operator=(const ParameterRegistry& r) = delete;
+  ParameterRegistry& operator=(ParameterRegistry&& r) = delete;
 
 public:
   /**
