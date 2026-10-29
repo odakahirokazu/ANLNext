@@ -75,7 +75,12 @@ protected:
 
   void set_module_pointer(ParameterRegistry* o) override
   {
-    MemberPointerPair<ModuleClass, T>::set_object(dynamic_cast<ModuleClass*>(o));
+    auto* module = dynamic_cast<ModuleClass*>(o);
+    if (!module) {
+      BOOST_THROW_EXCEPTION(
+        ParameterError(this, "Module type mismatch when rebinding parameter."));
+    }
+    MemberPointerPair<ModuleClass, T>::set_object(module);
     ModuleParameter<T>::set_module_pointer_of_value_info(o);
   }
 

@@ -15,3 +15,8 @@ add_executable(anlnext_parameter_defaults parameter_defaults.cc)
 target_link_libraries(anlnext_parameter_defaults PRIVATE ANLNext)
 add_test(NAME parameter_defaults COMMAND anlnext_parameter_defaults)
 set_tests_properties(parameter_defaults PROPERTIES TIMEOUT 15)
+
+add_executable(anlnext_parameter_rebinding parameter_rebinding.cc)
+target_link_libraries(anlnext_parameter_rebinding PRIVATE ANLNext)
+add_test(NAME parameter_rebinding COMMAND anlnext_parameter_rebinding)
+set_tests_properties(parameter_rebinding PROPERTIES TIMEOUT 15)
