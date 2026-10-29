@@ -145,7 +145,7 @@ public:
   bool value_enable(std::size_t, value_category_pair) const { return true; }
   bool value_enable(std::size_t i, value_category_tuple) const
   {
-    if (i>0) {
+    if (i > 0) {
       int type = 0;
       value_info_[0]->__get__(&type);
       typename decltype(value_enable_)::const_iterator it
@@ -228,7 +228,7 @@ public:
     container_type container;
     if (first_input()) { initialize_default_value_elements(); }
 
-    while (1) {
+    while (true) {
       keyParam.ask();
       if (buffer_key_=="=") { return false; }
       if (buffer_key_=="!") { break; }

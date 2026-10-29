@@ -8,6 +8,7 @@ template <typename Key, typename Value>
 class ModuleParameterMap : public VModuleParameter
 {
   using map_type = std::map<Key, Value>;
+
 public:
   ModuleParameterMap(const std::string& name, map_type* ptr);
   std::string type_name() const override;
@@ -25,10 +26,12 @@ public:
   void __get__(void* ptr) const override;
   void __set__(const void* ptr) override;
   boost::property_tree::ptree to_property_tree() const override;
+
 protected:
   ModuleParameterMap(const ModuleParameterMap&) = default;
   virtual map_type& __ref__();
   virtual const map_type& __ref__() const;
+
 private:
   map_type* ptr_;
 };

@@ -159,7 +159,7 @@ public:
     container_type container;
     if (first_input()) { initialize_default_value_elements(); }
 
-    while (1) {
+    while (true) {
       keyParam.ask();
       if (buffer=="=") { return false; }
       if (buffer=="!") { break; }
