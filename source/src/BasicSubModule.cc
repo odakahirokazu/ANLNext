@@ -24,6 +24,14 @@ namespace anlnext
 
 BasicSubModule::BasicSubModule() = default;
 
+BasicSubModule::BasicSubModule(const BasicSubModule& r)
+  : ParameterRegistry(),
+    ModuleDescription(r),
+    EvsInterface(),
+    ModuleAccessInterface()
+{
+}
+
 BasicSubModule::~BasicSubModule() = default;
 
 std::unique_ptr<BasicSubModule> BasicSubModule::duplicate()

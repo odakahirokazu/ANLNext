@@ -74,10 +74,26 @@ void verify_duplication()
   T source;
   verify_unselected(source);
   source.setup();
+  source.set_module_description("source description");
+  T copied(source);
+  require(copied.module_description() == "source description",
+          "copy construction lost module description");
+  require(copied.parameter_begin() == copied.parameter_end(),
+          "copy construction must start with an empty registry");
+  require(copied.value() == source.value() && copied.rows() == source.rows(),
+          "copy construction lost module data");
+  verify_unselected(copied);
   auto copy1 = source.duplicate();
   auto copy2 = source.duplicate();
   auto& first = dynamic_cast<T&>(*copy1);
   auto& second = dynamic_cast<T&>(*copy2);
+  require(first.module_description() == "source description" &&
+          second.module_description() == "source description",
+          "duplication lost module description");
+  first.set_module_description("copy description");
+  require(source.module_description() == "source description" &&
+          second.module_description() == "source description",
+          "module descriptions are not independent");
   verify_unselected(first);
   verify_unselected(second);
 

@@ -46,7 +46,11 @@ BasicModule::BasicModule()
 BasicModule::~BasicModule() = default;
 
 BasicModule::BasicModule(const BasicModule& r)
-  : order_sensitive_(r.order_sensitive_),
+  : ParameterRegistry(),
+    ModuleDescription(r),
+    EvsInterface(),
+    ModuleAccessInterface(),
+    order_sensitive_(r.order_sensitive_),
     module_ID_(r.module_ID_),
     aliases_(r.aliases_),
     access_permission_(r.access_permission_),

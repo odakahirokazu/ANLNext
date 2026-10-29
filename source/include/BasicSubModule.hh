@@ -60,7 +60,7 @@ public:
   virtual std::unique_ptr<BasicSubModule> duplicate();
 
 protected:
-  BasicSubModule(const BasicSubModule& r) = default;
+  BasicSubModule(const BasicSubModule& r);
 
 public:
   std::string submodule_name() const { return __submodule_name__(); }
