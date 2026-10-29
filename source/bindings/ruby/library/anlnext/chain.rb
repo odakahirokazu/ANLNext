@@ -364,20 +364,24 @@ module ANL
     def set_parameter(name, value)
       mod = @current_module
 
-      if value.is_a? Hash
-        value.each do |k, vs|
-          vs = [vs] unless vs.is_a? Array
-          h = {}
-          vs.each_with_index do |v, i|
-            h[i] = v
-          end
-          insert_to_map(name, k, h)
-        end
-        return
-      end
-
       parameter_setter =
-        if value.is_a? Vector
+        if value.is_a? Hash
+          lambda do
+            if mod.get_parameter(name).type_name() == 'map'
+              value.each do |key, elements|
+                elements = [elements] unless elements.is_a?(Array)
+                mod.insert_to_map(name.to_s, key.to_s) do |registry|
+                  elements.each_with_index do |element, index|
+                    element_name = registry.get_parameter(name).value_element_name(index)
+                    registry.set_value_element(element_name, element)
+                  end
+                end
+              end
+            else
+              mod.set_parameter(name, value)
+            end
+          end
+        elsif value.is_a? Vector
           if value.z
             lambda{ mod.set_parameter(name, value.x, value.y, value.z) }
           else

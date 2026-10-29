@@ -105,6 +105,72 @@ void VModuleParameter::set_value(double x, double y, double z)
   BOOST_THROW_EXCEPTION( ParameterTypeError(this, "3-vector", (boost::format("(%f, %f, %f)") % x % y % z).str()) );
 }
 
+void VModuleParameter::set_value(const std::map<int, int>& v)
+{
+  BOOST_THROW_EXCEPTION(ParameterTypeError(this, "map<int,int>",
+    (boost::format("map(size=%d)") % v.size()).str()));
+}
+
+std::map<int, int> VModuleParameter::get_value(const std::map<int, int>&) const
+{
+  BOOST_THROW_EXCEPTION(ParameterTypeError(this, "map<int,int>"));
+}
+
+void VModuleParameter::set_value(const std::map<int, double>& v)
+{
+  BOOST_THROW_EXCEPTION(ParameterTypeError(this, "map<int,double>",
+    (boost::format("map(size=%d)") % v.size()).str()));
+}
+
+std::map<int, double> VModuleParameter::get_value(const std::map<int, double>&) const
+{
+  BOOST_THROW_EXCEPTION(ParameterTypeError(this, "map<int,double>"));
+}
+
+void VModuleParameter::set_value(const std::map<int, std::string>& v)
+{
+  BOOST_THROW_EXCEPTION(ParameterTypeError(this, "map<int,string>",
+    (boost::format("map(size=%d)") % v.size()).str()));
+}
+
+std::map<int, std::string> VModuleParameter::get_value(const std::map<int, std::string>&) const
+{
+  BOOST_THROW_EXCEPTION(ParameterTypeError(this, "map<int,string>"));
+}
+
+void VModuleParameter::set_value(const std::map<std::string, int>& v)
+{
+  BOOST_THROW_EXCEPTION(ParameterTypeError(this, "map<string,int>",
+    (boost::format("map(size=%d)") % v.size()).str()));
+}
+
+std::map<std::string, int> VModuleParameter::get_value(const std::map<std::string, int>&) const
+{
+  BOOST_THROW_EXCEPTION(ParameterTypeError(this, "map<string,int>"));
+}
+
+void VModuleParameter::set_value(const std::map<std::string, double>& v)
+{
+  BOOST_THROW_EXCEPTION(ParameterTypeError(this, "map<string,double>",
+    (boost::format("map(size=%d)") % v.size()).str()));
+}
+
+std::map<std::string, double> VModuleParameter::get_value(const std::map<std::string, double>&) const
+{
+  BOOST_THROW_EXCEPTION(ParameterTypeError(this, "map<string,double>"));
+}
+
+void VModuleParameter::set_value(const std::map<std::string, std::string>& v)
+{
+  BOOST_THROW_EXCEPTION(ParameterTypeError(this, "map<string,string>",
+    (boost::format("map(size=%d)") % v.size()).str()));
+}
+
+std::map<std::string, std::string> VModuleParameter::get_value(const std::map<std::string, std::string>&) const
+{
+  BOOST_THROW_EXCEPTION(ParameterTypeError(this, "map<string,string>"));
+}
+
 void VModuleParameter::set_value_integer(intmax_t v)
 {
   BOOST_THROW_EXCEPTION( ParameterTypeError(this, "intger", boost::lexical_cast<std::string>(v)) );

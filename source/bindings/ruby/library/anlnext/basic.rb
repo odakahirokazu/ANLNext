@@ -10,7 +10,28 @@ module ANL
   AS_SKIP           = ANL::ANLStatus_skip
   AS_QUIT           = ANL::ANLStatus_quit
 
+  MAP_PARAMETER_TYPES = {
+    'map<int,int>' => 'i_i',
+    'map<int,double>' => 'i_d',
+    'map<int,string>' => 'i_str',
+    'map<string,int>' => 'str_i',
+    'map<string,double>' => 'str_d',
+    'map<string,string>' => 'str_str',
+  }.freeze
+
   class ParameterRegistry
+    alias :set_parameter_original :set_parameter
+    def set_parameter(name, *values)
+      if values.size == 1 && values.first.is_a?(Hash)
+        type = get_parameter(name).type_name()
+        suffix = MAP_PARAMETER_TYPES[type]
+        raise TypeError, "#{name} is not a scalar map parameter: #{type}" unless suffix
+        public_send("set_parameter_map_#{suffix}", name.to_s, values.first)
+      else
+        set_parameter_original(name.to_s, *values)
+      end
+    end
+
     # Get a list of parameters registered in the module.
     #
     # @return [Array] list of parameters registered in the given module.
@@ -67,6 +88,9 @@ module ANL
 
   class VModuleParameter
     def get_value_auto()
+      if (suffix = MAP_PARAMETER_TYPES[type_name()])
+        return public_send("get_value_map_#{suffix}", {})
+      end
       case type_name()
       when "bool"
         get_value(false)
@@ -129,13 +153,16 @@ module ANL
       o[:type] = type
 
       case type
-      when "double", "vector<double>"
+      when "double", "vector<double>", "map<int,double>", "map<string,double>"
         o[:unit] = unit()
         o[:unit_name] = unit_name()
       end
 
       o[:value] = self.to_value_object(children_into_hash: children_into_hash,
                                        value_element_to_object: true)
+      if MAP_PARAMETER_TYPES.key?(type)
+        o[:value] = o[:value].map { |key, value| { key: key, value: value } }
+      end
       return o
     end
 

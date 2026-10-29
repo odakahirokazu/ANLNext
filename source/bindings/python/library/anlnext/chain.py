@@ -95,7 +95,11 @@ class AnalysisChain:
 
     def set_parameter(self, name, value):
         mod = self.current_module
-        if isinstance(value, list):
+        if isinstance(value, dict):
+            def set_param():
+                anlnext.set_map_parameter(mod, name, value)
+            self.parameter_setter_list.append(set_param)
+        elif isinstance(value, list):
             if len(value)>0:
                 v0 = value[0]
                 if isinstance(v0, str):

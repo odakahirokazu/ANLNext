@@ -28,7 +28,7 @@ public:
     insert_to_container();
   }
 
-  std::map<std::string, int> table;
+  std::map<std::string, std::tuple<int>> table;
   std::vector<std::tuple<int, std::string>> rows;
 };
 
@@ -43,8 +43,8 @@ void verify(DefaultsModule& module, const std::string& name,
   module.insert(name, first_key);
   module.insert(name, first_key + "_default");
   if (name == "table") {
-    require(module.table.at(first_key) == first_value, "map input was lost");
-    require(module.table.at(first_key + "_default") == 17, "map default was lost");
+    require(std::get<0>(module.table.at(first_key)) == first_value, "map input was lost");
+    require(std::get<0>(module.table.at(first_key + "_default")) == 17, "map default was lost");
   }
   else {
     const auto n = module.rows.size();

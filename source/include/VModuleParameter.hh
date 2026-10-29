@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <map>
 #include <memory>
 
 #include <boost/property_tree/ptree.hpp>
@@ -107,6 +108,13 @@ public:
   virtual void set_value(double x, double y);
   virtual void set_value(double x, double y, double z);
 
+  virtual void set_value(const std::map<int, int>& v);
+  virtual void set_value(const std::map<int, double>& v);
+  virtual void set_value(const std::map<int, std::string>& v);
+  virtual void set_value(const std::map<std::string, int>& v);
+  virtual void set_value(const std::map<std::string, double>& v);
+  virtual void set_value(const std::map<std::string, std::string>& v);
+
   virtual void set_value_integer(intmax_t v);
 
   virtual void clear_array() {}
@@ -121,6 +129,13 @@ public:
   virtual std::list<std::string> get_value(const std::list<std::string>&) const;
   virtual std::vector<double> get_value(double, double) const;
   virtual std::vector<double> get_value(double, double, double) const;
+
+  virtual std::map<int, int> get_value(const std::map<int, int>&) const;
+  virtual std::map<int, double> get_value(const std::map<int, double>&) const;
+  virtual std::map<int, std::string> get_value(const std::map<int, std::string>&) const;
+  virtual std::map<std::string, int> get_value(const std::map<std::string, int>&) const;
+  virtual std::map<std::string, double> get_value(const std::map<std::string, double>&) const;
+  virtual std::map<std::string, std::string> get_value(const std::map<std::string, std::string>&) const;
 
   virtual intmax_t get_value_integer() const;
 

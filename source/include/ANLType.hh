@@ -22,6 +22,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 namespace anlnext
 {
@@ -100,6 +101,42 @@ template <>
 struct param_type_info<std::vector<std::string>>
 {
   static std::string name() { return "vector<string>"; }
+};
+
+template <>
+struct param_type_info<std::map<int, int>>
+{
+  static std::string name() { return "map<int,int>"; }
+};
+
+template <>
+struct param_type_info<std::map<int, double>>
+{
+  static std::string name() { return "map<int,double>"; }
+};
+
+template <>
+struct param_type_info<std::map<int, std::string>>
+{
+  static std::string name() { return "map<int,string>"; }
+};
+
+template <>
+struct param_type_info<std::map<std::string, int>>
+{
+  static std::string name() { return "map<string,int>"; }
+};
+
+template <>
+struct param_type_info<std::map<std::string, double>>
+{
+  static std::string name() { return "map<string,double>"; }
+};
+
+template <>
+struct param_type_info<std::map<std::string, std::string>>
+{
+  static std::string name() { return "map<string,string>"; }
 };
 
 } /* namespace anlnext */

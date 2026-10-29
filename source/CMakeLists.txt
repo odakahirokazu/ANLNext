@@ -80,6 +80,7 @@ target_sources(ANLNext
   src/ANLException.cc
   src/EvsManager.cc
   src/CLIUtility.cc
+  src/ModuleParameter_scalar_map.cc
   src/VModuleParameter.cc
   src/ModuleAccess.cc
   src/ModuleAccessInterface.cc

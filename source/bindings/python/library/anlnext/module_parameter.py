@@ -6,7 +6,27 @@
 
 import anlnext.anlnextpy
 
+_map_types = {
+    "map<int,int>": "i_i",
+    "map<int,double>": "i_d",
+    "map<int,string>": "i_str",
+    "map<string,int>": "str_i",
+    "map<string,double>": "str_d",
+    "map<string,string>": "str_str",
+}
+
+
+def set_map_parameter(module, name, value):
+    parameter_type = module.get_parameter(name).type_name()
+    if parameter_type not in _map_types:
+        raise TypeError(f"{name} is not a scalar map parameter: {parameter_type}")
+    suffix = _map_types[parameter_type]
+    getattr(module, "set_parameter_map_" + suffix)(name, value)
+
+
 def get_value(param):
+    if param.type_name() in _map_types:
+        return dict(getattr(param, "get_value_map_" + _map_types[param.type_name()])({}))
     if param.type_name()=="bool":
         return param.get_value(False)
     elif param.type_name()=="int":

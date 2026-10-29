@@ -493,6 +493,7 @@ private:
 #include "ModuleParameter_tuple.hh"
 #include "ModuleParameter_vector.hh"
 #include "ModuleParameter_map.hh"
+#include "ModuleParameter_scalar_map.hh"
 #include "ModuleParameter_member.hh"
 #include "ModuleParameter_unique.hh"
 

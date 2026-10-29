@@ -3,7 +3,7 @@ include(UseSWIG)
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 find_package(Ruby 3.0 REQUIRED COMPONENTS Interpreter Development)
 
-add_library(submodule_example STATIC SubmoduleExample.cc)
+add_library(submodule_example STATIC SubmoduleExample.cc ScalarMapExample.cc)
 set_target_properties(submodule_example PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(submodule_example PUBLIC ANLNext)
 target_include_directories(submodule_example PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -45,4 +45,16 @@ set_tests_properties(submodule_python PROPERTIES TIMEOUT 15
   ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python:${CMAKE_CURRENT_BINARY_DIR}")
 add_test(NAME submodule_ruby COMMAND ${Ruby_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/submodule.rb)
 set_tests_properties(submodule_ruby PROPERTIES TIMEOUT 15
+  ENVIRONMENT "RUBYLIB=${CMAKE_CURRENT_BINARY_DIR}/ruby:${CMAKE_CURRENT_BINARY_DIR}")
+
+add_executable(anlnext_scalar_map ../scalar_map.cc)
+target_link_libraries(anlnext_scalar_map PRIVATE submodule_example)
+add_test(NAME scalar_map COMMAND anlnext_scalar_map)
+set_tests_properties(scalar_map PROPERTIES TIMEOUT 15)
+
+add_test(NAME scalar_map_python COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scalar_map.py)
+set_tests_properties(scalar_map_python PROPERTIES TIMEOUT 15
+  ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python:${CMAKE_CURRENT_BINARY_DIR}")
+add_test(NAME scalar_map_ruby COMMAND ${Ruby_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scalar_map.rb)
+set_tests_properties(scalar_map_ruby PROPERTIES TIMEOUT 15
   ENVIRONMENT "RUBYLIB=${CMAKE_CURRENT_BINARY_DIR}/ruby:${CMAKE_CURRENT_BINARY_DIR}")

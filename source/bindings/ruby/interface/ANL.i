@@ -15,6 +15,15 @@
 %include "std_vector.i"
 %include "std_list.i"
 %include "std_pair.i"
+%include "std_map.i"
+
+%template() std::map<int, int>;
+%template() std::map<int, double>;
+%template() std::map<int, std::string>;
+%template() std::map<std::string, int>;
+%template() std::map<std::string, double>;
+%template() std::map<std::string, std::string>;
+
 
 %template(VectorI) std::vector<int>;
 %template(VectorD) std::vector<double>;
@@ -100,6 +109,26 @@ class VModuleParameter
   %rename(get_value_vector_d) get_value(const std::vector<double>&) const;
   %rename(get_value_vector_str) get_value(const std::vector<std::string>&) const;
 
+  %exception {
+    try { $action }
+    catch (const anlnext::ANLException& ex) {
+      SWIG_exception(SWIG_RuntimeError, ex.to_string().c_str());
+    }
+  }
+  %rename(get_value_map_i_i) get_value(const std::map<int, int>&) const;
+  std::map<int, int> get_value(const std::map<int, int>&) const;
+  %rename(get_value_map_i_d) get_value(const std::map<int, double>&) const;
+  std::map<int, double> get_value(const std::map<int, double>&) const;
+  %rename(get_value_map_i_str) get_value(const std::map<int, std::string>&) const;
+  std::map<int, std::string> get_value(const std::map<int, std::string>&) const;
+  %rename(get_value_map_str_i) get_value(const std::map<std::string, int>&) const;
+  std::map<std::string, int> get_value(const std::map<std::string, int>&) const;
+  %rename(get_value_map_str_d) get_value(const std::map<std::string, double>&) const;
+  std::map<std::string, double> get_value(const std::map<std::string, double>&) const;
+  %rename(get_value_map_str_str) get_value(const std::map<std::string, std::string>&) const;
+  std::map<std::string, std::string> get_value(const std::map<std::string, std::string>&) const;
+  %exception;
+
   bool get_value(bool) const;
   int get_value(int) const;
   double get_value(double) const;
@@ -170,6 +199,19 @@ class ParameterRegistry
   set_parameter(const std::string&, const std::vector<double>&);
   %rename(set_parameter_vector_str)
   set_parameter(const std::string&, const std::vector<std::string>&);
+
+  %rename(set_parameter_map_i_i) set_parameter(const std::string&, const std::map<int, int>&);
+  void set_parameter(const std::string& name, const std::map<int, int>& val);
+  %rename(set_parameter_map_i_d) set_parameter(const std::string&, const std::map<int, double>&);
+  void set_parameter(const std::string& name, const std::map<int, double>& val);
+  %rename(set_parameter_map_i_str) set_parameter(const std::string&, const std::map<int, std::string>&);
+  void set_parameter(const std::string& name, const std::map<int, std::string>& val);
+  %rename(set_parameter_map_str_i) set_parameter(const std::string&, const std::map<std::string, int>&);
+  void set_parameter(const std::string& name, const std::map<std::string, int>& val);
+  %rename(set_parameter_map_str_d) set_parameter(const std::string&, const std::map<std::string, double>&);
+  void set_parameter(const std::string& name, const std::map<std::string, double>& val);
+  %rename(set_parameter_map_str_str) set_parameter(const std::string&, const std::map<std::string, std::string>&);
+  void set_parameter(const std::string& name, const std::map<std::string, std::string>& val);
 
   void set_parameter(const std::string& name, bool val);
   void set_parameter(const std::string& name, int val);
