@@ -262,12 +262,23 @@ class BasicModule : public ParameterRegistry
   bool is_on();
   bool is_off();
 
+  %exception {
+    try {
+      $action
+    }
+    catch (const anlnext::ANLException& ex) {
+      SWIG_exception(SWIG_RuntimeError, ex.to_string().c_str());
+    }
+  }
+
   virtual void set_submodule_by_key(const std::string& /* name */, const std::string& /* keyword */);
   bool is_submodule_defined(const std::string& name) const;
   bool is_submodule_set(const std::string& name) const;
   BasicSubModule* get_submodule(const std::string& name);
   const BasicSubModule* get_submodule(const std::string& name) const;
   std::vector<std::string> submodule_names() const;
+
+  %exception;
 
   // mix-in ModuleDescription
   std::string module_description() const;
