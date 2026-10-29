@@ -83,6 +83,7 @@ function(anlnext_add_swig_ruby_binding target)
       -Wno-deprecated-declarations
       -Wno-ignored-qualifiers
       -Wno-deprecated-copy-with-user-provided-copy
+      -Wno-missing-field-initializers
     >
   )
 
