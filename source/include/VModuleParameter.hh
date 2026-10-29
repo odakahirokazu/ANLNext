@@ -115,7 +115,9 @@ public:
   virtual void set_value(const std::map<std::string, double>& v);
   virtual void set_value(const std::map<std::string, std::string>& v);
 
+  virtual void set_value(uintmax_t v);
   virtual void set_value_integer(intmax_t v);
+  virtual void set_value_unsigned_integer(uintmax_t v);
 
   virtual void clear_array() {}
 
@@ -137,7 +139,9 @@ public:
   virtual std::map<std::string, double> get_value(const std::map<std::string, double>&) const;
   virtual std::map<std::string, std::string> get_value(const std::map<std::string, std::string>&) const;
 
+  virtual uintmax_t get_value(uintmax_t) const;
   virtual intmax_t get_value_integer() const;
+  virtual uintmax_t get_value_unsigned_integer() const;
 
   virtual void output(std::ostream& ) const {}
   virtual void input(std::istream& ) {}

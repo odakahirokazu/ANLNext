@@ -21,6 +21,7 @@
 #define ANLNEXT_ANLType_H 1
 
 #include <string>
+#include <cstdint>
 #include <vector>
 #include <map>
 
@@ -71,6 +72,12 @@ template <>
 struct param_type_info<int>
 {
   static std::string name() { return "int"; }
+};
+
+template <>
+struct param_type_info<uintmax_t>
+{
+  static std::string name() { return "unsigned_integer"; }
 };
 
 template <>

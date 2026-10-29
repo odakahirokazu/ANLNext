@@ -171,6 +171,26 @@ std::map<std::string, std::string> VModuleParameter::get_value(const std::map<st
   BOOST_THROW_EXCEPTION(ParameterTypeError(this, "map<string,string>"));
 }
 
+void VModuleParameter::set_value(uintmax_t v)
+{
+  set_value_unsigned_integer(v);
+}
+
+void VModuleParameter::set_value_unsigned_integer(uintmax_t v)
+{
+  BOOST_THROW_EXCEPTION(ParameterTypeError(this, "unsigned_integer", std::to_string(v)));
+}
+
+uintmax_t VModuleParameter::get_value(uintmax_t) const
+{
+  return get_value_unsigned_integer();
+}
+
+uintmax_t VModuleParameter::get_value_unsigned_integer() const
+{
+  BOOST_THROW_EXCEPTION(ParameterTypeError(this, "unsigned_integer"));
+}
+
 void VModuleParameter::set_value_integer(intmax_t v)
 {
   BOOST_THROW_EXCEPTION( ParameterTypeError(this, "intger", boost::lexical_cast<std::string>(v)) );

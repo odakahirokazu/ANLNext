@@ -33,6 +33,8 @@ def get_value(param):
         return param.get_value(0)
     elif param.type_name()=="integer":
         return param.get_value_integer()
+    elif param.type_name()=="unsigned_integer":
+        return param.get_value_unsigned_integer()
     elif param.type_name()=="double":
         return param.get_value(0.0)
     elif param.type_name()=="string":

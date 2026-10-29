@@ -121,7 +121,10 @@ class AnalysisChain:
                 self.parameter_setter_list.append(set_param)
             elif isinstance(value, int):
                 def set_param():
-                    mod.set_parameter_integer(name, value)
+                    if mod.get_parameter(name).type_name() == "unsigned_integer":
+                        mod.set_parameter_unsigned_integer(name, value)
+                    else:
+                        mod.set_parameter_integer(name, value)
                 self.parameter_setter_list.append(set_param)
             else:
                 def set_param():

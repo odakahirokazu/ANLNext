@@ -176,6 +176,18 @@ void ParameterRegistry::set_parameter(const std::string& name, double x, double 
   }
 }
 
+void ParameterRegistry::set_parameter_unsigned_integer(const std::string& name, uintmax_t val)
+{
+  ModuleParamIter it = find_parameter(name);
+  try {
+    (*it)->set_value_unsigned_integer(val);
+  }
+  catch (ANLException& e) {
+    add_parameter_error_info(e);
+    throw;
+  }
+}
+
 void ParameterRegistry::set_parameter_integer(const std::string& name, intmax_t val)
 {
   ModuleParamIter it = find_parameter(name);

@@ -121,8 +121,6 @@ class VModuleParameter
   std::map<std::string, double> get_value(const std::map<std::string, double>&) const;
   %rename(get_value_map_str_str) get_value(const std::map<std::string, std::string>&) const;
   std::map<std::string, std::string> get_value(const std::map<std::string, std::string>&) const;
-  %exception;
-
   bool get_value(bool) const;
   int get_value(int) const;
   double get_value(double) const;
@@ -135,6 +133,7 @@ class VModuleParameter
   std::vector<double> get_value(double, double, double) const;
 
   intmax_t get_value_integer() const;
+  uintmax_t get_value_unsigned_integer() const;
 
   std::string map_key_name() const;
   std::size_t num_value_elements() const;
@@ -164,6 +163,8 @@ class VModuleParameter
     }
   }
   std::string value_string() const;
+
+  %exception;
 };
 
 using ModuleParam_sptr = std::shared_ptr<VModuleParameter>;
@@ -225,6 +226,7 @@ class ParameterRegistry
   void set_parameter(const std::string& name, double x, double y);
   void set_parameter(const std::string& name, double x, double y, double z);
   void set_parameter_integer(const std::string& name, intmax_t val);
+  void set_parameter_unsigned_integer(const std::string& name, uintmax_t val);
 
   void clear_array(const std::string& name);
 

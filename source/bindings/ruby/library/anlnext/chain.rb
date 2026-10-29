@@ -404,7 +404,13 @@ module ANL
           end
         else
           if value.is_a? Integer
-            lambda{ mod.set_parameter_integer(name, value) }
+            lambda do
+              if mod.get_parameter(name).type_name() == 'unsigned_integer'
+                mod.set_parameter_unsigned_integer(name, value)
+              else
+                mod.set_parameter_integer(name, value)
+              end
+            end
           else
             lambda{ mod.set_parameter(name, value) }
           end
@@ -932,6 +938,8 @@ module ANL
               param.get_value_auto.inspect
             when 'string'
               '"'+param.value_string+'"'
+            when 'unsigned_integer'
+              param.get_value_unsigned_integer.to_s
             when 'double'
               param.value_string.to_f.to_s
             when 'bool'
@@ -961,6 +969,8 @@ module ANL
               case type
               when 'string'
                 '"'+mapValue.value_string+'"'
+              when 'unsigned_integer'
+                mapValue.get_value_unsigned_integer.to_s
               when 'double'
                 mapValue.value_string.to_f.to_s
               else
@@ -983,6 +993,8 @@ module ANL
               case type
               when 'string'
                 '"'+mapValue.value_string+'"'
+              when 'unsigned_integer'
+                mapValue.get_value_unsigned_integer.to_s
               when 'double'
                 mapValue.value_string.to_f.to_s
               else

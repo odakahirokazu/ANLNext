@@ -85,6 +85,7 @@ public:
   void set_parameter(const std::string& name, double x, double y);
   void set_parameter(const std::string& name, double x, double y, double z);
   void set_parameter_integer(const std::string& name, intmax_t val);
+  void set_parameter_unsigned_integer(const std::string& name, uintmax_t val);
   void clear_array(const std::string& name);
   void set_map_key(const std::string& key)
   {

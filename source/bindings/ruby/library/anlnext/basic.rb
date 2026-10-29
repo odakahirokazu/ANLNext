@@ -27,6 +27,9 @@ module ANL
         suffix = MAP_PARAMETER_TYPES[type]
         raise TypeError, "#{name} is not a map parameter: #{type}" unless suffix
         public_send("set_parameter_map_#{suffix}", name.to_s, values.first)
+      elsif values.size == 1 && values.first.is_a?(Integer) &&
+            get_parameter(name).type_name() == 'unsigned_integer'
+        set_parameter_unsigned_integer(name.to_s, values.first)
       else
         set_parameter_original(name.to_s, *values)
       end
@@ -98,6 +101,8 @@ module ANL
         get_value(0)
       when "integer"
         get_value_integer()
+      when "unsigned_integer"
+        get_value_unsigned_integer()
       when "double"
         get_value(0.0)
       when "string"
