@@ -88,13 +88,13 @@ public:
   void clear_array(const std::string& name);
   void set_map_key(const std::string& key)
   {
-    current_parameter_->set_map_key(key);
+    current_parameter().set_map_key(key);
   }
   
   template <typename T>
   void set_value_element(const std::string& name, T val);
 
-  void insert_to_container() { current_parameter_->insert_to_container(); }
+  void insert_to_container() { current_parameter().insert_to_container(); }
 
   void print_parameters() const;
   void ask_parameters();
@@ -114,25 +114,25 @@ protected:
   void define_parameter(const std::string& name, T ModuleClass::* ptr, double unit, const std::string& unit_name);
 
   void define_map_key(const std::string& name, const std::string& default_key="")
-  { current_parameter_->set_map_key_properties(name, default_key); }
+  { current_parameter().set_map_key_properties(name, default_key); }
 
   void undefine_parameter(const std::string& name);
   void hide_parameter(const std::string& name, bool hidden=true);
 
   void set_parameter_unit(double unit, const std::string& unit_name)
-  { current_parameter_->set_unit(unit, unit_name); }
+  { current_parameter().set_unit(unit, unit_name); }
 
   void set_parameter_expression(const std::string& v)
-  { current_parameter_->set_expression(v); }
+  { current_parameter().set_expression(v); }
 
   void set_parameter_question(const std::string& v)
-  { current_parameter_->set_question(v); }
+  { current_parameter().set_question(v); }
 
   void set_parameter_default_string(const std::string& v)
-  { current_parameter_->set_default_string(v); }
+  { current_parameter().set_default_string(v); }
 
   void set_parameter_description(const std::string& v)
-  { current_parameter_->set_description(v); }
+  { current_parameter().set_description(v); }
 
   template <typename T>
   void add_value_element(const std::string& name, T value);
@@ -149,22 +149,22 @@ protected:
   void add_value_element(const std::string& name, T ModuleClass::* ptr, double unit, const std::string& unit_name);
 
   void enable_value_elements(int type, const std::vector<std::size_t>& enable)
-  { current_value_element_->enable_value_elements(type, enable); }
+  { current_value_element().enable_value_elements(type, enable); }
 
   void set_value_element_unit(double unit, const std::string& unit_name)
-  { current_value_element_->set_unit(unit, unit_name); }
+  { current_value_element().set_unit(unit, unit_name); }
 
   void set_value_element_expression(const std::string& v)
-  { current_value_element_->set_expression(v); }
+  { current_value_element().set_expression(v); }
 
   void set_value_element_question(const std::string& v)
-  { current_value_element_->set_question(v); }
+  { current_value_element().set_question(v); }
 
   void set_value_element_default_string(const std::string& v)
-  { current_value_element_->set_default_string(v); }
+  { current_value_element().set_default_string(v); }
 
   void set_value_element_description(const std::string& v)
-  { current_value_element_->set_description(v); }
+  { current_value_element().set_description(v); }
 
   void ask_parameter(const std::string& name, const std::string& question="");
 
@@ -184,6 +184,8 @@ protected:
   void copy_parameters(const ParameterRegistry& r);
 
 private:
+  VModuleParameter& current_parameter();
+  VModuleParameter& current_value_element();
   ModuleParamIter find_parameter(const std::string& name);
   virtual void add_parameter_error_info(ANLException&) const {}
 
@@ -214,21 +216,21 @@ template <typename ModuleClass, typename T>
 void ParameterRegistry::define_result(const std::string& name, T ModuleClass::* ptr)
 {
   define_parameter(name, ptr);
-  current_parameter_->set_result();
+  current_parameter().set_result();
 }
 
 template <typename ModuleClass, typename T>
 void ParameterRegistry::define_result(const std::string& name, T ModuleClass::* ptr, double unit, const std::string& unit_name)
 {
   define_parameter(name, ptr, unit, unit_name);
-  current_parameter_->set_result();
+  current_parameter().set_result();
 }
 
 template <typename T>
 void ParameterRegistry::add_value_element(const std::string& name, T value)
 {
   ModuleParam_sptr p(new ModuleParameterUnique<T>(name, value));
-  current_parameter_->add_value_element(p);
+  current_parameter().add_value_element(p);
   current_value_element_ = p;
 }
 
@@ -237,7 +239,7 @@ void ParameterRegistry::add_value_element(const std::string& name, T value, doub
 {
   ModuleParam_sptr p(new ModuleParameterUnique<T>(name, value));
   p->set_unit(unit, unit_name);
-  current_parameter_->add_value_element(p);
+  current_parameter().add_value_element(p);
   current_value_element_ = p;
 }
 
@@ -245,7 +247,7 @@ template <typename ModuleClass, typename T>
 void ParameterRegistry::add_value_element(const std::string& name, T ModuleClass::* ptr)
 {
   ModuleParam_sptr p(new ModuleParameterMember<ModuleClass, T>(name, dynamic_cast<ModuleClass*>(this), ptr));
-  current_parameter_->add_value_element(p);
+  current_parameter().add_value_element(p);
   current_value_element_ = p;
 }
 
@@ -254,7 +256,7 @@ void ParameterRegistry::add_value_element(const std::string& name, T ModuleClass
 {
   ModuleParam_sptr p(new ModuleParameterMember<ModuleClass, T>(name, dynamic_cast<ModuleClass*>(this), ptr));
   p->set_unit(unit, unit_name);
-  current_parameter_->add_value_element(p);
+  current_parameter().add_value_element(p);
   current_value_element_ = p;
 }
 
@@ -274,11 +276,12 @@ void ParameterRegistry::set_parameter(const std::string& name, T val)
 template <typename T>
 void ParameterRegistry::set_value_element(const std::string& name, T val)
 {
+  VModuleParameter& parameter = current_parameter();
   try {
-    current_parameter_->set_value_element(name, val);
+    parameter.set_value_element(name, val);
   }
   catch (ANLException& e) {
-    e.prepend_parameter_name(current_parameter_.get());
+    e.prepend_parameter_name(&parameter);
     add_parameter_error_info(e);
     throw;
   }

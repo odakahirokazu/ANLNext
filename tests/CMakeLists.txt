@@ -5,3 +5,8 @@ foreach(mode serial ordered skip quit quit_all exception anl_exception terminate
   add_test(NAME loop_control_${mode} COMMAND anlnext_loop_control ${mode})
   set_tests_properties(loop_control_${mode} PROPERTIES TIMEOUT 15)
 endforeach()
+
+add_executable(anlnext_parameter_selection parameter_selection.cc)
+target_link_libraries(anlnext_parameter_selection PRIVATE ANLNext)
+add_test(NAME parameter_selection COMMAND anlnext_parameter_selection)
+set_tests_properties(parameter_selection PROPERTIES TIMEOUT 15)

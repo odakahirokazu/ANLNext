@@ -33,6 +33,26 @@ ParameterRegistry::ParameterRegistry()
 
 ParameterRegistry::~ParameterRegistry() = default;
 
+VModuleParameter& ParameterRegistry::current_parameter()
+{
+  if (!current_parameter_) {
+    ANLException ex("No current parameter is selected.");
+    add_parameter_error_info(ex);
+    BOOST_THROW_EXCEPTION(ex);
+  }
+  return *current_parameter_;
+}
+
+VModuleParameter& ParameterRegistry::current_value_element()
+{
+  if (!current_value_element_) {
+    ANLException ex("No current value element is selected.");
+    add_parameter_error_info(ex);
+    BOOST_THROW_EXCEPTION(ex);
+  }
+  return *current_value_element_;
+}
+
 ModuleParamIter ParameterRegistry::find_parameter(const std::string& name)
 {
   ModuleParamIter it = std::begin(module_parameters_);
@@ -73,6 +93,8 @@ void ParameterRegistry::clear_array(const std::string& name)
 
 void ParameterRegistry::copy_parameters(const ParameterRegistry& r)
 {
+  current_parameter_.reset();
+  current_value_element_.reset();
   module_parameters_.clear();
   for (ModuleParam_sptr p: r.module_parameters_) {
     ModuleParam_sptr new_param = p->clone();
