@@ -96,7 +96,7 @@ public:
 
   void insert_to_container() { current_parameter().insert_to_container(); }
 
-  void print_parameters() const;
+  virtual void print_parameters() const;
   void ask_parameters();
   void print_results() const;
 

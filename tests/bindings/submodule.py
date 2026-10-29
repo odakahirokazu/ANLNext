@@ -1,3 +1,7 @@
+import json
+import tempfile
+from pathlib import Path
+
 import anlnext
 from submodule_python import SubmoduleExample
 
@@ -45,3 +49,17 @@ chain.run(6)
 for index in range(chain.num_parallels):
     module = chain.get_parallel_module(index, "example")
     assert anlnext.get_value(module.get_parameter("result")) == 4 * (7 + index)
+
+with tempfile.TemporaryDirectory() as directory:
+    filename = Path(directory) / "parameters.json"
+    chain.anl.parameters_to_json(str(filename))
+    application = json.loads(filename.read_text())["application"]
+    for index in range(chain.num_parallels):
+        modules = application["module_list" if index == 0 else f"chain{index}"]
+        entries = {entry["registered_name"]: entry for entry in modules[0]["submodule_list"]}
+        algorithm = entries["algorithm"]
+        assert algorithm["name"] == "ExampleAlgorithm"
+        assert algorithm["version"] == "1.0"
+        assert algorithm["state"] == "set"
+        assert int(algorithm["parameter_list"][0]["value"]) == 7 + index
+        assert entries["optional"] == {"registered_name": "optional", "state": "unset"}

@@ -113,6 +113,22 @@ std::vector<std::string> BasicModule::get_aliases_string() const
   return v;
 }
 
+void BasicModule::print_parameters() const
+{
+  ParameterRegistry::print_parameters();
+  for (const auto& entry: submodule_map_) {
+    std::cout << "\n  [" << entry.first << ": ";
+    if (entry.second) {
+      std::cout << entry.second->submodule_name() << " / "
+                << entry.second->submodule_version() << "]\n";
+      entry.second->print_parameters();
+    }
+    else {
+      std::cout << "unset]\n";
+    }
+  }
+}
+
 boost::property_tree::ptree BasicModule::parameters_to_property_tree() const
 {
   boost::property_tree::ptree pt;
@@ -121,6 +137,19 @@ boost::property_tree::ptree BasicModule::parameters_to_property_tree() const
   pt.put("version", module_version());
   boost::property_tree::ptree pt_parameters = ParameterRegistry::parameters_to_property_tree();
   pt.add_child("parameter_list", std::move(pt_parameters));
+  if (!submodule_map_.empty()) {
+    boost::property_tree::ptree submodules;
+    for (const auto& entry: submodule_map_) {
+      boost::property_tree::ptree submodule;
+      if (entry.second) {
+        submodule = entry.second->parameters_to_property_tree();
+      }
+      submodule.put("registered_name", entry.first);
+      submodule.put("state", entry.second ? "set" : "unset");
+      submodules.push_back(std::make_pair("", std::move(submodule)));
+    }
+    pt.add_child("submodule_list", std::move(submodules));
+  }
   return pt;
 }
 

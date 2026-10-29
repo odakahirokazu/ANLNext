@@ -43,3 +43,22 @@ ctest --test-dir <build-directory> -R 'submodule_(python|ruby)' --output-on-fail
 
 bindingと補助ライブラリはビルドディレクトリ内で読み込みます。
 インストール済みのANLNextは変更しません。
+
+## パラメータ出力
+
+親のJSONオブジェクトには、Submoduleの宣言がある場合だけ`submodule_list`を
+追加します。C++のJSON出力とRubyの`parameters_to_object()`は同じ構造です。
+
+- `registered_name`: 親への登録名。
+- `state`: 実体があれば`set`、名前だけの宣言なら`unset`。
+- `name`、`version`、`parameter_list`: 実体がある場合だけ出力。
+
+実体名は選択キーワードではありません。この出力は設定状態の記録であり、
+キーワードを復元して実体を再構成する機能は含みません。
+数値などのJSON表現は従来どおりで、C++のBoost.PropertyTree出力は文字列、
+Rubyの出力はRubyの値の型に従います。
+
+画面表示では、親のパラメータに続けて登録名と実体名・バージョンを見出しに
+Submoduleのパラメータを表示します。未設定の宣言は`[optional: unset]`のように
+表示します。JSONではresultパラメータも記録し、画面のパラメータ表示では
+従来どおりresultを除外します。

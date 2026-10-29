@@ -190,7 +190,7 @@ class ParameterRegistry
   void set_value_element(const std::string& name, const std::string& val);
   void insert_to_container();
 
-  void print_parameters() const;
+  virtual void print_parameters() const;
 
   %extend {
     void insert_to_map(const std::string& map_name, const std::string& key)
@@ -223,6 +223,9 @@ class BasicSubModule : public ParameterRegistry
  public:
   BasicSubModule();
   virtual ~BasicSubModule();
+
+  std::string submodule_name() const;
+  std::string submodule_version() const;
 
   // mix-in ModuleDescription
   std::string module_description() const;

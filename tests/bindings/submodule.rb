@@ -1,5 +1,6 @@
 require 'anlnext'
 require 'submodule_ruby'
+require 'tmpdir'
 
 def expect_error(text)
   begin
@@ -43,7 +44,35 @@ chain.modify do |c|
     algorithm.set_parameter_integer('factor', 7 + index)
   end
 end
-chain.run(6)
+Dir.mktmpdir do |directory|
+  chain.parameters_json_filename = File.join(directory, 'parameters.json')
+  chain.parameters_json_master = false
+  chain.run(6)
+  cpp = JSON.parse(File.read(chain.parameters_json_filename))['application']
+  ruby = JSON.parse(JSON.generate(chain.parameters_to_object()))['application']
+  normalize = lambda do |entry|
+    copy = Marshal.load(Marshal.dump(entry))
+    copy.fetch('parameter_list', []).each { |p| p['value'] = p['value'].to_s }
+    copy
+  end
+  3.times do |index|
+    mod = chain.get_parallel_module(index, :example)
+    ruby_module = JSON.parse(JSON.generate(mod.parameters_to_object()))
+    cpp_module = cpp[index.zero? ? 'module_list' : "chain#{index}"].first
+    ruby_entries = ruby_module['submodule_list'].map { |e| normalize.call(e) }
+    cpp_entries = cpp_module['submodule_list'].map { |e| normalize.call(e) }
+    raise unless ruby_entries == cpp_entries
+    algorithm = ruby_module['submodule_list'].find { |e| e['registered_name'] == 'algorithm' }
+    raise unless algorithm['name'] == 'ExampleAlgorithm' && algorithm['version'] == '1.0'
+    raise unless algorithm['state'] == 'set' && algorithm['parameter_list'].first['value'] == 7 + index
+    optional = ruby_module['submodule_list'].find { |e| e['registered_name'] == 'optional' }
+    raise unless optional == { 'registered_name' => 'optional', 'state' => 'unset' }
+  end
+  raise unless ruby['module_list'].first['submodule_list'] ==
+               JSON.parse(JSON.generate(chain.get_module(:example).parameters_to_object()))['submodule_list']
+  raise if ANL::BasicModule.new.parameters_to_object.key?(:submodule_list)
+  raise unless chain.get_module(:example).get_submodule('algorithm').get_parameter_value(:factor) == 7
+end
 3.times do |index|
   mod = chain.get_parallel_module(index, :example)
   raise unless value(mod, 'result') == 4 * (7 + index)

@@ -174,6 +174,7 @@ public:
   const BasicSubModule* get_submodule(const std::string& name) const;
   std::vector<std::string> submodule_names() const;
 
+  void print_parameters() const override;
   boost::property_tree::ptree parameters_to_property_tree() const override;
 
   void set_evs_manager(EvsManager* evs_manager) override;

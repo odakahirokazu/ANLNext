@@ -3,6 +3,7 @@
 #include "EvsManager.hh"
 #include <iostream>
 #include <stdexcept>
+#include <sstream>
 
 using namespace anlnext;
 
@@ -120,6 +121,36 @@ int main()
     expect_error<SubModuleConfigurationError>([&] { parent.set_submodule_by_key("algorithm", "algorithm"); });
     expect_error<SubModuleConfigurationError>([&] { cloned->set_submodule_by_key("algorithm", "algorithm"); });
     expect_error<SubModuleConfigurationError>([&] { parent.define_submodule("late"); });
+    BasicModule empty;
+    require(!empty.parameters_to_property_tree().get_child_optional("submodule_list"),
+            "undeclared submodule list must be omitted");
+    const auto tree = parent.parameters_to_property_tree();
+    const auto& entries = tree.get_child("submodule_list");
+    require(entries.size() == 2, "submodule output lost declarations");
+    const auto& set = entries.front().second;
+    require(set.get<std::string>("registered_name") == "algorithm" &&
+            set.get<std::string>("name") == "Algorithm" &&
+            set.get<std::string>("version") == "1.0" &&
+            set.get<std::string>("state") == "set", "submodule metadata mismatch");
+    require(set.get_child("parameter_list").front().second.get<int>("value") == 23,
+            "submodule parameter output mismatch");
+    const auto& unset = entries.back().second;
+    require(unset.size() == 2 && unset.get<std::string>("registered_name") == "optional" &&
+            unset.get<std::string>("state") == "unset", "unset output mismatch");
+    std::ostringstream output;
+    auto* saved = std::cout.rdbuf(output.rdbuf());
+    try {
+      const ParameterRegistry& registry = parent;
+      registry.print_parameters();
+    }
+    catch (...) {
+      std::cout.rdbuf(saved);
+      throw;
+    }
+    std::cout.rdbuf(saved);
+    require(output.str().find("[algorithm: Algorithm / 1.0]") != std::string::npos &&
+            output.str().find("[optional: unset]") != std::string::npos &&
+            output.str().find("23") != std::string::npos, "submodule display mismatch");
     auto second = parent.duplicate();
     require(second->is_submodule_set("algorithm"), "second duplication failed");
   }

@@ -10,7 +10,7 @@ module ANL
   AS_SKIP           = ANL::ANLStatus_skip
   AS_QUIT           = ANL::ANLStatus_quit
 
-  class BasicModule
+  class ParameterRegistry
     # Get a list of parameters registered in the module.
     #
     # @return [Array] list of parameters registered in the given module.
@@ -35,13 +35,32 @@ module ANL
       get_parameter(name).to_value_object()
     end
     alias :get_result_value :get_parameter_value
+  end
 
+  class BasicSubModule
+    def parameters_to_object()
+      { name: submodule_name(), version: submodule_version(),
+        parameter_list: parameter_list.map(&:to_object) }
+    end
+  end
+
+  class BasicModule
     def parameters_to_object()
       o = {}
       o[:module_id] = module_id()
       o[:name] = module_name()
       o[:version] = module_version()
       o[:parameter_list] = parameter_list.map(&:to_object)
+      names = submodule_names()
+      unless names.empty?
+        o[:submodule_list] = names.map do |name|
+          if is_submodule_set(name)
+            get_submodule(name).parameters_to_object.merge(registered_name: name, state: 'set')
+          else
+            { registered_name: name, state: 'unset' }
+          end
+        end
+      end
       return o
     end
   end
