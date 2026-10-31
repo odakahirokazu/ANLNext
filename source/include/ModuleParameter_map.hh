@@ -29,6 +29,7 @@ public:
 
 protected:
   ModuleParameterMap(const ModuleParameterMap&) = default;
+  void __set_pointer__(map_type* ptr) { ptr_ = ptr; }
   virtual map_type& __ref__();
   virtual const map_type& __ref__() const;
 

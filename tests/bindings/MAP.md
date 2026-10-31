@@ -18,6 +18,10 @@ auto values = get_parameter("coefficients")->get_value(std::map<int, double>{});
 `double`の値は設定時にunitを掛け、取得・表示・JSON出力時に割ります。
 キーにはunitを適用しません。複製時は各モジュールが独立したmapを持ちます。
 
+これらのmapは、`record_vector`／`record_map`の値要素としても
+`add_value_element("weights", std::map<int, double>{})`のように登録できます。
+編集用の値と初期値も複製先から独立し、表示・JSON出力では通常のmapと同じ形式を使います。
+
 RubyのChainでは、定義後に型を調べてHashの設定方法を選びます。
 従来の表形式の`map`には、引き続き既存の要素登録処理を使います。
 

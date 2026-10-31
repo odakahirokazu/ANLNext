@@ -9,10 +9,88 @@ void require(bool condition, const char* message)
   if (!condition) { throw std::runtime_error(message); }
 }
 
+template <typename Map>
+class MapRecords : public BasicModule {
+  DEFINE_ANL_MODULE(MapRecords, 1.0);
+  ENABLE_PARALLEL_RUN();
+public:
+  explicit MapRecords(const Map& values) : defaults_(values) {}
+
+  void setup()
+  {
+    define_parameter("rows", &MapRecords::rows);
+    add_value_element("weights", defaults_);
+    define_parameter("table", &MapRecords::table);
+    add_value_element("weights", defaults_);
+  }
+
+  void insert(const std::string& name, const std::string& key)
+  {
+    expose_parameter(name);
+    set_map_key(key);
+    insert_to_container();
+  }
+
+  const Map& last_value(const std::string& name, const std::string& key) const
+  {
+    if (name == "rows") { return std::get<0>(rows.back()); }
+    return std::get<0>(table.at(key));
+  }
+
+  std::vector<std::tuple<Map>> rows;
+  std::map<std::string, std::tuple<Map>> table;
+private:
+  Map defaults_;
+};
+
+template <typename Map>
+void verify_record_elements(const Map& values)
+{
+  for (const std::string name: {"rows", "table"}) {
+    MapRecords<Map> source(values);
+    source.setup();
+    source.insert(name, "initial");
+    require(source.last_value(name, "initial") == values, "map value element insertion failed");
+    auto copy = source.duplicate();
+    auto& cloned = dynamic_cast<MapRecords<Map>&>(*copy);
+    const auto* parameter = source.get_parameter(name);
+    if (name == "rows") {
+      source.rows.emplace_back(Map{});
+      parameter->retrieve_from_container(std::size_t{1});
+    }
+    else {
+      source.table.emplace("empty", std::make_tuple(Map{}));
+      parameter->retrieve_from_container(std::string("empty"));
+    }
+    source.insert(name, "edited");
+    cloned.insert(name, "copy");
+    require(source.last_value(name, "edited").empty(), "map value element retrieval failed");
+    require(cloned.last_value(name, "copy") == values, "map value element buffer is shared by copies");
+    require(cloned.get_parameter(name)->size_of_container() == 2, "record containers are shared by copies");
+    source.insert(name, "default");
+    require(source.last_value(name, "default") == values, "map value element default was lost");
+
+    const auto tree = parameter->to_property_tree();
+    const auto& row = name == "rows" ? tree.get_child("value").front().second
+                                     : tree.get_child("value").get_child("initial");
+    const auto& element = row.front().second;
+    require(element.template get<std::string>("name") == "weights" &&
+            element.template get<std::string>("type") == param_type_info<Map>::name() &&
+            element.get_child("value").size() == values.size(), "map value element JSON mismatch");
+    Map buffer = values;
+    ModuleParameter<Map> expected("weights", &buffer);
+    std::ostringstream output;
+    parameter->output(output);
+    require(output.str().find("weights: " + expected.value_string()) != std::string::npos,
+            "map value element display mismatch");
+  }
+}
+
 template <typename K, typename V>
 void verify(MapExample& module, const std::string& name, const std::map<K, V>& values)
 {
   using Map = std::map<K, V>;
+  verify_record_elements(values);
   module.set_parameter(name, values);
   const auto* param = module.get_parameter(name);
   require(param->get_value(Map{}) == values, "map setting/reading failed");
