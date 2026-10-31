@@ -40,12 +40,20 @@ public:
   void describe_parameter() { this->set_parameter_description("changed"); }
   void describe_element() { this->set_value_element_description("changed"); }
   void add_element() { this->add_value_element("extra", 0); }
+  void define_other(bool with_unit)
+  {
+    if (with_unit) { this->define_parameter("other", &Parameters::other_, 1.0, "unit"); }
+    else { this->define_parameter("other", &Parameters::other_); }
+  }
+  void undefine(const std::string& name) { this->undefine_parameter(name); }
+  void hide(const std::string& name) { this->hide_parameter(name); }
   int value() const { return value_; }
   const auto& rows() const { return rows_; }
 
 private:
   int value_ = 10;
   std::vector<std::tuple<int>> rows_;
+  std::vector<std::tuple<int>> other_;
 };
 
 class TestModule : public Parameters<BasicModule> {
@@ -124,11 +132,60 @@ void verify_duplication()
           "cloned element metadata is shared");
 }
 
+template <typename T>
+void verify_selection_changes()
+{
+  for (bool with_unit: {false, true}) {
+    T object;
+    object.setup();
+    object.define_other(with_unit);
+    expect_unselected([&] { object.describe_element(); }, "No current value element");
+    object.describe_parameter();
+    require(object.get_parameter("other")->description() == "changed",
+            "definition did not select the new parameter");
+    object.add_element();
+    object.describe_element();
+    require(object.get_parameter("other")->value_element_info(0)->description() == "changed",
+            "new value element was not selected");
+    require(object.get_parameter("rows")->value_element_info(0)->description().empty(),
+            "definition retained the previous element selection");
+  }
+
+  T switched;
+  switched.setup();
+  switched.expose_parameter("value");
+  expect_unselected([&] { switched.describe_element(); }, "No current value element");
+  switched.describe_parameter();
+  require(switched.get_parameter("value")->description() == "changed",
+          "exposure did not select the parameter");
+
+  T reselected;
+  reselected.setup();
+  reselected.hide("rows");
+  reselected.describe_element();
+  reselected.expose_parameter("rows");
+  expect_unselected([&] { reselected.describe_element(); }, "No current value element");
+
+  T removed;
+  removed.setup();
+  removed.undefine("value");
+  removed.describe_element();
+  removed.set_value_element("entry", 19);
+  removed.insert_to_container();
+  require(std::get<0>(removed.rows().back()) == 19,
+          "removing another parameter disturbed the selection");
+  removed.undefine("rows");
+  verify_unselected(removed);
+  require(removed.rows().size() == 2, "unselected operation modified removed data");
+}
+
 int main()
 {
   try {
     verify_duplication<TestModule>();
     verify_duplication<TestSubModule>();
+    verify_selection_changes<TestModule>();
+    verify_selection_changes<TestSubModule>();
   }
   catch (const ANLException& ex) {
     std::cerr << ex.to_string() << '\n';

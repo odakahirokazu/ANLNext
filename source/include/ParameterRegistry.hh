@@ -202,6 +202,7 @@ void ParameterRegistry::define_parameter(const std::string& name, T ModuleClass:
   ModuleParam_sptr p(new ModuleParameterMember<ModuleClass, T>(name, dynamic_cast<ModuleClass*>(this), ptr));
   module_parameters_.push_back(p);
   current_parameter_ = p;
+  current_value_element_.reset();
 }
 
 template <typename ModuleClass, typename T>
@@ -211,6 +212,7 @@ void ParameterRegistry::define_parameter(const std::string& name, T ModuleClass:
   p->set_unit(unit, unit_name);
   module_parameters_.push_back(p);
   current_parameter_ = p;
+  current_value_element_.reset();
 }
 
 template <typename ModuleClass, typename T>

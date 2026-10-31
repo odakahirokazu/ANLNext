@@ -134,13 +134,20 @@ void ParameterRegistry::print_results() const
 void ParameterRegistry::undefine_parameter(const std::string& name)
 {
   ModuleParamIter it = find_parameter(name);
+  if (current_parameter_ == *it) {
+    current_parameter_.reset();
+    current_value_element_.reset();
+  }
   module_parameters_.erase(it);
 }
 
 void ParameterRegistry::hide_parameter(const std::string& name, bool hidden)
 {
   ModuleParamIter it = find_parameter(name);
-  if (!hidden) { current_parameter_ = *it; }
+  if (!hidden) {
+    current_parameter_ = *it;
+    current_value_element_.reset();
+  }
   (*it)->set_hidden(hidden);
 }
 
@@ -149,6 +156,7 @@ void ParameterRegistry::ask_parameter(const std::string& name,
 {
   ModuleParamIter it = find_parameter(name);
   current_parameter_ = *it;
+  current_value_element_.reset();
   if (question!="") {
     (*it)->set_question(question);
   }
