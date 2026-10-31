@@ -15,9 +15,9 @@ def verify_record_integer_range():
 
         def insert(value, key):
             if name == 'table':
-                module.insert_to_map(name, key, {'count': value})
+                anlnext.insert_to_map(module, name, key, {'count': value})
             else:
-                module.push_to_vector(name, {'count': value})
+                anlnext.push_to_vector(module, name, {'count': value})
 
         for index, value in enumerate([-2147483648, -1, 0, 2147483647]):
             key = str(index)
@@ -31,15 +31,59 @@ def verify_record_integer_range():
         for bad in [2147483648, -2147483649, (1 << 32) + 7, 1 << 100, -(1 << 100)]:
             try:
                 insert(bad, 'invalid')
-            except RuntimeError as error:
-                assert 'ParameterError' in str(error) and 'count' in str(error)
+            except (RuntimeError, TypeError, OverflowError, ValueError):
+                pass
             else:
                 raise AssertionError(f'accepted out-of-range record integer: {name}: {bad}')
             assert parameter.size_of_container() == expected_size
             assert anlnext.get_value(parameter) == expected
 
 
+def verify_record_input_types():
+    module = MapExample()
+    manager = anlnext.ANLManager()
+    manager.set_modules([module])
+    manager.define_analysis()
+    for name in ['table', 'rows']:
+        parameter = module.get_parameter(name)
+
+        def insert(values, key):
+            if name == 'table':
+                anlnext.insert_to_map(module, name, key, values)
+            else:
+                anlnext.push_to_vector(module, name, values)
+
+        insert({}, 'default')
+        insert({'count': 7}, 'explicit')
+        insert({}, 'default_again')
+        stored = anlnext.get_value(parameter)
+        rows = [stored[key] for key in ['default', 'explicit', 'default_again']] if name == 'table' else stored
+        assert [row['count'] for row in rows] == [0, 7, 0]
+        if name == 'table':
+            assert all(row['weight'] == 0.0 for row in rows)
+
+        expected_size = parameter.size_of_container()
+        for bad in [None, [7], (), 'count', 7,
+                    {'count': None}, {'count': [7]}, {'count': {}},
+                    {'count': {7}}, {'count': 1j},
+                    {0: 7}, {None: 7}, {b'count': 7},
+                    {'\ud800': 7}, {'count': '\ud800'}]:
+            try:
+                insert(bad, 'invalid')
+            except (RuntimeError, TypeError, OverflowError, ValueError):
+                pass
+            else:
+                raise AssertionError(f'accepted invalid record input: {name}: {bad!r}')
+            assert parameter.size_of_container() == expected_size
+            assert anlnext.get_value(parameter) == stored
+        insert({'count': 13}, 'after_error')
+        after_error = anlnext.get_value(parameter)
+        row = after_error['after_error'] if name == 'table' else after_error[-1]
+        assert row['count'] == 13
+
+
 verify_record_integer_range()
+verify_record_input_types()
 
 values = {
     'map_i_i': {-1: 3, 2147483647: -2147483648},
@@ -53,7 +97,7 @@ chain = anlnext.AnalysisChain()
 chain.console = False
 chain.num_parallels = 2
 chain.chain(MapExample, 'maps').with_parameters(values)
-chain.with_setter(lambda m: m.insert_to_map('table', 'row', {'count': 3, 'weight': 0.5}))
+chain.insert_to_map('table', 'row', {'count': 3, 'weight': 0.5})
 chain.push_to_vector('rows', {'count': 4})
 
 def modify(c):

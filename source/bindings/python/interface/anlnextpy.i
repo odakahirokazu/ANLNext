@@ -1,7 +1,6 @@
 %module anlnextpy
 %{
 #define SWIG_FILE_WITH_INIT
-#include <limits>
 #include "ANLManager.hh"
 #include "ANLManagerMT.hh"
 #include "VModuleParameter.hh"
@@ -238,87 +237,6 @@ class ParameterRegistry
   void insert_to_container();
 
   virtual void print_parameters() const;
-
-  %extend {
-    void insert_to_map(const std::string& map_name, const std::string& key, PyObject* dict)
-    {
-      $self->expose_parameter(map_name);
-      $self->set_map_key(key);
-
-      if (PyDict_Check(dict)) {
-        PyObject* keys = PyDict_Keys(dict);
-        const int n = PyList_Size(keys);
-        for (int i=0; i<n; i++) {
-          PyObject* key = PyList_GetItem(keys, i);
-          PyObject* val = PyDict_GetItem(dict, key);
-          const std::string name(PyUnicode_AsUTF8(key));
-          if (PyLong_Check(val)) {
-            const long v = PyLong_AsLong(val);
-            if (PyErr_Occurred()) {
-              PyErr_Clear();
-              BOOST_THROW_EXCEPTION(anlnext::ParameterError(
-                $self->get_parameter(map_name), "Integer conversion failed: " + name));
-            }
-            if (v < std::numeric_limits<int>::min() ||
-                v > std::numeric_limits<int>::max()) {
-              BOOST_THROW_EXCEPTION(anlnext::ParameterError(
-                $self->get_parameter(map_name), "Integer is outside the range of int: " + name));
-            }
-            $self->set_value_element(name, static_cast<int>(v));
-          }
-          else if (PyFloat_Check(val)) {
-            const double v = PyFloat_AsDouble(val);
-            $self->set_value_element(name, v);
-          }
-          else if (PyUnicode_Check(val)) {
-            const std::string v(PyUnicode_AsUTF8(val));
-            $self->set_value_element(name, v);
-          }
-        }
-      }
-      
-      $self->insert_to_container();
-    }
-
-    void push_to_vector(const std::string& vector_name, PyObject* dict)
-    {
-      $self->expose_parameter(vector_name);
-
-      if (PyDict_Check(dict)) {
-        PyObject* keys = PyDict_Keys(dict);
-        const int n = PyList_Size(keys);
-        for (int i=0; i<n; i++) {
-          PyObject* key = PyList_GetItem(keys, i);
-          PyObject* val = PyDict_GetItem(dict, key);
-          const std::string name(PyUnicode_AsUTF8(key));
-          if (PyLong_Check(val)) {
-            const long v = PyLong_AsLong(val);
-            if (PyErr_Occurred()) {
-              PyErr_Clear();
-              BOOST_THROW_EXCEPTION(anlnext::ParameterError(
-                $self->get_parameter(vector_name), "Integer conversion failed: " + name));
-            }
-            if (v < std::numeric_limits<int>::min() ||
-                v > std::numeric_limits<int>::max()) {
-              BOOST_THROW_EXCEPTION(anlnext::ParameterError(
-                $self->get_parameter(vector_name), "Integer is outside the range of int: " + name));
-            }
-            $self->set_value_element(name, static_cast<int>(v));
-          }
-          else if (PyFloat_Check(val)) {
-            const double v = PyFloat_AsDouble(val);
-            $self->set_value_element(name, v);
-          }
-          else if (PyUnicode_Check(val)) {
-            const std::string v(PyUnicode_AsUTF8(val));
-            $self->set_value_element(name, v);
-          }
-        }
-      }
-      
-      $self->insert_to_container();
-    }
-  }
 
   %exception;
 };

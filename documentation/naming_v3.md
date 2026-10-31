@@ -45,6 +45,27 @@ ANLExceptionの`SetVerboseLevel()`は`set_verbose_level()`、
 
 移行用に旧名をdeprecatedな転送メソッドとして残します。
 
+## Pythonのrecord入力
+
+record_map／record_vectorへ直接入力するAPIは、Pythonの補助関数へ移します。
+
+```python
+# 旧API
+module.insert_to_map('table', 'row', {'count': 7})
+module.push_to_vector('rows', {'count': 7})
+
+# 新API
+anlnext.insert_to_map(module, 'table', 'row', {'count': 7})
+anlnext.push_to_vector(module, 'rows', {'count': 7})
+```
+
+AnalysisChainの`chain.insert_to_map()`／`chain.push_to_vector()`は変更しません。
+辞書の確認と走査はPython側で行い、個々の値の型変換・数値範囲確認は
+既存のSWIG setterとC++の型チェックに任せます。
+辞書のキーは値要素名の文字列、値は`int`・`float`・`str`を使います。
+不正な入力は例外となり、レコードを追加しません。要素を省略した場合や空の辞書では
+編集用バッファの現在値を使います。通常の挿入後はバッファが初期値へ戻ります。
+
 ## 内部実装・補助コード・サンプル
 
 `module_ID_`、`copy_ID_`などのメンバを`module_id_`、`copy_id_`へ統一します。

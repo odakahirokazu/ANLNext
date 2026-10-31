@@ -80,7 +80,7 @@ class AnalysisChain:
     def insert_to_map(self, map_name, key, values):
         mod = self.current_module
         def set_param():
-            mod.insert_to_map(map_name, key, values)
+            anlnext.insert_to_map(mod, map_name, key, values)
         self.parameter_setter_list.append(set_param)
         return self
       
@@ -88,7 +88,7 @@ class AnalysisChain:
     def push_to_vector(self, vector_name, values):
         mod = self.current_module
         def set_param():
-            mod.push_to_vector(vector_name, values)
+            anlnext.push_to_vector(mod, vector_name, values)
         self.parameter_setter_list.append(set_param)
         return self
 

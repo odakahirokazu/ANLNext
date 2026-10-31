@@ -24,6 +24,30 @@ def set_map_parameter(module, name, value):
     getattr(module, "set_parameter_map_" + suffix)(name, value)
 
 
+def _set_record_values(registry, values):
+    if not isinstance(values, dict):
+        raise TypeError("Record values must be a dict")
+    for name, value in values.items():
+        if not isinstance(name, str):
+            raise TypeError("Value element name must be a string")
+        if not isinstance(value, (int, float, str)):
+            raise TypeError(f"Unsupported value type: {name}")
+        registry.set_value_element(name, value)
+
+
+def insert_to_map(registry, map_name, key, values):
+    registry.expose_parameter(map_name)
+    registry.set_map_key(key)
+    _set_record_values(registry, values)
+    registry.insert_to_container()
+
+
+def push_to_vector(registry, vector_name, values):
+    registry.expose_parameter(vector_name)
+    _set_record_values(registry, values)
+    registry.insert_to_container()
+
+
 def get_value(param):
     if param.type_name() in _map_types:
         return dict(getattr(param, "get_value_map_" + _map_types[param.type_name()])({}))
