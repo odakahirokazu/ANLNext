@@ -9,6 +9,9 @@ ANLStatus MapExample::mod_define()
   define_parameter("map_str_i", &MapExample::map_str_i);
   define_parameter("map_str_d", &MapExample::map_str_d, 10.0, "test_unit");
   define_parameter("map_str_str", &MapExample::map_str_str);
+  define_parameter("vector_i", &MapExample::vector_i);
+  define_parameter("vector_d", &MapExample::vector_d, 10.0, "test_unit");
+  define_parameter("vector_str", &MapExample::vector_str);
   define_parameter("table", &MapExample::table);
   define_map_key("key");
   add_value_element("count", 0);

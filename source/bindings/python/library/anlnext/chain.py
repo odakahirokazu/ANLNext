@@ -100,20 +100,9 @@ class AnalysisChain:
                 anlnext.set_map_parameter(mod, name, value)
             self.parameter_setter_list.append(set_param)
         elif isinstance(value, list):
-            if len(value)>0:
-                v0 = value[0]
-                if isinstance(v0, str):
-                    def set_param():
-                        mod.set_parameter_vector_str(name, value)
-                    self.parameter_setter_list.append(set_param)
-                elif isinstance(v0, float):
-                    def set_param():
-                        mod.set_parameter_vector_d(name, value)
-                    self.parameter_setter_list.append(set_param)
-                elif isinstance(v0, int):
-                    def set_param():
-                        mod.set_parameter_vector_i(name, value)
-                    self.parameter_setter_list.append(set_param)
+            def set_param():
+                anlnext.set_vector_parameter(mod, name, value)
+            self.parameter_setter_list.append(set_param)
         else:
             if isinstance(value, bool):
                 def set_param():

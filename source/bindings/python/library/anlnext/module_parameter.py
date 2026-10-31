@@ -6,6 +6,12 @@
 
 import anlnext.anlnextpy
 
+_vector_types = {
+    "vector<int>": "i",
+    "vector<double>": "d",
+    "vector<string>": "str",
+}
+
 _map_types = {
     "map<int,int>": "i_i",
     "map<int,double>": "i_d",
@@ -22,6 +28,14 @@ def set_map_parameter(module, name, value):
         raise TypeError(f"{name} is not a map parameter: {parameter_type}")
     suffix = _map_types[parameter_type]
     getattr(module, "set_parameter_map_" + suffix)(name, value)
+
+
+def set_vector_parameter(module, name, value):
+    parameter_type = module.get_parameter(name).type_name()
+    if parameter_type not in _vector_types:
+        raise TypeError(f"{name} is not a vector parameter: {parameter_type}")
+    suffix = _vector_types[parameter_type]
+    getattr(module, "set_parameter_vector_" + suffix)(name, value)
 
 
 def _set_record_values(registry, values):

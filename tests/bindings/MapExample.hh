@@ -13,6 +13,9 @@ public:
   std::map<std::string, int> map_str_i;
   std::map<std::string, double> map_str_d;
   std::map<std::string, std::string> map_str_str;
+  std::vector<int> vector_i = {1, 2, 3};
+  std::vector<double> vector_d = {10.0, 20.0};
+  std::vector<std::string> vector_str = {"default"};
   std::map<std::string, std::tuple<int, double>> table;
   std::vector<std::tuple<int>> rows;
 };
