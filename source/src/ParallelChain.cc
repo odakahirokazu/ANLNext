@@ -65,9 +65,6 @@ void ParallelChain::setup_module_access()
       }
     }
   }
-  for (const BasicModule* mod: modules_ref_) {
-    mod->check_module_requirements();
-  }
 }
 
 void ParallelChain::reset_counters()

@@ -1,8 +1,6 @@
 #include "ANLManager.hh"
 #include "ANLManagerMT.hh"
 #include "BasicModule.hh"
-#include "ParallelChain.hh"
-#include "EvsManager.hh"
 #include <iostream>
 #include <stdexcept>
 
@@ -39,7 +37,6 @@ public:
   { set_module_id(id + "_pending"); }
 
   using BasicModule::set_access_permission;
-  using BasicModule::require_module;
 
   ANLStatus mod_define() override
   {
@@ -130,7 +127,7 @@ void verify_permissions()
   expect_requirement_error([&] { hidden_manager.Define(); }, "dependent", "hidden", "any");
 }
 
-void verify_clones()
+void verify_clone_state()
 {
   RequirementModule target("producer");
   RequirementModule requester("consumer", "producer", ModulePosition::before);
@@ -139,17 +136,11 @@ void verify_clones()
   require(manager.Define() == AS_OK, "define failed");
   require(manager.PreInitialize() == AS_OK, "parallel duplication failed");
   for (std::size_t index=0; index<3; ++index) {
-    auto* copy = manager.access_to_module(index, "consumer");
-    copy->check_module_requirements();
+    manager.access_to_module(index, "consumer")->check_module_requirements();
   }
-  EvsManager evs;
-  ParallelChain reversed(4, evs);
-  reversed.push(requester.duplicate());
-  reversed.push(target.duplicate());
-  expect_requirement_error([&] { reversed.setup_module_access(); }, "consumer", "producer", "before");
-  requester.require_module("source_only");
-  expect_requirement_error([&] { requester.check_module_requirements(); }, "consumer", "source_only", "any");
-  manager.access_to_module(1, "consumer")->check_module_requirements();
+  auto detached = requester.duplicate();
+  expect_requirement_error([&] { detached->check_module_requirements(); },
+                           "consumer", "producer", "before");
 }
 
 int main()
@@ -158,7 +149,7 @@ int main()
     verify_positions();
     verify_alias_resolution();
     verify_permissions();
-    verify_clones();
+    verify_clone_state();
   }
   catch (const ANLException& ex) { std::cerr << ex.to_string() << '\n'; return 1; }
   catch (const std::exception& ex) { std::cerr << ex.what() << '\n'; return 1; }

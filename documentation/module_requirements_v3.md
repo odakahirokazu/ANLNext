@@ -37,7 +37,7 @@ ANLStatus MyModule::mod_define()
 
 存在しないモジュールや位置条件の違反では`ModuleRequirementError`を投げます。
 例外には要求元のモジュールID・クラス名、要求先の名前、位置条件、理由が付きます。
-Ruby／Pythonからの`Define()`や並行チェーン構築中の違反はRuntimeErrorとして伝わります。
+Ruby／Pythonからの`Define()`ではRuntimeErrorとして伝わります。
 
 ## 名前解決とアクセス権
 
@@ -55,9 +55,10 @@ Ruby／Pythonからの`Define()`や並行チェーン構築中の違反はRuntim
 
 この機能は正規のモジュールだけが持ち、Submoduleではサポートしません。
 
-`duplicate()`は要求を値としてコピーします。
-複製されたチェーンは、自身のモジュール実体に対して名前と順序を登録し、
-要求を再検証します。元チェーンのオブジェクトへの参照は要求情報に保持しません。
+並行チェーンは検証済みのチェーンと同じモジュール順序・ID・別名で構築するため、
+要求の検証は元チェーンの`Define()`時に行います。
+複製先でも状態の整合性を保つため、要求情報をコピーし、各チェーンのModuleAccessに
+名前・別名と位置情報を登録します。チェーン構築時の自動の再検証は行いません。
 
 ```sh
 ctest --test-dir <build-directory> -R module_requirements --output-on-failure
