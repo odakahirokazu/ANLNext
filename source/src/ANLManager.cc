@@ -25,6 +25,7 @@
 #include <memory>
 #include <thread>
 #include <cctype>
+#include <cerrno>
 #include <limits>
 
 #if ANLNEXT_ANALYZE_INTERRUPT || ANL_INITIALIZE_INTERRUPT || ANL_FINALIZE_INTERRUPT
@@ -42,13 +43,10 @@
 #include "ANLManager_impl.hh"
 #include "OrderKeeper.hh"
 
-#if ANLNEXT_USE_READLINE
 #include <unistd.h>
 #include <sys/select.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include "CLIUtility.hh"
-#endif /* ANLNEXT_USE_READLINE */
 
 
 namespace anlnext
@@ -270,19 +268,26 @@ ANLStatus ANLManager::run_analysis(std::size_t num_events, bool enable_console)
     analysis_thread_finished_ = false;
     std::thread interactive_thread(std::bind(&ANLManager::interactive_session, this));
 
-    const bool use_analysis_thread = false;
-    if (use_analysis_thread) {
-      std::promise<ANLStatus> status_promise;
-      std::future<ANLStatus> status_future = status_promise.get_future();
-      std::thread analysis_thread(std::bind(&ANLManager::process_analysis_for_the_thread,
-                                            this,
-                                            std::placeholders::_1),
-                                  std::move(status_promise));
-      analysis_thread.join();
-      status = status_future.get();
+    try {
+      const bool use_analysis_thread = false;
+      if (use_analysis_thread) {
+        std::promise<ANLStatus> status_promise;
+        std::future<ANLStatus> status_future = status_promise.get_future();
+        std::thread analysis_thread(std::bind(&ANLManager::process_analysis_for_the_thread,
+                                              this,
+                                              std::placeholders::_1),
+                                    std::move(status_promise));
+        analysis_thread.join();
+        status = status_future.get();
+      }
+      else {
+        status = process_analysis();
+      }
     }
-    else {
-      status = process_analysis();
+    catch (...) {
+      analysis_thread_finished_ = true;
+      interactive_thread.join();
+      throw;
     }
     analysis_thread_finished_ = true;
     interactive_thread.join();
@@ -636,58 +641,64 @@ void ANLManager::process_analysis_for_the_thread(std::promise<ANLStatus> status_
 
 void ANLManager::interactive_session()
 {
-  while (true) {
-#if ANLNEXT_USE_READLINE
-    {
-      fd_set read_fd_set;
-      FD_ZERO(&read_fd_set);
-      FD_SET(0, &read_fd_set); // check STDIN (= 0)
-      struct timeval timeout{1, 0}; // 1 s, 0 us
-      const int retval = select(1, &read_fd_set, nullptr, nullptr, &timeout);
-      if (retval == -1) {
-        std::cout << "Error by select() in ANLManager::interactive_sesson()\n" << std::flush;
-        return;
-      }
-      if (retval == 0) {
-        if (analysis_thread_finished_) {
-          return;
-        }
+  std::string line;
+  std::cout << "ANL> " << std::flush;
+  while (!analysis_thread_finished_) {
+    fd_set read_fd_set;
+    FD_ZERO(&read_fd_set);
+    FD_SET(STDIN_FILENO, &read_fd_set);
+    struct timeval timeout{1, 0};
+    const int ready = select(STDIN_FILENO+1, &read_fd_set, nullptr, nullptr, &timeout);
+    if (ready < 0) {
+      if (errno == EINTR) { continue; }
+      std::cout << "Error by select() in ANLManager::interactive_session()\n" << std::flush;
+      return;
+    }
+    if (analysis_thread_finished_) { return; }
+    if (ready == 0) { continue; }
+
+    // Read available characters rather than waiting for a complete input line.
+    char buffer[256];
+    ssize_t count = read(STDIN_FILENO, buffer, sizeof(buffer));
+    if (count < 0) {
+      if (errno == EINTR) { continue; }
+      std::cout << "Error by read() in ANLManager::interactive_session()\n" << std::flush;
+      return;
+    }
+    const bool eof = count == 0;
+    if (eof) {
+      if (line.empty()) { return; }
+      buffer[0] = '\n';
+      count = 1;
+    }
+    for (ssize_t i=0; i<count && !analysis_thread_finished_; ++i) {
+      if (buffer[i] != '\n') {
+        line += buffer[i];
         continue;
       }
+      while (!line.empty() && std::isspace(static_cast<unsigned char>(line.back()))) {
+        line.pop_back();
+      }
+      if (line == ".q") {
+        std::lock_guard<std::mutex> lock(mutex_);
+        std::cout << " ---> Quit\n\n" << std::flush;
+        requested_ = ANLRequest::quit;
+        return;
+      }
+      else if (line == ".i") {
+        std::lock_guard<std::mutex> lock(mutex_);
+        std::cout << " ---> Show event index\n\n" << std::flush;
+        requested_ = ANLRequest::show_event_index;
+      }
+      else if (line == ".s") {
+        std::lock_guard<std::mutex> lock(mutex_);
+        std::cout << " ---> Show evs summary\n\n" << std::flush;
+        requested_ = ANLRequest::show_evs_summary;
+      }
+      line.clear();
+      if (!eof) { std::cout << "ANL> " << std::flush; }
     }
-
-    ReadLine reader;
-    const int count = reader.read("ANL> ");
-    if (count == -1) { return; }
-    if (count == 0) { continue; }
-    std::string line = reader.str();
-#else /* ANLNEXT_USE_READLINE */
-    std::string line;
-    std::getline(std::cin, line);
-    std::cout << "ANL>> " << line;
-    if (analysis_thread_finished_) {
-      return;
-    }
-#endif /* ANLNEXT_USE_READLINE */
-    if (line == ".q") {
-      std::lock_guard<std::mutex> lock(mutex_);
-      std::cout << " ---> Quit\n\n" << std::flush;
-      requested_ = ANLRequest::quit;
-      return;
-    }
-    else if (line == ".i") {
-      std::lock_guard<std::mutex> lock(mutex_);
-      std::cout << " ---> Show event index\n\n" << std::flush;
-      requested_ = ANLRequest::show_event_index;
-    }
-    else if (line == ".s") {
-      std::lock_guard<std::mutex> lock(mutex_);
-      std::cout << " ---> Show evs summary\n\n" << std::flush;
-      requested_ = ANLRequest::show_evs_summary;
-    }
-    else {
-      ;
-    }
+    if (eof) { return; }
   }
 }
 
