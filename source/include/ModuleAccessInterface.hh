@@ -164,7 +164,7 @@ void ModuleAccessInterface::request_module_interface(const std::string& name, co
     *ptr = dynamic_cast<const T*>(m);
   }
   else {
-    *ptr = m;
+    *ptr = nullptr;
   }
 }
 
@@ -176,7 +176,7 @@ void ModuleAccessInterface::request_module_interface_non_const(const std::string
     *ptr = dynamic_cast<T*>(m);
   }
   else {
-    *ptr = m;
+    *ptr = nullptr;
   }
 }
 
