@@ -4,6 +4,43 @@ from pathlib import Path
 import anlnext
 from submodule_python import MapExample
 
+
+def verify_record_integer_range():
+    module = MapExample()
+    manager = anlnext.ANLManager()
+    manager.set_modules([module])
+    manager.define_analysis()
+    for name in ['table', 'rows']:
+        parameter = module.get_parameter(name)
+
+        def insert(value, key):
+            if name == 'table':
+                module.insert_to_map(name, key, {'count': value})
+            else:
+                module.push_to_vector(name, {'count': value})
+
+        for index, value in enumerate([-2147483648, -1, 0, 2147483647]):
+            key = str(index)
+            insert(value, key)
+            stored = anlnext.get_value(parameter)
+            row = stored[key] if name == 'table' else stored[-1]
+            assert row['count'] == value
+
+        expected = anlnext.get_value(parameter)
+        expected_size = parameter.size_of_container()
+        for bad in [2147483648, -2147483649, (1 << 32) + 7, 1 << 100, -(1 << 100)]:
+            try:
+                insert(bad, 'invalid')
+            except RuntimeError as error:
+                assert 'ParameterError' in str(error) and 'count' in str(error)
+            else:
+                raise AssertionError(f'accepted out-of-range record integer: {name}: {bad}')
+            assert parameter.size_of_container() == expected_size
+            assert anlnext.get_value(parameter) == expected
+
+
+verify_record_integer_range()
+
 values = {
     'map_i_i': {-1: 3, 2147483647: -2147483648},
     'map_i_d': {-1: 0.5, 2: 1.5},

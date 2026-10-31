@@ -1,6 +1,7 @@
 %module anlnextpy
 %{
 #define SWIG_FILE_WITH_INIT
+#include <limits>
 #include "ANLManager.hh"
 #include "ANLManagerMT.hh"
 #include "VModuleParameter.hh"
@@ -252,8 +253,18 @@ class ParameterRegistry
           PyObject* val = PyDict_GetItem(dict, key);
           const std::string name(PyUnicode_AsUTF8(key));
           if (PyLong_Check(val)) {
-            const int v = PyLong_AsLong(val);
-            $self->set_value_element(name, v);
+            const long v = PyLong_AsLong(val);
+            if (PyErr_Occurred()) {
+              PyErr_Clear();
+              BOOST_THROW_EXCEPTION(anlnext::ParameterError(
+                $self->get_parameter(map_name), "Integer conversion failed: " + name));
+            }
+            if (v < std::numeric_limits<int>::min() ||
+                v > std::numeric_limits<int>::max()) {
+              BOOST_THROW_EXCEPTION(anlnext::ParameterError(
+                $self->get_parameter(map_name), "Integer is outside the range of int: " + name));
+            }
+            $self->set_value_element(name, static_cast<int>(v));
           }
           else if (PyFloat_Check(val)) {
             const double v = PyFloat_AsDouble(val);
@@ -281,8 +292,18 @@ class ParameterRegistry
           PyObject* val = PyDict_GetItem(dict, key);
           const std::string name(PyUnicode_AsUTF8(key));
           if (PyLong_Check(val)) {
-            const int v = PyLong_AsLong(val);
-            $self->set_value_element(name, v);
+            const long v = PyLong_AsLong(val);
+            if (PyErr_Occurred()) {
+              PyErr_Clear();
+              BOOST_THROW_EXCEPTION(anlnext::ParameterError(
+                $self->get_parameter(vector_name), "Integer conversion failed: " + name));
+            }
+            if (v < std::numeric_limits<int>::min() ||
+                v > std::numeric_limits<int>::max()) {
+              BOOST_THROW_EXCEPTION(anlnext::ParameterError(
+                $self->get_parameter(vector_name), "Integer is outside the range of int: " + name));
+            }
+            $self->set_value_element(name, static_cast<int>(v));
           }
           else if (PyFloat_Check(val)) {
             const double v = PyFloat_AsDouble(val);
