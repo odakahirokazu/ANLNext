@@ -15,7 +15,7 @@ m5.set_module_id("MyModule3")
 
 am.set_modules([m1, m2, m3, m4, m5])
 
-am.Define()
+am.define_analysis()
 
 m1.set_parameter("my_parameter1", 10)
 m1.set_parameter("my_parameter2", 20.5)
@@ -40,10 +40,10 @@ m5.set_parameter("my_parameter11", -301)
 m5.set_parameter("my_parameter12", 1000000000)
 m5.set_parameter("my_parameter13", 876543210)
 
-am.PreInitialize()
-am.Initialize()
-am.Analyze(10000)
-am.Finalize()
+am.pre_initialize_analysis()
+am.initialize_analysis()
+am.run_analysis(10000)
+am.finalize_analysis()
 
 ### to peek a parameter
 print(anlnext.get_value(m1.get_parameter("my_parameter11")))

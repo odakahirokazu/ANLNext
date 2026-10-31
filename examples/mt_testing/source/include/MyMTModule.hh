@@ -32,8 +32,8 @@ public:
   anlnext::ANLStatus mod_finalize() override;
 
 private:
-  int m_QuitIndex = -1;
-  bool m_QuitAll = true;
+  int quit_index_ = -1;
+  bool quit_all_ = true;
 };
 
 #endif /* MyMTModule_H */

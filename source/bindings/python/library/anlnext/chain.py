@@ -158,7 +158,7 @@ class AnalysisChain:
         else:
             self.anl = anlnext.ANLManager()
         self.anl.set_modules(self.module_list)
-        self.anl.Define()
+        self.anl.define_analysis()
 
 
     def load_all_parameters(self):
@@ -177,15 +177,15 @@ class AnalysisChain:
         self.define()
         self.load_all_parameters()
 
-        status = self.anl.PreInitialize()
-        if not check_status(status, "PreInitialize()"):
+        status = self.anl.pre_initialize_analysis()
+        if not check_status(status, "pre_initialize_analysis()"):
             return
 
         if self.parameter_modifier is not None:
             self.parameter_modifier(self)
 
-        status = self.anl.Initialize()
-        if not check_status(status, "Initialize()"):
+        status = self.anl.initialize_analysis()
+        if not check_status(status, "initialize_analysis()"):
             return
 
         print("")
@@ -193,14 +193,14 @@ class AnalysisChain:
         sys.stdout.flush()
         self.anl.set_display_period(self.display_period)
 
-        status = self.anl.Analyze(num_loop, self.console)
+        status = self.anl.run_analysis(num_loop, self.console)
         print("")
         print("<End Analysis>   | Time: " + str(datetime.datetime.now()))
         sys.stdout.flush()
 
-        if not check_status(status, "Analyze()"):
-            print("Error: Analyze() not successful")
+        if not check_status(status, "run_analysis()"):
+            print("Error: analyze() not successful")
 
-        status = self.anl.Finalize()
-        if not check_status(status, "Finalize()"):
+        status = self.anl.finalize_analysis()
+        if not check_status(status, "finalize_analysis()"):
             return

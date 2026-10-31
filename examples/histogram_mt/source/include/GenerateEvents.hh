@@ -31,7 +31,7 @@ public:
   anlnext::ANLStatus mod_analyze() override;
   anlnext::ANLStatus mod_end_run() override;
 
-  const std::vector<double>& Energies() const
+  const std::vector<double>& energies() const
   { return energies_generated_; }
 
 private:

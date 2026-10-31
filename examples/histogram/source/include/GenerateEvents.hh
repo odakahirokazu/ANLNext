@@ -24,7 +24,7 @@ public:
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_analyze() override;
 
-  double Energy() const { return energy_generated_; }
+  double energy() const { return energy_generated_; }
 
 private:
   double center_;

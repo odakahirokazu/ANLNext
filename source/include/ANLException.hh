@@ -62,8 +62,8 @@ public:
   enum class Treatment { rethrow, finalize, terminate, hard_terminate };
 
 public:
-  static void SetVerboseLevel(int v);
-  static int VerboseLevel();
+  static void set_verbose_level(int v);
+  static int verbose_level();
 
 public:
   ANLException();
@@ -89,7 +89,7 @@ public:
   std::string to_string() const;
 
 private:
-  static int __VerboseLevel__;
+  static int verbose_level_;
 };
 
 using ExceptionTreatment = boost::error_info<struct tag_ExceptionTreatment, ANLException::Treatment>;

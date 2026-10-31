@@ -42,42 +42,42 @@ module ANL
 
     def extract_interface()
       c = @name
-      dirIndex = @include_path.index do |dir|
+      dir_index = @include_path.index do |dir|
         File::exist?(dir+"/"+c+".hh")
       end
-      fileName = @include_path[dirIndex]+"/"+c+".hh"
-      File.open(fileName) do |fin|
-        className = nil
-        classOpen = nil
+      filename = @include_path[dir_index]+"/"+c+".hh"
+      File.open(filename) do |fin|
+        class_name = nil
+        class_open = nil
         constructor = nil
         constructor2 = nil
-        braceCount = 0
+        brace_count = 0
 
         fin.each_line do |l|
-          if !className && l=~/^class\s+(\w+)(\s+|\:)/
-            className = $1
+          if !class_name && l=~/^class\s+(\w+)(\s+|\:)/
+            class_name = $1
             puts l.sub(/,.+/, '')
             if l.include? '{'
-              classOpen = true
-              braceCount = ANL.count_braces(l)
+              class_open = true
+              brace_count = ANL.count_braces(l)
             end
             next
           end
 
-          if className && !classOpen
+          if class_name && !class_open
             puts l
             if l.include? '{'
-              classOpen = true
-              braceCount = ANL.count_braces(l)
+              class_open = true
+              brace_count = ANL.count_braces(l)
               puts 'public:'
             end
             next
           end
 
-          if className && classOpen
-            braceCount += ANL.count_braces(l)
+          if class_name && class_open
+            brace_count += ANL.count_braces(l)
 
-            if l.include?(className+'(') && !l.include?('&')
+            if l.include?(class_name+'(') && !l.include?('&')
               puts l
               constructor = true
             elsif constructor
@@ -93,11 +93,11 @@ module ANL
               end
             end
 
-            if braceCount == 0 && l.include?('};')
+            if brace_count == 0 && l.include?('};')
               puts l
               puts ''
-              classOpen = nil
-              className = nil
+              class_open = nil
+              class_name = nil
             end
           end
         end
@@ -106,15 +106,15 @@ module ANL
   end
 
   def count_braces(line)
-    braceCount = 0
+    brace_count = 0
     line.chars.each do |x|
       if x=='{'
-        braceCount += 1
+        brace_count += 1
       elsif x=='}'
-        braceCount -= 1
+        brace_count -= 1
       end
     end
-    braceCount
+    brace_count
   end
   module_function :count_braces
 
@@ -122,30 +122,30 @@ module ANL
   # This produces one Ruby extension module interface to be processed by SWIG.
   #
   class SWIGModule
-    def initialize(name, classList, namespace=nil)
+    def initialize(name, class_list, namespace=nil)
       @name = name
-      @classList = classList
+      @class_list = class_list
       @namespace = namespace
-      @includeFiles = []
-      @importModules = []
-      @includeModules = []
+      @include_files = []
+      @import_modules = []
+      @include_modules = []
     end
 
     attr_reader :name
-    attr_accessor :includeFiles, :importModules, :includeModules
+    attr_accessor :include_files, :import_modules, :include_modules
 
     def print_interface(using_namespace=true)
       puts '%module '+@name
       puts '%{'
-      @classList.each{|sc| sc.puts_include }
+      @class_list.each{|sc| sc.puts_include }
       puts ""
-      @includeFiles.each{|s| puts '#include "'+s+'"' }
+      @include_files.each{|s| puts '#include "'+s+'"' }
       puts ''
       puts '%}'
       puts ''
-      @includeModules.each{|s| puts '%include "'+s+'"' }
+      @include_modules.each{|s| puts '%include "'+s+'"' }
       puts ''
-      @importModules.each do |s|
+      @import_modules.each do |s|
         if s.is_a? Hash
           puts '%import(module="'+s[:name]+'") "'+s[:file]+'"'
         else
@@ -155,18 +155,18 @@ module ANL
       puts ''
       puts 'namespace '+@namespace+' {' if @namespace
       puts ''
-      @classList.each{|sc| sc.interface }
+      @class_list.each{|sc| sc.interface }
       puts '}' if @namespace
     end
 
     def print_class_list()
       puts 'namespace '+@namespace+' {' if @namespace
-      @classList.each{|s| puts 'class '+s.name+';' }
+      @class_list.each{|s| puts 'class '+s.name+';' }
       puts '}' if @namespace
     end
 
     def print_make_doc()
-      @classList.each do |s|
+      @class_list.each do |s|
         module_name = @name[0].upcase+@name[1..-1]
         puts "a.push #{module_name}::#{s.name}.new"
         puts "# a.text \"\""

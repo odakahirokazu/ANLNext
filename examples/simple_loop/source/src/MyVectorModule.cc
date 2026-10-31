@@ -10,11 +10,11 @@ MyVectorModule::~MyVectorModule() = default;
 
 ANLStatus MyVectorModule::mod_define()
 {
-  define_parameter("my_vector", &mod_class::myVector_);
-  add_value_element("ID", &mod_class::bufferID_);
-  add_value_element("type", &mod_class::bufferType_);
-  add_value_element("x", &mod_class::bufferX_);
-  add_value_element("y", &mod_class::bufferY_);
+  define_parameter("my_vector", &mod_class::my_vector_);
+  add_value_element("ID", &mod_class::buffer_id_);
+  add_value_element("type", &mod_class::buffer_type_);
+  add_value_element("x", &mod_class::buffer_x_);
+  add_value_element("y", &mod_class::buffer_y_);
   
   return AS_OK;
 }

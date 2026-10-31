@@ -90,18 +90,18 @@ ANLStatus ANLManager::do_interactive_comunication()
       }
     }
     else if (cmd == "modify") {
-      std::string moduleID;
+      std::string module_id;
       int n = 0;
-      is >> moduleID;
+      is >> module_id;
       if (is) {
         try {
-          if (std::isdigit(moduleID[0])) {
-            n = boost::lexical_cast<int>(moduleID);
+          if (std::isdigit(module_id[0])) {
+            n = boost::lexical_cast<int>(module_id);
           }
           else {
-            n = static_cast<int>(module_index(moduleID, false));
+            n = static_cast<int>(module_index(module_id, false));
             if (n==static_cast<int>(modules_.size())) {
-              std::cout << "Module not found: " << moduleID << std::endl;
+              std::cout << "Module not found: " << module_id << std::endl;
               continue;
             }
           }
@@ -117,17 +117,17 @@ ANLStatus ANLManager::do_interactive_comunication()
       }
     }
     else if (cmd == "print") {
-      std::string moduleID;
+      std::string module_id;
       int n = 0;
-      is >> moduleID;
+      is >> module_id;
       if (is) {
-        if (std::isdigit(moduleID[0])) {
-          n = boost::lexical_cast<int>(moduleID);
+        if (std::isdigit(module_id[0])) {
+          n = boost::lexical_cast<int>(module_id);
         }
         else {
-          n = static_cast<int>(module_index(moduleID, false));
+          n = static_cast<int>(module_index(module_id, false));
           if (n==static_cast<int>(modules_.size())) {
-            std::cout << "Module not found: " << moduleID << std::endl;
+            std::cout << "Module not found: " << module_id << std::endl;
             continue;
           }
         }
@@ -138,17 +138,17 @@ ANLStatus ANLManager::do_interactive_comunication()
       }
     }
     else if (cmd == "on") {
-      std::string moduleID;
+      std::string module_id;
       int n = 0;
-      is >> moduleID;
+      is >> module_id;
       if (is) {
-        if (std::isdigit(moduleID[0])) {
-          n = boost::lexical_cast<int>(moduleID);
+        if (std::isdigit(module_id[0])) {
+          n = boost::lexical_cast<int>(module_id);
         }
         else {
-          n = static_cast<int>(module_index(moduleID, false));
+          n = static_cast<int>(module_index(module_id, false));
           if (n==static_cast<int>(modules_.size())) {
-            std::cout << "Module not found: " << moduleID << std::endl;
+            std::cout << "Module not found: " << module_id << std::endl;
             continue;
           }
         }
@@ -159,17 +159,17 @@ ANLStatus ANLManager::do_interactive_comunication()
       }
     }
     else if (cmd == "off") {
-      std::string moduleID;
+      std::string module_id;
       int n = 0;
-      is >> moduleID;
+      is >> module_id;
       if (is) {
-        if (std::isdigit(moduleID[0])) {
-          n = boost::lexical_cast<int>(moduleID);
+        if (std::isdigit(module_id[0])) {
+          n = boost::lexical_cast<int>(module_id);
         }
         else {
-          n = static_cast<int>(module_index(moduleID, false));
+          n = static_cast<int>(module_index(module_id, false));
           if (n==static_cast<int>(modules_.size())) {
-            std::cout << "Module not found: " << moduleID << std::endl;
+            std::cout << "Module not found: " << module_id << std::endl;
             continue;
           }
         }
@@ -355,7 +355,7 @@ ANLStatus ANLManager::do_interactive_analysis()
         else {
           is.clear();
         }
-        status = Analyze(num_loops, true);
+        status = run_analysis(num_loops, true);
       }
     }
     else {

@@ -58,8 +58,13 @@ public:
   ModuleAccess& operator=(ModuleAccess&&) = default;
 
   const BasicModule* get_module(const std::string& name) const;
-  BasicModule* get_module_NC(const std::string& name) const;
+  BasicModule* get_module_non_const(const std::string& name) const;
   const BasicModule* request_module(const std::string& name) const;
+  BasicModule* request_module_non_const(const std::string& name) const;
+
+  [[deprecated("Use get_module_non_const() instead.")]]
+  BasicModule* get_module_NC(const std::string& name) const;
+  [[deprecated("Use request_module_non_const() instead.")]]
   BasicModule* request_module_NC(const std::string& name) const;
 
   void register_module(const std::string& name, BasicModule* module,

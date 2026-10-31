@@ -95,7 +95,7 @@ std::size_t ANLManager::display_period() const
   return display_period_;
 }
 
-ANLStatus ANLManager::Define()
+ANLStatus ANLManager::define_analysis()
 {
   std::cout << '\n'
             << "######################################################\n"
@@ -123,13 +123,13 @@ ANLStatus ANLManager::Define()
 
   for (BasicModule* mod: modules_) {
     if (mod->access_permission() != ModuleAccess::Permission::privacy) {
-      const std::string module_ID = mod->module_id();
-      module_access_->register_module(module_ID,
+      const std::string module_id = mod->module_id();
+      module_access_->register_module(module_id,
                                       mod,
                                       ModuleAccess::ConflictOption::error);
 
       for (const std::pair<std::string, ModuleAccess::ConflictOption>& alias: mod->get_aliases()) {
-        if (alias.first != module_ID) {
+        if (alias.first != module_id) {
           module_access_->register_module(alias.first,
                                           mod,
                                           alias.second);
@@ -149,7 +149,7 @@ ANLStatus ANLManager::Define()
   return status;
 }
 
-ANLStatus ANLManager::PreInitialize()
+ANLStatus ANLManager::pre_initialize_analysis()
 {
   std::cout << '\n'
             << "        **************************************\n"
@@ -171,7 +171,7 @@ ANLStatus ANLManager::PreInitialize()
   return status;
 }
 
-ANLStatus ANLManager::Initialize()
+ANLStatus ANLManager::initialize_analysis()
 {
   std::cout << '\n'
             << "        **************************************\n"
@@ -216,7 +216,7 @@ ANLStatus ANLManager::Initialize()
   return status;
 }
 
-ANLStatus ANLManager::Analyze(std::size_t num_events, bool enable_console)
+ANLStatus ANLManager::run_analysis(std::size_t num_events, bool enable_console)
 {
   std::cout << '\n'
             << "        **************************************\n"
@@ -327,7 +327,7 @@ final:
   return status;
 }
 
-ANLStatus ANLManager::Finalize()
+ANLStatus ANLManager::finalize_analysis()
 {
   std::cout << '\n'
             << "        **************************************\n"
@@ -367,27 +367,27 @@ ANLStatus ANLManager::Finalize()
   return status;
 }
 
-BasicModule* ANLManager::access_to_module(std::size_t chain_ID,
-                                          const std::string& module_ID)
+BasicModule* ANLManager::access_to_module(std::size_t chain_id,
+                                          const std::string& module_id)
 {
-  if (chain_ID == 0) {
-    return module_access_->get_module_NC(module_ID);
+  if (chain_id == 0) {
+    return module_access_->get_module_non_const(module_id);
   }
 
-  BOOST_THROW_EXCEPTION( ChainNotFoundError(chain_ID) );
+  BOOST_THROW_EXCEPTION( ChainNotFoundError(chain_id) );
   return nullptr;
 }
 
-std::size_t ANLManager::module_index(const std::string& module_ID, bool strict) const
+std::size_t ANLManager::module_index(const std::string& module_id, bool strict) const
 {
   std::size_t index = 0;
   if (strict) {
     AMConstIter module_iter = std::find_if(std::begin(modules_), std::end(modules_),
-                                           [&](const BasicModule* m){ return (m->module_id() == module_ID); });
+                                           [&](const BasicModule* m){ return (m->module_id() == module_id); });
     index = std::distance(modules_.begin(), module_iter);
   }
   else {
-    std::string lower1(module_ID);
+    std::string lower1(module_id);
     std::transform(lower1.begin(), lower1.end(), lower1.begin(),
                    [](unsigned char c){ return std::tolower(c);});
     AMConstIter module_iter = std::find_if(std::begin(modules_), std::end(modules_),
@@ -421,11 +421,11 @@ void ANLManager::show_analysis()
 
     for (std::size_t i=0; i<modules_.size(); i++) {
       std::cout << std::right << std::setw(4) << i << "    ";
-      std::string module_ID(modules_[i]->module_id());
+      std::string module_id(modules_[i]->module_id());
       if (modules_[i]->module_id() != modules_[i]->module_name()) {
-        module_ID += " (" + modules_[i]->module_name() + ")";
+        module_id += " (" + modules_[i]->module_name() + ")";
       }
-      std::cout << std::left << std::setw(48) << module_ID;
+      std::cout << std::left << std::setw(48) << module_id;
       std::cout << "  "
                 << std::left << std::setw(9) << modules_[i]->module_version()
                 << "  "
@@ -552,12 +552,12 @@ void ANLManager::print_summary()
             << "                |\n";
 
   for (std::size_t i=0; i<n; i++) {
-    std::string module_ID = modules_[i]->module_name();
+    std::string module_id = modules_[i]->module_name();
     if (modules_[i]->module_id() != modules_[i]->module_name()) {
-      module_ID += "/" + modules_[i]->module_id();
+      module_id += "/" + modules_[i]->module_id();
     }
-    module_ID += "  version  " + modules_[i]->module_version();
-    std::cout << boost::format("    [%4d]  %-40s") % i % module_ID;
+    module_id += "  version  " + modules_[i]->module_version();
+    std::cout << boost::format("    [%4d]  %-40s") % i % module_id;
     if (counters_[i].quit() > 0) { std::cout << "         ---> [Quit]"; }
     std::cout <<  '\n';
     std::cout << boost::format("    %10d  |  OK: %10d | Skip: %10d | Error: %10d")
@@ -639,11 +639,11 @@ void ANLManager::interactive_session()
   while (true) {
 #if ANLNEXT_USE_READLINE
     {
-      fd_set readFDSet;
-      FD_ZERO(&readFDSet);
-      FD_SET(0, &readFDSet); // check STDIN (= 0)
+      fd_set read_fd_set;
+      FD_ZERO(&read_fd_set);
+      FD_SET(0, &read_fd_set); // check STDIN (= 0)
       struct timeval timeout{1, 0}; // 1 s, 0 us
-      const int retval = select(1, &readFDSet, nullptr, nullptr, &timeout);
+      const int retval = select(1, &read_fd_set, nullptr, nullptr, &timeout);
       if (retval == -1) {
         std::cout << "Error by select() in ANLManager::interactive_sesson()\n" << std::flush;
         return;
@@ -703,8 +703,8 @@ ANLStatus process_one_event(std::size_t i_event,
     mod->set_loop_index(i_event);
   }
 
-  const std::size_t NumberOfModules = modules.size();
-  for (std::size_t i_module=0; i_module<NumberOfModules; i_module++) {
+  const std::size_t num_modules = modules.size();
+  for (std::size_t i_module=0; i_module<num_modules; i_module++) {
     BasicModule* mod = modules[i_module];
 
     if (mod->is_on()) {
@@ -748,8 +748,8 @@ ANLStatus process_one_event(std::size_t i_event,
     mod->set_loop_index(i_event);
   }
 
-  const std::size_t NumberOfModules = modules.size();
-  for (std::size_t i_module=0; i_module<NumberOfModules; i_module++) {
+  const std::size_t num_modules = modules.size();
+  for (std::size_t i_module=0; i_module<num_modules; i_module++) {
     BasicModule* mod = modules[i_module];
   
     const KeeperBlock<OrderKeeper, std::size_t> block(order_keepers[i_module].get(), i_event);

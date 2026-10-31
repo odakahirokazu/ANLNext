@@ -79,8 +79,8 @@ std::string status_to_string(ANLStatus status);
 
 struct ANLException
 {
-  static void SetVerboseLevel(int v);
-  static int VerboseLevel();
+  static void set_verbose_level(int v);
+  static int verbose_level();
 
   ANLException();
   virtual ~ANLException();
@@ -296,7 +296,7 @@ class BasicModule : public ParameterRegistry
   void set_order_sensitive(bool v);
   bool is_order_sensitive() const;
 
-  void set_singleton(int copyID);
+  void set_singleton(int copy_id);
   void unset_singleton();
   bool is_singleton() const;
   int singleton_copy_id() const;
@@ -352,16 +352,16 @@ class ANLManager
   
   void set_modules(std::vector<anlnext::BasicModule*> modules);
 
-  virtual ANLStatus Define();
-  virtual ANLStatus PreInitialize();
-  virtual ANLStatus Initialize();
-  virtual ANLStatus Analyze(std::size_t num_events, bool enable_console=true);
-  virtual ANLStatus Finalize();
+  virtual ANLStatus define_analysis();
+  virtual ANLStatus pre_initialize_analysis();
+  virtual ANLStatus initialize_analysis();
+  virtual ANLStatus run_analysis(std::size_t num_events, bool enable_console=true);
+  virtual ANLStatus finalize_analysis();
 
   virtual std::size_t number_of_parallels() const;
   void set_print_parallel_modules(bool v=true);
-  virtual BasicModule* access_to_module(std::size_t chainID,
-                                        const std::string& moduleID);
+  virtual BasicModule* access_to_module(std::size_t chain_id,
+                                        const std::string& module_id);
 
   void parameters_to_json(const std::string& filename) const;
 

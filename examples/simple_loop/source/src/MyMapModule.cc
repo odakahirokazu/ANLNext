@@ -10,12 +10,12 @@ MyMapModule::~MyMapModule() = default;
 
 ANLStatus MyMapModule::mod_define()
 {
-  define_parameter("my_map", &mod_class::myMap_);
+  define_parameter("my_map", &mod_class::my_map_);
   define_map_key("name");
-  add_value_element("ID", &mod_class::bufferID_);
-  add_value_element("type", &mod_class::bufferType_);
-  add_value_element("x", &mod_class::bufferX_);
-  add_value_element("y", &mod_class::bufferY_);
+  add_value_element("ID", &mod_class::buffer_id_);
+  add_value_element("type", &mod_class::buffer_type_);
+  add_value_element("x", &mod_class::buffer_x_);
+  add_value_element("y", &mod_class::buffer_y_);
   
   return AS_OK;
 }

@@ -28,8 +28,8 @@ namespace comptonsoft
 {
 
 CreateRootFile::CreateRootFile()
-  : m_FilenameBase("output"),
-    m_RootFile(nullptr)
+  : filename_base_("output"),
+    root_file_(nullptr)
 {
 }
 
@@ -37,46 +37,46 @@ CreateRootFile::~CreateRootFile() = default;
 
 CreateRootFile::CreateRootFile(const CreateRootFile& r)
   : BasicModule::BasicModule(r),
-    m_FilenameBase(r.m_FilenameBase),
-    m_RootFile(nullptr),
-    m_SeparateClones(r.m_SeparateClones),
-    m_SaveClones(r.m_SaveClones)
+    filename_base_(r.filename_base_),
+    root_file_(nullptr),
+    separate_clones_(r.separate_clones_),
+    save_clones_(r.save_clones_)
 {
 }
 
-std::string CreateRootFile::Filename() const
+std::string CreateRootFile::filename() const
 {
-  if (is_master() && m_MasterFile) { return FilenameBase()+".root"; }
-  return FilenameBase()+(boost::format("_%03d.root")%copy_id()).str();
+  if (is_master() && master_file_) { return filename_base()+".root"; }
+  return filename_base()+(boost::format("_%03d.root")%copy_id()).str();
 }
 
 ANLStatus CreateRootFile::mod_define()
 {
-  define_parameter("filename_base", &mod_class::m_FilenameBase);
-  define_parameter("master_file", &mod_class::m_MasterFile);
-  define_parameter("parallel", &mod_class::m_SeparateClones);
-  define_parameter("save_parallel", &mod_class::m_SaveClones);
+  define_parameter("filename_base", &mod_class::filename_base_);
+  define_parameter("master_file", &mod_class::master_file_);
+  define_parameter("parallel", &mod_class::separate_clones_);
+  define_parameter("save_parallel", &mod_class::save_clones_);
   return AS_OK;
 }
 
 ANLStatus CreateRootFile::mod_initialize()
 {
   if (is_master()) {
-    m_RootFile.reset(new TFile(Filename().c_str(), "recreate"));
+    root_file_.reset(new TFile(filename().c_str(), "recreate"));
   }
-  else if (m_SeparateClones) {
-    if (m_SaveClones) {
-      m_RootFile.reset(new TFile(Filename().c_str(), "recreate"));
+  else if (separate_clones_) {
+    if (save_clones_) {
+      root_file_.reset(new TFile(filename().c_str(), "recreate"));
     }
     else {
-      m_RootFile.reset(new TMemFile(Filename().c_str(), "recreate"));
+      root_file_.reset(new TMemFile(filename().c_str(), "recreate"));
     }
   }
   else {
     return AS_OK;
   }
 
-  if ( !m_RootFile ) {
+  if ( !root_file_ ) {
     std::cout << "CreateRootFile: cannot create ROOT file" << std::endl;
     return AS_QUIT;
   }
@@ -86,27 +86,27 @@ ANLStatus CreateRootFile::mod_initialize()
 
 ANLStatus CreateRootFile::mod_finalize()
 {
-  if (is_master() || (m_SeparateClones && m_SaveClones)) {
-    std::cout << "CreateRootFile: saving data to ROOT file " << Filename() << std::endl;
-    m_RootFile->Write();
+  if (is_master() || (separate_clones_ && save_clones_)) {
+    std::cout << "CreateRootFile: saving data to ROOT file " << filename() << std::endl;
+    root_file_->Write();
   }
 
-  if (is_master() || m_SeparateClones) {
-    m_RootFile->Close();
+  if (is_master() || separate_clones_) {
+    root_file_->Close();
     std::cout << "CreateRootFile: ROOT file closed " << std::endl;
   }
   
   return AS_OK;
 }
 
-TDirectory* CreateRootFile::GetDirectory()
+TDirectory* CreateRootFile::get_directory()
 {
-  return m_RootFile->GetDirectory(0);
+  return root_file_->GetDirectory(0);
 }
 
 bool CreateRootFile::cd()
 {
-  return m_RootFile->cd();
+  return root_file_->cd();
 }
 
 } /* namespace comptonsoft */

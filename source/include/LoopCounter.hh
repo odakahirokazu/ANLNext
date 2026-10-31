@@ -67,14 +67,14 @@ public:
       ++error_;
     }
 
-    const ANLStatus statusWithoutError = eliminate_normal_error_status(status);
-    if (statusWithoutError == AS_OK) {
+    const ANLStatus status_without_error = eliminate_normal_error_status(status);
+    if (status_without_error == AS_OK) {
       ++ok_;
     }
-    else if (statusWithoutError == AS_SKIP) {
+    else if (status_without_error == AS_SKIP) {
       ++skip_;
     }
-    else if (statusWithoutError == AS_QUIT || statusWithoutError == AS_QUIT_ALL) {
+    else if (status_without_error == AS_QUIT || status_without_error == AS_QUIT_ALL) {
       ++quit_;
     }
   }

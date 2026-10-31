@@ -30,16 +30,16 @@ namespace anlnext
 
 BasicModule::BasicModule()
   : order_sensitive_(false),
-    module_ID_(""),
+    module_id_(""),
     access_permission_(ModuleAccess::Permission::full_access),
     module_on_(true),
     loop_index_(-1),
-    copy_ID_(0),
+    copy_id_(0),
     last_copy_(0),
     singleton_(false),
-    singleton_copy_ID_(0)
+    singleton_copy_id_(0)
 {
-  module_ID_method_ = &BasicModule::module_name;
+  module_id_method_ = &BasicModule::module_name;
   singleton_ptr_ = std::make_shared<BasicModule*>(this);
 }
 
@@ -51,26 +51,26 @@ BasicModule::BasicModule(const BasicModule& r)
     EvsInterface(),
     ModuleAccessInterface(),
     order_sensitive_(r.order_sensitive_),
-    module_ID_(r.module_ID_),
+    module_id_(r.module_id_),
     aliases_(r.aliases_),
     module_requirements_(r.module_requirements_),
     access_permission_(r.access_permission_),
     module_on_(r.module_on_),
     loop_index_(-1),
-    copy_ID_(r.last_copy_+1),
+    copy_id_(r.last_copy_+1),
     last_copy_(0),
     singleton_(r.singleton_),
-    singleton_copy_ID_(r.singleton_copy_ID_),
+    singleton_copy_id_(r.singleton_copy_id_),
     singleton_ptr_(r.singleton_ptr_)
 {
-  if (module_ID_=="") {
-    module_ID_method_ = &BasicModule::module_name;
+  if (module_id_=="") {
+    module_id_method_ = &BasicModule::module_name;
   }
   else {
-    module_ID_method_ = &BasicModule::get_module_id;
+    module_id_method_ = &BasicModule::get_module_id;
   }
 
-  if (singleton_copy_ID_ == copy_ID_) {
+  if (singleton_copy_id_ == copy_id_) {
     *singleton_ptr_ = this;
   }
 }
@@ -91,8 +91,8 @@ std::unique_ptr<BasicModule> BasicModule::clone() const
 
 void BasicModule::set_module_id(const std::string& module_id)
 {
-  module_ID_ = module_id;
-  module_ID_method_ = &BasicModule::get_module_id;
+  module_id_ = module_id;
+  module_id_method_ = &BasicModule::get_module_id;
 }
 
 ANLStatus BasicModule::mod_reduce(const std::list<BasicModule*>& parallel_modules)

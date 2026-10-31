@@ -93,27 +93,27 @@ public:
   std::string module_version() const { return __module_version__(); }
   
   void set_module_id(const std::string& v);
-  std::string module_id() const { return (this->*module_ID_method_)(); }
+  std::string module_id() const { return (this->*module_id_method_)(); }
 
-  int copy_id() const { return copy_ID_; }
-  bool is_master() const { return (copy_ID_ == 0); }
+  int copy_id() const { return copy_id_; }
+  bool is_master() const { return (copy_id_ == 0); }
 
   void set_order_sensitive(bool v) { order_sensitive_ = v; }
   bool is_order_sensitive() const { return order_sensitive_; }
 
-  void set_singleton(int copyID)
+  void set_singleton(int copy_id)
   {
     singleton_ = true;
-    singleton_copy_ID_ = copyID;
+    singleton_copy_id_ = copy_id;
   }
   void unset_singleton()
   {
     singleton_ = false;
-    singleton_copy_ID_ = -1;
+    singleton_copy_id_ = -1;
   }
 
   bool is_singleton() const { return singleton_; }
-  int singleton_copy_id() const { return singleton_copy_ID_; }
+  int singleton_copy_id() const { return singleton_copy_id_; }
 
   void automatic_switch_for_singleton();
   
@@ -209,30 +209,30 @@ protected:
   std::unique_ptr<BasicModule> clone() const;
 
 private:
-  std::string get_module_id() const { return module_ID_; }
+  std::string get_module_id() const { return module_id_; }
   void add_parameter_error_info(ANLException& ex) const override final;
   void copy_submodules(const BasicModule& source);
   void check_submodule_configuration(const std::string& name) const;
 
 private:
   bool order_sensitive_ = false;
-  std::string module_ID_;
+  std::string module_id_;
   std::vector<std::pair<std::string, ModuleAccess::ConflictOption>> aliases_;
   std::vector<std::pair<std::string, ModulePosition>> module_requirements_;
   ModuleAccess::Permission access_permission_ = ModuleAccess::Permission::full_access;
   bool module_on_ = true;
   long int loop_index_ = -1;
 
-  const int copy_ID_ = 0;
+  const int copy_id_ = 0;
   int last_copy_ = 0;
 
   bool singleton_ = false;
-  int singleton_copy_ID_ = 0;
+  int singleton_copy_id_ = 0;
   std::shared_ptr<BasicModule*> singleton_ptr_;
 
   std::map<std::string, std::unique_ptr<BasicSubModule>> submodule_map_;
 
-  std::string (BasicModule::*module_ID_method_)() const;
+  std::string (BasicModule::*module_id_method_)() const;
 };
 
 using AMIter = std::vector<BasicModule*>::iterator;

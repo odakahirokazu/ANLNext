@@ -52,22 +52,22 @@ protected:
   { *ptr = static_cast<const T*>(module_access_->get_module(name)); }
 
   template <typename T>
-  void get_module_NC(const std::string& name, T** ptr) const
-  { *ptr = static_cast<T*>(module_access_->get_module_NC(name)); }
+  void get_module_non_const(const std::string& name, T** ptr) const
+  { *ptr = static_cast<T*>(module_access_->get_module_non_const(name)); }
 
   template <typename T>
   const T* get_module(const std::string& name) const
   { return static_cast<const T*>(module_access_->get_module(name)); }
 
   template <typename T>
-  T* get_module_NC(const std::string& name) const
-  { return static_cast<T*>(module_access_->get_module_NC(name)); }
+  T* get_module_non_const(const std::string& name) const
+  { return static_cast<T*>(module_access_->get_module_non_const(name)); }
 
   template <typename T>
-  void get_module_IF(const std::string& name, const T** ptr) const;
+  void get_module_interface(const std::string& name, const T** ptr) const;
 
   template <typename T>
-  void get_module_IFNC(const std::string& name, T** ptr) const;
+  void get_module_interface_non_const(const std::string& name, T** ptr) const;
 
   bool exist_module(const std::string& name) const
   { return module_access_->exist(name); }
@@ -77,29 +77,69 @@ protected:
   { *ptr = static_cast<const T*>(module_access_->request_module(name)); }
 
   template <typename T>
-  void request_module_NC(const std::string& name, T** ptr) const
-  { *ptr = static_cast<T*>(module_access_->request_module_NC(name)); }
+  void request_module_non_const(const std::string& name, T** ptr) const
+  { *ptr = static_cast<T*>(module_access_->request_module_non_const(name)); }
 
   template <typename T>
   const T* request_module(const std::string& name) const
   { return static_cast<const T*>(module_access_->request_module(name)); }
 
   template <typename T>
+  T* request_module_non_const(const std::string& name) const
+  { return static_cast<T*>(module_access_->request_module_non_const(name)); }
+
+  template <typename T>
+  void request_module_interface(const std::string& name, const T** ptr) const;
+
+  template <typename T>
+  void request_module_interface_non_const(const std::string& name, T** ptr) const;
+
+  template <typename T>
+  [[deprecated("Use get_module_non_const() instead.")]]
+  void get_module_NC(const std::string& name, T** ptr) const
+  { get_module_non_const(name, ptr); }
+
+  template <typename T>
+  [[deprecated("Use get_module_non_const() instead.")]]
+  T* get_module_NC(const std::string& name) const
+  { return get_module_non_const<T>(name); }
+
+  template <typename T>
+  [[deprecated("Use get_module_interface() instead.")]]
+  void get_module_IF(const std::string& name, const T** ptr) const
+  { get_module_interface(name, ptr); }
+
+  template <typename T>
+  [[deprecated("Use get_module_interface_non_const() instead.")]]
+  void get_module_IFNC(const std::string& name, T** ptr) const
+  { get_module_interface_non_const(name, ptr); }
+
+  template <typename T>
+  [[deprecated("Use request_module_non_const() instead.")]]
+  void request_module_NC(const std::string& name, T** ptr) const
+  { request_module_non_const(name, ptr); }
+
+  template <typename T>
+  [[deprecated("Use request_module_non_const() instead.")]]
   T* request_module_NC(const std::string& name) const
-  { return static_cast<T*>(module_access_->request_module_NC(name)); }
+  { return request_module_non_const<T>(name); }
 
   template <typename T>
-  void request_module_IF(const std::string& name, const T** ptr) const;
+  [[deprecated("Use request_module_interface() instead.")]]
+  void request_module_IF(const std::string& name, const T** ptr) const
+  { request_module_interface(name, ptr); }
 
   template <typename T>
-  void request_module_IFNC(const std::string& name, T** ptr) const;
+  [[deprecated("Use request_module_interface_non_const() instead.")]]
+  void request_module_IFNC(const std::string& name, T** ptr) const
+  { request_module_interface_non_const(name, ptr); }
 
 private:
   const ModuleAccess* module_access_ = nullptr;
 };
 
 template <typename T>
-void ModuleAccessInterface::get_module_IF(const std::string& name, const T** ptr) const
+void ModuleAccessInterface::get_module_interface(const std::string& name, const T** ptr) const
 {
   *ptr = dynamic_cast<const T*>(module_access_->get_module(name));
   if (*ptr==0) {
@@ -108,16 +148,16 @@ void ModuleAccessInterface::get_module_IF(const std::string& name, const T** ptr
 }
 
 template <typename T>
-void ModuleAccessInterface::get_module_IFNC(const std::string& name, T** ptr) const
+void ModuleAccessInterface::get_module_interface_non_const(const std::string& name, T** ptr) const
 {
-  *ptr = dynamic_cast<T*>(module_access_->get_module_NC(name));
+  *ptr = dynamic_cast<T*>(module_access_->get_module_non_const(name));
   if (*ptr==0) {
     BOOST_THROW_EXCEPTION( ModuleAccessError("Dynamic cast failed -- Module", name) );
   }
 }
 
 template <typename T>
-void ModuleAccessInterface::request_module_IF(const std::string& name, const T** ptr) const
+void ModuleAccessInterface::request_module_interface(const std::string& name, const T** ptr) const
 {
   const BasicModule* m = module_access_->request_module(name);
   if (m) {
@@ -129,9 +169,9 @@ void ModuleAccessInterface::request_module_IF(const std::string& name, const T**
 }
 
 template <typename T>
-void ModuleAccessInterface::request_module_IFNC(const std::string& name, T** ptr) const
+void ModuleAccessInterface::request_module_interface_non_const(const std::string& name, T** ptr) const
 {
-  BasicModule* m = module_access_->request_module_NC(name);
+  BasicModule* m = module_access_->request_module_non_const(name);
   if (m) {
     *ptr = dynamic_cast<T*>(m);
   }

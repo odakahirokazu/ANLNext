@@ -10,11 +10,11 @@ for order in ['valid', 'reversed', 'missing']:
     modules = [producer, consumer] if order == 'valid' else [consumer, producer]
     manager.set_modules([consumer] if order == 'missing' else modules)
     if order == 'valid':
-        assert manager.Define() == anlnext.status.AS_OK
-        assert manager.PreInitialize() == anlnext.status.AS_OK
+        assert manager.define_analysis() == anlnext.status.AS_OK
+        assert manager.pre_initialize_analysis() == anlnext.status.AS_OK
     else:
         try:
-            manager.Define()
+            manager.define_analysis()
         except RuntimeError as error:
             text = str(error)
             assert all(word in text for word in ['ModuleRequirementError', 'consumer', 'producer', 'before'])

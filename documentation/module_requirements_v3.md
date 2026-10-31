@@ -32,12 +32,12 @@ ANLStatus MyModule::mod_define()
 後続モジュールが`mod_define()`で設定するIDや別名も指定できます。
 
 通常のモジュールの要求は、全モジュールの定義と名前・別名の登録が終わった
-`ANLManager::Define()`の最後に検証します。
+`ANLManager::define_analysis()`の最後に検証します。
 要求は正規のモジュールの`mod_define()`で宣言してください。
 
 存在しないモジュールや位置条件の違反では`ModuleRequirementError`を投げます。
 例外には要求元のモジュールID・クラス名、要求先の名前、位置条件、理由が付きます。
-Ruby／Pythonからの`Define()`ではRuntimeErrorとして伝わります。
+Ruby／Pythonからの`define_analysis()`ではRuntimeErrorとして伝わります。
 
 ## 名前解決とアクセス権
 
@@ -56,7 +56,7 @@ Ruby／Pythonからの`Define()`ではRuntimeErrorとして伝わります。
 この機能は正規のモジュールだけが持ち、Submoduleではサポートしません。
 
 並行チェーンは検証済みのチェーンと同じモジュール順序・ID・別名で構築するため、
-要求の検証は元チェーンの`Define()`時に行います。
+要求の検証は元チェーンの`define_analysis()`時に行います。
 複製先でも状態の整合性を保つため、要求情報をコピーし、各チェーンのModuleAccessに
 名前・別名と位置情報を登録します。チェーン構築時の自動の再検証は行いません。
 

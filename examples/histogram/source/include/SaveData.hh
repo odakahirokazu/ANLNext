@@ -22,12 +22,12 @@ public:
   anlnext::ANLStatus mod_initialize() override;
   anlnext::ANLStatus mod_finalize() override;
 
-  TDirectory* GetDirectory() { return m_RootFile->GetDirectory(0); }
-  bool cd() { return m_RootFile->cd(); }
-  std::string FileName() const { return m_FileName; }
+  TDirectory* get_directory() { return root_file_->GetDirectory(0); }
+  bool cd() { return root_file_->cd(); }
+  std::string filename() const { return filename_; }
 private:
-  std::string m_FileName;
-  TFile* m_RootFile;
+  std::string filename_;
+  TFile* root_file_;
 };
 
 #endif /* SaveData_H */

@@ -27,9 +27,9 @@ ANLStatus FillHistogram::mod_initialize()
   get_module("GenerateEvents", &event_);
 
   if (exist_module("CreateRootFile")) {
-    comptonsoft::CreateRootFile* fileManager = nullptr;
-    get_module_NC("CreateRootFile", &fileManager);
-    fileManager->cd();
+    comptonsoft::CreateRootFile* file_manager = nullptr;
+    get_module_non_const("CreateRootFile", &file_manager);
+    file_manager->cd();
   }
 
   spectrum_ = new TH1I("spectrum", "Spectrum", nbins_, energy0_, energy1_);
@@ -39,7 +39,7 @@ ANLStatus FillHistogram::mod_initialize()
 
 ANLStatus FillHistogram::mod_analyze()
 {
-  const std::vector<double>& energies = event_->Energies();
+  const std::vector<double>& energies = event_->energies();
 
   for (const auto& energy: energies) {
     spectrum_->Fill(energy);

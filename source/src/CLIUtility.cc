@@ -33,7 +33,7 @@
 
 namespace {
 
-std::vector<std::string> g_CompletionCandidates;
+std::vector<std::string> g_completion_candidates;
 char** completion_function(const char *text, int /* start */, int /* end */);
 char* completion_key_generator(const char* text, int state);
 
@@ -45,14 +45,14 @@ namespace anlnext
 ReadLine::ReadLine()
 {
   rl_attempted_completion_function = nullptr;
-  g_CompletionCandidates.clear();
+  g_completion_candidates.clear();
 }
 
 ReadLine::~ReadLine()
 {
   std::free(line_);
   rl_attempted_completion_function = nullptr;
-  g_CompletionCandidates.clear();
+  g_completion_candidates.clear();
 }
 
 int ReadLine::read(const char* prompt, const bool history, const bool trim_right)
@@ -80,7 +80,7 @@ int ReadLine::read(const char* prompt, const bool history, const bool trim_right
 
 void ReadLine::set_completion_candidates(const std::vector<std::string>& keys)
 {
-  g_CompletionCandidates = keys;
+  g_completion_candidates = keys;
   rl_attempted_completion_function = completion_function;
 }
 
@@ -97,14 +97,14 @@ char** completion_function(const char* text, int, int)
 
 char* completion_key_generator(const char* text, int state)
 {
-  static std::size_t keyIndex = 0;
+  static std::size_t key_index = 0;
   
   if (state==0) {
-    keyIndex = 0;
+    key_index = 0;
   }
 
-  while (keyIndex < g_CompletionCandidates.size()) {
-    const std::string& key = g_CompletionCandidates[keyIndex++];
+  while (key_index < g_completion_candidates.size()) {
+    const std::string& key = g_completion_candidates[key_index++];
     if (key.find(text) == 0) {
       return strdup(key.c_str());
     }

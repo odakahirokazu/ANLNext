@@ -51,13 +51,13 @@ void ParallelChain::setup_module_access()
   module_access_->set_module_order(modules_ref_);
   for (BasicModule* mod: modules_ref_) {
     if (mod->access_permission() != ModuleAccess::Permission::privacy) {
-      const std::string module_ID = mod->module_id();
-      module_access_->register_module(module_ID,
+      const std::string module_id = mod->module_id();
+      module_access_->register_module(module_id,
                                       mod,
                                       ModuleAccess::ConflictOption::error);
     
       for (const std::pair<std::string, ModuleAccess::ConflictOption>& alias: mod->get_aliases()) {
-        if (alias.first != module_ID) {
+        if (alias.first != module_id) {
           module_access_->register_module(alias.first,
                                           mod,
                                           alias.second);
@@ -74,9 +74,9 @@ void ParallelChain::reset_counters()
   }
 }
 
-BasicModule* ParallelChain::access_to_module(const std::string& module_ID)
+BasicModule* ParallelChain::access_to_module(const std::string& module_id)
 {
-  return module_access_->get_module_NC(module_ID);
+  return module_access_->get_module_non_const(module_id);
 }
 
 void ParallelChain::automatic_switch_for_singletons()

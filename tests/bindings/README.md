@@ -26,7 +26,7 @@ chain.chain(SubmoduleExample, 'example').with_setter(configure)
 chain.with_parameters({'input': 4})
 ```
 
-これらの設定処理は`Define()`の後、`PreInitialize()`の前に実行されます。
+これらの設定処理は`define_analysis()`の後、`pre_initialize_analysis()`の前に実行されます。
 実体登録時にSubmoduleのパラメータが定義されるため、続けて値を設定できます。
 実体を差し替えた場合は古い実体への参照を使わず、再取得します。
 

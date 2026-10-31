@@ -11,15 +11,15 @@ MyMTModule::~MyMTModule() = default;
 
 ANLStatus MyMTModule::mod_define()
 {
-  define_parameter("quit_index", &mod_class::m_QuitIndex);
-  define_parameter("quit_all", &mod_class::m_QuitAll);
+  define_parameter("quit_index", &mod_class::quit_index_);
+  define_parameter("quit_all", &mod_class::quit_all_);
   return AS_OK;
 }
 
 ANLStatus MyMTModule::mod_pre_initialize()
 {
-  if (m_QuitIndex < 0) {
-    m_QuitIndex = std::numeric_limits<int>().max();
+  if (quit_index_ < 0) {
+    quit_index_ = std::numeric_limits<int>().max();
   }
   
   return AS_OK;
@@ -38,8 +38,8 @@ ANLStatus MyMTModule::mod_begin_run()
 
 ANLStatus MyMTModule::mod_analyze()
 {
-  if (get_loop_index() >= m_QuitIndex) {
-    if (m_QuitAll) {
+  if (get_loop_index() >= quit_index_) {
+    if (quit_all_) {
       std::cout << "i = " << get_loop_index() << " -> AS_QUIT_ALL" << std::endl;
       return AS_QUIT_ALL;
     }

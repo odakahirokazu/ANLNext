@@ -27,9 +27,9 @@ ANLStatus FillHistogram::mod_initialize()
   get_module("GenerateEvents", &event_);
 
   if (exist_module("SaveData")) {
-    SaveData* saveModule = nullptr;
-    get_module_NC("SaveData", &saveModule);
-    saveModule->cd();
+    SaveData* save_module = nullptr;
+    get_module_non_const("SaveData", &save_module);
+    save_module->cd();
   }
   
   spectrum1_ = new TH1I("spectrum1", "Spectrum 1", nbins_, energy0_, energy1_);
@@ -41,7 +41,7 @@ ANLStatus FillHistogram::mod_initialize()
 
 ANLStatus FillHistogram::mod_analyze()
 {
-  const double energy = event_->Energy();
+  const double energy = event_->energy();
   if (evs("GenerateEvents:Detector1")) {
     spectrum1_->Fill(energy);
     spectrum_sum_->Fill(energy);

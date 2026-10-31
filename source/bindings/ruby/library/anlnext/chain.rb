@@ -657,8 +657,8 @@ module ANL
       vec = ANL::ModuleVector.new(@module_list)
       @anl.set_modules(vec)
 
-      status = @anl.Define()
-      check_status(status, "Define()") or return
+      status = @anl.define_analysis()
+      check_status(status, "define_analysis()") or return
       @stage = :definition_done
 
       return @anl
@@ -702,8 +702,8 @@ module ANL
         end
       end
 
-      status = anl.PreInitialize()
-      check_status(status, "PreInitialize()") or return
+      status = anl.pre_initialize_analysis()
+      check_status(status, "pre_initialize_analysis()") or return
       @stage = :pre_initialization_done
 
       if @modification_block
@@ -714,33 +714,33 @@ module ANL
         anl.parameters_to_json(parameters_json_filename())
       end
 
-      status = anl.Initialize()
-      check_status(status, "Initialize()") or return
+      status = anl.initialize_analysis()
+      check_status(status, "initialize_analysis()") or return
       @stage = :initialization_done
 
       puts ""
       puts "<Begin Analysis> | Time: " + Time.now.to_s
       $stdout.flush
       anl.set_display_period(@display_period)
-      status = anl.Analyze(num_loop, @console)
+      status = anl.run_analysis(num_loop, @console)
       puts ""
       puts "<End Analysis>   | Time: " + Time.now.to_s
       $stdout.flush
 
-      if check_status(status, "Analyze()")
+      if check_status(status, "run_analysis()")
         @stage = :analysis_done
       end
 
-      status = anl.Finalize()
-      check_status(status, "Finalize()") or return
+      status = anl.finalize_analysis()
+      check_status(status, "finalize_analysis()") or return
       @stage = :finalization_done
     rescue RuntimeError => ex
       print_exception(ex)
       if @stage == :error_to_finalize
-        status = anl.Finalize()
-        puts "Finalize() returned #{ANL.status_to_string(status)}."
+        status = anl.finalize_analysis()
+        puts "finalize_analysis() returned #{ANL.status_to_string(status)}."
       end
-      if ANL::ANLException.VerboseLevel >= 3
+      if ANL::ANLException.verbose_level >= 3
         raise
       end
     end
@@ -761,16 +761,16 @@ module ANL
         end
       end
 
-      status = anl.PreInitialize()
-      check_status(status, "PreInitialize()") or return
+      status = anl.pre_initialize_analysis()
+      check_status(status, "pre_initialize_analysis()") or return
       @stage = :pre_initialization_done
 
       if parameters_json_filename() && !parameters_json_master()
         anl.parameters_to_json(parameters_json_filename())
       end
 
-      status = anl.Initialize()
-      check_status(status, "Initialize()") or return
+      status = anl.initialize_analysis()
+      check_status(status, "initialize_analysis()") or return
       @stage = :initialization_done
 
       status = anl.do_interactive_analysis()
@@ -778,16 +778,16 @@ module ANL
         @stage = :analysis_done
       end
 
-      status = anl.Finalize()
-      check_status(status, "Finalize()") or return
+      status = anl.finalize_analysis()
+      check_status(status, "finalize_analysis()") or return
       @stage = :finalization_done
     rescue RuntimeError => ex
       print_exception(ex)
       if @stage == :error_to_finalize
-        status = anl.Finalize()
-        puts "Finalize() returned #{ANL.status_to_string(status)}."
+        status = anl.finalize_analysis()
+        puts "finalize_analysis() returned #{ANL.status_to_string(status)}."
       end
-      if ANL::ANLException.VerboseLevel >= 3
+      if ANL::ANLException.verbose_level >= 3
         raise
       end
     end
@@ -963,20 +963,20 @@ module ANL
           default_string = param.default_string
           out.puts '    insert_to_map "'+param.name+'", "'+default_string+'", {'
           param.num_value_elements.times do |i|
-            mapValue = param.value_element_info(i)
-            type = mapValue.type_name
+            map_value = param.value_element_info(i)
+            type = map_value.type_name
             default_string =
               case type
               when 'string'
-                '"'+mapValue.value_string+'"'
+                '"'+map_value.value_string+'"'
               when 'unsigned_integer'
-                mapValue.get_value_unsigned_integer.to_s
+                map_value.get_value_unsigned_integer.to_s
               when 'double'
-                mapValue.value_string.to_f.to_s
+                map_value.value_string.to_f.to_s
               else
-                mapValue.value_string
+                map_value.value_string
               end
-            out.puts '      "'+mapValue.name+'" => '+default_string+","
+            out.puts '      "'+map_value.name+'" => '+default_string+","
           end
           out.puts '    }'
         end
@@ -987,20 +987,20 @@ module ANL
           default_string = param.default_string
           out.puts '    push_to_vector "'+param.name+'", {'
           param.num_value_elements.times do |i|
-            mapValue = param.value_element_info(i)
-            type = mapValue.type_name
+            map_value = param.value_element_info(i)
+            type = map_value.type_name
             default_string =
               case type
               when 'string'
-                '"'+mapValue.value_string+'"'
+                '"'+map_value.value_string+'"'
               when 'unsigned_integer'
-                mapValue.get_value_unsigned_integer.to_s
+                map_value.get_value_unsigned_integer.to_s
               when 'double'
-                mapValue.value_string.to_f.to_s
+                map_value.value_string.to_f.to_s
               else
-                mapValue.value_string
+                map_value.value_string
               end
-            out.puts '      "'+mapValue.name+'" => '+default_string+","
+            out.puts '      "'+map_value.name+'" => '+default_string+","
           end
           out.puts '    }'
         end

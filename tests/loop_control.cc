@@ -115,13 +115,13 @@ int main(int argc, char** argv)
     else { manager = std::make_unique<ANLManagerMT>(4); }
     manager->set_modules({&input, &disabled, &output});
     manager->set_display_period(1000);
-    require(manager->Define() == AS_OK, "Define failed");
-    require(manager->PreInitialize() == AS_OK, "PreInitialize failed");
-    require(manager->Initialize() == AS_OK, "Initialize failed");
+    require(manager->define_analysis() == AS_OK, "Define failed");
+    require(manager->pre_initialize_analysis() == AS_OK, "PreInitialize failed");
+    require(manager->initialize_analysis() == AS_OK, "Initialize failed");
 
     bool caught = false;
     ANLStatus status = AS_OK;
-    try { status = manager->Analyze(100, false); }
+    try { status = manager->run_analysis(100, false); }
     catch (const std::runtime_error& ex) {
       require(state.mode == "exception" && std::string(ex.what()) == "worker failure",
               "unexpected exception");
@@ -151,9 +151,9 @@ int main(int argc, char** argv)
     state.mode = "ordered";
     state.input.clear();
     state.output.clear();
-    require(manager->Analyze(100, false) == AS_OK, "second run failed");
+    require(manager->run_analysis(100, false) == AS_OK, "second run failed");
     verify_complete(state, false);
-    require(manager->Finalize() == AS_OK, "Finalize failed");
+    require(manager->finalize_analysis() == AS_OK, "Finalize failed");
   }
   catch (const std::exception& ex) {
     std::cerr << ex.what() << '\n';

@@ -10,11 +10,11 @@ require 'submodule_ruby'
   modules = order == 'valid' ? [producer, consumer] : [consumer, producer]
   manager.set_modules(order == 'missing' ? [consumer] : modules)
   if order == 'valid'
-    raise unless manager.Define == ANL::AS_OK
-    raise unless manager.PreInitialize == ANL::AS_OK
+    raise unless manager.define_analysis == ANL::AS_OK
+    raise unless manager.pre_initialize_analysis == ANL::AS_OK
   else
     begin
-      manager.Define
+      manager.define_analysis
     rescue RuntimeError => error
       raise error unless %w[ModuleRequirementError consumer producer before].all? { |word| error.message.include?(word) }
       next

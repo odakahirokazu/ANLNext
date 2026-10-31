@@ -91,17 +91,17 @@ public:
   bool exception_propagation() const
   { return exception_propagation_; }
 
-  virtual ANLStatus Define();
-  virtual ANLStatus PreInitialize();
-  virtual ANLStatus Initialize();
-  virtual ANLStatus Analyze(std::size_t num_events, bool enable_console=false);
-  virtual ANLStatus Finalize();
+  virtual ANLStatus define_analysis();
+  virtual ANLStatus pre_initialize_analysis();
+  virtual ANLStatus initialize_analysis();
+  virtual ANLStatus run_analysis(std::size_t num_events, bool enable_console=false);
+  virtual ANLStatus finalize_analysis();
 
   virtual std::size_t number_of_parallels() const { return 1; }
   void set_print_parallel_modules(bool v=true)
   { print_clone_parameters_ = v; }
-  virtual BasicModule* access_to_module(std::size_t chain_ID,
-                                        const std::string& module_ID);
+  virtual BasicModule* access_to_module(std::size_t chain_id,
+                                        const std::string& module_id);
 
   virtual ANLStatus do_interactive_comunication();
   virtual ANLStatus do_interactive_analysis();
@@ -172,7 +172,7 @@ ANLStatus routine_modfn(T func,
 ANLStatus process_one_event(std::size_t i_event,
                             const std::vector<BasicModule*>& modules,
                             std::vector<LoopCounter>& counters,
-                            EvsManager& evsManager);
+                            EvsManager& evs_manager);
 
 ANLStatus process_one_event(std::size_t i_event,
                             const std::vector<BasicModule*>& modules,

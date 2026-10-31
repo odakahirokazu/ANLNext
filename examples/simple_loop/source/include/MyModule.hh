@@ -28,18 +28,18 @@ public:
   anlnext::ANLStatus mod_finalize() override;
 
 private:
-  int myParameter1_;
-  double myParameter2_;
-  std::string myParameter3_;
-  std::vector<int> myVector1_;
-  std::vector<double> myVector2_;
-  std::vector<std::string> myVector3_;
+  int my_parameter1_;
+  double my_parameter2_;
+  std::string my_parameter3_;
+  std::vector<int> my_vector1_;
+  std::vector<double> my_vector2_;
+  std::vector<std::string> my_vector3_;
 
-  int16_t myParameter11_;
-  int32_t myParameter12_;
-  int64_t myParameter13_;
+  int16_t my_parameter11_;
+  int32_t my_parameter12_;
+  int64_t my_parameter13_;
 
-  bool myParameter21_;
+  bool my_parameter21_;
 };
 
 #endif /* MyModule_H */

@@ -43,8 +43,8 @@ class ModuleParameter<std::vector<std::tuple<Ts...>>> : public VModuleParameter
   using const_iter_type = typename container_type::const_iterator;
   using value_category = typename size_of_value<value_type>::type;
  
-  constexpr static std::size_t ValueSize = size_of_value<value_type>::value;
-  using  ValueEnd_t = std::integral_constant<std::size_t, ValueSize>;
+  constexpr static std::size_t value_size = size_of_value<value_type>::value;
+  using  ValueEnd_t = std::integral_constant<std::size_t, value_size>;
 
 public:
   ModuleParameter(const std::string& name, container_type* ptr)
@@ -153,21 +153,21 @@ public:
   {
     std::cout << "Define table of " << name() << ":" << std::endl;
     std::string buffer = "";
-    ModuleParameter<std::string> keyParam("continue", &buffer);
-    keyParam.set_question(name()+" | break => '!' | keep -> '='");
+    ModuleParameter<std::string> key_param("continue", &buffer);
+    key_param.set_question(name()+" | break => '!' | keep -> '='");
     
     container_type container;
     if (first_input()) { initialize_default_value_elements(); }
 
     while (true) {
-      keyParam.ask();
+      key_param.ask();
       if (buffer=="=") { return false; }
       if (buffer=="!") { break; }
       
       value_info_set<0>(&default_value_, value_category());
       
-      const std::size_t NumValues = value_info_.size();
-      for (std::size_t i=0; i<NumValues; ++i) {
+      const std::size_t num_values = value_info_.size();
+      for (std::size_t i=0; i<num_values; ++i) {
         value_info_[i]->ask();
       }
       
@@ -230,106 +230,106 @@ private:
     value_info_get<0>(&default_value_, value_category());
   }
 
-  template <std::size_t Index>
+  template <std::size_t index>
   void value_info_set(value_type* pval, value_category_scalar) const
   {
     value_info_[0]->__set__(pval);
   }
 
-  template <std::size_t Index>
+  template <std::size_t index>
   void value_info_set(value_type* pval, value_category_pair) const
   {
     value_info_[0]->__set__(&(pval->first));
     value_info_[1]->__set__(&(pval->second));
   }
   
-  template <std::size_t Index>
+  template <std::size_t index>
   void value_info_set(value_type* pval, value_category_tuple) const
   {
-    using Index_t = std::integral_constant<std::size_t, Index>;
-    value_info_set<Index>(pval, value_category_tuple(), Index_t());
+    using Index_t = std::integral_constant<std::size_t, index>;
+    value_info_set<index>(pval, value_category_tuple(), Index_t());
   }
 
-  template <std::size_t Index>
+  template <std::size_t index>
   void value_info_set(value_type* pval, value_category_tuple,
-                      std::integral_constant<std::size_t, Index>) const
+                      std::integral_constant<std::size_t, index>) const
   {
-    value_info_[Index]->__set__(&(std::get<Index>(*pval)));
-    using NextIndex_t = std::integral_constant<std::size_t, Index+1>;
-    value_info_set<Index+1>(pval, value_category_tuple(), NextIndex_t());
+    value_info_[index]->__set__(&(std::get<index>(*pval)));
+    using NextIndex_t = std::integral_constant<std::size_t, index+1>;
+    value_info_set<index+1>(pval, value_category_tuple(), NextIndex_t());
   }
 
-  template <std::size_t Index>
+  template <std::size_t index>
   void value_info_set(value_type*, value_category_tuple,
                       ValueEnd_t) const
   {
   }
 
-  template <std::size_t Index>
+  template <std::size_t index>
   void value_info_get(value_type* pval, value_category_scalar) const
   {
     value_info_[0]->__get__(pval);
   }
 
-  template <std::size_t Index>
+  template <std::size_t index>
   void value_info_get(value_type* pval, value_category_pair) const
   {
     value_info_[0]->__get__(&(pval->first));
     value_info_[1]->__get__(&(pval->second));
   }
   
-  template <std::size_t Index>
+  template <std::size_t index>
   void value_info_get(value_type* pval, value_category_tuple) const
   {
-    using Index_t = std::integral_constant<std::size_t, Index>;
-    value_info_get<Index>(pval, value_category_tuple(), Index_t());
+    using Index_t = std::integral_constant<std::size_t, index>;
+    value_info_get<index>(pval, value_category_tuple(), Index_t());
   }
 
-  template <std::size_t Index>
+  template <std::size_t index>
   void value_info_get(value_type* pval, value_category_tuple,
-                      std::integral_constant<std::size_t, Index>) const
+                      std::integral_constant<std::size_t, index>) const
   {
-    value_info_[Index]->__get__(&(std::get<Index>(*pval)));
-    using NextIndex_t = std::integral_constant<std::size_t, Index+1>;
-    value_info_get<Index+1>(pval, value_category_tuple(), NextIndex_t());
+    value_info_[index]->__get__(&(std::get<index>(*pval)));
+    using NextIndex_t = std::integral_constant<std::size_t, index+1>;
+    value_info_get<index+1>(pval, value_category_tuple(), NextIndex_t());
   }
 
-  template <std::size_t Index>
+  template <std::size_t index>
   void value_info_get(value_type*, value_category_tuple,
                       ValueEnd_t) const
   {
   }
 
-  template <std::size_t Index>
+  template <std::size_t index>
   void value_info_output(std::ostream& os, value_category_scalar) const
   {
     os << "    "; value_info_[0]->print(os); os << '\n';
   } 
 
-  template <std::size_t Index>
+  template <std::size_t index>
   void value_info_output(std::ostream& os, value_category_pair) const
   {
     os << "    "; value_info_[0]->print(os); os << '\n';
     os << "    "; value_info_[1]->print(os); os << '\n';
   } 
 
-  template <std::size_t Index>
+  template <std::size_t index>
   void value_info_output(std::ostream& os, value_category_tuple) const
   {
-    using Index_t = std::integral_constant<std::size_t, Index>;
-    value_info_output<Index>(os, value_category_tuple(), Index_t());
+    using Index_t = std::integral_constant<std::size_t, index>;
+    value_info_output<index>(os, value_category_tuple(), Index_t());
   }
 
-  template <std::size_t Index>
+  template <std::size_t index>
   void value_info_output(std::ostream& os, value_category_tuple,
-                         std::integral_constant<std::size_t, Index>) const
+                         std::integral_constant<std::size_t, index>) const
   {
-    os << "    "; value_info_[Index]->print(os); os << '\n';
-    using NextIndex_t = std::integral_constant<std::size_t, Index+1>;
-    value_info_output<Index+1>(os, value_category_tuple(), NextIndex_t());
+    os << "    "; value_info_[index]->print(os); os << '\n';
+    using NextIndex_t = std::integral_constant<std::size_t, index+1>;
+    value_info_output<index+1>(os, value_category_tuple(), NextIndex_t());
   }
 
-  template <std::size_t Index>
+  template <std::size_t index>
   void value_info_output(std::ostream&, value_category_tuple,
                          ValueEnd_t) const
   {

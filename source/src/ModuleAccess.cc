@@ -44,7 +44,7 @@ const BasicModule* ModuleAccess::get_module(const std::string& name) const
   return nullptr;
 }
 
-BasicModule* ModuleAccess::get_module_NC(const std::string& name) const
+BasicModule* ModuleAccess::get_module_non_const(const std::string& name) const
 {
   ANLModuleMap::const_iterator it = module_map_.find(name);
   if (it != std::end(module_map_)) {
@@ -75,7 +75,7 @@ const BasicModule* ModuleAccess::request_module(const std::string& name) const
   return nullptr;
 }
 
-BasicModule* ModuleAccess::request_module_NC(const std::string& name) const
+BasicModule* ModuleAccess::request_module_non_const(const std::string& name) const
 {
   ANLModuleMap::const_iterator it = module_map_.find(name);
   if (it != std::end(module_map_)) {
@@ -85,6 +85,16 @@ BasicModule* ModuleAccess::request_module_NC(const std::string& name) const
     }
   }
   return nullptr;
+}
+
+BasicModule* ModuleAccess::get_module_NC(const std::string& name) const
+{
+  return get_module_non_const(name);
+}
+
+BasicModule* ModuleAccess::request_module_NC(const std::string& name) const
+{
+  return request_module_non_const(name);
 }
 
 void ModuleAccess::register_module(const std::string& name,

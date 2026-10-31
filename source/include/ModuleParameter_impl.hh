@@ -48,15 +48,15 @@ bool ModuleParameter<T>::ask_sequential(const std::true_type&)
   using value_type = typename std::iterator_traits<iter_type>::value_type;
 
   std::string buffer(default_string());
-  ModuleParameter<std::string> stringParam(name(), &buffer);
-  stringParam.set_question(name()+" | break => '!' | keep => '='");
+  ModuleParameter<std::string> string_param(name(), &buffer);
+  string_param.set_question(name()+" | break => '!' | keep => '='");
   value_type t;
   ModuleParameter<value_type> param(name(), &t);
   param.set_unit(unit(), unit_name());
   
   T container;
   while (1) {
-    stringParam.ask();
+    string_param.ask();
     if (buffer=="=") { return false; }
     if (buffer=="!") { break; }
     param.set_value(boost::lexical_cast<value_type>(buffer));

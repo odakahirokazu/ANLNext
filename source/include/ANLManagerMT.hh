@@ -46,11 +46,11 @@ public:
   virtual ~ANLManagerMT();
 
   std::size_t number_of_parallels() const override { return num_parallels_; }
-  BasicModule* access_to_module(std::size_t chain_ID,
-                                const std::string& module_ID) override;
+  BasicModule* access_to_module(std::size_t chain_id,
+                                const std::string& module_id) override;
 
 protected:
-  void clone_modules(std::size_t chain_ID);
+  void clone_modules(std::size_t chain_id);
 
   ANLStatus routine_initialize() override;
   ANLStatus routine_begin_run() override;

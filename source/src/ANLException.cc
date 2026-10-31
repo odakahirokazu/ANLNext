@@ -26,16 +26,16 @@
 namespace anlnext
 {
 
-int ANLException::__VerboseLevel__ = 1;
+int ANLException::verbose_level_ = 1;
 
-void ANLException::SetVerboseLevel(int v)
+void ANLException::set_verbose_level(int v)
 {
-  __VerboseLevel__ = v;
+  verbose_level_ = v;
 }
 
-int ANLException::VerboseLevel()
+int ANLException::verbose_level()
 {
-  return __VerboseLevel__;
+  return verbose_level_;
 }
 
 ANLException::ANLException()
@@ -133,27 +133,27 @@ const ANLException& ANLException::set_module_info(const BasicSubModule* mod) con
 
 std::string ANLException::to_string() const
 {
-  if (VerboseLevel() == 1) {
+  if (verbose_level() == 1) {
     const std::string* message    = boost::get_error_info<ErrorMessage>(*this);
-    const std::string* moduleID   = boost::get_error_info<ErrorInfoOnModuleID>(*this);
-    const std::string* moduleName = boost::get_error_info<ErrorInfoOnModuleName>(*this);
+    const std::string* module_id   = boost::get_error_info<ErrorInfoOnModuleID>(*this);
+    const std::string* module_name = boost::get_error_info<ErrorInfoOnModuleName>(*this);
     const std::string* method     = boost::get_error_info<ErrorInfoOnMethod>(*this);
-    const int64_t* loopIndex      = boost::get_error_info<ErrorInfoOnLoopIndex>(*this);
-    const int* chainID            = boost::get_error_info<ErrorInfoOnChainID>(*this);
+    const int64_t* loop_index      = boost::get_error_info<ErrorInfoOnLoopIndex>(*this);
+    const int* chain_id            = boost::get_error_info<ErrorInfoOnChainID>(*this);
     const std::string* parameter  = boost::get_error_info<ErrorInfoOnParameter>(*this);
 
     std::ostringstream oss;
     if (message)    { oss << *message << "\n"; }
     if (message)    { oss << "<Error information>\n"; }
-    if (chainID)    { oss << "Chain ID: " << *chainID << "\n"; }
-    if (moduleID)   { oss << "Module ID: " << *moduleID << "\n"; }
-    if (moduleName) { oss << "Module Name: " << *moduleName << "\n"; }
+    if (chain_id)    { oss << "Chain ID: " << *chain_id << "\n"; }
+    if (module_id)   { oss << "Module ID: " << *module_id << "\n"; }
+    if (module_name) { oss << "Module Name: " << *module_name << "\n"; }
     if (method)     { oss << "Method: " << *method << "\n"; }
-    if (loopIndex)  { oss << "Loop index: " << *loopIndex << "\n"; }
+    if (loop_index)  { oss << "Loop index: " << *loop_index << "\n"; }
     if (parameter)  { oss << "Parameter: " << *parameter << "\n"; }
     return oss.str();
   }
-  else if (VerboseLevel() >= 2) {
+  else if (verbose_level() >= 2) {
     return boost::diagnostic_information(*this);
   }
 

@@ -68,9 +68,9 @@ void verify_positions()
       const bool succeeds = position == ModulePosition::any ||
                             (position == ModulePosition::before && target_first) ||
                             (position == ModulePosition::after && !target_first);
-      if (succeeds) { require(manager.Define() == AS_OK, "valid requirement failed"); }
+      if (succeeds) { require(manager.define_analysis() == AS_OK, "valid requirement failed"); }
       else {
-        expect_requirement_error([&] { manager.Define(); }, "consumer", "events",
+        expect_requirement_error([&] { manager.define_analysis(); }, "consumer", "events",
                                  position == ModulePosition::before ? "before" : "after");
       }
       require(target.defined && requester.defined, "validated before all definitions finished");
@@ -78,17 +78,17 @@ void verify_positions()
     RequirementModule missing("consumer", "missing", position);
     ANLManager missing_manager;
     missing_manager.set_modules({&missing});
-    expect_requirement_error([&] { missing_manager.Define(); }, "consumer", "missing",
+    expect_requirement_error([&] { missing_manager.define_analysis(); }, "consumer", "missing",
       position == ModulePosition::before ? "before" : position == ModulePosition::after ? "after" : "any");
     RequirementModule self("self", "self_alias", position);
     self.late_alias = "self_alias";
     ANLManager self_manager;
     self_manager.set_modules({&self});
     if (position == ModulePosition::any) {
-      require(self_manager.Define() == AS_OK, "any must allow self");
+      require(self_manager.define_analysis() == AS_OK, "any must allow self");
     }
     else {
-      expect_requirement_error([&] { self_manager.Define(); }, "self", "self_alias",
+      expect_requirement_error([&] { self_manager.define_analysis(); }, "self", "self_alias",
                                position == ModulePosition::before ? "before" : "after");
     }
   }
@@ -104,10 +104,10 @@ void verify_alias_resolution()
     ANLManager manager;
     manager.set_modules({&first, &requester, &last});
     if (option == ModuleAccess::ConflictOption::yield) {
-      require(manager.Define() == AS_OK, "alias yield lost first target");
+      require(manager.define_analysis() == AS_OK, "alias yield lost first target");
     }
     else {
-      expect_requirement_error([&] { manager.Define(); }, "consumer", "shared", "before");
+      expect_requirement_error([&] { manager.define_analysis(); }, "consumer", "shared", "before");
     }
   }
 }
@@ -119,12 +119,12 @@ void verify_permissions()
   requester.set_access_permission(ModuleAccess::Permission::privacy);
   ANLManager manager;
   manager.set_modules({&target, &requester});
-  require(manager.Define() == AS_OK, "order check must be independent of access permission");
+  require(manager.define_analysis() == AS_OK, "order check must be independent of access permission");
   RequirementModule hidden("hidden"), dependent("dependent", "hidden");
   hidden.set_access_permission(ModuleAccess::Permission::privacy);
   ANLManager hidden_manager;
   hidden_manager.set_modules({&hidden, &dependent});
-  expect_requirement_error([&] { hidden_manager.Define(); }, "dependent", "hidden", "any");
+  expect_requirement_error([&] { hidden_manager.define_analysis(); }, "dependent", "hidden", "any");
 }
 
 void verify_clone_state()
@@ -133,8 +133,8 @@ void verify_clone_state()
   RequirementModule requester("consumer", "producer", ModulePosition::before);
   ANLManagerMT manager(3);
   manager.set_modules({&target, &requester});
-  require(manager.Define() == AS_OK, "define failed");
-  require(manager.PreInitialize() == AS_OK, "parallel duplication failed");
+  require(manager.define_analysis() == AS_OK, "define failed");
+  require(manager.pre_initialize_analysis() == AS_OK, "parallel duplication failed");
   for (std::size_t index=0; index<3; ++index) {
     manager.access_to_module(index, "consumer")->check_module_requirements();
   }

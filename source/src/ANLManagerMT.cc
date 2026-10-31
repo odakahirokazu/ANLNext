@@ -43,24 +43,24 @@ ANLManagerMT::ANLManagerMT(std::size_t num_parallels)
 
 ANLManagerMT::~ANLManagerMT() = default;
 
-BasicModule* ANLManagerMT::access_to_module(std::size_t chain_ID, const std::string& module_ID)
+BasicModule* ANLManagerMT::access_to_module(std::size_t chain_id, const std::string& module_id)
 {
-  if (chain_ID==0) {
-    return ANLManager::access_to_module(chain_ID, module_ID);
+  if (chain_id==0) {
+    return ANLManager::access_to_module(chain_id, module_id);
   }
   for (auto& chain: parallel_chains_) {
-    if (chain.chain_id() == chain_ID) {
-      return chain.access_to_module(module_ID);
+    if (chain.chain_id() == chain_id) {
+      return chain.access_to_module(module_id);
     }
   }
 
-  BOOST_THROW_EXCEPTION( ChainNotFoundError(chain_ID) );
+  BOOST_THROW_EXCEPTION( ChainNotFoundError(chain_id) );
   return nullptr;
 }
 
-void ANLManagerMT::clone_modules(std::size_t chain_ID)
+void ANLManagerMT::clone_modules(std::size_t chain_id)
 {
-  ParallelChain chain(chain_ID, *evs_manager_);
+  ParallelChain chain(chain_id, *evs_manager_);
   for (BasicModule* mod: modules_) {
     chain.push(mod->duplicate());
   }
