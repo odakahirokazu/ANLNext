@@ -59,6 +59,10 @@ add_test(NAME map_parameter_ruby COMMAND ${Ruby_EXECUTABLE} ${CMAKE_CURRENT_SOUR
 set_tests_properties(map_parameter_ruby PROPERTIES TIMEOUT 15
   ENVIRONMENT "RUBYLIB=${CMAKE_CURRENT_BINARY_DIR}/ruby:${CMAKE_CURRENT_BINARY_DIR}")
 
+add_test(NAME script_generation_ruby COMMAND ${Ruby_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/script_generation.rb)
+set_tests_properties(script_generation_ruby PROPERTIES TIMEOUT 15
+  ENVIRONMENT "RUBYLIB=${CMAKE_CURRENT_BINARY_DIR}/ruby:${CMAKE_CURRENT_BINARY_DIR}")
+
 add_executable(anlnext_unsigned_integer ../unsigned_integer.cc)
 target_link_libraries(anlnext_unsigned_integer PRIVATE submodule_example)
 add_test(NAME unsigned_integer COMMAND anlnext_unsigned_integer)

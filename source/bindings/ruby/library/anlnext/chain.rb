@@ -914,7 +914,7 @@ module ANL
       out = output ? File::open(output, 'w') : STDOUT
       out.puts '#!/usr/bin/env ruby'
       out.puts "require 'anlnext'"
-      out.puts "require '#{package}'"
+      out.puts "require #{package.to_s.inspect}"
       out.puts ''
       out.puts 'num_loop = 100000'
       out.puts ''
@@ -931,13 +931,13 @@ module ANL
           default_string =
             case type
             when 'vector<string>', 'list<string>'
-              '["'+param.default_string+'"]'
+              [param.default_string].inspect
             when 'vector<int>', 'vector<double>'
               '[]'
             when *MAP_PARAMETER_TYPES.keys
               param.get_value_auto.inspect
             when 'string'
-              '"'+param.value_string+'"'
+              param.value_string.inspect
             when 'unsigned_integer'
               param.get_value_unsigned_integer.to_s
             when 'double'
@@ -953,7 +953,7 @@ module ANL
             else
               param.value_string
             end
-          "\"#{param.name}\" => #{default_string}"
+          "#{param.name.inspect} => #{default_string}"
         end.join(",\n                    ") + ")"
         out.puts with_parameters_string
 
@@ -961,14 +961,14 @@ module ANL
           param.type_name == 'record_map'
         }.each do |param|
           default_string = param.default_string
-          out.puts '    insert_to_map "'+param.name+'", "'+default_string+'", {'
+          out.puts "    insert_to_map #{param.name.inspect}, #{default_string.inspect}, {"
           param.num_value_elements.times do |i|
             map_value = param.value_element_info(i)
             type = map_value.type_name
             default_string =
               case type
               when 'string'
-                '"'+map_value.value_string+'"'
+                map_value.value_string.inspect
               when 'unsigned_integer'
                 map_value.get_value_unsigned_integer.to_s
               when 'double'
@@ -976,7 +976,7 @@ module ANL
               else
                 map_value.value_string
               end
-            out.puts '      "'+map_value.name+'" => '+default_string+","
+            out.puts "      #{map_value.name.inspect} => #{default_string},"
           end
           out.puts '    }'
         end
@@ -985,14 +985,14 @@ module ANL
           param.type_name == 'record_vector'
         }.each do |param|
           default_string = param.default_string
-          out.puts '    push_to_vector "'+param.name+'", {'
+          out.puts "    push_to_vector #{param.name.inspect}, {"
           param.num_value_elements.times do |i|
             map_value = param.value_element_info(i)
             type = map_value.type_name
             default_string =
               case type
               when 'string'
-                '"'+map_value.value_string+'"'
+                map_value.value_string.inspect
               when 'unsigned_integer'
                 map_value.get_value_unsigned_integer.to_s
               when 'double'
@@ -1000,7 +1000,7 @@ module ANL
               else
                 map_value.value_string
               end
-            out.puts '      "'+map_value.name+'" => '+default_string+","
+            out.puts "      #{map_value.name.inspect} => #{default_string},"
           end
           out.puts '    }'
         end
