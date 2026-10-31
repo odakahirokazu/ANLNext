@@ -52,9 +52,9 @@ namespace anlnext
 {
 
 /* version definition */
-const int ANLManager::__version1__ = 2;
-const int ANLManager::__version2__ = 5;
-const int ANLManager::__version3__ = 0;
+const int ANLManager::__version1__ = 3;
+const int ANLManager::__version2__ = -2;
+const int ANLManager::__version3__ = 3;
 
 
 ANLManager::ANLManager()
@@ -94,12 +94,14 @@ std::size_t ANLManager::display_period() const
 
 ANLStatus ANLManager::define_analysis()
 {
+  const std::string version = std::to_string(__version1__) + "." +
+    std::to_string(__version2__) + "." + std::to_string(__version3__);
   std::cout << '\n'
             << "######################################################\n"
             << "#                                                    #\n"
             << "#          ANL Next Data Analysis Framework          #\n"
             << "#                                                    #\n"
-            << boost::format("#    version: %2d.%02d.%02d%31s#\n") % __version1__ % __version2__ % __version3__ % " "
+            << boost::format("#    version: %-39s#\n") % version
             << "#    author: Hirokazu Odaka                          #\n"
             << "#    URL: https://github.com/odakahirokazu/ANLNext   #\n"
             << "#                                                    #\n"

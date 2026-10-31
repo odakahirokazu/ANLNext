@@ -41,6 +41,7 @@ void EvsManager::reset_all_counts()
 {
   for (auto& e: data_) {
     e.second.counts = 0;
+    e.second.counts_ok = 0;
   }
 }
 

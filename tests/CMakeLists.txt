@@ -1,4 +1,10 @@
 find_package(Threads REQUIRED)
+
+add_executable(anlnext_evs_manager evs_manager.cc)
+target_link_libraries(anlnext_evs_manager PRIVATE ANLNext)
+add_test(NAME evs_manager COMMAND anlnext_evs_manager)
+set_tests_properties(evs_manager PROPERTIES TIMEOUT 15)
+
 add_executable(anlnext_loop_control loop_control.cc)
 target_link_libraries(anlnext_loop_control PRIVATE ANLNext Threads::Threads)
 foreach(mode serial ordered skip quit quit_all exception anl_exception terminate_exception critical reduce)
