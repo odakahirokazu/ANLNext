@@ -2,6 +2,21 @@ require 'anlnext'
 require 'submodule_ruby'
 require 'tmpdir'
 
+def verify_indexed_vector_input
+  chain = ANL::AnalysisChain.new
+  chain.chain(Submodule_ruby::MapExample, :maps)
+  chain.push_to_vector(:rows, 0 => 7)
+  chain.define
+  chain.load_all_parameters
+  mod = chain.get_module(:maps)
+  raise unless mod.get_parameter(:rows).value_element_name(0) == 'count'
+  raise unless mod.get_parameter_value(:rows) == [{ 'count' => 7 }]
+  chain.push_to_vector(:rows, 0 => 11)
+  raise unless mod.get_parameter_value(:rows) == [{ 'count' => 7 }, { 'count' => 11 }]
+end
+
+verify_indexed_vector_input
+
 values = {
   'map_i_i' => { -1 => 3, 2147483647 => -2147483648 },
   'map_i_d' => { -1 => 0.5, 2 => 1.5 },

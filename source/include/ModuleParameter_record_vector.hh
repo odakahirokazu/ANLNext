@@ -100,6 +100,8 @@ public:
   { return value_info_.size(); }
   std::shared_ptr<VModuleParameter const> value_element_info(std::size_t index) const override
   { return value_info_[index]; }
+  std::string value_element_name(std::size_t index) const override
+  { return value_info_[index]->name(); }
   void add_value_element(ModuleParam_sptr param) override
   { value_info_.push_back(param); }
 

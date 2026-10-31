@@ -484,7 +484,7 @@ module ANL
         mod.push_to_vector(vector_name.to_s) do |v|
           values.each do |value_name, value|
             if value_name.is_a? Integer
-              value_name = v.get_parameter(map_name).value_element_name(value_name)
+              value_name = v.get_parameter(vector_name).value_element_name(value_name)
             end
             v.set_value_element(value_name.to_s, value)
           end

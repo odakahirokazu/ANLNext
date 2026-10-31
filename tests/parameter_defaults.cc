@@ -59,6 +59,11 @@ void run(const std::string& name, bool initialized, bool direct)
 {
   DefaultsModule source;
   source.setup();
+  if (name == "rows") {
+    require(source.get_parameter(name)->value_element_name(0) == "number" &&
+            source.get_parameter(name)->value_element_name(1) == "label",
+            "record vector element names do not match their indices");
+  }
   const auto expected_type = name == "table" ? "record_map" : "record_vector";
   require(source.get_parameter(name)->type_name() == expected_type, "record container type mismatch");
   require(source.get_parameter(name)->to_property_tree().get<std::string>("type") == expected_type,
