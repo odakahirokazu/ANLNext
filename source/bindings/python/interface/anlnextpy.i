@@ -231,6 +231,7 @@ class ParameterRegistry
   void clear_array(const std::string& name);
 
   void set_map_key(const std::string& key);
+  void set_value_element(const std::string& name, bool val);
   void set_value_element(const std::string& name, int val);
   void set_value_element(const std::string& name, double val);
   void set_value_element(const std::string& name, const std::string& val);

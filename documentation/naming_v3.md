@@ -62,7 +62,7 @@ anlnext.push_to_vector(module, 'rows', {'count': 7})
 AnalysisChainの`chain.insert_to_map()`／`chain.push_to_vector()`は変更しません。
 辞書の確認と走査はPython側で行い、個々の値の型変換・数値範囲確認は
 既存のSWIG setterとC++の型チェックに任せます。
-辞書のキーは値要素名の文字列、値は`int`・`float`・`str`を使います。
+辞書のキーは値要素名の文字列、値は`bool`・`int`・`float`・`str`を使います。
 不正な入力は例外となり、レコードを追加しません。要素を省略した場合や空の辞書では
 編集用バッファの現在値を使います。通常の挿入後はバッファが初期値へ戻ります。
 

@@ -67,6 +67,13 @@ add_test(NAME script_generation_ruby COMMAND ${Ruby_EXECUTABLE} ${CMAKE_CURRENT_
 set_tests_properties(script_generation_ruby PROPERTIES TIMEOUT 15
   ENVIRONMENT "RUBYLIB=${CMAKE_CURRENT_BINARY_DIR}/ruby:${CMAKE_CURRENT_BINARY_DIR}")
 
+add_test(NAME record_boolean_python COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/record_boolean.py)
+set_tests_properties(record_boolean_python PROPERTIES TIMEOUT 15
+  ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python:${CMAKE_CURRENT_BINARY_DIR}")
+add_test(NAME record_boolean_ruby COMMAND ${Ruby_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/record_boolean.rb)
+set_tests_properties(record_boolean_ruby PROPERTIES TIMEOUT 15
+  ENVIRONMENT "RUBYLIB=${CMAKE_CURRENT_BINARY_DIR}/ruby:${CMAKE_CURRENT_BINARY_DIR}")
+
 add_executable(anlnext_unsigned_integer ../unsigned_integer.cc)
 target_link_libraries(anlnext_unsigned_integer PRIVATE submodule_example)
 add_test(NAME unsigned_integer COMMAND anlnext_unsigned_integer)

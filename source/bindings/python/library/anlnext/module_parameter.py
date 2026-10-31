@@ -44,7 +44,7 @@ def _set_record_values(registry, values):
     for name, value in values.items():
         if not isinstance(name, str):
             raise TypeError("Value element name must be a string")
-        if not isinstance(value, (int, float, str)):
+        if not isinstance(value, (bool, int, float, str)):
             raise TypeError(f"Unsupported value type: {name}")
         registry.set_value_element(name, value)
 

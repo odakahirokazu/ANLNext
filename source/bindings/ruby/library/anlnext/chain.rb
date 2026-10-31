@@ -969,6 +969,8 @@ module ANL
               case type
               when 'string'
                 map_value.value_string.inspect
+              when 'bool'
+                map_value.get_value_auto.inspect
               when 'unsigned_integer'
                 map_value.get_value_unsigned_integer.to_s
               when 'double'
@@ -993,6 +995,8 @@ module ANL
               case type
               when 'string'
                 map_value.value_string.inspect
+              when 'bool'
+                map_value.get_value_auto.inspect
               when 'unsigned_integer'
                 map_value.get_value_unsigned_integer.to_s
               when 'double'

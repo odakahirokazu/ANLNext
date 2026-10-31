@@ -18,5 +18,11 @@ ANLStatus MapExample::mod_define()
   add_value_element("weight", 0.0);
   define_parameter("rows", &MapExample::rows);
   add_value_element("count", 0);
+  define_parameter("flag_table", &MapExample::flag_table);
+  add_value_element("count", 0);
+  add_value_element("enabled", false);
+  define_parameter("flags", &MapExample::flags);
+  add_value_element("count", 0);
+  add_value_element("enabled", false);
   return AS_OK;
 }

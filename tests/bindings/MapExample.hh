@@ -18,5 +18,7 @@ public:
   std::vector<std::string> vector_str = {"default"};
   std::map<std::string, std::tuple<int, double>> table;
   std::vector<std::tuple<int>> rows;
+  std::map<std::string, std::tuple<int, bool>> flag_table;
+  std::vector<std::tuple<int, bool>> flags;
 };
 #endif
