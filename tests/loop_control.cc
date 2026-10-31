@@ -68,6 +68,11 @@ public:
     std::this_thread::yield();
     return AS_OK;
   }
+  ANLStatus mod_reduce(const std::list<BasicModule*>& parallel_modules) override
+  {
+    if (state_->mode == "reduce") { return AS_CRITICAL_ERROR_TO_TERMINATE; }
+    return BasicModule::mod_reduce(parallel_modules);
+  }
 private:
   State* state_;
 };
@@ -136,6 +141,10 @@ int main(int argc, char** argv)
     }
     else if (state.mode == "critical") {
       require(status == AS_CRITICAL_ERROR_TO_FINALIZE, "lost critical status");
+    }
+    else if (state.mode == "reduce") {
+      require(status == AS_CRITICAL_ERROR_TO_TERMINATE, "lost reduction status");
+      verify_complete(state, false);
     }
     else {
       require(status == AS_OK, "Analyze failed");

@@ -307,7 +307,7 @@ ANLStatus ANLManager::run_analysis(std::size_t num_events, bool enable_console)
     goto final;
   }
 
-  reduce_modules();
+  status = reduce_modules();
 
 final:
   std::cout << '\n' << std::flush;

@@ -1,7 +1,7 @@
 find_package(Threads REQUIRED)
 add_executable(anlnext_loop_control loop_control.cc)
 target_link_libraries(anlnext_loop_control PRIVATE ANLNext Threads::Threads)
-foreach(mode serial ordered skip quit quit_all exception anl_exception terminate_exception critical)
+foreach(mode serial ordered skip quit quit_all exception anl_exception terminate_exception critical reduce)
   add_test(NAME loop_control_${mode} COMMAND anlnext_loop_control ${mode})
   set_tests_properties(loop_control_${mode} PROPERTIES TIMEOUT 15)
 endforeach()
