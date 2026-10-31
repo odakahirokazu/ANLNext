@@ -2,6 +2,8 @@
 #include "BasicSubModule.hh"
 
 #include <iostream>
+#include <map>
+#include <sstream>
 #include <stdexcept>
 #include <tuple>
 #include <vector>
@@ -47,6 +49,20 @@ public:
   }
   void undefine(const std::string& name) { this->undefine_parameter(name); }
   void hide(const std::string& name) { this->hide_parameter(name); }
+  void setup_table()
+  {
+    this->define_parameter("table", &Parameters::table_);
+    this->add_value_element("type", 0);
+    this->add_value_element("first", std::string());
+    this->add_value_element("second", std::string());
+    table_["one"] = {1, "visible-one", "hidden-one"};
+    table_["two"] = {2, "hidden-two", "visible-two"};
+  }
+  void configure_table()
+  {
+    this->enable_value_elements(1, {0, 1});
+    this->enable_value_elements(2, {0, 2});
+  }
   int value() const { return value_; }
   const auto& rows() const { return rows_; }
 
@@ -54,6 +70,7 @@ private:
   int value_ = 10;
   std::vector<std::tuple<int>> rows_;
   std::vector<std::tuple<int>> other_;
+  std::map<std::string, std::tuple<int, std::string, std::string>> table_;
 };
 
 class TestModule : public Parameters<BasicModule> {
@@ -179,6 +196,25 @@ void verify_selection_changes()
   require(removed.rows().size() == 2, "unselected operation modified removed data");
 }
 
+template <typename T>
+void verify_enabled_elements()
+{
+  for (bool reselect: {false, true}) {
+    T object;
+    object.setup_table();
+    if (reselect) { object.expose_parameter("table"); }
+    object.configure_table();
+    std::ostringstream output;
+    object.get_parameter("table")->output(output);
+    require(output.str().find("visible-one") != std::string::npos &&
+            output.str().find("visible-two") != std::string::npos,
+            "enabled record fields were not displayed");
+    require(output.str().find("hidden-one") == std::string::npos &&
+            output.str().find("hidden-two") == std::string::npos,
+            "disabled record fields were displayed");
+  }
+}
+
 int main()
 {
   try {
@@ -186,6 +222,8 @@ int main()
     verify_duplication<TestSubModule>();
     verify_selection_changes<TestModule>();
     verify_selection_changes<TestSubModule>();
+    verify_enabled_elements<TestModule>();
+    verify_enabled_elements<TestSubModule>();
   }
   catch (const ANLException& ex) {
     std::cerr << ex.to_string() << '\n';

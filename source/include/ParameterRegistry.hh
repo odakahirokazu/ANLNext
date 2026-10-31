@@ -150,7 +150,7 @@ protected:
   void add_value_element(const std::string& name, T ModuleClass::* ptr, double unit, const std::string& unit_name);
 
   void enable_value_elements(int type, const std::vector<std::size_t>& enable)
-  { current_value_element().enable_value_elements(type, enable); }
+  { current_parameter().enable_value_elements(type, enable); }
 
   void set_value_element_unit(double unit, const std::string& unit_name)
   { current_value_element().set_unit(unit, unit_name); }
