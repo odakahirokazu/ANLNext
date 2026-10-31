@@ -35,52 +35,52 @@ void write_map_element(std::ostream& os, const T& value)
 }
 }
 
-template <typename K, typename V>
-ModuleParameterMap<K, V>::ModuleParameterMap(const std::string& name, map_type* ptr)
+template <typename Key, typename Value>
+ModuleParameterMap<Key, Value>::ModuleParameterMap(const std::string& name, map_type* ptr)
   : VModuleParameter(name), ptr_(ptr)
 {}
 
-template <typename K, typename V>
-std::string ModuleParameterMap<K, V>::type_name() const
+template <typename Key, typename Value>
+std::string ModuleParameterMap<Key, Value>::type_name() const
 { return param_type_info<map_type>::name(); }
 
-template <typename K, typename V>
-void ModuleParameterMap<K, V>::set_value(const map_type& value)
+template <typename Key, typename Value>
+void ModuleParameterMap<Key, Value>::set_value(const map_type& value)
 {
   map_type converted = value;
-  if constexpr (std::is_same<V, double>::value) {
+  if constexpr (std::is_same<Value, double>::value) {
     for (auto& entry: converted) { entry.second *= unit(); }
   }
   __ref__() = std::move(converted);
 }
 
-template <typename K, typename V>
-std::map<K, V> ModuleParameterMap<K, V>::get_value(const map_type&) const
+template <typename Key, typename Value>
+std::map<Key, Value> ModuleParameterMap<Key, Value>::get_value(const map_type&) const
 {
   map_type converted = __ref__();
-  if constexpr (std::is_same<V, double>::value) {
+  if constexpr (std::is_same<Value, double>::value) {
     for (auto& entry: converted) { entry.second /= unit(); }
   }
   return converted;
 }
 
-template <typename K, typename V>
-void ModuleParameterMap<K, V>::add_value_element(ModuleParam_sptr)
+template <typename Key, typename Value>
+void ModuleParameterMap<Key, Value>::add_value_element(ModuleParam_sptr)
 {
   BOOST_THROW_EXCEPTION(ParameterError(this, "Map parameters do not have value elements."));
 }
 
-template <typename K, typename V>
-void ModuleParameterMap<K, V>::clear_array() { __ref__().clear(); }
+template <typename Key, typename Value>
+void ModuleParameterMap<Key, Value>::clear_array() { __ref__().clear(); }
 
-template <typename K, typename V>
-void ModuleParameterMap<K, V>::clear_container() { __ref__().clear(); }
+template <typename Key, typename Value>
+void ModuleParameterMap<Key, Value>::clear_container() { __ref__().clear(); }
 
-template <typename K, typename V>
-std::size_t ModuleParameterMap<K, V>::size_of_container() const { return __ref__().size(); }
+template <typename Key, typename Value>
+std::size_t ModuleParameterMap<Key, Value>::size_of_container() const { return __ref__().size(); }
 
-template <typename K, typename V>
-void ModuleParameterMap<K, V>::output(std::ostream& os) const
+template <typename Key, typename Value>
+void ModuleParameterMap<Key, Value>::output(std::ostream& os) const
 {
   bool first = true;
   for (const auto& entry: get_value(map_type{})) {
@@ -92,16 +92,16 @@ void ModuleParameterMap<K, V>::output(std::ostream& os) const
   }
 }
 
-template <typename K, typename V>
-void ModuleParameterMap<K, V>::input(std::istream& is)
+template <typename Key, typename Value>
+void ModuleParameterMap<Key, Value>::input(std::istream& is)
 {
   if (is.fail()) { return; }
   map_type value;
   while (true) {
     is >> std::ws;
     if (is.eof()) { break; }
-    K key{};
-    V element{};
+    Key key{};
+    Value element{};
     if (!read_map_element(is, key) || !read_map_element(is, element)) { return; }
     value.insert_or_assign(key, element);
     if (is.eof()) { break; }
@@ -111,34 +111,34 @@ void ModuleParameterMap<K, V>::input(std::istream& is)
   set_value(value);
 }
 
-template <typename K, typename V>
-void ModuleParameterMap<K, V>::__get__(void* ptr) const
+template <typename Key, typename Value>
+void ModuleParameterMap<Key, Value>::__get__(void* ptr) const
 { *static_cast<map_type*>(ptr) = __ref__(); }
 
-template <typename K, typename V>
-void ModuleParameterMap<K, V>::__set__(const void* ptr)
+template <typename Key, typename Value>
+void ModuleParameterMap<Key, Value>::__set__(const void* ptr)
 { __ref__() = *static_cast<const map_type*>(ptr); }
 
-template <typename K, typename V>
-std::map<K, V>& ModuleParameterMap<K, V>::__ref__() { return *ptr_; }
+template <typename Key, typename Value>
+std::map<Key, Value>& ModuleParameterMap<Key, Value>::__ref__() { return *ptr_; }
 
-template <typename K, typename V>
-const std::map<K, V>& ModuleParameterMap<K, V>::__ref__() const { return *ptr_; }
+template <typename Key, typename Value>
+const std::map<Key, Value>& ModuleParameterMap<Key, Value>::__ref__() const { return *ptr_; }
 
-template <typename K, typename V>
-bool ModuleParameterMap<K, V>::ask()
+template <typename Key, typename Value>
+bool ModuleParameterMap<Key, Value>::ask()
 {
   std::cout << "  key value pairs... (quote strings containing spaces)\n";
   return ask_base();
 }
 
-template <typename K, typename V>
-boost::property_tree::ptree ModuleParameterMap<K, V>::to_property_tree() const
+template <typename Key, typename Value>
+boost::property_tree::ptree ModuleParameterMap<Key, Value>::to_property_tree() const
 {
   boost::property_tree::ptree pt;
   pt.put("name", name());
   pt.put("type", type_name());
-  if constexpr (std::is_same<V, double>::value) {
+  if constexpr (std::is_same<Value, double>::value) {
     pt.put("unit", unit());
     pt.put("unit_name", unit_name());
   }

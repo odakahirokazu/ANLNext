@@ -489,7 +489,7 @@ private:
 } /* namespace anlnext */
 
 #include "ModuleParameter_impl.hh"
-#include "ModuleParameter_spec.hh"
+#include "ModuleParameter_special.hh"
 #include "ModuleParameter_unsigned_integer.hh"
 #include "ModuleParameter_tuple.hh"
 #include "ModuleParameter_record_vector.hh"
