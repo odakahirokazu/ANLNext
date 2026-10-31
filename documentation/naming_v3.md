@@ -21,6 +21,8 @@ Rubyの`initialize`はコンストラクタに使われるため、解析の初�
 既存の内部メソッド`process_analysis()`とは別の役割です。
 モジュールの`mod_define()`、`mod_initialize()`などのフック名はそのまま使います。
 Ruby／PythonのAnalysisChainが提供する`define()`と`run()`もそのままです。
+PythonのAnalysisChainの`define()`は定義処理のステータスを返します。
+`run()`はその戻り値が非OKなら、パラメータ設定・初期化・解析へ進まず終了します。
 
 ANLExceptionの`SetVerboseLevel()`は`set_verbose_level()`、
 `VerboseLevel()`は`verbose_level()`に変更します。

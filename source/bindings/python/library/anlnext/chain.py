@@ -147,7 +147,7 @@ class AnalysisChain:
         else:
             self.anl = anlnext.ANLManager()
         self.anl.set_modules(self.module_list)
-        self.anl.define_analysis()
+        return self.anl.define_analysis()
 
 
     def load_all_parameters(self):
@@ -163,7 +163,9 @@ class AnalysisChain:
         if num_loop == -1:
             num_loop = ctypes.c_size_t(-1).value # maximum value of size_t
 
-        self.define()
+        status = self.define()
+        if not check_status(status, "define_analysis()"):
+            return
         self.load_all_parameters()
 
         status = self.anl.pre_initialize_analysis()
