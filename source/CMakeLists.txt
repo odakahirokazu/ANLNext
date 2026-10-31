@@ -91,6 +91,7 @@ target_sources(ANLNext
   src/EvsInterface.cc
   src/BasicModule.cc
   src/BasicSubModule.cc
+  src/SigintHandlerGuard.cc
   src/ANLManager.cc
   src/ANLManager_interactive.cc
   src/ParallelChain.cc

@@ -6,6 +6,15 @@ foreach(mode serial ordered skip quit quit_all exception anl_exception terminate
   set_tests_properties(loop_control_${mode} PROPERTIES TIMEOUT 15)
 endforeach()
 
+add_executable(anlnext_signal_restore signal_restore.cc)
+target_link_libraries(anlnext_signal_restore PRIVATE ANLNext)
+foreach(phase initialize run finalize)
+  foreach(mode normal critical exception anl_exception)
+    add_test(NAME signal_restore_${phase}_${mode} COMMAND anlnext_signal_restore ${phase} ${mode})
+    set_tests_properties(signal_restore_${phase}_${mode} PROPERTIES TIMEOUT 15)
+  endforeach()
+endforeach()
+
 add_executable(anlnext_console_control console_control.cc)
 target_link_libraries(anlnext_console_control PRIVATE ANLNext Threads::Threads)
 foreach(mode serial_idle serial_partial serial_exception parallel_partial parallel_exception quit index summary eof quit_eof)

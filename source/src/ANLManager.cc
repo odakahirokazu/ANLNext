@@ -28,9 +28,8 @@
 #include <cerrno>
 #include <limits>
 
-#if ANLNEXT_ANALYZE_INTERRUPT || ANL_INITIALIZE_INTERRUPT || ANL_FINALIZE_INTERRUPT
-#include <csignal>
-#include <cstring>
+#if ANLNEXT_ANALYZE_INTERRUPT || ANLNEXT_INITIALIZE_INTERRUPT || ANLNEXT_FINALIZE_INTERRUPT
+#include "SigintHandlerGuard.hh"
 #endif
 
 #include <boost/format.hpp>
@@ -179,14 +178,8 @@ ANLStatus ANLManager::initialize_analysis()
             << std::flush;
 
 #if ANLNEXT_INITIALIZE_INTERRUPT
-  struct sigaction sa;
-  struct sigaction sa_org;
-  std::memset(&sa, 0, sizeof(sa));
-  std::memset(&sa_org, 0, sizeof(sa_org));
-  sa.sa_handler = SIG_DFL;
-  sa.sa_flags |= SA_RESTART;
-  if ( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
-    std::cout << "sigaction(2) error!\n" << std::flush;
+  SigintHandlerGuard sigint_guard;
+  if (!sigint_guard.is_active()) {
     return ANLStatus::critical_error_to_terminate;
   }
 #endif
@@ -205,8 +198,7 @@ ANLStatus ANLManager::initialize_analysis()
     std::cout << std::endl;
 
 #if ANLNEXT_INITIALIZE_INTERRUPT
-  if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
-    std::cout << "sigaction(2) error!\n" << std::flush;
+  if (!sigint_guard.restore()) {
     return ANLStatus::critical_error_to_terminate;
   }
 #endif
@@ -235,14 +227,8 @@ ANLStatus ANLManager::run_analysis(std::size_t num_events, bool enable_console)
   std::cout << '\n' << std::flush;
 
 #if ANLNEXT_ANALYZE_INTERRUPT
-  struct sigaction sa;
-  struct sigaction sa_org;
-  std::memset(&sa, 0, sizeof(sa));
-  std::memset(&sa_org, 0, sizeof(sa_org));
-  sa.sa_handler = SIG_DFL;
-  sa.sa_flags |= SA_RESTART;
-  if ( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
-    std::cout << "sigaction(2) error!\n" << std::flush;
+  SigintHandlerGuard sigint_guard;
+  if (!sigint_guard.is_active()) {
     return ANLStatus::critical_error_to_terminate;
   }
 #endif
@@ -323,8 +309,7 @@ final:
   requested_ = ANLRequest::none;
 
 #if ANLNEXT_ANALYZE_INTERRUPT
-  if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
-    std::cout << "sigaction(2) error!\n" << std::flush;
+  if (!sigint_guard.restore()) {
     return ANLStatus::critical_error_to_terminate;
   }
 #endif
@@ -342,14 +327,8 @@ ANLStatus ANLManager::finalize_analysis()
             << std::flush;
 
 #if ANLNEXT_FINALIZE_INTERRUPT
-  struct sigaction sa;
-  struct sigaction sa_org;
-  std::memset(&sa, 0, sizeof(sa));
-  std::memset(&sa_org, 0, sizeof(sa_org));
-  sa.sa_handler = SIG_DFL;
-  sa.sa_flags |= SA_RESTART;
-  if ( sigaction(SIGINT, &sa, &sa_org) != 0 ) {
-    std::cout << "sigaction(2) error!\n" << std::flush;
+  SigintHandlerGuard sigint_guard;
+  if (!sigint_guard.is_active()) {
     return ANLStatus::critical_error_to_terminate;
   }
 #endif
@@ -363,8 +342,7 @@ ANLStatus ANLManager::finalize_analysis()
     std::cout << std::endl;
 
 #if ANLNEXT_FINALIZE_INTERRUPT
-  if ( sigaction(SIGINT, &sa_org, 0) != 0 ) {
-    std::cout << "sigaction(2) error!\n" << std::flush;
+  if (!sigint_guard.restore()) {
     return ANLStatus::critical_error_to_terminate;
   }
 #endif
