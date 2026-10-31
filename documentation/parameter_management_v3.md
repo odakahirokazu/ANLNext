@@ -1,5 +1,13 @@
 # Version 3: パラメータ管理の検討事項
 
+## 登録名の一意性
+
+同一の`ParameterRegistry`内では、parameterとresultを合わせて登録名を一意とする。
+`define_parameter()`、`define_result()`で既存の名前を再登録すると、
+`ParameterAlreadyDefinedError`を送出し、既存の登録と選択状態を維持する。
+明示的に`undefine_parameter()`で削除した後の再定義は認める。
+モジュールやSubmoduleなど、別々のRegistry間では同じ名前を使える。
+
 ## レコード出力による編集用バッファの変更
 
 ### 現時点の判断

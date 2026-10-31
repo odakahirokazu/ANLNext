@@ -2,6 +2,7 @@
 #include "BasicSubModule.hh"
 
 #include <iostream>
+#include <iterator>
 #include <map>
 #include <sstream>
 #include <stdexcept>
@@ -48,6 +49,17 @@ public:
     else { this->define_parameter("other", &Parameters::other_); }
   }
   void undefine(const std::string& name) { this->undefine_parameter(name); }
+  void define_named(const std::string& name, bool result, bool with_unit)
+  {
+    if (result) {
+      if (with_unit) { this->define_result(name, &Parameters::value_, 1.0, "unit"); }
+      else { this->define_result(name, &Parameters::value_); }
+    }
+    else {
+      if (with_unit) { this->define_parameter(name, &Parameters::value_, 1.0, "unit"); }
+      else { this->define_parameter(name, &Parameters::value_); }
+    }
+  }
   void hide(const std::string& name) { this->hide_parameter(name); }
   void setup_table()
   {
@@ -215,6 +227,44 @@ void verify_enabled_elements()
   }
 }
 
+template <typename T>
+void verify_duplicate_names()
+{
+  for (bool original_result: {false, true}) {
+    for (bool original_unit: {false, true}) {
+      for (bool duplicate_result: {false, true}) {
+        for (bool duplicate_unit: {false, true}) {
+          T object;
+          object.define_named("shared", original_result, original_unit);
+          const auto* original = object.get_parameter("shared");
+          object.setup();
+          bool rejected = false;
+          try { object.define_named("shared", duplicate_result, duplicate_unit); }
+          catch (const ParameterAlreadyDefinedError& ex) {
+            rejected = true;
+            require(ex.get_message().find("shared") != std::string::npos,
+                    "duplicate error omitted the parameter name");
+          }
+          require(rejected, "duplicate parameter or result name was accepted");
+          require(std::distance(object.parameter_begin(), object.parameter_end()) == 3,
+                  "rejected registration changed the registry");
+          require(object.get_parameter("shared") == original && original->is_result() == original_result,
+                  "rejected registration changed the original parameter");
+          object.describe_parameter();
+          object.describe_element();
+          require(object.get_parameter("rows")->description() == "changed" &&
+                  object.get_parameter("rows")->value_element_info(0)->description() == "changed",
+                  "rejected registration changed the selection");
+          object.undefine("shared");
+          object.define_named("shared", duplicate_result, duplicate_unit);
+          require(object.get_parameter("shared")->is_result() == duplicate_result,
+                  "redefinition after removal failed");
+        }
+      }
+    }
+  }
+}
+
 int main()
 {
   try {
@@ -224,6 +274,8 @@ int main()
     verify_selection_changes<TestSubModule>();
     verify_enabled_elements<TestModule>();
     verify_enabled_elements<TestSubModule>();
+    verify_duplicate_names<TestModule>();
+    verify_duplicate_names<TestSubModule>();
   }
   catch (const ANLException& ex) {
     std::cerr << ex.to_string() << '\n';

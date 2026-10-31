@@ -156,6 +156,11 @@ struct ParameterNotFoundError : anlnext::ANLException
   ParameterNotFoundError(const std::string& name);
 };
 
+struct ParameterAlreadyDefinedError : anlnext::ANLException
+{
+  ParameterAlreadyDefinedError(const std::string& name);
+};
+
 struct ParameterError : anlnext::ANLException
 {
   ParameterError(const VModuleParameter* param, const std::string& message);

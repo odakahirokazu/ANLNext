@@ -185,6 +185,7 @@ protected:
   void copy_parameters(const ParameterRegistry& r);
 
 private:
+  void register_parameter(const ModuleParam_sptr& parameter);
   VModuleParameter& current_parameter();
   VModuleParameter& current_value_element();
   ModuleParamIter find_parameter(const std::string& name);
@@ -200,9 +201,7 @@ template <typename ModuleClass, typename T>
 void ParameterRegistry::define_parameter(const std::string& name, T ModuleClass::* ptr)
 {
   ModuleParam_sptr p(new ModuleParameterMember<ModuleClass, T>(name, dynamic_cast<ModuleClass*>(this), ptr));
-  module_parameters_.push_back(p);
-  current_parameter_ = p;
-  current_value_element_.reset();
+  register_parameter(p);
 }
 
 template <typename ModuleClass, typename T>
@@ -210,9 +209,7 @@ void ParameterRegistry::define_parameter(const std::string& name, T ModuleClass:
 {
   ModuleParam_sptr p(new ModuleParameterMember<ModuleClass, T>(name, dynamic_cast<ModuleClass*>(this), ptr));
   p->set_unit(unit, unit_name);
-  module_parameters_.push_back(p);
-  current_parameter_ = p;
-  current_value_element_.reset();
+  register_parameter(p);
 }
 
 template <typename ModuleClass, typename T>

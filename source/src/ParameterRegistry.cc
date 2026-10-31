@@ -33,6 +33,20 @@ ParameterRegistry::ParameterRegistry()
 
 ParameterRegistry::~ParameterRegistry() = default;
 
+void ParameterRegistry::register_parameter(const ModuleParam_sptr& parameter)
+{
+  for (const auto& registered: module_parameters_) {
+    if (registered->name() == parameter->name()) {
+      ParameterAlreadyDefinedError ex(parameter->name());
+      add_parameter_error_info(ex);
+      BOOST_THROW_EXCEPTION(ex);
+    }
+  }
+  module_parameters_.push_back(parameter);
+  current_parameter_ = parameter;
+  current_value_element_.reset();
+}
+
 VModuleParameter& ParameterRegistry::current_parameter()
 {
   if (!current_parameter_) {

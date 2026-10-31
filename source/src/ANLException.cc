@@ -257,6 +257,13 @@ ParameterNotFoundError::ParameterNotFoundError(const std::string& name)
   append_message((boost::format("Parameter is not found: %s") % name).str());
 }
 
+ParameterAlreadyDefinedError::ParameterAlreadyDefinedError(const std::string& name)
+{
+  *this << ErrorInfoOnParameter(name);
+  set_message("<ParameterAlreadyDefinedError>");
+  append_message("Parameter or result is already defined: " + name);
+}
+
 ParameterError::ParameterError(const VModuleParameter* param, const std::string& message)
 {
   *this << ErrorInfoOnParameter(param->name());
