@@ -57,6 +57,13 @@ KeeperBlockは、待機が正常に完了した場合だけ通過完了を通知
 モジュール結果の集約が非OKを返した場合、`run_analysis()`はそのステータスを返す。
 統計の集約と表示は従来どおり実施する。
 
+## 結果集約の引数
+
+`mod_reduce()`の引数は`const std::vector<BasicModule*>&`とする。
+master自身を除く各並列チェーンの、同じ位置のModuleをチェーン順に渡す。
+デフォルト実装は順に`mod_merge(const BasicModule*)`を呼び、非OKが返れば集約を中断する。
+`mod_reduce()`をoverrideする利用側は引数型を変更する。`mod_merge()`のAPIは維持する。
+
 ## SIGINTの設定
 
 `initialize_analysis()`・`run_analysis()`・`finalize_analysis()`で一時変更するSIGINTの設定は、

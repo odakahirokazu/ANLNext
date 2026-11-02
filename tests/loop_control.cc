@@ -68,8 +68,13 @@ public:
     std::this_thread::yield();
     return AS_OK;
   }
-  ANLStatus mod_reduce(const std::list<BasicModule*>& parallel_modules) override
+  ANLStatus mod_reduce(const std::vector<BasicModule*>& parallel_modules) override
   {
+    for (std::size_t module_index=0; module_index<parallel_modules.size(); ++module_index) {
+      const BasicModule* module = parallel_modules[module_index];
+      require(module->copy_id() == static_cast<int>(module_index + 1), "reduction chain order changed");
+      require(module->module_id() == module_id(), "reduction received a different module");
+    }
     if (state_->mode == "reduce") { return AS_CRITICAL_ERROR_TO_TERMINATE; }
     return BasicModule::mod_reduce(parallel_modules);
   }

@@ -129,7 +129,7 @@ public:
   virtual ANLStatus mod_end_run()        { return AS_OK; }
   virtual ANLStatus mod_finalize()       { return AS_OK; }
 
-  virtual ANLStatus mod_reduce(const std::list<BasicModule*>& parallel_modules);
+  virtual ANLStatus mod_reduce(const std::vector<BasicModule*>& parallel_modules);
   virtual ANLStatus mod_merge(const BasicModule*) { return AS_OK; }
 
   virtual ANLStatus mod_communicate() { ask_parameters(); return AS_OK; }

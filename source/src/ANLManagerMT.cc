@@ -394,11 +394,12 @@ ANLStatus ANLManagerMT::reduce_modules()
   ANLStatus status = AS_OK;
   for (std::size_t module_index=0; module_index<modules_.size(); module_index++) {
     BasicModule* mod = modules_[module_index];
-    std::list<BasicModule*> module_list;
+    std::vector<BasicModule*> parallel_modules;
+    parallel_modules.reserve(parallel_chains_.size());
     for (const ParallelChain& chain: parallel_chains_) {
-      module_list.push_back(chain.modules_reference()[module_index]);
+      parallel_modules.push_back(chain.modules_reference()[module_index]);
     }
-    status = mod->mod_reduce(module_list);
+    status = mod->mod_reduce(parallel_modules);
     if (status != AS_OK) {
       break;
     }

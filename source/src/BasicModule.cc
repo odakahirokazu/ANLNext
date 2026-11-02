@@ -95,7 +95,7 @@ void BasicModule::set_module_id(const std::string& module_id)
   module_id_method_ = &BasicModule::get_module_id;
 }
 
-ANLStatus BasicModule::mod_reduce(const std::list<BasicModule*>& parallel_modules)
+ANLStatus BasicModule::mod_reduce(const std::vector<BasicModule*>& parallel_modules)
 {
   ANLStatus status = AS_OK;
   for (BasicModule* m: parallel_modules) {
