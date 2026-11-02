@@ -531,7 +531,7 @@ ANLManager: <initialize> routine successfully done.
         ****        Main Analysis         ****
         **************************************
 
-Number of events: 1000000
+Number of loops: 1000000
 
 
 ANLManager: starting <begin_run> routine.
@@ -543,20 +543,20 @@ ANLManager: <begin_run> routine successfully done.
 ANLManager: starting analysis loop (with user-console mode on).
 ----------------------------------------------------------------------------
   input '.q' => quit the analysis loop
-  input '.i' => show the current event index
+  input '.i' => show the current loop index
   input '.s' => show the status of event selections (of the master thread)
 ----------------------------------------------------------------------------
 
-Event :          0
-Event :     100000
-Event :     200000
-Event :     300000
-Event :     400000
-Event :     500000
-Event :     600000
-Event :     700000
-Event :     800000
-Event :     900000
+Index :          0
+Index :     100000
+Index :     200000
+Index :     300000
+Index :     400000
+Index :     500000
+Index :     600000
+Index :     700000
+Index :     800000
+Index :     900000
 
 ANLManager: analysis loop successfully done.
 

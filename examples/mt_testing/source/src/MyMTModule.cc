@@ -38,13 +38,14 @@ ANLStatus MyMTModule::mod_begin_run()
 
 ANLStatus MyMTModule::mod_analyze()
 {
-  if (get_loop_index() >= quit_index_) {
+  const auto loop_index = get_loop_index();
+  if (loop_index >= static_cast<std::size_t>(quit_index_)) {
     if (quit_all_) {
-      std::cout << "i = " << get_loop_index() << " -> AS_QUIT_ALL" << std::endl;
+      std::cout << "loop_index = " << loop_index << " -> AS_QUIT_ALL" << std::endl;
       return AS_QUIT_ALL;
     }
     else {
-      std::cout << "i = " << get_loop_index() << " -> AS_QUIT" << std::endl;
+      std::cout << "loop_index = " << loop_index << " -> AS_QUIT" << std::endl;
       return AS_QUIT;
     }
   }

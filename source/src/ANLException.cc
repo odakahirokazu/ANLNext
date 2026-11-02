@@ -134,13 +134,13 @@ const ANLException& ANLException::set_module_info(const BasicSubModule* mod) con
 std::string ANLException::to_string() const
 {
   if (verbose_level() == 1) {
-    const std::string* message    = boost::get_error_info<ErrorMessage>(*this);
-    const std::string* module_id   = boost::get_error_info<ErrorInfoOnModuleID>(*this);
+    const std::string* message = boost::get_error_info<ErrorMessage>(*this);
+    const std::string* module_id = boost::get_error_info<ErrorInfoOnModuleID>(*this);
     const std::string* module_name = boost::get_error_info<ErrorInfoOnModuleName>(*this);
-    const std::string* method     = boost::get_error_info<ErrorInfoOnMethod>(*this);
-    const int64_t* loop_index      = boost::get_error_info<ErrorInfoOnLoopIndex>(*this);
-    const int* chain_id            = boost::get_error_info<ErrorInfoOnChainID>(*this);
-    const std::string* parameter  = boost::get_error_info<ErrorInfoOnParameter>(*this);
+    const std::string* method = boost::get_error_info<ErrorInfoOnMethod>(*this);
+    const std::size_t* loop_index = boost::get_error_info<ErrorInfoOnLoopIndex>(*this);
+    const int* chain_id = boost::get_error_info<ErrorInfoOnChainID>(*this);
+    const std::string* parameter = boost::get_error_info<ErrorInfoOnParameter>(*this);
 
     std::ostringstream oss;
     if (message)    { oss << *message << "\n"; }

@@ -123,10 +123,10 @@ void verify(Manager& manager, bool fail)
   require(manager.observed_request == manager.expected_request, "console command was lost");
   if (!fail) {
     if (manager.expected_request == ANLRequest::quit) {
-      require(calls < 3, "console quit did not stop event processing");
+      require(calls < 3, "console quit did not stop loop processing");
     }
     else {
-      require(calls == 3, "console disturbed event processing");
+      require(calls == 3, "console disturbed loop processing");
     }
   }
   require(manager.finalize_analysis() == AS_OK, "finalization failed");
@@ -148,7 +148,7 @@ int main(int argc, char** argv)
     }
     else if (mode == "index") {
       input = ".i  \r\n";
-      request = ANLRequest::show_event_index;
+      request = ANLRequest::show_loop_index;
     }
     else if (mode == "summary") {
       input = ".s\n";

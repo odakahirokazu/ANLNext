@@ -5,6 +5,11 @@ target_link_libraries(anlnext_evs_manager PRIVATE ANLNext)
 add_test(NAME evs_manager COMMAND anlnext_evs_manager)
 set_tests_properties(evs_manager PROPERTIES TIMEOUT 15)
 
+add_executable(anlnext_loop_index loop_index.cc)
+target_link_libraries(anlnext_loop_index PRIVATE ANLNext)
+add_test(NAME loop_index COMMAND anlnext_loop_index)
+set_tests_properties(loop_index PROPERTIES TIMEOUT 15)
+
 add_executable(anlnext_loop_control loop_control.cc)
 target_link_libraries(anlnext_loop_control PRIVATE ANLNext Threads::Threads)
 foreach(mode serial ordered skip quit quit_all exception anl_exception terminate_exception critical reduce)

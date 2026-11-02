@@ -24,8 +24,8 @@ struct State {
   std::condition_variable cv;
   bool later_started = false;
   std::string mode;
-  std::vector<long> input;
-  std::vector<long> output;
+  std::vector<std::size_t> input;
+  std::vector<std::size_t> output;
 };
 
 class Input : public BasicModule {
@@ -96,8 +96,8 @@ void verify_complete(const State& state, bool skip)
 {
   auto input = state.input;
   std::sort(input.begin(), input.end());
-  std::vector<long> expected_input, expected_output;
-  for (long i = 0; i < 100; ++i) {
+  std::vector<std::size_t> expected_input, expected_output;
+  for (std::size_t i = 0; i < 100; ++i) {
     expected_input.push_back(i);
     if (!skip || i % 2 != 0) { expected_output.push_back(i); }
   }

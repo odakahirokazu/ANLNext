@@ -36,7 +36,7 @@ namespace anlnext
 
 ANLManagerMT::ANLManagerMT(std::size_t num_parallels)
   : num_parallels_(num_parallels),
-    loop_index_(0)
+    next_loop_index_(0)
 {
   set_print_parallel_modules();
 }
@@ -201,31 +201,31 @@ ANLStatus ANLManagerMT::routine_finalize()
   return status;
 }
 
-std::size_t ANLManagerMT::event_index_to_process()
+std::size_t ANLManagerMT::next_loop_index()
 {
   std::lock_guard<std::mutex> lock(mutex_);
 
   const std::size_t period_disp = display_period();
   const std::size_t index_end = number_of_loops();
-  const std::size_t index = loop_index_;
+  const std::size_t loop_index = next_loop_index_;
 
-  if (index >= index_end) {
+  if (loop_index >= index_end) {
     return index_end;
   }
   if (requested_ == ANLRequest::quit) {
     return index_end;
   }
 
-  if (period_disp != 0 && index % period_disp == 0) {
-    print_event_index(index);
+  if (period_disp != 0 && loop_index % period_disp == 0) {
+    print_loop_index(loop_index);
   }
 
-  return loop_index_++;
+  return next_loop_index_++;
 }
 
 ANLStatus ANLManagerMT::process_analysis()
 {
-  loop_index_ = 0;
+  next_loop_index_ = 0;
   for (auto& keeper: order_keepers_) {
     if (keeper) { keeper->reset(); }
   }
@@ -329,10 +329,10 @@ ANLStatus ANLManagerMT::process_analysis_impl(const std::vector<BasicModule*>& m
 
   try {
     while (true) {
-      const std::size_t i_event = event_index_to_process();
-      if (i_event == index_end) { break; }
+      const std::size_t loop_index = next_loop_index();
+      if (loop_index == index_end) { break; }
 
-      status = process_one_event(i_event, modules, counters, evs_manager, order_keepers_);
+      status = process_one_iteration(loop_index, modules, counters, evs_manager, order_keepers_);
       
       if (is_critical_error(status)) {
         cancel_analysis();
@@ -348,11 +348,11 @@ ANLStatus ANLManagerMT::process_analysis_impl(const std::vector<BasicModule*>& m
         if (requested_ == ANLRequest::quit) {
           break;
         }
-        else if (requested_ == ANLRequest::show_event_index) {
-          print_event_index(i_event);
+        else if (requested_ == ANLRequest::show_loop_index) {
+          print_loop_index(loop_index);
         }
         else if (requested_ == ANLRequest::show_evs_summary) {
-          print_event_index(i_event);
+          print_loop_index(loop_index);
           evs_manager_->print_summary();
         }
         requested_ = ANLRequest::none;
@@ -392,11 +392,11 @@ ANLStatus ANLManagerMT::process_analysis_impl(const std::vector<BasicModule*>& m
 ANLStatus ANLManagerMT::reduce_modules()
 {
   ANLStatus status = AS_OK;
-  for (std::size_t i_module=0; i_module<modules_.size(); i_module++) {
-    BasicModule* mod = modules_[i_module];
+  for (std::size_t module_index=0; module_index<modules_.size(); module_index++) {
+    BasicModule* mod = modules_[module_index];
     std::list<BasicModule*> module_list;
     for (const ParallelChain& chain: parallel_chains_) {
-      module_list.push_back(chain.modules_reference()[i_module]);
+      module_list.push_back(chain.modules_reference()[module_index]);
     }
     status = mod->mod_reduce(module_list);
     if (status != AS_OK) {

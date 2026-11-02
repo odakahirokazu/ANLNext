@@ -20,6 +20,8 @@
 #ifndef ANLNEXT_BasicModule_H
 #define ANLNEXT_BasicModule_H 1
 
+#include <cstddef>
+#include <limits>
 #include <string>
 #include <vector>
 #include <utility>
@@ -76,6 +78,8 @@ private:
   virtual BasicModule* __this_ptr__() { return this; }
 
 public:
+  static constexpr std::size_t undefined_loop_index = std::numeric_limits<std::size_t>::max();
+
   BasicModule();
   virtual ~BasicModule();
 
@@ -161,8 +165,8 @@ public:
    */
   bool is_off() const { return !module_on_; }
 
-  void set_loop_index(long int index) { loop_index_ = index; }
-  long int get_loop_index() const { return loop_index_; }
+  void set_loop_index(std::size_t index) { loop_index_ = index; }
+  std::size_t get_loop_index() const { return loop_index_; }
 
   /*
    * Sub module
@@ -221,7 +225,7 @@ private:
   std::vector<std::pair<std::string, ModulePosition>> module_requirements_;
   ModuleAccess::Permission access_permission_ = ModuleAccess::Permission::full_access;
   bool module_on_ = true;
-  long int loop_index_ = -1;
+  std::size_t loop_index_ = undefined_loop_index;
 
   const int copy_id_ = 0;
   int last_copy_ = 0;

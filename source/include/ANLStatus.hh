@@ -71,7 +71,7 @@ constexpr ANLStatus AS_CRITICAL_ERROR_TO_TERMINATE = ANLStatus::critical_error_t
 enum class ANLRequest {
   none,
   quit,
-  show_event_index,
+  show_loop_index,
   show_evs_summary
 };
 

@@ -63,7 +63,7 @@ protected:
   
   ANLStatus process_analysis() override;
   virtual void process_analysis_in_each_thread(std::size_t i_thread, std::promise<ANLStatus> status_promise);
-  virtual std::size_t event_index_to_process();
+  virtual std::size_t next_loop_index();
 
   boost::property_tree::ptree parameters_to_property_tree() const override;
 
@@ -79,7 +79,7 @@ private:
 
 private:
   const std::size_t num_parallels_ = 1;
-  std::size_t loop_index_ = 0;
+  std::size_t next_loop_index_ = 0;
   std::vector<ParallelChain> parallel_chains_;
   std::vector<std::unique_ptr<OrderKeeper>> order_keepers_;
 };

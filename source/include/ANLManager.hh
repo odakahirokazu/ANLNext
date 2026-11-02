@@ -81,7 +81,7 @@ public:
    */
   void set_modules(std::vector<BasicModule*> modules);
 
-  std::size_t number_of_loops() const { return num_events_; }
+  std::size_t number_of_loops() const { return num_loops_; }
 
   void set_display_period(std::size_t v) { display_period_ = v; }
   std::size_t display_period() const;
@@ -94,7 +94,7 @@ public:
   virtual ANLStatus define_analysis();
   virtual ANLStatus pre_initialize_analysis();
   virtual ANLStatus initialize_analysis();
-  virtual ANLStatus run_analysis(std::size_t num_events, bool enable_console=false);
+  virtual ANLStatus run_analysis(std::size_t num_loops, bool enable_console=false);
   virtual ANLStatus finalize_analysis();
 
   virtual std::size_t number_of_parallels() const { return 1; }
@@ -146,7 +146,7 @@ private:
 
 protected:
   bool print_clone_parameters_ = false;
-  std::size_t num_events_ = 0;
+  std::size_t num_loops_ = 0;
   std::vector<BasicModule*> modules_;
   std::vector<LoopCounter> counters_;
   std::unique_ptr<EvsManager> evs_manager_;
@@ -169,22 +169,22 @@ ANLStatus routine_modfn(T func,
                         const std::string& func_id,
                         const std::vector<BasicModule*>& modules);
 
-ANLStatus process_one_event(std::size_t i_event,
-                            const std::vector<BasicModule*>& modules,
-                            std::vector<LoopCounter>& counters,
-                            EvsManager& evs_manager);
+ANLStatus process_one_iteration(std::size_t loop_index,
+                                const std::vector<BasicModule*>& modules,
+                                std::vector<LoopCounter>& counters,
+                                EvsManager& evs_manager);
 
-ANLStatus process_one_event(std::size_t i_event,
-                            const std::vector<BasicModule*>& modules,
-                            std::vector<LoopCounter>& counters,
-                            EvsManager& evs_manager,
-                            std::vector<std::unique_ptr<OrderKeeper>>& order_keepers);
+ANLStatus process_one_iteration(std::size_t loop_index,
+                                const std::vector<BasicModule*>& modules,
+                                std::vector<LoopCounter>& counters,
+                                EvsManager& evs_manager,
+                                std::vector<std::unique_ptr<OrderKeeper>>& order_keepers);
 
 void count_evs(ANLStatus status, EvsManager& evs_manager);
 
-inline void print_event_index(std::size_t index, std::ostream& os=std::cout)
+inline void print_loop_index(std::size_t loop_index, std::ostream& os=std::cout)
 {
-  os << "Index : " << std::setw(12) << index << '\n' << std::flush;
+  os << "Index : " << std::setw(12) << loop_index << '\n' << std::flush;
 }
 
 inline void print_exception(const ANLException& ex, std::ostream& os=std::cout)

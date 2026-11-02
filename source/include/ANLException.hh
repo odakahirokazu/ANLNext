@@ -33,7 +33,7 @@ using ErrorMessage          = boost::error_info<struct tag_ErrorMessage, std::st
 using ErrorInfoOnModuleID   = boost::error_info<struct tag_ErrorModuleID, std::string>;
 using ErrorInfoOnModuleName = boost::error_info<struct tag_ErrorModuleName, std::string>;
 using ErrorInfoOnMethod     = boost::error_info<struct tag_ErrorMethod, std::string>;
-using ErrorInfoOnLoopIndex  = boost::error_info<struct tag_ErrorLoopIndex, int64_t>;
+using ErrorInfoOnLoopIndex  = boost::error_info<struct tag_ErrorLoopIndex, std::size_t>;
 using ErrorInfoOnChainID    = boost::error_info<struct tag_ErrorChainID, int>;
 using ErrorInfoOnParameter  = boost::error_info<struct tag_ErrorParameter, std::string>;
 
