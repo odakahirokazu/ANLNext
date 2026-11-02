@@ -60,6 +60,7 @@ protected:
   void print_parameters() override;
   void print_results() override;
   void reset_counters() override;
+  void prepare_run() override;
   
   ANLStatus process_analysis() override;
   virtual void process_analysis_in_each_thread(std::size_t i_thread, std::promise<ANLStatus> status_promise);

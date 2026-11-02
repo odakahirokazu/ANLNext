@@ -72,6 +72,8 @@ void ParallelChain::reset_counters()
   for (LoopCounter& c: counters_) {
     c.reset();
   }
+  evs_manager_->reset_all_counts();
+  evs_manager_->reset_all_flags();
 }
 
 BasicModule* ParallelChain::access_to_module(const std::string& module_id)

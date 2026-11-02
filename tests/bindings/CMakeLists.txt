@@ -63,6 +63,13 @@ set_tests_properties(vector_parameter_python PROPERTIES TIMEOUT 15
 add_test(NAME definition_status_python COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/definition_status.py)
 set_tests_properties(definition_status_python PROPERTIES TIMEOUT 15
   ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python:${CMAKE_CURRENT_BINARY_DIR}")
+
+add_test(NAME multiple_runs_python COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/multiple_runs.py)
+set_tests_properties(multiple_runs_python PROPERTIES TIMEOUT 15
+  ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python:${CMAKE_CURRENT_BINARY_DIR}")
+add_test(NAME multiple_runs_ruby COMMAND ${Ruby_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/multiple_runs.rb)
+set_tests_properties(multiple_runs_ruby PROPERTIES TIMEOUT 15
+  ENVIRONMENT "RUBYLIB=${CMAKE_CURRENT_BINARY_DIR}/ruby:${CMAKE_CURRENT_BINARY_DIR}")
 add_test(NAME map_parameter_ruby COMMAND ${Ruby_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/map_parameter.rb)
 set_tests_properties(map_parameter_ruby PROPERTIES TIMEOUT 15
   ENVIRONMENT "RUBYLIB=${CMAKE_CURRENT_BINARY_DIR}/ruby:${CMAKE_CURRENT_BINARY_DIR}")

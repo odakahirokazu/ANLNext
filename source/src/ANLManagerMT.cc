@@ -141,6 +141,21 @@ void ANLManagerMT::reset_counters()
   }
 }
 
+void ANLManagerMT::prepare_run()
+{
+  ANLManager::prepare_run();
+  next_loop_index_ = 0;
+  for (auto& keeper: order_keepers_) {
+    if (keeper) { keeper->reset(); }
+  }
+  for (const auto& chain: parallel_chains_) {
+    for (BasicModule* mod: chain.modules_reference()) {
+      mod->set_run_index(run_index());
+      mod->set_loop_index(BasicModule::undefined_loop_index);
+    }
+  }
+}
+
 ANLStatus ANLManagerMT::routine_initialize()
 {
   ANLStatus status = AS_OK;
@@ -225,11 +240,6 @@ std::size_t ANLManagerMT::next_loop_index()
 
 ANLStatus ANLManagerMT::process_analysis()
 {
-  next_loop_index_ = 0;
-  for (auto& keeper: order_keepers_) {
-    if (keeper) { keeper->reset(); }
-  }
-
   std::vector<std::future<ANLStatus>> status_future_vector;
   std::vector<std::thread> analysis_threads(num_parallels_);
   try {

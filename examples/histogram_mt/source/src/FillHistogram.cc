@@ -37,6 +37,12 @@ ANLStatus FillHistogram::mod_initialize()
   return AS_OK;
 }
 
+ANLStatus FillHistogram::mod_begin_run()
+{
+  spectrum_->Reset();
+  return AS_OK;
+}
+
 ANLStatus FillHistogram::mod_analyze()
 {
   const std::vector<double>& energies = event_->energies();

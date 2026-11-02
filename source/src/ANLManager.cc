@@ -188,6 +188,7 @@ ANLStatus ANLManager::initialize_analysis()
 
   show_analysis();
   print_parameters();
+  run_index_ = undefined_run_index;
   reset_counters();
   requested_ = ANLRequest::none;
 
@@ -210,14 +211,21 @@ ANLStatus ANLManager::initialize_analysis()
 
 ANLStatus ANLManager::run_analysis(std::size_t num_loops, bool enable_console)
 {
+  if (run_index_ == undefined_run_index - 1) {
+    std::cerr << "ANLManager: run index limit reached.\n";
+    return AS_CRITICAL_ERROR_TO_TERMINATE;
+  }
+
+  run_index_ = (run_index_ == undefined_run_index) ? 0 : (run_index_ + 1);
+  num_loops_ = num_loops;
+  requested_ = ANLRequest::none;
+  prepare_run();
+
   std::cout << '\n'
             << "        **************************************\n"
             << "        ****        Main Analysis         ****\n"
             << "        **************************************\n"
             << '\n';
-
-  num_loops_ = num_loops;
-  requested_ = ANLRequest::none;
 
   if (num_loops==std::numeric_limits<std::size_t>::max()) {
     std::cout << "Number of loops: " << "max" << '\n';
@@ -459,6 +467,17 @@ void ANLManager::reset_counters()
   counters_.resize(modules_.size());
   for (LoopCounter& c: counters_) {
     c.reset();
+  }
+  evs_manager_->reset_all_counts();
+  evs_manager_->reset_all_flags();
+}
+
+void ANLManager::prepare_run()
+{
+  reset_counters();
+  for (BasicModule* mod: modules_) {
+    mod->set_run_index(run_index_);
+    mod->set_loop_index(BasicModule::undefined_loop_index);
   }
 }
 

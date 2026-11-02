@@ -25,6 +25,7 @@
 #define ANLNEXT_FINALIZE_INTERRUPT 1
 
 #include <cstddef>
+#include <limits>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -63,6 +64,8 @@ class OrderKeeper;
 class ANLManager
 {
 public:
+  static constexpr std::size_t undefined_run_index = std::numeric_limits<std::size_t>::max();
+
   static const int __version1__;
   static const int __version2__;
   static const int __version3__;
@@ -82,6 +85,7 @@ public:
   void set_modules(std::vector<BasicModule*> modules);
 
   std::size_t number_of_loops() const { return num_loops_; }
+  std::size_t run_index() const { return run_index_; }
 
   void set_display_period(std::size_t v) { display_period_ = v; }
   std::size_t display_period() const;
@@ -121,6 +125,7 @@ protected:
   virtual void print_parameters();
   virtual void print_results();
   virtual void reset_counters();
+  virtual void prepare_run();
   virtual ANLStatus process_analysis();
   void print_summary();
 
@@ -155,7 +160,8 @@ protected:
   bool exception_propagation_ = true;
 
 private:
-  std::size_t display_period_ = -1;
+  std::size_t run_index_ = undefined_run_index;
+  std::size_t display_period_ = 0;
   std::unique_ptr<ModuleAccess> module_access_;
   std::atomic<bool> analysis_thread_finished_{false};
 };

@@ -78,6 +78,7 @@ private:
   virtual BasicModule* __this_ptr__() { return this; }
 
 public:
+  static constexpr std::size_t undefined_run_index = std::numeric_limits<std::size_t>::max();
   static constexpr std::size_t undefined_loop_index = std::numeric_limits<std::size_t>::max();
 
   BasicModule();
@@ -165,6 +166,9 @@ public:
    */
   bool is_off() const { return !module_on_; }
 
+  void set_run_index(std::size_t index) { run_index_ = index; }
+  std::size_t get_run_index() const { return run_index_; }
+
   void set_loop_index(std::size_t index) { loop_index_ = index; }
   std::size_t get_loop_index() const { return loop_index_; }
 
@@ -225,6 +229,7 @@ private:
   std::vector<std::pair<std::string, ModulePosition>> module_requirements_;
   ModuleAccess::Permission access_permission_ = ModuleAccess::Permission::full_access;
   bool module_on_ = true;
+  std::size_t run_index_ = undefined_run_index;
   std::size_t loop_index_ = undefined_loop_index;
 
   const int copy_id_ = 0;

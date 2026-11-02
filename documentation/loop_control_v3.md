@@ -83,12 +83,53 @@ master自身を除く各並列チェーンの、同じ位置のModuleをチェ�
 この簡易コンソールではreadline固有の編集・履歴機能を使わない。
 パラメータ設定用の対話入力は従来のままとする。
 
-## 実行制御のリセット
+## 複数回のrun
 
-ワーカーがすべて終了した後、次の解析ループ開始時に番号とOrderKeeperをリセットする。
-これは実行制御のリセットであり、Moduleの状態・資源・解析結果のリセットではない。
-現時点では、一度の初期化から終了処理までに`run_analysis()`を1回呼ぶ使い方を対象とする。
-同じ初期化状態での複数回の実行はサポート対象外とし、将来機能として検討する。
+`define_analysis()`で定義し、`pre_initialize_analysis()`で複製前の初期化を行い、
+その末尾で並列チェーンを複製する。`initialize_analysis()`で各チェーンを初期化した後は、
+同じManager・同じModuleで`run_analysis()`を繰り返せる。
+最後に`finalize_analysis()`を一度呼ぶ。各runでは再定義・再複製・再初期化を行わない。
+
+正常時のrunは次の順序で実行する。
+
+1. 全チェーンのフレームワークの統計・Evsカウント・フラグ・実行制御をリセットする。
+2. 各チェーンの`mod_begin_run()`を呼ぶ。
+3. 解析ループを実行する。
+4. 各チェーンの`mod_end_run()`を呼ぶ。
+5. 並列Moduleの結果を`mod_reduce()`で集約する。
+6. フレームワークの統計とEvsを集約し、表示する。
+
+管理側のrun準備は内部メソッド`prepare_run()`にまとめ、
+`routine_*()`は`routine_modfn()`によるModuleメソッドの呼び出しと、MTでの各チェーンへの適用を担当する。
+`prepare_run()`は新しいModule側のライフサイクルメソッドではない。
+
+処理統計とEvsは各runについて集計し、以前のrunの値は加算しない。
+反復回数が0でもbegin/end/reduceは実行し、フレームワークのカウントは0とする。
+Module固有の状態・資源・入力位置・乱数状態・解析結果は自動リセットしない。
+継続・初期化・累積の扱いはModuleが`mod_begin_run()`・`mod_end_run()`・`mod_reduce()`等で規定する。
+結果を累積する場合も、過去の寄与を再加算しない責任はModule側にある。
+`histogram_mt`の`FillHistogram`は、各runの`mod_begin_run()`でヒストグラムをリセットする例とする。
+
+## Run番号
+
+Managerがloop番号と同じ`std::size_t`のrun番号を保持し、`run_index()`で取得する。
+初期化までの値は`ANLManager::undefined_run_index`（型の最大値）、最初のrunは0とし、run開始時に更新する。
+Moduleでも同じ値の`BasicModule::undefined_run_index`を使う。
+`mod_begin_run()`より前に全チェーンのModuleへ同じ番号を渡し、Moduleは`get_run_index()`で取得する。
+番号は正常完了数ではなく開始したrunを識別するため、begin_runの失敗でも消費する。
+finalize中も最後のrun番号を維持する。複製直後のModuleのrun番号も未設定値とする。
+Ruby/PythonでもManagerの`run_index()`、Moduleの`get_run_index()`と`get_loop_index()`、
+および各クラスの未設定値の定数を利用できる。
+
+各runのloop番号は0から開始し、begin_runの時点では`undefined_loop_index`とする。
+MTで次に割り当てる番号とOrderKeeperも、前回のワーカーが終了した後、begin_runより前にリセットする。
+
+critical statusや送出された例外からの復旧・再runは今回のサポート対象に含めない。
+既存のfinalize/terminate指定と例外伝播の方針を維持する。
+既存の実行制御テストで異常終了後に再実行するのは、制御状態のリセットに限った確認とする。
+
+Ruby/Pythonの上位APIである`AnalysisChain.run()`は、準備からfinalizeまでをまとめる従来の動作を維持する。
+複数runは、初期化済みの`ANLManager`/`ANLManagerMT`の`run_analysis()`を繰り返し呼び出す。
 
 ## 検証
 
@@ -96,7 +137,7 @@ CTestにタイムアウト付きの回帰テストを登録した。
 逐次実行、並列順序、SKIP、無効な順序依存Module、QUIT、QUIT_ALL、
 標準例外、ANL例外のfinalize/terminate指定、critical statusを確認する。
 各経路の後に同じManagerで再実行し、loop番号と順序制御の再開も確認する。
-この確認は実行制御に限り、複数回の実行における統計や解析結果の正しさを保証するものではない。
+正常時の複数runについては別のテストで統計とModuleの結果も確認する。
 例外テストでは、先頭の反復が例外を送出する前に別の反復の開始を待つ。
 コンソールのテストではパイプの書き込み側を開いたままにし、入力なし・入力途中の終了を確認する。
 単一・並列実行の例外伝播、3コマンド、EOFと改行のない最終コマンドも確認する。
@@ -108,26 +149,14 @@ Evsのカウントリセットでは、`counts`と`counts_ok`の両方がゼロ�
 Loop番号は符号付き整数の上限を超える値も含め、逐次・並列用の1反復処理でModuleへの受け渡しと
 例外情報・表示への格納、複製時の未設定値への初期化を確認する。
 
+逐次・MTの1チェーン・MTの複数チェーンについて、異なる回数と0回のrunを繰り返す。
+run番号、loop番号、各段階の呼び出し順、各runの統計・Evs、Moduleの実体と状態の維持を確認する。
+Moduleが結果を毎runリセットする場合と累積する場合を検証し、
+begin_runのcritical statusと例外でも、全チェーンのrun番号更新と統計リセットが先に完了することを確認する。
+Ruby/Pythonからの複数runと番号取得も検証する。
+
 ```sh
 cmake -S . -B build -DBUILD_TESTING=ON
 cmake --build build
 ctest --test-dir build --output-on-failure
 ```
-
-## 将来機能: 複数回の実行
-
-複数回の`run_analysis()`をサポートする場合は、run間の状態、統計、解析結果について、
-継続とリセットの契約を決める。以下はその設計に向けた現行実装の調査結果であり、
-今回の不具合修正には含めない。
-
-- 統計集約。
-  MTの`reduce_statistics()`は、並列チェーンの累積カウンタとEvsをmasterへ毎回加算するため、
-  以前の寄与を二重に集計する。2チェーンで各1回ずつ処理する実験では、
-  `run_analysis(2)`を2回、その後`run_analysis(0)`を実行すると、
-  累積の実処理数は2→4→4だが、統計は2→5→7になった。
-  master自身の統計と集約値の保持方法を整理する必要がある。
-- Moduleの結果集約。
-  `mod_reduce()`は各runの正常な終了処理後に呼ばれるため、
-  並列モジュールの累積結果を単純加算すると以前の寄与が再加算される。
-  `histogram_mt`の`FillHistogram::mod_merge()`も該当する。
-  Moduleが持つ任意の解析データについて、初期化や差分集約の責任を整理する必要がある。

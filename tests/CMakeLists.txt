@@ -10,6 +10,13 @@ target_link_libraries(anlnext_loop_index PRIVATE ANLNext)
 add_test(NAME loop_index COMMAND anlnext_loop_index)
 set_tests_properties(loop_index PROPERTIES TIMEOUT 15)
 
+add_executable(anlnext_multiple_runs multiple_runs.cc)
+target_link_libraries(anlnext_multiple_runs PRIVATE ANLNext Threads::Threads)
+foreach(mode serial mt_single parallel begin_failure begin_exception)
+  add_test(NAME multiple_runs_${mode} COMMAND anlnext_multiple_runs ${mode})
+  set_tests_properties(multiple_runs_${mode} PROPERTIES TIMEOUT 15)
+endforeach()
+
 add_executable(anlnext_loop_control loop_control.cc)
 target_link_libraries(anlnext_loop_control PRIVATE ANLNext Threads::Threads)
 foreach(mode serial ordered skip quit quit_all exception anl_exception terminate_exception critical reduce)

@@ -11,6 +11,9 @@
 using namespace anlnext;
 
 static_assert(std::is_same_v<decltype(BasicModule().get_loop_index()), std::size_t>);
+static_assert(std::is_same_v<decltype(BasicModule().get_run_index()), std::size_t>);
+static_assert(std::is_same_v<decltype(ANLManager().run_index()), std::size_t>);
+static_assert(BasicModule::undefined_run_index == ANLManager::undefined_run_index);
 
 void require(bool condition, const char* message)
 {
@@ -65,7 +68,9 @@ void verify(std::size_t loop_index, bool parallel, bool fail)
   require(counters[0].entry() == 1 && counters[0].ok() == (fail ? 0 : 1),
           "iteration statistics changed");
 
+  module.set_run_index(7);
   auto copy = module.duplicate();
+  require(copy->get_run_index() == BasicModule::undefined_run_index, "copy retained the source run index");
   require(copy->get_loop_index() == BasicModule::undefined_loop_index,
           "copy retained the source loop index");
 }

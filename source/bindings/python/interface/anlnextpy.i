@@ -259,6 +259,9 @@ class BasicSubModule : public ParameterRegistry
 class BasicModule : public ParameterRegistry
 {
  public:
+  static const std::size_t undefined_run_index;
+  static const std::size_t undefined_loop_index;
+
   BasicModule();
   virtual ~BasicModule();
 
@@ -269,6 +272,9 @@ class BasicModule : public ParameterRegistry
   
   void set_module_id(const std::string& v);
   std::string module_id() const;
+
+  std::size_t get_run_index() const;
+  std::size_t get_loop_index() const;
 
   int copy_id() const;
   bool is_master() const;
@@ -315,6 +321,8 @@ class BasicModule : public ParameterRegistry
 class ANLManager
 {
  public:
+  static const std::size_t undefined_run_index;
+
   ANLManager();
   virtual ~ANLManager();
   
@@ -326,6 +334,8 @@ class ANLManager
       SWIG_exception(SWIG_RuntimeError, ex.to_string().c_str());
     }
   }
+
+  std::size_t run_index() const;
 
   void set_display_period(std::size_t v);
   std::size_t display_period() const;
