@@ -42,60 +42,30 @@ class ModuleParameter<std::vector<std::tuple<Ts...>>> : public VModuleParameter
   using iter_type = typename container_type::iterator;
   using const_iter_type = typename container_type::const_iterator;
   using value_category = typename size_of_value<value_type>::type;
- 
+
   constexpr static std::size_t value_size = size_of_value<value_type>::value;
   using  ValueEnd_t = std::integral_constant<std::size_t, value_size>;
 
 public:
-  ModuleParameter(const std::string& name, container_type* ptr)
-    : VModuleParameter(name), ptr_(ptr), first_input_(true)
-  {
-  }
-  
-  ModuleParameter(const std::string& name, container_type* ptr,
-                  const std::vector<ModuleParam_sptr>& values_info)
-    : VModuleParameter(name), ptr_(ptr),
-      value_info_(values_info),
-      first_input_(true)
-  {
-  }
+  ModuleParameter(const std::string& name, container_type* ptr);
 
-  std::shared_ptr<VModuleParameter> clone() override
-  { return std::shared_ptr<VModuleParameter>(new ModuleParameter(*this)); }
+  ModuleParameter(const std::string& name, container_type* ptr,
+                  const std::vector<ModuleParam_sptr>& values_info);
+
+  std::shared_ptr<VModuleParameter> clone() override;
 
 protected:
-  ModuleParameter(const ModuleParameter& r)
-    : VModuleParameter(r),
-      ptr_(r.ptr_),
-      default_value_(r.default_value_),
-      first_input_(r.first_input_)
-  {
-    value_info_.clear();
-    for (ModuleParam_sptr p: r.value_info_) {
-      value_info_.push_back(p->clone());
-    }
-  }
+  ModuleParameter(const ModuleParameter& r);
 
 public:
   std::string type_name() const override
   { return "record_vector"; }
 
-  void output(std::ostream& os) const override
-  {
-    os << '\n';
-    std::size_t index = 0;
-    for (const_iter_type it=__ref__().begin(); it!=__ref__().end(); ++it) {
-      os << "  index: " << index++ << '\n';
-      for (const auto& element: make_parameters_with_values(value_info_, *it)) {
-        os << "    "; element->print(os); os << '\n';
-      }
-    }
-    os.flush();
-  }
-  
+  void output(std::ostream& os) const override;
+
   void input(std::istream&) override
   {}
-  
+
   std::size_t num_value_elements() const override
   { return value_info_.size(); }
   std::shared_ptr<VModuleParameter const> value_element_info(std::size_t index) const override
@@ -110,32 +80,14 @@ public:
   void clear_container() override
   { __ref__().clear(); }
 
-  void insert_to_container() override
-  {
-    if (first_input()) { initialize_default_value_elements(); }
-    value_type t;
-    value_info_get<0>(&t, value_category());
-    __ref__().push_back(t);
-    
-    value_info_set<0>(&default_value_, value_category());
-  }
+  void insert_to_container() override;
 
-  void retrieve_from_container(std::size_t index) const override
-  {
-    value_type value = __ref__().at(index);
-    value_info_set<0>(&value, value_category());
-  }
+  void retrieve_from_container(std::size_t index) const override;
   using VModuleParameter::retrieve_from_container;
 
-  std::vector<ModuleParam_sptr> value_elements_from_container(std::size_t index) const override
-  {
-    if (index >= __ref__().size()) {
-      BOOST_THROW_EXCEPTION(ParameterError(this, "Record vector index is out of range."));
-    }
-    return make_parameters_with_values(value_info_, __ref__().at(index));
-  }
+  std::vector<ModuleParam_sptr> value_elements_from_container(std::size_t index) const override;
   using VModuleParameter::value_elements_from_container;
-  
+
   void set_value_element(const std::string& name, bool val) override
   { set_value_element_impl(name, val); }
 
@@ -150,7 +102,7 @@ public:
 
   bool get_value_element(const std::string& name, bool dummy) const override
   { return get_value_element_impl(name, dummy); }
-  
+
   int get_value_element(const std::string& name, int dummy) const override
   { return get_value_element_impl(name, dummy); }
 
@@ -160,201 +112,66 @@ public:
   std::string get_value_element(const std::string& name, const std::string& dummy) const override
   { return get_value_element_impl(name, dummy); }
 
-  bool ask() override
-  {
-    std::cout << "Define table of " << name() << ":" << std::endl;
-    std::string buffer = "";
-    ModuleParameter<std::string> key_param("continue", &buffer);
-    key_param.set_question(name()+" | break => '!' | keep -> '='");
-    
-    container_type container;
-    if (first_input()) { initialize_default_value_elements(); }
+  bool ask() override;
 
-    while (true) {
-      key_param.ask();
-      if (buffer=="=") { return false; }
-      if (buffer=="!") { break; }
-      
-      value_info_set<0>(&default_value_, value_category());
-      
-      const std::size_t num_values = value_info_.size();
-      for (std::size_t i=0; i<num_values; ++i) {
-        value_info_[i]->ask();
-      }
-      
-      value_type t;
-      value_info_get<0>(&t, value_category());
-      container.push_back(t);
-    }
-
-    __ref__() = std::move(container);
-    return true;
-  }
-
-  boost::property_tree::ptree to_property_tree() const override
-  {
-    using boost::property_tree::ptree;
-    ptree pt;
-    pt.put("name", name());
-    pt.put("type", type_name());
-
-    ptree pt_values;
-    const std::size_t n = size_of_container();
-    for (std::size_t i=0; i<n; i++) {
-      ptree pt_value;
-      for (const auto& element: value_elements_from_container(i)) {
-        ptree pt_element = element->to_property_tree();
-        pt_value.push_back(std::make_pair("", std::move(pt_element))); 
-      }
-      pt_values.push_back(std::make_pair("", std::move(pt_value)));
-    }
-    pt.add_child("value", std::move(pt_values));
-    return pt;
-  }
+  boost::property_tree::ptree to_property_tree() const override;
 
 protected:
   virtual container_type& __ref__() { return *ptr_; }
   virtual const container_type& __ref__() const { return *ptr_; }
 
-  void set_module_pointer_of_value_info(ParameterRegistry* o) override
-  {
-    for (ModuleParam_sptr& element: value_info_) {
-      element->set_module_pointer(o);
-    }
-  }
+  void set_module_pointer_of_value_info(ParameterRegistry* o) override;
 
 private:
-  bool first_input()
-  {
-    if (first_input_) {
-      first_input_ = false;
-      return true;
-    }
-    return false;
-  }
+  bool first_input();
 
-  void initialize_default_value_elements()
-  {
-    value_info_get<0>(&default_value_, value_category());
-  }
+  void initialize_default_value_elements();
 
   template <std::size_t index>
-  void value_info_set(value_type* pval, value_category_scalar) const
-  {
-    value_info_[0]->__set__(pval);
-  }
+  void value_info_set(value_type* pval, value_category_scalar) const;
 
   template <std::size_t index>
-  void value_info_set(value_type* pval, value_category_pair) const
-  {
-    value_info_[0]->__set__(&(pval->first));
-    value_info_[1]->__set__(&(pval->second));
-  }
-  
+  void value_info_set(value_type* pval, value_category_pair) const;
+
   template <std::size_t index>
-  void value_info_set(value_type* pval, value_category_tuple) const
-  {
-    using Index_t = std::integral_constant<std::size_t, index>;
-    value_info_set<index>(pval, value_category_tuple(), Index_t());
-  }
+  void value_info_set(value_type* pval, value_category_tuple) const;
 
   template <std::size_t index>
   void value_info_set(value_type* pval, value_category_tuple,
-                      std::integral_constant<std::size_t, index>) const
-  {
-    value_info_[index]->__set__(&(std::get<index>(*pval)));
-    using NextIndex_t = std::integral_constant<std::size_t, index+1>;
-    value_info_set<index+1>(pval, value_category_tuple(), NextIndex_t());
-  }
+                      std::integral_constant<std::size_t, index>) const;
 
   template <std::size_t index>
   void value_info_set(value_type*, value_category_tuple,
-                      ValueEnd_t) const
-  {
-  }
+                      ValueEnd_t) const;
 
   template <std::size_t index>
-  void value_info_get(value_type* pval, value_category_scalar) const
-  {
-    value_info_[0]->__get__(pval);
-  }
+  void value_info_get(value_type* pval, value_category_scalar) const;
 
   template <std::size_t index>
-  void value_info_get(value_type* pval, value_category_pair) const
-  {
-    value_info_[0]->__get__(&(pval->first));
-    value_info_[1]->__get__(&(pval->second));
-  }
-  
+  void value_info_get(value_type* pval, value_category_pair) const;
+
   template <std::size_t index>
-  void value_info_get(value_type* pval, value_category_tuple) const
-  {
-    using Index_t = std::integral_constant<std::size_t, index>;
-    value_info_get<index>(pval, value_category_tuple(), Index_t());
-  }
+  void value_info_get(value_type* pval, value_category_tuple) const;
 
   template <std::size_t index>
   void value_info_get(value_type* pval, value_category_tuple,
-                      std::integral_constant<std::size_t, index>) const
-  {
-    value_info_[index]->__get__(&(std::get<index>(*pval)));
-    using NextIndex_t = std::integral_constant<std::size_t, index+1>;
-    value_info_get<index+1>(pval, value_category_tuple(), NextIndex_t());
-  }
+                      std::integral_constant<std::size_t, index>) const;
 
   template <std::size_t index>
   void value_info_get(value_type*, value_category_tuple,
-                      ValueEnd_t) const
-  {
-  }
+                      ValueEnd_t) const;
 
-  template <typename ValueT>
-  void set_value_element_impl(const std::string& name, ValueT val)
-  {
-    if (first_input()) { initialize_default_value_elements(); }
+  template <typename ElementType>
+  void set_value_element_impl(const std::string& name, ElementType val);
 
-    auto it = find_value_info(name);
-    (*it)->set_value(val);
-  }
-
-  template <typename ValueT>
-  ValueT get_value_element_impl(const std::string& name, ValueT dummy) const
-  {
-    auto it = find_value_info(name);
-    return (*it)->get_value(dummy);
-  }
+  template <typename ElementType>
+  ElementType get_value_element_impl(const std::string& name, ElementType dummy) const;
 
   std::vector<ModuleParam_sptr>::iterator
-  find_value_info(const std::string& name)
-  {
-    std::vector<ModuleParam_sptr>::iterator it = std::begin(value_info_);
-    for (; it!=std::end(value_info_); ++it) {
-      if ((*it)->name()==name) {
-        return it;
-      }
-    }
-
-    if (it == std::end(value_info_)) {
-      BOOST_THROW_EXCEPTION( ParameterError(this, (boost::format("Value element is not found: %s") % name).str()) );
-    }
-    return it;
-  }
+  find_value_info(const std::string& name);
 
   std::vector<ModuleParam_sptr>::const_iterator
-  find_value_info(const std::string& name) const
-  {
-    std::vector<ModuleParam_sptr>::const_iterator it = std::begin(value_info_);
-    for (; it!=std::end(value_info_); ++it) {
-      if ((*it)->name()==name) {
-        return it;
-      }
-    }
-
-    if (it == std::end(value_info_)) {
-      BOOST_THROW_EXCEPTION( ParameterError(this, (boost::format("Value element is not found: %s") % name).str()) );
-    }
-    return it;
-  }
+  find_value_info(const std::string& name) const;
 
 private:
   container_type* ptr_;
@@ -362,5 +179,298 @@ private:
   std::vector<ModuleParam_sptr> value_info_;
   bool first_input_;
 };
+
+template <typename... Ts>
+ModuleParameter<std::vector<std::tuple<Ts...>>>::ModuleParameter(const std::string& name, container_type* ptr)
+  : VModuleParameter(name), ptr_(ptr), first_input_(true)
+{
+}
+
+template <typename... Ts>
+ModuleParameter<std::vector<std::tuple<Ts...>>>::ModuleParameter(const std::string& name, container_type* ptr,
+                                                                 const std::vector<ModuleParam_sptr>& values_info)
+  : VModuleParameter(name), ptr_(ptr),
+    value_info_(values_info),
+    first_input_(true)
+{
+}
+
+template <typename... Ts>
+std::shared_ptr<VModuleParameter> ModuleParameter<std::vector<std::tuple<Ts...>>>::clone()
+{ return std::shared_ptr<VModuleParameter>(new ModuleParameter(*this)); }
+
+template <typename... Ts>
+ModuleParameter<std::vector<std::tuple<Ts...>>>::ModuleParameter(const ModuleParameter& r)
+  : VModuleParameter(r),
+    ptr_(r.ptr_),
+    default_value_(r.default_value_),
+    first_input_(r.first_input_)
+{
+  value_info_.clear();
+  for (ModuleParam_sptr p: r.value_info_) {
+    value_info_.push_back(p->clone());
+  }
+}
+
+template <typename... Ts>
+void ModuleParameter<std::vector<std::tuple<Ts...>>>::output(std::ostream& os) const
+{
+  os << '\n';
+  std::size_t index = 0;
+  for (const_iter_type it=__ref__().begin(); it!=__ref__().end(); ++it) {
+    os << "  index: " << index++ << '\n';
+    for (const auto& element: make_parameters_with_values(value_info_, *it)) {
+      os << "    "; element->print(os); os << '\n';
+    }
+  }
+  os.flush();
+}
+
+template <typename... Ts>
+void ModuleParameter<std::vector<std::tuple<Ts...>>>::insert_to_container()
+{
+  if (first_input()) { initialize_default_value_elements(); }
+  value_type t;
+  value_info_get<0>(&t, value_category());
+  __ref__().push_back(t);
+
+  value_info_set<0>(&default_value_, value_category());
+}
+
+template <typename... Ts>
+void ModuleParameter<std::vector<std::tuple<Ts...>>>::retrieve_from_container(std::size_t index) const
+{
+  value_type value = __ref__().at(index);
+  value_info_set<0>(&value, value_category());
+}
+
+template <typename... Ts>
+std::vector<ModuleParam_sptr>
+ModuleParameter<std::vector<std::tuple<Ts...>>>::value_elements_from_container(std::size_t index) const
+{
+  if (index >= __ref__().size()) {
+    BOOST_THROW_EXCEPTION(ParameterError(this, "Record vector index is out of range."));
+  }
+  return make_parameters_with_values(value_info_, __ref__().at(index));
+}
+
+template <typename... Ts>
+bool ModuleParameter<std::vector<std::tuple<Ts...>>>::ask()
+{
+  std::cout << "Define table of " << name() << ":" << std::endl;
+  std::string buffer = "";
+  ModuleParameter<std::string> key_param("continue", &buffer);
+  key_param.set_question(name()+" | break => '!' | keep -> '='");
+
+  container_type container;
+  if (first_input()) { initialize_default_value_elements(); }
+
+  while (true) {
+    key_param.ask();
+    if (buffer=="=") { return false; }
+    if (buffer=="!") { break; }
+
+    value_info_set<0>(&default_value_, value_category());
+
+    const std::size_t num_values = value_info_.size();
+    for (std::size_t i=0; i<num_values; ++i) {
+      value_info_[i]->ask();
+    }
+
+    value_type t;
+    value_info_get<0>(&t, value_category());
+    container.push_back(t);
+  }
+
+  __ref__() = std::move(container);
+  return true;
+}
+
+template <typename... Ts>
+boost::property_tree::ptree ModuleParameter<std::vector<std::tuple<Ts...>>>::to_property_tree() const
+{
+  using boost::property_tree::ptree;
+  ptree pt;
+  pt.put("name", name());
+  pt.put("type", type_name());
+
+  ptree pt_values;
+  const std::size_t n = size_of_container();
+  for (std::size_t i=0; i<n; i++) {
+    ptree pt_value;
+    for (const auto& element: value_elements_from_container(i)) {
+      ptree pt_element = element->to_property_tree();
+      pt_value.push_back(std::make_pair("", std::move(pt_element)));
+    }
+    pt_values.push_back(std::make_pair("", std::move(pt_value)));
+  }
+  pt.add_child("value", std::move(pt_values));
+  return pt;
+}
+
+template <typename... Ts>
+void ModuleParameter<std::vector<std::tuple<Ts...>>>::set_module_pointer_of_value_info(ParameterRegistry* o)
+{
+  for (ModuleParam_sptr& element: value_info_) {
+    element->set_module_pointer(o);
+  }
+}
+
+template <typename... Ts>
+bool ModuleParameter<std::vector<std::tuple<Ts...>>>::first_input()
+{
+  if (first_input_) {
+    first_input_ = false;
+    return true;
+  }
+  return false;
+}
+
+template <typename... Ts>
+void ModuleParameter<std::vector<std::tuple<Ts...>>>::initialize_default_value_elements()
+{
+  value_info_get<0>(&default_value_, value_category());
+}
+
+template <typename... Ts>
+template <std::size_t index>
+void
+ModuleParameter<std::vector<std::tuple<Ts...>>>::value_info_set(value_type* pval, value_category_scalar) const
+{
+  value_info_[0]->__set__(pval);
+}
+
+template <typename... Ts>
+template <std::size_t index>
+void
+ModuleParameter<std::vector<std::tuple<Ts...>>>::value_info_set(value_type* pval, value_category_pair) const
+{
+  value_info_[0]->__set__(&(pval->first));
+  value_info_[1]->__set__(&(pval->second));
+}
+
+template <typename... Ts>
+template <std::size_t index>
+void
+ModuleParameter<std::vector<std::tuple<Ts...>>>::value_info_set(value_type* pval, value_category_tuple) const
+{
+  using Index_t = std::integral_constant<std::size_t, index>;
+  value_info_set<index>(pval, value_category_tuple(), Index_t());
+}
+
+template <typename... Ts>
+template <std::size_t index>
+void ModuleParameter<std::vector<std::tuple<Ts...>>>::value_info_set(value_type* pval, value_category_tuple,
+                                                                     std::integral_constant<std::size_t, index>) const
+{
+  value_info_[index]->__set__(&(std::get<index>(*pval)));
+  using NextIndex_t = std::integral_constant<std::size_t, index+1>;
+  value_info_set<index+1>(pval, value_category_tuple(), NextIndex_t());
+}
+
+template <typename... Ts>
+template <std::size_t index>
+void ModuleParameter<std::vector<std::tuple<Ts...>>>::value_info_set(value_type*, value_category_tuple,
+                                                                     ValueEnd_t) const
+{
+}
+
+template <typename... Ts>
+template <std::size_t index>
+void
+ModuleParameter<std::vector<std::tuple<Ts...>>>::value_info_get(value_type* pval, value_category_scalar) const
+{
+  value_info_[0]->__get__(pval);
+}
+
+template <typename... Ts>
+template <std::size_t index>
+void
+ModuleParameter<std::vector<std::tuple<Ts...>>>::value_info_get(value_type* pval, value_category_pair) const
+{
+  value_info_[0]->__get__(&(pval->first));
+  value_info_[1]->__get__(&(pval->second));
+}
+
+template <typename... Ts>
+template <std::size_t index>
+void
+ModuleParameter<std::vector<std::tuple<Ts...>>>::value_info_get(value_type* pval, value_category_tuple) const
+{
+  using Index_t = std::integral_constant<std::size_t, index>;
+  value_info_get<index>(pval, value_category_tuple(), Index_t());
+}
+
+template <typename... Ts>
+template <std::size_t index>
+void ModuleParameter<std::vector<std::tuple<Ts...>>>::value_info_get(value_type* pval, value_category_tuple,
+                                                                     std::integral_constant<std::size_t, index>) const
+{
+  value_info_[index]->__get__(&(std::get<index>(*pval)));
+  using NextIndex_t = std::integral_constant<std::size_t, index+1>;
+  value_info_get<index+1>(pval, value_category_tuple(), NextIndex_t());
+}
+
+template <typename... Ts>
+template <std::size_t index>
+void ModuleParameter<std::vector<std::tuple<Ts...>>>::value_info_get(value_type*, value_category_tuple,
+                                                                     ValueEnd_t) const
+{
+}
+
+template <typename... Ts>
+template <typename ElementType>
+void
+ModuleParameter<std::vector<std::tuple<Ts...>>>::set_value_element_impl(const std::string& name, ElementType val)
+{
+  if (first_input()) { initialize_default_value_elements(); }
+
+  auto it = find_value_info(name);
+  (*it)->set_value(val);
+}
+
+template <typename... Ts>
+template <typename ElementType>
+ElementType
+ModuleParameter<std::vector<std::tuple<Ts...>>>::get_value_element_impl(
+  const std::string& name, ElementType dummy) const
+{
+  auto it = find_value_info(name);
+  return (*it)->get_value(dummy);
+}
+
+template <typename... Ts>
+std::vector<ModuleParam_sptr>::iterator
+ModuleParameter<std::vector<std::tuple<Ts...>>>::find_value_info(const std::string& name)
+{
+  std::vector<ModuleParam_sptr>::iterator it = std::begin(value_info_);
+  for (; it!=std::end(value_info_); ++it) {
+    if ((*it)->name()==name) {
+      return it;
+    }
+  }
+
+  if (it == std::end(value_info_)) {
+    BOOST_THROW_EXCEPTION( ParameterError(this, (boost::format("Value element is not found: %s") % name).str()) );
+  }
+  return it;
+}
+
+template <typename... Ts>
+std::vector<ModuleParam_sptr>::const_iterator
+ModuleParameter<std::vector<std::tuple<Ts...>>>::find_value_info(const std::string& name) const
+{
+  std::vector<ModuleParam_sptr>::const_iterator it = std::begin(value_info_);
+  for (; it!=std::end(value_info_); ++it) {
+    if ((*it)->name()==name) {
+      return it;
+    }
+  }
+
+  if (it == std::end(value_info_)) {
+    BOOST_THROW_EXCEPTION( ParameterError(this, (boost::format("Value element is not found: %s") % name).str()) );
+  }
+  return it;
+}
 
 } /* namespace anlnext */

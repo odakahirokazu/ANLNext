@@ -25,30 +25,20 @@ namespace anlnext
 /**
  * A class template for a module parameter with an owned value.
  * @author Hirokazu Odaka
- * @date 2026-07-29 | 
+ * @date 2026-07-29 |
  */
 template <typename T>
 class ModuleParameterUnique : public ModuleParameter<T>
 {
 public:
-  ModuleParameterUnique(const std::string& name, T value)
-    : ModuleParameter<T>(name, nullptr),
-      owned_ptr_(std::make_unique<T>(value))
-  {}
+  ModuleParameterUnique(const std::string& name, T value);
 
-  ModuleParameterUnique(const ModuleParameter<T>& definition, const T& value)
-    : ModuleParameter<T>(definition),
-      owned_ptr_(std::make_unique<T>(value))
-  {}
-  
-  std::shared_ptr<VModuleParameter> clone() override
-  { return std::shared_ptr<VModuleParameter>(new ModuleParameterUnique(*this)); }
+  ModuleParameterUnique(const ModuleParameter<T>& definition, const T& value);
+
+  std::shared_ptr<VModuleParameter> clone() override;
 
 protected:
-  ModuleParameterUnique(const ModuleParameterUnique& r)
-    : ModuleParameter<T>(r),
-      owned_ptr_(std::make_unique<T>(r.__ref__()))
-  {}
+  ModuleParameterUnique(const ModuleParameterUnique& r);
 
   T& __ref__() override { return *owned_ptr_; }
   const T& __ref__() const override { return *owned_ptr_; }
@@ -56,6 +46,28 @@ protected:
 private:
   std::unique_ptr<T> owned_ptr_;
 };
+
+template <typename T>
+ModuleParameterUnique<T>::ModuleParameterUnique(const std::string& name, T value)
+  : ModuleParameter<T>(name, nullptr),
+    owned_ptr_(std::make_unique<T>(value))
+{}
+
+template <typename T>
+ModuleParameterUnique<T>::ModuleParameterUnique(const ModuleParameter<T>& definition, const T& value)
+  : ModuleParameter<T>(definition),
+    owned_ptr_(std::make_unique<T>(value))
+{}
+
+template <typename T>
+std::shared_ptr<VModuleParameter> ModuleParameterUnique<T>::clone()
+{ return std::shared_ptr<VModuleParameter>(new ModuleParameterUnique(*this)); }
+
+template <typename T>
+ModuleParameterUnique<T>::ModuleParameterUnique(const ModuleParameterUnique& r)
+  : ModuleParameter<T>(r),
+    owned_ptr_(std::make_unique<T>(r.__ref__()))
+{}
 
 template <typename T>
 ModuleParam_sptr make_parameter_with_value(const VModuleParameter& definition, const T& value)
