@@ -21,6 +21,8 @@ foreach(language python ruby)
 endforeach()
 target_include_directories(submodule_python SYSTEM PRIVATE ${Python3_INCLUDE_DIRS})
 target_link_libraries(submodule_python PRIVATE Python3::Python)
+target_compile_options(submodule_python PRIVATE
+  $<$<COMPILE_LANG_AND_ID:CXX,AppleClang,Clang>:-Wno-unused-parameter>)
 target_include_directories(submodule_ruby SYSTEM PRIVATE ${Ruby_INCLUDE_DIRS})
 target_link_libraries(submodule_ruby PRIVATE ${Ruby_LIBRARIES})
 set_target_properties(submodule_ruby PROPERTIES PREFIX "")
