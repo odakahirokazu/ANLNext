@@ -369,7 +369,7 @@ class ANLManager
   virtual ANLStatus define_analysis();
   virtual ANLStatus pre_initialize_analysis();
   virtual ANLStatus initialize_analysis();
-  virtual ANLStatus run_analysis(std::size_t num_loops, bool enable_console=true);
+  virtual ANLStatus run_analysis(std::size_t num_loops, bool enable_console=false);
   virtual ANLStatus finalize_analysis();
 
   virtual std::size_t number_of_parallels() const;
