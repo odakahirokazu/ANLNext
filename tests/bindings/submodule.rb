@@ -31,8 +31,8 @@ chain.with_parameters do |mod|
   mod.set_submodule_by_key('algorithm', 'multiply')
   algorithm = mod.get_submodule('algorithm')
   raise unless value(algorithm, 'factor') == 2
-  algorithm.set_parameter_integer('factor', 7)
 end
+chain.with_parameters("algorithm.factor": 7)
 chain.with_parameters(input: 4)
 chain.modify do |c|
   3.times do |index|

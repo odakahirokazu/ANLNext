@@ -23,7 +23,7 @@ ANLStatus SubmoduleExample::mod_define()
 {
   define_parameter("input", &SubmoduleExample::input_);
   define_parameter("result", &SubmoduleExample::result_);
-  define_submodule("algorithm");
+  define_submodule("algorithm", &SubmoduleExample::algorithm_);
   define_submodule("optional");
   return AS_OK;
 }
@@ -41,9 +41,8 @@ ANLStatus SubmoduleExample::mod_initialize()
 
 ANLStatus SubmoduleExample::mod_analyze()
 {
-  auto& algorithm = dynamic_cast<ExampleAlgorithm&>(*get_submodule("algorithm"));
   reset_evs("algorithm_used");
-  result_ = algorithm.calculate(input_, this);
+  result_ = algorithm_->calculate(input_, this);
   if (!evs("algorithm_used")) {
     throw ANLException("Submodule Evs is connected to another chain");
   }

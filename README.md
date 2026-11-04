@@ -22,7 +22,8 @@ News
 
 **released on X**
 
-- **submodule**: A module can have submodules, and each submodule has parameter registry system 
+- **submodule**: A module can have submodules, and each submodule has parameter registry system.
+  See the [submodule example](examples/submodule/README.md) for selection, parameter setting, display, and value retrieval in Ruby and Python.
 
 
 ### Version 2.3

@@ -242,7 +242,7 @@ module ANL
       @methods_to_play << m
     end
 
-    [:with_parameters, :with, :push_to_vector, :insert_to_map].each do |m|
+    [:with_parameters, :with, :with_submodule, :push_to_vector, :insert_to_map].each do |m|
       define_method(m) do |*args, &block|
         keep_method(m, args, &block)
       end

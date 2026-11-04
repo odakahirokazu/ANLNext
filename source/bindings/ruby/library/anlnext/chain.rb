@@ -74,7 +74,7 @@ module ANL
       :push, :insert, :insert_before, :insert_after, :chain,
       :expose_module, :get_module, :get_parallel_module, :index, :rindex,
       :insert_to_map, :push_to_vector,
-      :set_parameters, :with_parameters, :chain_with_parameters,
+      :set_parameters, :with_parameters, :with_submodule, :chain_with_parameters,
       :modify, :modify_parameters,
       :define, :load_all_parameters,
       :print_all_parameters, :parameters_to_object, :make_doc,
@@ -362,59 +362,7 @@ module ANL
     # @param value value to be set.
     #
     def set_parameter(name, value)
-      mod = @current_module
-
-      parameter_setter =
-        if value.is_a? Hash
-          lambda do
-            if mod.get_parameter(name).type_name() == 'record_map'
-              value.each do |key, elements|
-                elements = [elements] unless elements.is_a?(Array)
-                mod.insert_to_map(name.to_s, key.to_s) do |registry|
-                  elements.each_with_index do |element, index|
-                    element_name = registry.get_parameter(name).value_element_name(index)
-                    registry.set_value_element(element_name, element)
-                  end
-                end
-              end
-            else
-              mod.set_parameter(name, value)
-            end
-          end
-        elsif value.is_a? Vector
-          if value.z
-            lambda{ mod.set_parameter(name, value.x, value.y, value.z) }
-          else
-            lambda{ mod.set_parameter(name, value.x, value.y) }
-          end
-        elsif value.is_a? Array
-          if value.empty?
-            lambda{ mod.clear_array(name) }
-          else
-            f = value.first
-            if f.is_a? String
-              lambda{ mod.set_parameter_vector_str(name, value) }
-            elsif f.is_a? Float
-              lambda{ mod.set_parameter_vector_d(name, value) }
-            elsif f.is_a? Integer
-              lambda{ mod.set_parameter_vector_i(name, value) }
-            else
-              raise "AnalysisChain#set_parameter(): type invalid (Array of *)."
-            end
-          end
-        else
-          if value.is_a? Integer
-            lambda do
-              if mod.get_parameter(name).type_name() == 'unsigned_integer'
-                mod.set_parameter_unsigned_integer(name, value)
-              else
-                mod.set_parameter_integer(name, value)
-              end
-            end
-          else
-            lambda{ mod.set_parameter(name, value) }
-          end
-        end
+      parameter_setter = parameter_setter_for(@current_module, name, value)
 
       if self.definition_already_done?
         parameter_setter.call
@@ -423,6 +371,72 @@ module ANL
       end
 
       return
+    end
+
+    private def parameter_setter_for(mod, name, value)
+      name = name.to_s
+      if name.include?('.')
+        parts = name.split('.', -1)
+        unless parts.size == 2 && parts.none?(&:empty?)
+          raise ArgumentError, "Invalid submodule parameter path: #{name}"
+        end
+        submodule_name, parameter_name = parts
+        return lambda do
+          submodule = mod.get_submodule(submodule_name)
+          parameter_setter_for(submodule, parameter_name, value).call
+        end
+      end
+
+      if value.is_a? Hash
+        lambda do
+          if mod.get_parameter(name).type_name() == 'record_map'
+            value.each do |key, elements|
+              elements = [elements] unless elements.is_a?(Array)
+              mod.insert_to_map(name.to_s, key.to_s) do |registry|
+                elements.each_with_index do |element, index|
+                  element_name = registry.get_parameter(name).value_element_name(index)
+                  registry.set_value_element(element_name, element)
+                end
+              end
+            end
+          else
+            mod.set_parameter(name, value)
+          end
+        end
+      elsif value.is_a? Vector
+        if value.z
+          lambda{ mod.set_parameter(name, value.x, value.y, value.z) }
+        else
+          lambda{ mod.set_parameter(name, value.x, value.y) }
+        end
+      elsif value.is_a? Array
+        if value.empty?
+          lambda{ mod.clear_array(name) }
+        else
+          f = value.first
+          if f.is_a? String
+            lambda{ mod.set_parameter_vector_str(name, value) }
+          elsif f.is_a? Float
+            lambda{ mod.set_parameter_vector_d(name, value) }
+          elsif f.is_a? Integer
+            lambda{ mod.set_parameter_vector_i(name, value) }
+          else
+            raise "AnalysisChain#set_parameter(): type invalid (Array of *)."
+          end
+        end
+      else
+        if value.is_a? Integer
+          lambda do
+            if mod.get_parameter(name).type_name() == 'unsigned_integer'
+              mod.set_parameter_unsigned_integer(name, value)
+            else
+              mod.set_parameter_integer(name, value)
+            end
+          end
+        else
+          lambda{ mod.set_parameter(name, value) }
+        end
+      end
     end
 
     # Set a map-type parameter of the current module.
@@ -549,6 +563,12 @@ module ANL
     end
 
     alias :with :with_parameters
+
+    def with_submodule(name, key)
+      with_parameters do |mod|
+        mod.set_submodule_by_key(name.to_s, key.to_s)
+      end
+    end
 
     # Utility method to push ANL module and then set parameters.
     #

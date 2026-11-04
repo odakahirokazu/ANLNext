@@ -72,9 +72,98 @@ public:
   }
 };
 
+class BindingBase : public BasicModule {
+public:
+  Algorithm* algorithm = nullptr;
+};
+
+class BoundParent : public BindingBase {
+  DEFINE_ANL_MODULE(BoundParent, 1.0);
+  ENABLE_PARALLEL_RUN();
+public:
+  using BasicModule::define_submodule;
+  using BasicModule::set_submodule;
+  ANLStatus mod_define() override
+  {
+    define_submodule("algorithm", &BindingBase::algorithm);
+    define_submodule("optional", &BoundParent::optional);
+    define_submodule("base", &BoundParent::base);
+    return AS_OK;
+  }
+  Algorithm* optional = nullptr;
+  BasicSubModule* base = nullptr;
+};
+
+class OtherOwner : public BasicModule {
+public:
+  Algorithm* algorithm = nullptr;
+};
+
+void verify_member_binding()
+{
+  BoundParent parent;
+  EvsManager evs;
+  ModuleAccess access;
+  evs.define("first");
+  access.register_module("first", &parent);
+  parent.set_evs_manager(&evs);
+  parent.set_module_access(&access);
+  Algorithm external;
+  parent.algorithm = &external;
+  parent.optional = &external;
+  parent.base = &external;
+  require(parent.mod_define() == AS_OK, "bound declaration failed");
+  require(!parent.algorithm && !parent.optional && !parent.base, "declaration retained a member pointer");
+  parent.set_submodule("algorithm", std::make_unique<Algorithm>());
+  require(parent.algorithm == parent.get_submodule("algorithm"), "registration did not bind the member");
+  parent.algorithm->set_parameter("value", 23);
+  auto* original = parent.algorithm;
+  expect_error<SubModuleAlreadyDefinedError>([&] {
+    parent.define_submodule("algorithm", &BoundParent::optional);
+  });
+  require(parent.algorithm == original && !parent.optional, "duplicate declaration changed a binding");
+  expect_error<SubModuleBindingError>([&] {
+    parent.set_submodule("algorithm", std::make_unique<BasicSubModule>());
+  });
+  require(parent.algorithm == original && parent.get_submodule("algorithm") == original,
+          "type mismatch changed the registered instance or member");
+  expect_error<SubModuleBindingError>([&] {
+    parent.define_submodule("wrong_owner", &OtherOwner::algorithm);
+  });
+  require(!parent.is_submodule_defined("wrong_owner"), "invalid owner left a declaration");
+  Algorithm* BoundParent::* null_member = nullptr;
+  expect_error<SubModuleBindingError>([&] { parent.define_submodule("null_member", null_member); });
+  parent.set_submodule("base", std::make_unique<Algorithm>());
+  require(parent.base == parent.get_submodule("base"), "base pointer binding failed");
+
+  for (int i=0; i<2; ++i) {
+    auto copy = parent.duplicate();
+    auto* bound = dynamic_cast<BoundParent*>(copy.get());
+    require(bound && bound->algorithm == bound->get_submodule("algorithm") &&
+            bound->algorithm != original, "copy retained the source member pointer");
+    require(bound->algorithm->value == 23 && !bound->optional,
+            "copy lost a value or an unset binding");
+    require(bound->base == bound->get_submodule("base") && bound->base != parent.base,
+            "copy lost the base pointer binding");
+    bound->algorithm->set_parameter("value", 77);
+    require(original->value == 23, "bound copy modified the source");
+  }
+
+  BoundParent replacement;
+  replacement.set_evs_manager(&evs);
+  replacement.set_module_access(&access);
+  replacement.mod_define();
+  replacement.set_submodule("algorithm", std::make_unique<Algorithm>());
+  auto next = std::make_unique<Algorithm>();
+  auto* next_pointer = next.get();
+  replacement.set_submodule("algorithm", std::move(next));
+  require(replacement.algorithm == next_pointer, "replacement did not update the member");
+}
+
 int main()
 {
   try {
+    verify_member_binding();
     EvsManager evs1, evs2;
     ModuleAccess access1, access2;
     Parent parent;

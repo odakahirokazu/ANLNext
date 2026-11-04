@@ -10,8 +10,8 @@ Rubyでは既存の`with_parameters`ブロックを使います。
 chain.chain(Submodule_ruby::SubmoduleExample, :example)
 chain.with_parameters do |mod|
   mod.set_submodule_by_key('algorithm', 'multiply')
-  mod.get_submodule('algorithm').set_parameter_integer('factor', 7)
 end
+chain.with_parameters("algorithm.factor": 7)
 chain.with_parameters(input: 4)
 ```
 
@@ -20,9 +20,9 @@ Pythonでは既存の`with_setter`を使います。
 ```python
 def configure(module):
     module.set_submodule_by_key('algorithm', 'multiply')
-    module.get_submodule('algorithm').set_parameter_integer('factor', 7)
 
 chain.chain(SubmoduleExample, 'example').with_setter(configure)
+chain.with_parameters({'algorithm.factor': 7})
 chain.with_parameters({'input': 4})
 ```
 
@@ -43,6 +43,17 @@ ctest --test-dir <build-directory> -R 'submodule_(python|ruby)' --output-on-fail
 
 bindingと補助ライブラリはビルドディレクトリ内で読み込みます。
 インストール済みのANLNextは変更しません。
+
+利用者向けの例題は[`examples/submodule`](../../examples/submodule/README.md)にあります。
+掛け算と加算の選択、パラメータ設定、表示・取得、並列実行を扱います。
+
+`with_submodule(name, key)`で実体を選択し、
+`with_parameters()`の`"algorithm.factor"`のようなキーで値を設定できます。
+親とSubmoduleは値設定処理を共用します。
+Rubyでは定義前は設定を予約し、定義後は直ちに適用します。
+Pythonでは既存の`with_parameters()`と同じく`load_all_parameters()`時に適用します。
+適用時に親から実体を取得するため、それより前に実体を登録しておく必要があります。
+未宣言・未設定のSubmoduleや未知のパラメータへの設定は、既存の例外になります。
 
 ## パラメータ出力
 

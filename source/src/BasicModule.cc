@@ -133,10 +133,11 @@ void BasicModule::print_parameters() const
   ParameterRegistry::print_parameters();
   for (const auto& entry: submodule_map_) {
     std::cout << "\n  [" << entry.first << ": ";
-    if (entry.second) {
-      std::cout << entry.second->submodule_name() << " / "
-                << entry.second->submodule_version() << "]\n";
-      entry.second->print_parameters();
+    const BasicSubModule* submodule = entry.second->instance();
+    if (submodule) {
+      std::cout << submodule->submodule_name() << " / "
+                << submodule->submodule_version() << "]\n";
+      submodule->print_parameters();
     }
     else {
       std::cout << "unset]\n";
@@ -156,11 +157,12 @@ boost::property_tree::ptree BasicModule::parameters_to_property_tree() const
     boost::property_tree::ptree submodules;
     for (const auto& entry: submodule_map_) {
       boost::property_tree::ptree submodule;
-      if (entry.second) {
-        submodule = entry.second->parameters_to_property_tree();
+      const BasicSubModule* instance = entry.second->instance();
+      if (instance) {
+        submodule = instance->parameters_to_property_tree();
       }
       submodule.put("registered_name", entry.first);
-      submodule.put("state", entry.second ? "set" : "unset");
+      submodule.put("state", instance ? "set" : "unset");
       submodules.push_back(std::make_pair("", std::move(submodule)));
     }
     pt.add_child("submodule_list", std::move(submodules));
@@ -187,11 +189,18 @@ void BasicModule::add_parameter_error_info(ANLException& ex) const
 
 void BasicModule::define_submodule(const std::string& name)
 {
+  define_submodule_impl(std::make_unique<SubModuleEntry>(name));
+}
+
+void BasicModule::define_submodule_impl(std::unique_ptr<SubModuleEntry> entry)
+{
+  const std::string name = entry->name();
   check_submodule_configuration(name);
   if (is_submodule_defined(name)) {
     BOOST_THROW_EXCEPTION(SubModuleAlreadyDefinedError(this, name));
   }
-  submodule_map_.emplace(name, nullptr);
+  entry->bind(this);
+  submodule_map_.emplace(name, std::move(entry));
 }
 
 bool BasicModule::is_submodule_defined(const std::string& name) const
@@ -209,7 +218,7 @@ bool BasicModule::is_submodule_set(const std::string& name) const
   if (it == submodule_map_.end()) {
     BOOST_THROW_EXCEPTION(SubModuleUndefinedError(this, name));
   }
-  return static_cast<bool>(it->second);
+  return static_cast<bool>(it->second->instance());
 }
 
 void BasicModule::check_submodule_configuration(const std::string& name) const
@@ -241,7 +250,7 @@ void BasicModule::set_submodule(const std::string& name, std::unique_ptr<BasicSu
   connect_evs_to(*submod);
   connect_module_access_to(*submod);
   submod->define_parameters();
-  it->second = std::move(submod);
+  it->second->set_instance(this, std::move(submod));
 }
 
 BasicSubModule* BasicModule::get_submodule(const std::string& name)
@@ -250,10 +259,10 @@ BasicSubModule* BasicModule::get_submodule(const std::string& name)
   if (it == submodule_map_.end()) {
     BOOST_THROW_EXCEPTION(SubModuleUndefinedError(this, name));
   }
-  if (!it->second) {
+  if (!it->second->instance()) {
     BOOST_THROW_EXCEPTION(SubModuleNotSetError(this, name));
   }
-  return it->second.get();
+  return it->second->instance();
 }
 
 const BasicSubModule* BasicModule::get_submodule(const std::string& name) const
@@ -263,17 +272,16 @@ const BasicSubModule* BasicModule::get_submodule(const std::string& name) const
     BOOST_THROW_EXCEPTION( SubModuleUndefinedError(this, name) );
   }
 
-  if (!it->second) {
+  if (!it->second->instance()) {
     BOOST_THROW_EXCEPTION(SubModuleNotSetError(this, name));
   }
-  return it->second.get();
+  return it->second->instance();
 }
 
 void BasicModule::copy_submodules(const BasicModule& source)
 {
   for (const auto& entry: source.submodule_map_) {
-    submodule_map_.emplace(entry.first,
-                          entry.second ? entry.second->duplicate() : nullptr);
+    submodule_map_.emplace(entry.first, entry.second->duplicate(this));
   }
 }
 
@@ -282,7 +290,8 @@ void BasicModule::set_evs_manager(EvsManager* evs_manager)
   EvsInterface::set_evs_manager(evs_manager);
   
   for (auto& kv : submodule_map_) {
-    if (kv.second) { kv.second->set_evs_manager(evs_manager); }
+    BasicSubModule* submodule = kv.second->instance();
+    if (submodule) { submodule->set_evs_manager(evs_manager); }
   }
 }
 
@@ -291,7 +300,8 @@ void BasicModule::set_module_access(const ModuleAccess* module_access)
   ModuleAccessInterface::set_module_access(module_access);
   
   for (auto& kv : submodule_map_) {
-    if (kv.second) { kv.second->set_module_access(module_access); }
+    BasicSubModule* submodule = kv.second->instance();
+    if (submodule) { submodule->set_module_access(module_access); }
   }
 }
 

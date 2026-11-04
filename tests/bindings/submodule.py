@@ -26,7 +26,6 @@ def configure(module):
     module.set_submodule_by_key("algorithm", "multiply")
     algorithm = module.get_submodule("algorithm")
     assert anlnext.get_value(algorithm.get_parameter("factor")) == 2
-    algorithm.set_parameter_integer("factor", 7)
 
 
 def modify(chain):
@@ -44,6 +43,7 @@ chain = anlnext.AnalysisChain()
 chain.console = False
 chain.num_parallels = 3
 chain.chain(SubmoduleExample, "example").with_setter(configure).with_parameters({"input": 4})
+chain.with_parameters({'algorithm.factor': 7})
 chain.modify(modify)
 chain.run(6)
 for index in range(chain.num_parallels):

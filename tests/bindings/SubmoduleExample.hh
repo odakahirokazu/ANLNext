@@ -23,5 +23,6 @@ public:
 private:
   int input_ = 3;
   int result_ = 0;
+  ExampleAlgorithm* algorithm_ = nullptr;
 };
 #endif

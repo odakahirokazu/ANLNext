@@ -41,6 +41,7 @@
 #include "ModuleAccess.hh"
 
 #include "ANLMacro.hh"
+#include "SubModuleMember.hh"
 
 namespace anlnext
 {
@@ -208,6 +209,8 @@ protected:
    * Submodule
    */
   void define_submodule(const std::string& name);
+  template <typename ModuleClass, typename SubModuleType>
+  void define_submodule(const std::string& name, SubModuleType* ModuleClass::* member);
   void set_submodule(const std::string& name, std::unique_ptr<BasicSubModule>&& submod);
 
 protected:
@@ -221,6 +224,7 @@ private:
   void add_parameter_error_info(ANLException& ex) const override final;
   void copy_submodules(const BasicModule& source);
   void check_submodule_configuration(const std::string& name) const;
+  void define_submodule_impl(std::unique_ptr<SubModuleEntry> entry);
 
 private:
   bool order_sensitive_ = false;
@@ -239,13 +243,19 @@ private:
   int singleton_copy_id_ = 0;
   std::shared_ptr<BasicModule*> singleton_ptr_;
 
-  std::map<std::string, std::unique_ptr<BasicSubModule>> submodule_map_;
+  std::map<std::string, std::unique_ptr<SubModuleEntry>> submodule_map_;
 
   std::string (BasicModule::*module_id_method_)() const;
 };
 
 using AMIter = std::vector<BasicModule*>::iterator;
 using AMConstIter = std::vector<BasicModule*>::const_iterator;
+
+template <typename ModuleClass, typename SubModuleType>
+void BasicModule::define_submodule(const std::string& name, SubModuleType* ModuleClass::* member)
+{
+  define_submodule_impl(std::make_unique<SubModuleMember<ModuleClass, SubModuleType>>(this, name, member));
+}
 
 template <typename ModuleType>
 std::unique_ptr<BasicModule> BasicModule::help_duplication(std::unique_ptr<ModuleType>&& cloned)

@@ -239,6 +239,15 @@ SubModuleNotSetError::SubModuleNotSetError(const BasicModule* mod, const std::st
   append_message("Submodule is not set: " + name);
 }
 
+SubModuleBindingError::SubModuleBindingError(const BasicModule* mod, const std::string& name,
+                                             const std::string& reason)
+  : ANLException(mod)
+{
+  set_message("<SubModuleBindingError>");
+  append_message("Cannot bind submodule: " + name);
+  append_message(reason);
+}
+
 ParameterNotSelectedError::ParameterNotSelectedError()
 {
   set_message("<ParameterNotSelectedError>");

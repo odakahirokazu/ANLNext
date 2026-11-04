@@ -141,6 +141,11 @@ struct SubModuleNotSetError : anlnext::ANLException
   SubModuleNotSetError(const BasicModule* mod, const std::string& name);
 };
 
+struct SubModuleBindingError : anlnext::ANLException
+{
+  SubModuleBindingError(const BasicModule* mod, const std::string& name, const std::string& reason);
+};
+
 struct ParameterNotSelectedError : anlnext::ANLException
 {
   ParameterNotSelectedError();
