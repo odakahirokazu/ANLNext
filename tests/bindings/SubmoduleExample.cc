@@ -7,6 +7,13 @@ void ExampleAlgorithm::define_parameters()
   define_evs("algorithm_used");
 }
 
+void ContainerAlgorithm::define_parameters()
+{
+  ExampleAlgorithm::define_parameters();
+  define_parameter("samples", &ContainerAlgorithm::samples_);
+  define_parameter("weights", &ContainerAlgorithm::weights_);
+}
+
 int ExampleAlgorithm::calculate(int input, const BasicModule* parent)
 {
   if (get_module<BasicModule>(parent->module_id()) != parent) {
@@ -30,8 +37,15 @@ ANLStatus SubmoduleExample::mod_define()
 
 void SubmoduleExample::set_submodule_by_key(const std::string& name, const std::string& key)
 {
-  if (key != "multiply") { throw ANLException("Unknown algorithm: " + key); }
-  set_submodule(name, std::make_unique<ExampleAlgorithm>());
+  if (key == "multiply") {
+    set_submodule(name, std::make_unique<ExampleAlgorithm>());
+  }
+  else if (key == "containers") {
+    set_submodule(name, std::make_unique<ContainerAlgorithm>());
+  }
+  else {
+    throw ANLException("Unknown algorithm: " + key);
+  }
 }
 
 ANLStatus SubmoduleExample::mod_initialize()

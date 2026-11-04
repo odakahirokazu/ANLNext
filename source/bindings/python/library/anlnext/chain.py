@@ -127,7 +127,14 @@ class AnalysisChain:
 
     def with_parameters(self, parameters):
         for name, value in parameters.items():
-            self.set_parameter(name, value)
+            if name.endswith('_') and '.' not in name:
+                submodule_name = name[:-1]
+                if not submodule_name or not isinstance(value, dict):
+                    raise ValueError(f'Submodule parameter group requires a nonempty name and a dict: {name}')
+                for parameter_name, parameter_value in value.items():
+                    self.set_parameter(f'{submodule_name}.{parameter_name}', parameter_value)
+            else:
+                self.set_parameter(name, value)
         return self
 
 

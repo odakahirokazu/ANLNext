@@ -13,7 +13,7 @@ chain.with_parameters({'input': 4.0, 'algorithm.factor': 7.0})
 
 chain.chain(AlgorithmModule, 'offset')
 chain.with_submodule('algorithm', 'offset')
-chain.with_parameters({'input': 4.0, 'algorithm.offset': 3.0})
+chain.with_parameters({'input': 4.0, 'algorithm_': {'offset': 3.0}})
 
 chain.run(10)
 

@@ -63,10 +63,29 @@ current parent module.
 
 `with_parameters()` accepts both parent parameters and `submodule.parameter`
 paths. The dot separates the submodule name from its parameter name; neither
-name can contain a dot in this form. Underscores remain ordinary characters.
+name can contain a dot in this form.
 Ruby accepts a quoted symbol key such as `"algorithm.factor": 7.0`, or a string
 key such as `'algorithm.factor' => 7.0`. Scalar, vector, and map values use
 the same setting operations as parent parameters.
+
+Submodule parameters can also be grouped under a key ending in `_`:
+
+```ruby
+chain.with_parameters(input: 4.0, algorithm_: {factor: 7.0})
+```
+
+```python
+chain.with_parameters({'input': 4.0, 'algorithm_': {'factor': 7.0}})
+```
+
+This is equivalent to the dotted form above. At the top level, a key without
+a dot that ends in `_` denotes a submodule group and requires a Hash/dict.
+Remove only the final `_` to obtain the submodule name. Other underscores
+remain ordinary characters. A group contains parameter values, including
+vectors and maps; its contents are not interpreted as further groups.
+Ordinary map parameters use keys without the trailing `_`, and their map
+entries are passed through unchanged. An empty group applies no settings.
+Both forms can be mixed in the same call and are applied in entry order.
 
 Ruby applies settings immediately after definition, or queues them before
 definition. Python queues them until `load_all_parameters()`, as for parent

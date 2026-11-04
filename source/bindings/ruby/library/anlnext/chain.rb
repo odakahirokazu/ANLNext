@@ -550,7 +550,20 @@ module ANL
       end
 
       if parameters
-        parameters.each{|name, value| set_parameter(name.to_s, value) }
+        parameters.each do |name, value|
+          name = name.to_s
+          if name.end_with?('_') && !name.include?('.')
+            submodule_name = name[0...-1]
+            if submodule_name.empty? || !value.is_a?(Hash)
+              raise ArgumentError, "Submodule parameter group requires a nonempty name and a Hash: #{name}"
+            end
+            value.each do |parameter_name, parameter_value|
+              set_parameter("#{submodule_name}.#{parameter_name}", parameter_value)
+            end
+          else
+            set_parameter(name, value)
+          end
+        end
       end
       if block_given?
         if self.definition_already_done?

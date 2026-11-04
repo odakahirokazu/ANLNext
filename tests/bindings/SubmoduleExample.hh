@@ -1,5 +1,7 @@
 #ifndef ANLNEXT_TEST_SUBMODULE_EXAMPLE_H
 #define ANLNEXT_TEST_SUBMODULE_EXAMPLE_H
+#include <map>
+#include <vector>
 #include "BasicModule.hh"
 #include "BasicSubModule.hh"
 
@@ -10,6 +12,15 @@ public:
   int calculate(int input, const anlnext::BasicModule* parent);
 private:
   int factor_ = 2;
+};
+
+class ContainerAlgorithm : public ExampleAlgorithm {
+  DEFINE_ANL_SUBMODULE(ContainerAlgorithm, 1.0);
+public:
+  void define_parameters() override;
+private:
+  std::vector<int> samples_;
+  std::map<std::string, double> weights_;
 };
 
 class SubmoduleExample : public anlnext::BasicModule {
