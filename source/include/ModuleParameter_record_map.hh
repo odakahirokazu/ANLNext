@@ -91,9 +91,12 @@ public:
     os << '\n';
     for (const_iter_type it=__ref__().begin(); it!=__ref__().end(); ++it) {
       os << "  " << key_name_ << ": " << it->first << '\n';
-      value_type t = it->second;
-      value_info_set<0>(&t, value_category());
-      value_info_output<0>(os, value_category());
+      const auto elements = make_parameters_with_values(value_info_, it->second);
+      for (std::size_t index=0; index<elements.size(); ++index) {
+        if (value_enable_impl(index, value_category(), elements)) {
+          os << "    "; elements[index]->print(os); os << '\n';
+        }
+      }
     }
     os.flush();
   }
@@ -145,16 +148,7 @@ public:
   bool value_enable(std::size_t, value_category_pair) const { return true; }
   bool value_enable(std::size_t i, value_category_tuple) const
   {
-    if (i > 0) {
-      int type = 0;
-      value_info_[0]->__get__(&type);
-      typename decltype(value_enable_)::const_iterator it
-        = value_enable_.find(type);
-      if (it!=value_enable_.end() && (it->second)[i]==0) {
-        return false;
-      }
-    }
-    return true;
+    return value_enable_impl(i, value_category_tuple(), value_info_);
   }
 
   std::size_t size_of_container() const override
@@ -191,6 +185,16 @@ public:
     value_info_set<0>(&value, value_category());
   }
   using VModuleParameter::retrieve_from_container;
+
+  std::vector<ModuleParam_sptr> value_elements_from_container(const std::string& key) const override
+  {
+    const auto it = __ref__().find(key);
+    if (it == __ref__().end()) {
+      BOOST_THROW_EXCEPTION(ParameterError(this, (boost::format("Map does not have key: %s") % key).str()));
+    }
+    return make_parameters_with_values(value_info_, it->second);
+  }
+  using VModuleParameter::value_elements_from_container;
 
   void set_map_key(const std::string& key) override
   { buffer_key_ = key; }
@@ -262,10 +266,7 @@ public:
     std::vector<std::string> key_list = map_key_list();
     for (auto& key: key_list) {
       ptree pt_value;
-      retrieve_from_container(key);
-      const std::size_t num_elements = num_value_elements();
-      for (std::size_t j=0; j<num_elements; j++) {
-        std::shared_ptr<VModuleParameter const> element = value_element_info(j);
+      for (const auto& element: value_elements_from_container(key)) {
         ptree pt_element = element->to_property_tree();
         pt_value.push_back(std::make_pair("", std::move(pt_element))); 
       }
@@ -287,6 +288,23 @@ protected:
   }
 
 private:
+  template <typename Category>
+  bool value_enable_impl(std::size_t, Category, const std::vector<ModuleParam_sptr>&) const
+  {
+    return true;
+  }
+
+  bool value_enable_impl(std::size_t index, value_category_tuple,
+                    const std::vector<ModuleParam_sptr>& elements) const
+  {
+    if (index > 0 && !value_enable_.empty()) {
+      const int type = elements[0]->get_value(0);
+      const auto it = value_enable_.find(type);
+      if (it != value_enable_.end() && it->second[index] == 0) { return false; }
+    }
+    return true;
+  }
+
   bool first_input()
   {
     if (first_input_) {
@@ -368,43 +386,6 @@ private:
   template <std::size_t index>
   void value_info_get(value_type*, value_category_tuple,
                       ValueEnd_t) const
-  {
-  }
-
-  template <std::size_t index>
-  void value_info_output(std::ostream& os, value_category_scalar) const
-  {
-    os << "    "; value_info_[0]->print(os); os << '\n';
-  } 
-
-  template <std::size_t index>
-  void value_info_output(std::ostream& os, value_category_pair) const
-  {
-    os << "    "; value_info_[0]->print(os); os << '\n';
-    os << "    "; value_info_[1]->print(os); os << '\n';
-  } 
-
-  template <std::size_t index>
-  void value_info_output(std::ostream& os, value_category_tuple) const
-  {
-    using Index_t = std::integral_constant<std::size_t, index>;
-    value_info_output<index>(os, value_category_tuple(), Index_t());
-  }
-
-  template <std::size_t index>
-  void value_info_output(std::ostream& os, value_category_tuple,
-                         std::integral_constant<std::size_t, index>) const
-  {
-    if (value_enable(index, value_category_tuple())) {
-      os << "    "; value_info_[index]->print(os); os << '\n';
-    }
-    using NextIndex_t = std::integral_constant<std::size_t, index+1>;
-    value_info_output<index+1>(os, value_category_tuple(), NextIndex_t());
-  }
-
-  template <std::size_t index>
-  void value_info_output(std::ostream&, value_category_tuple,
-                         ValueEnd_t) const
   {
   }
 

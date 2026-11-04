@@ -86,9 +86,9 @@ public:
     std::size_t index = 0;
     for (const_iter_type it=__ref__().begin(); it!=__ref__().end(); ++it) {
       os << "  index: " << index++ << '\n';
-      value_type t = *it;
-      value_info_set<0>(&t, value_category());
-      value_info_output<0>(os, value_category());
+      for (const auto& element: make_parameters_with_values(value_info_, *it)) {
+        os << "    "; element->print(os); os << '\n';
+      }
     }
     os.flush();
   }
@@ -126,6 +126,15 @@ public:
     value_info_set<0>(&value, value_category());
   }
   using VModuleParameter::retrieve_from_container;
+
+  std::vector<ModuleParam_sptr> value_elements_from_container(std::size_t index) const override
+  {
+    if (index >= __ref__().size()) {
+      BOOST_THROW_EXCEPTION(ParameterError(this, "Record vector index is out of range."));
+    }
+    return make_parameters_with_values(value_info_, __ref__().at(index));
+  }
+  using VModuleParameter::value_elements_from_container;
   
   void set_value_element(const std::string& name, bool val) override
   { set_value_element_impl(name, val); }
@@ -193,10 +202,7 @@ public:
     const std::size_t n = size_of_container();
     for (std::size_t i=0; i<n; i++) {
       ptree pt_value;
-      retrieve_from_container(i);
-      const std::size_t num_elements = num_value_elements();
-      for (std::size_t j=0; j<num_elements; j++) {
-        std::shared_ptr<VModuleParameter const> element = value_element_info(j);
+      for (const auto& element: value_elements_from_container(i)) {
         ptree pt_element = element->to_property_tree();
         pt_value.push_back(std::make_pair("", std::move(pt_element))); 
       }
@@ -299,41 +305,6 @@ private:
   template <std::size_t index>
   void value_info_get(value_type*, value_category_tuple,
                       ValueEnd_t) const
-  {
-  }
-
-  template <std::size_t index>
-  void value_info_output(std::ostream& os, value_category_scalar) const
-  {
-    os << "    "; value_info_[0]->print(os); os << '\n';
-  } 
-
-  template <std::size_t index>
-  void value_info_output(std::ostream& os, value_category_pair) const
-  {
-    os << "    "; value_info_[0]->print(os); os << '\n';
-    os << "    "; value_info_[1]->print(os); os << '\n';
-  } 
-
-  template <std::size_t index>
-  void value_info_output(std::ostream& os, value_category_tuple) const
-  {
-    using Index_t = std::integral_constant<std::size_t, index>;
-    value_info_output<index>(os, value_category_tuple(), Index_t());
-  }
-
-  template <std::size_t index>
-  void value_info_output(std::ostream& os, value_category_tuple,
-                         std::integral_constant<std::size_t, index>) const
-  {
-    os << "    "; value_info_[index]->print(os); os << '\n';
-    using NextIndex_t = std::integral_constant<std::size_t, index+1>;
-    value_info_output<index+1>(os, value_category_tuple(), NextIndex_t());
-  }
-
-  template <std::size_t index>
-  void value_info_output(std::ostream&, value_category_tuple,
-                         ValueEnd_t) const
   {
   }
 

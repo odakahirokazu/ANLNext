@@ -168,6 +168,9 @@ public:
   virtual void retrieve_from_container(const std::string& /* key */) const {}
   virtual void retrieve_from_container(std::size_t /* index */) const {}
 
+  virtual std::vector<std::shared_ptr<VModuleParameter>> value_elements_from_container(const std::string& key) const;
+  virtual std::vector<std::shared_ptr<VModuleParameter>> value_elements_from_container(std::size_t index) const;
+
   virtual void set_map_key(const std::string& /* key */) {}
 
   virtual void set_value_element(const std::string& /* name */, bool /* val */) {}

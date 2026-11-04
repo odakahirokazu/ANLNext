@@ -47,6 +47,7 @@ namespace std
 %template(SPtrModParam) std::shared_ptr<anlnext::VModuleParameter>;
 %template(SPtrModParamConst) std::shared_ptr<anlnext::VModuleParameter const>;
 %template(ListModParam) std::list<std::shared_ptr<anlnext::VModuleParameter> >;
+%template(VectorModParam) std::vector<std::shared_ptr<anlnext::VModuleParameter>>;
 
 %template(ModuleVector) std::vector<anlnext::BasicModule*>;
 
@@ -161,6 +162,8 @@ class VModuleParameter
   std::vector<std::string> map_key_list() const;
   void retrieve_from_container(const std::string& /* key */) const;
   void retrieve_from_container(std::size_t /* index */) const;
+  std::vector<std::shared_ptr<anlnext::VModuleParameter>> value_elements_from_container(const std::string& key) const;
+  std::vector<std::shared_ptr<anlnext::VModuleParameter>> value_elements_from_container(std::size_t index) const;
     
   void print(std::ostream& os) const;
   std::string value_string() const;

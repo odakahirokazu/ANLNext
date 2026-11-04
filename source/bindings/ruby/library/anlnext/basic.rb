@@ -173,9 +173,7 @@ module ANL
 
     def get_list_from_container(k, value_element_to_object: false)
       o = []
-      retrieve_from_container(k)
-      num_value_elements.times do |i|
-        element = value_element_info(i)
+      value_elements_from_container(k).each do |element|
         if value_element_to_object
           o.push(element.to_object)
         else
@@ -187,9 +185,7 @@ module ANL
 
     def get_hash_from_container(k, value_element_to_object: false)
       o = {}
-      retrieve_from_container(k)
-      num_value_elements.times do |i|
-        element = value_element_info(i)
+      value_elements_from_container(k).each do |element|
         if value_element_to_object
           o[element.name] = element.to_object
         else
@@ -197,6 +193,16 @@ module ANL
         end
       end
       return o
+    end
+  end
+
+  class SPtrModParam
+    def to_object(**options)
+      __deref__.to_object(**options)
+    end
+
+    def to_value_object(**options)
+      __deref__.to_value_object(**options)
     end
   end
 

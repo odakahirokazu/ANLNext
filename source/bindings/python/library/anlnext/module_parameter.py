@@ -113,8 +113,6 @@ def get_map_value(param):
 
 def get_dict_from_container(param, k):
     o = {}
-    param.retrieve_from_container(k)
-    for i in range(param.num_value_elements()):
-        element = param.value_element_info(i)
+    for element in param.value_elements_from_container(k):
         o[element.name()] = get_value(element)
     return o

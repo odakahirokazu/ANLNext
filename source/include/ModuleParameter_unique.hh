@@ -34,9 +34,12 @@ public:
   ModuleParameterUnique(const std::string& name, T value)
     : ModuleParameter<T>(name, nullptr),
       owned_ptr_(std::make_unique<T>(value))
-  {
-    this->__set_pointer__(owned_ptr_.get());
-  }
+  {}
+
+  ModuleParameterUnique(const ModuleParameter<T>& definition, const T& value)
+    : ModuleParameter<T>(definition),
+      owned_ptr_(std::make_unique<T>(value))
+  {}
   
   std::shared_ptr<VModuleParameter> clone() override
   { return std::shared_ptr<VModuleParameter>(new ModuleParameterUnique(*this)); }
@@ -45,12 +48,23 @@ protected:
   ModuleParameterUnique(const ModuleParameterUnique& r)
     : ModuleParameter<T>(r),
       owned_ptr_(std::make_unique<T>(r.__ref__()))
-  {
-    this->__set_pointer__(owned_ptr_.get());
-  }
+  {}
+
+  T& __ref__() override { return *owned_ptr_; }
+  const T& __ref__() const override { return *owned_ptr_; }
 
 private:
   std::unique_ptr<T> owned_ptr_;
 };
+
+template <typename T>
+ModuleParam_sptr make_parameter_with_value(const VModuleParameter& definition, const T& value)
+{
+  const auto* parameter = dynamic_cast<const ModuleParameter<T>*>(&definition);
+  if (!parameter) {
+    BOOST_THROW_EXCEPTION(ParameterTypeError(&definition, param_type_info<T>::name()));
+  }
+  return std::make_shared<ModuleParameterUnique<T>>(*parameter, value);
+}
 
 } /* namespace anlnext */

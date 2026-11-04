@@ -50,6 +50,36 @@ struct size_of_value<std::tuple<Ts...>>
   constexpr static std::size_t value = std::tuple_size<tuple_type>::value;
 };
 
+template <typename T>
+std::vector<ModuleParam_sptr> make_parameters_with_values(const std::vector<ModuleParam_sptr>& definitions,
+                                                        const T& value)
+{
+  return {make_parameter_with_value(*definitions.at(0), value)};
+}
+
+template <typename T1, typename T2>
+std::vector<ModuleParam_sptr> make_parameters_with_values(const std::vector<ModuleParam_sptr>& definitions,
+                                                        const std::pair<T1, T2>& value)
+{
+  return {make_parameter_with_value(*definitions.at(0), value.first),
+          make_parameter_with_value(*definitions.at(1), value.second)};
+}
+
+template <typename... Ts, std::size_t... Indices>
+std::vector<ModuleParam_sptr> make_parameters_with_values_impl(const std::vector<ModuleParam_sptr>& definitions,
+                                                             const std::tuple<Ts...>& value,
+                                                             std::index_sequence<Indices...>)
+{
+  return {make_parameter_with_value(*definitions.at(Indices), std::get<Indices>(value))...};
+}
+
+template <typename... Ts>
+std::vector<ModuleParam_sptr> make_parameters_with_values(const std::vector<ModuleParam_sptr>& definitions,
+                                                        const std::tuple<Ts...>& value)
+{
+  return make_parameters_with_values_impl(definitions, value, std::index_sequence_for<Ts...>());
+}
+
 /**
  * class template for an ANL module parameter. Partial specialization.
  * @author Hirokazu Odaka

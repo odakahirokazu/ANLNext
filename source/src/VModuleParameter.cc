@@ -262,6 +262,16 @@ intmax_t VModuleParameter::get_value_integer() const
   return 0;
 }
 
+std::vector<ModuleParam_sptr> VModuleParameter::value_elements_from_container(const std::string&) const
+{
+  BOOST_THROW_EXCEPTION(ParameterTypeError(this, "record_map"));
+}
+
+std::vector<ModuleParam_sptr> VModuleParameter::value_elements_from_container(std::size_t) const
+{
+  BOOST_THROW_EXCEPTION(ParameterTypeError(this, "record_vector"));
+}
+
 void VModuleParameter::print(std::ostream& os) const
 {
   os << name() << ": " << *this
