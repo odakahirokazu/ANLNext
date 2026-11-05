@@ -2,12 +2,17 @@
 # Based on LLVM, customized for ANLNext
 
 BasedOnStyle: LLVM
+Language: Cpp
+Standard: c++17
 
 # Indentation
 IndentWidth: 2
+ContinuationIndentWidth: 2
 TabWidth: 2
 UseTab: Never
 IndentGotoLabels: false
+AccessModifierOffset: -2
+IndentCaseLabels: true
 
 # Line length
 ColumnLimit: 120
@@ -20,9 +25,9 @@ BreakBeforeBraces: Custom
 BraceWrapping:
   AfterClass: true
   AfterStruct: true
-  AfterEnum: true
+  AfterEnum: false
   AfterFunction: true
-  AfterNamespace: false
+  AfterNamespace: true
 
   # if (...) {
   # }
@@ -32,18 +37,19 @@ BraceWrapping:
 
   # Keep K&R style for control statements
   AfterControlStatement: Never
+  SplitEmptyFunction: false
 
 # Allow short guard clauses
 AllowShortIfStatementsOnASingleLine: WithoutElse
 
-# Short loops may remain on a single line
-AllowShortLoopsOnASingleLine: true
+# Keep loop bodies on separate lines
+AllowShortLoopsOnASingleLine: false
 
 # Allow inline accessors inside class definitions
-AllowShortFunctionsOnASingleLine: Inline
+AllowShortFunctionsOnASingleLine: InlineOnly
 
-# Do not compress arbitrary blocks
-AllowShortBlocksOnASingleLine: Never
+# Keep braced guards such as: if (!ptr) { return; }
+AllowShortBlocksOnASingleLine: Always
 
 # Short enums may stay on one line
 AllowShortEnumsOnASingleLine: true
@@ -51,8 +57,24 @@ AllowShortEnumsOnASingleLine: true
 # Pointer/reference style
 PointerAlignment: Left
 ReferenceAlignment: Left
+DerivePointerAlignment: false
+
+# for (auto& module: modules)
+SpaceBeforeRangeBasedForLoopColon: false
+SpaceAfterTemplateKeyword: true
+SpacesBeforeTrailingComments: 2
 
 # Constructor initializer lists
 BreakConstructorInitializers: BeforeColon
-PackConstructorInitializers: Never
+PackConstructorInitializers: NextLineOnly
 ConstructorInitializerIndentWidth: 2
+
+# Preserve include grouping, comments, and namespace end comments
+SortIncludes: false
+IncludeBlocks: Preserve
+SortUsingDeclarations: false
+ReflowComments: false
+FixNamespaceComments: false
+
+# Parentheses in conditional expressions are written explicitly in the code.
+# clang-format cannot add them or preserve compact spacing only in for headers.
