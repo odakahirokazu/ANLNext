@@ -1,7 +1,7 @@
 ANL Next
 ========================================
 
-- Version: 3.a.7 (3.-2.7)
+- Version: 3.a.8 (3.-2.8)
 - Author: Hirokazu Odaka
 
 For prerelease versions, `a` means alpha (`-2`) and `b` means beta (`-1`).
