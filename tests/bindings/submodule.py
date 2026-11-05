@@ -52,7 +52,7 @@ for index in range(chain.num_parallels):
 
 with tempfile.TemporaryDirectory() as directory:
     filename = Path(directory) / "parameters.json"
-    chain.anl.parameters_to_json(str(filename))
+    chain.anl_manager.parameters_to_json(str(filename))
     application = json.loads(filename.read_text())["application"]
     for index in range(chain.num_parallels):
         modules = application["module_list" if index == 0 else f"chain{index}"]

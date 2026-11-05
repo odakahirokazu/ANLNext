@@ -77,22 +77,28 @@ applies. Prefer `1.0e+3` when writing floating-point values in scientific notati
 
 ## Application order and errors
 
-`load_parameters_from_yaml()` reads the file when called. During setup before
-definition, settings follow file entry order, interleaved with scripted setters
-in call order. Later settings override earlier ones. The selected current
-module is restored after loading, including when an error occurs.
+`load_parameters_from_yaml()` reads the file when called. Ruby and Python both
+queue settings in file entry order, interleaved with scripted setters in call
+order. This also applies after definition. Later value assignments override
+earlier ones; record insertion retains its existing insertion behavior.
+The selected current module is restored after loading, including when an error
+occurs.
 
-Ruby applies settings immediately if definition has completed, or queues them
-otherwise. Python queues settings until `load_all_parameters()`. Normal `run()`
-applies queued settings before pre-initialization and chain duplication, so
-parallel copies receive the configured values.
+Normal `run()` applies queued settings before pre-initialization and chain
+duplication, so parallel copies receive the configured values. It applies any
+further settings registered by `modify` before initialization. During setup,
+call `load_all_parameters()` explicitly after definition to apply pending
+settings before reading values. Reading or displaying values does not apply
+queued setters.
 
-In Ruby, an older setter queued before definition can execute after an immediate
-setting made after definition. Configure before `run()`, or apply queued setters
-with `load_all_parameters()` before making immediate changes.
+The Chain setting APIs reject reservations once initialization starts. Direct
+module setters remain immediate operations. A successful reservation is consumed
+once; an empty queue makes no changes. If a setter fails, its exception propagates
+and the chain cannot resume parameter application or analysis. Previously applied
+values are retained; automatic retry and rollback are not provided.
 
 The reader checks the top-level structure, parameter-name types, and all module
-IDs before applying or queuing settings. Unknown/unset submodules, unknown
+IDs before queuing settings. Unknown/unset submodules, unknown
 parameters, and invalid parameter values raise the existing setting errors
 when their setters execute. Configuration is not transactional; abort setup
 if an error is raised.

@@ -75,8 +75,57 @@ Ruby/Pythonでは、`chain()`、`with_submodule(name, key)`、`with_parameters()
 `with_parameters()`は親の通常名と`submodule.parameter`形式の名前を受け付ける。
 この形式はSubmodule名とパラメータ名の2要素とし、空の要素や追加の階層はエラーにする。
 通常のパラメータ名のアンダースコアは区切りにしない。mapの値のキーも階層として解釈しない。
-Rubyの設定前後の即時・予約動作、Pythonの予約動作は従来と同じとする。
+Ruby/Pythonとも、Chain経由の設定は定義の前後を問わず予約する。
 実体の選択は値設定より先に行い、未宣言・未設定の実体や未知のパラメータは既存の例外とする。
+
+## Chainの設定予約と実行
+
+設定APIは、対象の指定方法と項目数で区別する。
+
+| 対象 | 1項目 | 複数項目 |
+|---|---|---|
+| 選択中のモジュール | `set_parameter(name, value)` | `set_parameters(parameters)` |
+| module_idで指定 | `set_module_parameter(module_id, name, value)` | `set_module_parameters(module_id, parameters)` |
+
+`with_parameters()`は`set_parameters()`の正式な別名として維持する。
+Rubyの`with()`、ブロック付きの呼び出し、`ANLApp`と`ModuleInitializer`の利用も維持する。
+module_id指定版は対象モジュールを選択して設定を予約し、その後も選択状態を保持する。
+以前のRubyの`set_parameters(module_id, parameters)`は`set_module_parameters()`へ改名した。
+
+`with_parameters()`、YAMLからの値設定、Submodule選択、レコードの挿入、
+設定用ブロックは、登録順に並ぶ一つの予約リストへ入れる。
+同じ名前の設定も省略せず、各操作を順番に実行する。
+通常の値設定は後の設定が優先され、レコードの追加・挿入は既存の操作の意味に従う。
+モジュールを直接操作する`mod.set_parameter()`などは即時設定とする。
+
+通常の`run()`では、次の二箇所で予約をすべて実行する。
+
+1. 定義後、`pre_initialize_analysis()`とチェーン複製の前。
+2. 複製後の`modify`終了後、`initialize_analysis()`の前。
+
+手動で`define()`、`load_all_parameters()`を呼んだ後も、追加した予約を`run()`が反映する。
+定義済みのChainでは同じマネージャーを使い、定義を繰り返さない。
+`load_all_parameters()`は定義後の設定可能な段階で呼ぶ。
+予約が空なら値も解析の進行段階も変更しない。
+設定予約の有無を「設定読み込み済み」という解析段階で代用しない。
+
+表示・値取得・出力は適用済みの値を読み取り、予約を暗黙に実行しない。
+`modify`内でも新しい設定は予約されるため、その場で設定後の値を参照する場合は
+明示的に`load_all_parameters()`を呼ぶ。
+初期化開始以降のChain経由の予約はエラーとし、未実行の予約を残さない。
+
+成功した予約は実行後に消化する。予約の実行中に追加された操作も末尾から順に処理する。
+予約の実行処理への再入は認めない。
+実行が例外で失敗した場合は呼び出し元へ送出し、以後、そのChainでの設定・予約実行・解析を拒否する。
+成功済み操作を再実行せず、失敗した操作と後続操作も自動で再試行しない。
+適用済みの値は巻き戻さない。新しいChainを構築し直すか、Rubyでは明示的に`clear()`して再構築する。
+
+Rubyのinteractive経路でも、対話入力前に予約を反映し、対話入力中に追加された予約は
+チェーン複製前に反映する。対話モード自体の再設計は別途検討する。
+
+予約時点での値のコピーと、Rubyの配列setterの型選択は、今回の変更には含めない。
+配列・Hash/dictなどの値は引き続き参照を保持する。任意の設定用ブロックが参照する外部状態も
+この変更では固定しない。
 
 ## Interactive modeの位置づけ
 

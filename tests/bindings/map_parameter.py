@@ -135,7 +135,7 @@ chain.modify(modify)
 chain.run(0)
 with tempfile.TemporaryDirectory() as directory:
     filename = Path(directory) / 'maps.json'
-    chain.anl.parameters_to_json(str(filename))
+    chain.anl_manager.parameters_to_json(str(filename))
     parameters = json.loads(filename.read_text())['application']['module_list'][0]['parameter_list']
     for param in parameters:
         if param['name'] not in values:

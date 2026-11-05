@@ -44,6 +44,9 @@ class AnalysisChain:
         self.current_module = None
         self.parameter_setter_list = []
         self.parameter_modifier = None
+        self.anl_manager = None
+        self._stage = None
+        self._applying_parameters = False
 
 
     def setup(self, func):
@@ -69,33 +72,36 @@ class AnalysisChain:
 
 
     def get_parallel_module(self, chain_id, module_id):
-        return self.anl.access_to_module(chain_id, module_id)
+        return self.anl_manager.access_to_module(chain_id, module_id)
 
 
     def expose_module(self, module_id):
-        self.current_module = self.get_module(module_id)
+        mod = self.get_module(module_id)
+        if mod is None:
+            raise RuntimeError(f'ANL module {module_id} is not registered.')
+        self.current_module = mod
         return self.current_module
 
 
     def insert_to_map(self, map_name, key, values):
         mod = self.current_module
-        def set_param():
+        def parameter_setter():
             anlnext.insert_to_map(mod, map_name, key, values)
-        self.parameter_setter_list.append(set_param)
+        self._reserve_parameter(parameter_setter)
         return self
       
 
     def push_to_vector(self, vector_name, values):
         mod = self.current_module
-        def set_param():
+        def parameter_setter():
             anlnext.push_to_vector(mod, vector_name, values)
-        self.parameter_setter_list.append(set_param)
+        self._reserve_parameter(parameter_setter)
         return self
 
 
     def set_parameter(self, name, value):
         mod = self.current_module
-        def set_param():
+        def parameter_setter():
             target = mod
             parameter_name = name
             if '.' in name:
@@ -118,11 +124,24 @@ class AnalysisChain:
                         target.set_parameter_integer(parameter_name, value)
                 else:
                     target.set_parameter(parameter_name, value)
-        self.parameter_setter_list.append(set_param)
+        self._reserve_parameter(parameter_setter)
         return self
 
 
-    def with_parameters(self, parameters):
+    def _check_parameter_configuration(self):
+        if self._stage not in (None, 'definition_done', 'pre_initialization_done'):
+            raise RuntimeError(f'Parameter configuration is not allowed at this stage: {self._stage}.')
+
+
+    def _reserve_parameter(self, setter):
+        self._check_parameter_configuration()
+        if self.current_module is None:
+            raise RuntimeError('No current module is selected.')
+        self.parameter_setter_list.append(setter)
+
+
+    def set_parameters(self, parameters):
+        self._check_parameter_configuration()
         for name, value in parameters.items():
             if name.endswith('_') and '.' not in name:
                 submodule_name = name[:-1]
@@ -135,7 +154,23 @@ class AnalysisChain:
         return self
 
 
+    with_parameters = set_parameters
+
+
+    def set_module_parameter(self, module_id, name, value):
+        self._check_parameter_configuration()
+        self.expose_module(module_id)
+        return self.set_parameter(name, value)
+
+
+    def set_module_parameters(self, module_id, parameters):
+        self._check_parameter_configuration()
+        self.expose_module(module_id)
+        return self.set_parameters(parameters)
+
+
     def load_parameters_from_yaml(self, filename):
+        self._check_parameter_configuration()
         try:
             import yaml
         except ImportError as error:
@@ -160,7 +195,7 @@ class AnalysisChain:
         try:
             for mod, parameters in settings:
                 self.current_module = mod
-                self.with_parameters(parameters)
+                self.set_parameters(parameters)
         finally:
             self.current_module = current_module
         return self
@@ -172,9 +207,9 @@ class AnalysisChain:
 
     def with_setter(self, func):
         mod = self.current_module
-        def set_param():
+        def parameter_setter():
             func(mod)
-        self.parameter_setter_list.append(set_param)
+        self._reserve_parameter(parameter_setter)
         return self
 
 
@@ -183,56 +218,97 @@ class AnalysisChain:
 
 
     def define(self):
-        if self.num_parallels > 1:
-            self.anl = anlnext.ANLManagerMT(self.num_parallels)
-        else:
-            self.anl = anlnext.ANLManager()
-        self.anl.set_modules(self.module_list)
-        return self.anl.define_analysis()
+        self._check_parameter_configuration()
+        if self._stage is not None:
+            return anlnext.status.AS_OK
+        try:
+            if self.num_parallels > 1:
+                self.anl_manager = anlnext.ANLManagerMT(self.num_parallels)
+            else:
+                self.anl_manager = anlnext.ANLManager()
+            self.anl_manager.set_modules(self.module_list)
+            self._stage = 'definition'
+            status = self.anl_manager.define_analysis()
+            if status == anlnext.status.AS_OK:
+                self._stage = 'definition_done'
+            else:
+                self._stage = 'error_to_terminate'
+            return status
+        except Exception:
+            self._stage = 'error_to_terminate'
+            raise
 
 
     def load_all_parameters(self):
-        for f in self.parameter_setter_list:
-            f()
-        self.parameter_setter_list.clear()
+        self._check_parameter_configuration()
+        if self._stage is None:
+            raise RuntimeError('Definition stage is not completed.')
+        if self._applying_parameters:
+            raise RuntimeError('Parameter application is already in progress.')
+        try:
+            self._applying_parameters = True
+            while self.parameter_setter_list:
+                self.parameter_setter_list[0]()
+                self.parameter_setter_list.pop(0)
+        except Exception:
+            self._stage = 'error_to_terminate'
+            raise
+        finally:
+            self._applying_parameters = False
 
 
     def run(self, num_loop):
+        if self._stage not in (None, 'definition_done'):
+            raise RuntimeError(f'Analysis cannot start at this stage: {self._stage}.')
         if self.display_period is None:
             self.display_period = proposed_display_period(num_loop)
 
         if num_loop == -1:
             num_loop = ctypes.c_size_t(-1).value # maximum value of size_t
 
-        status = self.define()
-        if not check_status(status, "define_analysis()"):
-            return
-        self.load_all_parameters()
+        try:
+            status = self.define()
+            if not check_status(status, "define_analysis()"):
+                return
+            self.load_all_parameters()
 
-        status = self.anl.pre_initialize_analysis()
-        if not check_status(status, "pre_initialize_analysis()"):
-            return
+            self._stage = 'pre_initialization'
+            status = self.anl_manager.pre_initialize_analysis()
+            if not check_status(status, "pre_initialize_analysis()"):
+                self._stage = 'error_to_terminate'
+                return
+            self._stage = 'pre_initialization_done'
 
-        if self.parameter_modifier is not None:
-            self.parameter_modifier(self)
+            if self.parameter_modifier is not None:
+                self.parameter_modifier(self)
+            self.load_all_parameters()
 
-        status = self.anl.initialize_analysis()
-        if not check_status(status, "initialize_analysis()"):
-            return
+            self._stage = 'initialization'
+            status = self.anl_manager.initialize_analysis()
+            if not check_status(status, "initialize_analysis()"):
+                self._stage = 'error_to_terminate'
+                return
+            self._stage = 'initialization_done'
 
-        print("")
-        print("<Begin Analysis> | Time: " + str(datetime.datetime.now()))
-        sys.stdout.flush()
-        self.anl.set_display_period(self.display_period)
+            print("")
+            print("<Begin Analysis> | Time: " + str(datetime.datetime.now()))
+            sys.stdout.flush()
+            self.anl_manager.set_display_period(self.display_period)
 
-        status = self.anl.run_analysis(num_loop, self.console)
-        print("")
-        print("<End Analysis>   | Time: " + str(datetime.datetime.now()))
-        sys.stdout.flush()
+            status = self.anl_manager.run_analysis(num_loop, self.console)
+            print("")
+            print("<End Analysis>   | Time: " + str(datetime.datetime.now()))
+            sys.stdout.flush()
 
-        if not check_status(status, "run_analysis()"):
-            print("Error: analyze() not successful")
+            if not check_status(status, "run_analysis()"):
+                print("Error: analyze() not successful")
+            self._stage = 'analysis_done'
 
-        status = self.anl.finalize_analysis()
-        if not check_status(status, "finalize_analysis()"):
-            return
+            status = self.anl_manager.finalize_analysis()
+            if not check_status(status, "finalize_analysis()"):
+                self._stage = 'error_to_terminate'
+                return
+            self._stage = 'finalization_done'
+        except Exception:
+            self._stage = 'error_to_terminate'
+            raise

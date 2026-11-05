@@ -30,22 +30,35 @@ raise unless second.get_parameter_value('factor') == 11
 
 chain.with_parameters(input: 4, "algorithm.factor": 12,
                       algorithm_: {factor: 13, samples: [2, 3], weights: {'left_' => 0.5, 'a.b' => 1.5}})
+raise unless second.get_parameter_value('factor') == 11
+chain.load_all_parameters
 raise unless second.get_parameter_value('factor') == 13
 raise unless second.get_parameter_value('samples') == [2, 3]
 raise unless second.get_parameter_value('weights') == {'left_' => 0.5, 'a.b' => 1.5}
 raise unless chain.get_module(:second).get_parameter_value('input') == 4
 raise unless first.get_parameter_value('factor') == 7
 chain.with_parameters(algorithm_: {factor: 14}, "algorithm.factor": 15)
+chain.load_all_parameters
 raise unless second.get_parameter_value('factor') == 15
 chain.with_parameters('algorithm_' => {factor: 13})
 chain.with_parameters(algorithm_: {})
+chain.load_all_parameters
 raise unless second.get_parameter_value('factor') == 13
-expect_error('SubModuleUndefinedError') { chain.with_parameters("missing.factor": 1) }
-expect_error('SubModuleNotSetError') { chain.with_parameters("optional.factor": 1) }
-expect_error('ParameterNotFound') { chain.with_parameters("algorithm.missing": 1) }
-expect_error('SubModuleUndefinedError') { chain.with_parameters(missing_: {factor: 1}) }
-expect_error('SubModuleNotSetError') { chain.with_parameters(optional_: {factor: 1}) }
-expect_error('ParameterNotFound') { chain.with_parameters(algorithm_: {missing: 1}) }
+[
+  [{"missing.factor": 1}, 'SubModuleUndefinedError'],
+  [{"optional.factor": 1}, 'SubModuleNotSetError'],
+  [{"algorithm.missing": 1}, 'ParameterNotFound'],
+  [{missing_: {factor: 1}}, 'SubModuleUndefinedError'],
+  [{optional_: {factor: 1}}, 'SubModuleNotSetError'],
+  [{algorithm_: {missing: 1}}, 'ParameterNotFound'],
+].each do |parameters, error|
+  invalid = ANL::AnalysisChain.new
+  invalid.chain(Submodule_ruby::SubmoduleExample)
+  invalid.with_submodule('algorithm', 'multiply')
+  invalid.define
+  invalid.with_parameters(parameters)
+  expect_error(error) { invalid.load_all_parameters }
+end
 
 [{algorithm_: 1}, {algorithm_: [1]}, {'_' => {}}].each do |parameters|
   begin

@@ -12,6 +12,7 @@ def verify_indexed_vector_input
   raise unless mod.get_parameter(:rows).value_element_name(0) == 'count'
   raise unless mod.get_parameter_value(:rows) == [{ 'count' => 7 }]
   chain.push_to_vector(:rows, 0 => 11)
+  chain.load_all_parameters
   raise unless mod.get_parameter_value(:rows) == [{ 'count' => 7 }, { 'count' => 11 }]
 end
 

@@ -58,6 +58,8 @@ Dir.mktmpdir do |directory|
   File.write(file, "unsigned: {count: 17}\n")
   app.define
   app.load_parameters_from_yaml(file)
+  raise unless app.get_module(:unsigned).get_parameter_value('count') == 0
+  app.load_all_parameters
   raise unless app.get_module(:unsigned).get_parameter_value('count') == 17
 
   ['', '[]', 'null', 'unsigned:', '1: {}', 'unsigned: {1: 7}',

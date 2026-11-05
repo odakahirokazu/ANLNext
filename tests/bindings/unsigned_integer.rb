@@ -43,11 +43,17 @@ chain.modify do |c|
   expect_error { original.get_parameter('count').get_value_unsigned_integer }
   expect_error { original.set_parameter('address', -1) }
   original.set_parameter('address', maximum)
-  c.expose_module(:unsigned)
-  [-1, maximum + 1].each do |bad|
-    expect_error { c.with_parameters(address: bad) }
-    raise unless original.get_parameter_value('address') == maximum
-  end
+end
+
+[-1, maximum + 1].each do |bad|
+  invalid = ANL::AnalysisChain.new
+  invalid.chain(Submodule_ruby::UnsignedIntegerExample, :unsigned)
+  invalid.with_parameters(address: maximum)
+  invalid.define
+  invalid.load_all_parameters
+  invalid.with_parameters(address: bad)
+  expect_error { invalid.load_all_parameters }
+  raise unless invalid.get_module(:unsigned).get_parameter_value('address') == maximum
 end
 Dir.mktmpdir do |directory|
   chain.parameters_json_filename = File.join(directory, 'unsigned.json')

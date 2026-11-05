@@ -74,7 +74,8 @@ module ANL
       :push, :insert, :insert_before, :insert_after, :chain,
       :expose_module, :get_module, :get_parallel_module, :index, :rindex,
       :insert_to_map, :push_to_vector,
-      :set_parameters, :with_parameters, :with_submodule, :chain_with_parameters,
+      :set_parameter, :set_parameters, :set_module_parameter, :set_module_parameters,
+      :with_submodule, :chain_with_parameters,
       :load_parameters_from_yaml,
       :modify, :modify_parameters,
       :define, :load_all_parameters,
@@ -83,7 +84,8 @@ module ANL
       :display_period=,
     ]
     def_delegators :@_anlapp_analysis_chain, *anlapp_methods
-    alias :with :with_parameters
+    alias :with_parameters :set_parameters
+    alias :with :set_parameters
 
     def self.define_setup_module(basename, module_class=nil, array: false)
       if array
@@ -173,9 +175,11 @@ module ANL
       @module_hash = {}
       @current_module = nil
       @parameter_setter_list = []
+      @applying_parameters = false
       @namespace_list = [Object]
       @modification_block = nil
       @stage = nil
+      @anl_manager = nil
     end
 
     # Accessors to internal information (instance variables).
@@ -191,6 +195,8 @@ module ANL
     # (e.g., console, parallel number, display period)
     #
     def clear()
+      raise 'Cannot clear the chain while applying parameters.' if @applying_parameters
+
       @module_list.clear
       @module_hash = {}
       @current_module = nil
@@ -198,6 +204,7 @@ module ANL
       @namespace_list.clear; @namespace_list << Object
       @modification_block = nil
       @stage = nil
+      @anl_manager = nil
     end
 
     def definition_already_done?()
@@ -320,7 +327,7 @@ module ANL
     end
 
     def get_parallel_module(chain_id, module_id)
-      @anl.access_to_module(chain_id, module_id.to_s)
+      @anl_manager.access_to_module(chain_id, module_id.to_s)
     end
 
     # Get position of the first ANL module which has the specified name
@@ -353,28 +360,39 @@ module ANL
     end
 
     # Set a parameter of the current module.
-    # Before the ANL definition stage, this method reserves parameter setting,
-    # and acctual setting to the ANL module object is performed after the
-    # definition stage.
-    # If this method is called after the definition stage, parameter setting is
-    # performed immediately.
+    # Reserve parameter setting for execution by load_all_parameters().
     #
     # @param [String] name name of the parameter.
     # @param value value to be set.
     #
     def set_parameter(name, value)
-      parameter_setter = parameter_setter_for(@current_module, name, value)
-
-      if self.definition_already_done?
-        parameter_setter.call
-      else
-        @parameter_setter_list << parameter_setter
+      check_parameter_configuration()
+      mod = @current_module
+      if mod.is_a? ModuleInitializer
+        mod.set_parameter(name, value)
+        return
       end
+      parameter_setter = make_parameter_setter(mod, name, value)
+
+      reserve_parameter(parameter_setter)
 
       return
     end
 
-    private def parameter_setter_for(mod, name, value)
+    private def check_parameter_configuration()
+      unless @stage.nil? || @stage == :definition_done || @stage == :pre_initialization_done
+        raise "Parameter configuration is not allowed at this stage: #{@stage}."
+      end
+    end
+
+    private def reserve_parameter(parameter_setter)
+      check_parameter_configuration()
+      raise 'No current module is selected.' unless @current_module
+
+      @parameter_setter_list << parameter_setter
+    end
+
+    private def make_parameter_setter(mod, name, value)
       name = name.to_s
       if name.include?('.')
         parts = name.split('.', -1)
@@ -384,7 +402,7 @@ module ANL
         submodule_name, parameter_name = parts
         return lambda do
           submodule = mod.get_submodule(submodule_name)
-          parameter_setter_for(submodule, parameter_name, value).call
+          make_parameter_setter(submodule, parameter_name, value).call
         end
       end
 
@@ -441,17 +459,14 @@ module ANL
     end
 
     # Set a map-type parameter of the current module.
-    # Before the ANL definition stage, this method reserves parameter setting,
-    # and acctual setting to the ANL module object is performed after the
-    # definition stage.
-    # If this method is called after the definition stage, parameter setting is
-    # performed immediately.
+    # Reserve map insertion for execution by load_all_parameters().
     #
     # @param [String] map_name name of the parameter.
     # @param [String] key key of the map content, or name of inserted object.
     # @param [Hash] map_values list of (key, value) pairs of the parameter.
     #
     def insert_to_map(map_name, key, map_values)
+      check_parameter_configuration()
       mod = @current_module
       if mod.is_a? ModuleInitializer
         mod.insert_to_map(map_name, key, map_values)
@@ -469,26 +484,19 @@ module ANL
         end
       end
 
-      if self.definition_already_done?
-        parameter_setter.call
-      else
-        @parameter_setter_list << parameter_setter
-      end
+      reserve_parameter(parameter_setter)
 
       return
     end
 
     # Set a vector-type parameter of the current module.
-    # Before the ANL definition stage, this method reserves parameter setting,
-    # and acctual setting to the ANL module object is performed after the
-    # definition stage.
-    # If this method is called after the definition stage, parameter setting is
-    # performed immediately.
+    # Reserve vector insertion for execution by load_all_parameters().
     #
     # @param [String] vector_name name of the parameter.
     # @param [Hash] values list of (key, value) pairs of the parameter.
     #
     def push_to_vector(vector_name, values)
+      check_parameter_configuration()
       mod = @current_module
       if mod.is_a? ModuleInitializer
         mod.push_to_vector(vector_name, values)
@@ -506,33 +514,33 @@ module ANL
         end
       end
 
-      if self.definition_already_done?
-        parameter_setter.call
-      else
-        @parameter_setter_list << parameter_setter
-      end
+      reserve_parameter(parameter_setter)
 
       return
     end
 
+    def set_module_parameter(module_id, name, value)
+      check_parameter_configuration()
+      expose_module(module_id)
+      set_parameter(name, value)
+    end
+
     # Utility method to set parameters of the specified module.
-    # Before the ANL definition stage, this method reserves parameter setting,
-    # and acctual setting to the ANL module object is performed after the
-    # definition stage.
-    # If this method is called after the definition stage, parameter setting is
-    # performed immediately.
+    # Settings are reserved for execution by load_all_parameters().
     #
     # @param [Symbol] module_id ANL module ID.
     # @param [Hash] parameters list of parameters (name, value).
     # @yield [mod] a block can be given for additional process.
     # @yieldparam mod the current module is given.
     #
-    def set_parameters(module_id, parameters=nil, &parameter_setter)
+    def set_module_parameters(module_id, parameters=nil, &parameter_setter)
+      check_parameter_configuration()
       expose_module(module_id)
-      with_parameters(parameters, &parameter_setter)
+      set_parameters(parameters, &parameter_setter)
     end
 
     def load_parameters_from_yaml(filename)
+      check_parameter_configuration()
       require 'yaml'
 
       text = File.read(filename, encoding: 'UTF-8')
@@ -561,7 +569,7 @@ module ANL
       begin
         settings.each do |mod, parameters|
           @current_module = mod
-          with_parameters(parameters)
+          set_parameters(parameters)
         end
       ensure
         @current_module = current_module
@@ -570,20 +578,17 @@ module ANL
     end
 
     # Utility method to set parameters of the current module.
-    # Before the ANL definition stage, this method reserves parameter setting,
-    # and acctual setting to the ANL module object is performed after the
-    # definition stage.
-    # If this method is called after the definition stage, parameter setting is
-    # performed immediately.
+    # Settings and the optional block are reserved for load_all_parameters().
     #
     # @param [Hash] parameters list of parameters (name, value).
     # @yield [mod] a block can be given for additional process.
     # @yieldparam mod the current module is given.
     #
-    def with_parameters(parameters=nil, &parameter_setter)
+    def set_parameters(parameters=nil, &parameter_setter)
+      check_parameter_configuration()
       mod = @current_module
       if mod.is_a? ModuleInitializer
-        mod.with_parameters(parameters, &parameter_setter)
+        mod.set_parameters(parameters, &parameter_setter)
         return
       end
 
@@ -604,19 +609,16 @@ module ANL
         end
       end
       if block_given?
-        if self.definition_already_done?
-          parameter_setter.(mod)
-        else
-          @parameter_setter_list << lambda{ parameter_setter.(mod) }
-        end
+        reserve_parameter(lambda{ parameter_setter.(mod) })
       end
       return
     end
 
-    alias :with :with_parameters
+    alias :with_parameters :set_parameters
+    alias :with :set_parameters
 
     def with_submodule(name, key)
-      with_parameters do |mod|
+      set_parameters do |mod|
         mod.set_submodule_by_key(name.to_s, key.to_s)
       end
     end
@@ -646,16 +648,17 @@ module ANL
     # modify method. This block is executed just after pre-initialization.
     #
     def modify_parameters(chain_id, module_id, parameters=nil, &parameter_setter)
+      current_module = @current_module
       begin
         if chain_id == 0
           expose_module(module_id)
-          with_parameters(parameters, &parameter_setter)
+          set_parameters(parameters, &parameter_setter)
         else
           @current_module = get_parallel_module(chain_id, module_id)
-          with_parameters(parameters, &parameter_setter)
+          set_parameters(parameters, &parameter_setter)
         end
       ensure
-        @current_module = nil
+        @current_module = current_module
       end
     end
 
@@ -719,31 +722,51 @@ module ANL
     # Execute the ANL definition stage.
     #
     def define()
+      check_parameter_configuration()
+      return @anl_manager if self.definition_already_done?
+
       if @num_parallels > 1
-        @anl = ANL::ANLManagerMT.new(@num_parallels)
+        @anl_manager = ANL::ANLManagerMT.new(@num_parallels)
       else
-        @anl = ANL::ANLManager.new
+        @anl_manager = ANL::ANLManager.new
       end
 
       vec = ANL::ModuleVector.new(@module_list)
-      @anl.set_modules(vec)
+      @anl_manager.set_modules(vec)
 
-      status = @anl.define_analysis()
-      check_status(status, "define_analysis()") or return
+      @stage = :definition
+      status = @anl_manager.define_analysis()
+      unless check_status(status, "define_analysis()")
+        @stage = :error_to_terminate
+        return
+      end
       @stage = :definition_done
 
-      return @anl
+      return @anl_manager
+    rescue StandardError
+      @stage = :error_to_terminate
+      raise
     end
 
     def load_all_parameters()
+      check_parameter_configuration()
       if not self.definition_already_done?
         raise "Definition stage is not completed."
       end
+      raise 'Parameter application is already in progress.' if @applying_parameters
 
-      while s = @parameter_setter_list.shift
-        s.call
+      begin
+        @applying_parameters = true
+        until @parameter_setter_list.empty?
+          @parameter_setter_list.first.call
+          @parameter_setter_list.shift
+        end
+      rescue StandardError
+        @stage = :error_to_terminate
+        raise
+      ensure
+        @applying_parameters = false
       end
-      @stage = :loading_parameters_done
     end
 
     # Run the ANL analysis.
@@ -751,6 +774,9 @@ module ANL
     # @param [Integer] num_loop number of loops. :all or -1 for infinite loops.
     #
     def run(num_loop)
+      unless @stage.nil? || @stage == :definition_done
+        raise "Analysis cannot start at this stage: #{@stage}."
+      end
       if num_loop == :max || num_loop == :all
         num_loop = -1
       end
@@ -760,12 +786,13 @@ module ANL
       if num_loop == -1
         ptr_size = [nil].pack('p').size # size of nullptr (= size of size_t)
         nbits = ptr_size * 8
-        num_loop = (1<<nbits)-1 # maximum value of size_t
+        num_loop = (1 << nbits) - 1 # maximum value of size_t
       end
 
-      anl = define() unless self.definition_already_done?
+      anl_manager = define()
+      return unless anl_manager
 
-      load_all_parameters() unless @stage == :loading_parameters_done
+      load_all_parameters()
 
       if parameters_json_filename() && parameters_json_master()
         File.open(parameters_json_filename(), 'w') do |fout|
@@ -773,27 +800,30 @@ module ANL
         end
       end
 
-      status = anl.pre_initialize_analysis()
+      @stage = :pre_initialization
+      status = anl_manager.pre_initialize_analysis()
       check_status(status, "pre_initialize_analysis()") or return
       @stage = :pre_initialization_done
 
       if @modification_block
         @modification_block.(self)
       end
+      load_all_parameters()
 
       if parameters_json_filename() && !parameters_json_master()
-        anl.parameters_to_json(parameters_json_filename())
+        anl_manager.parameters_to_json(parameters_json_filename())
       end
 
-      status = anl.initialize_analysis()
+      @stage = :initialization
+      status = anl_manager.initialize_analysis()
       check_status(status, "initialize_analysis()") or return
       @stage = :initialization_done
 
       puts ""
       puts "<Begin Analysis> | Time: " + Time.now.to_s
       $stdout.flush
-      anl.set_display_period(@display_period)
-      status = anl.run_analysis(num_loop, @console)
+      anl_manager.set_display_period(@display_period)
+      status = anl_manager.run_analysis(num_loop, @console)
       puts ""
       puts "<End Analysis>   | Time: " + Time.now.to_s
       $stdout.flush
@@ -802,29 +832,33 @@ module ANL
         @stage = :analysis_done
       end
 
-      status = anl.finalize_analysis()
+      status = anl_manager.finalize_analysis()
       check_status(status, "finalize_analysis()") or return
       @stage = :finalization_done
-    rescue RuntimeError => ex
+    rescue StandardError => ex
+      @stage = :error_to_terminate unless @stage == :error_to_finalize
       print_exception(ex)
       if @stage == :error_to_finalize
-        status = anl.finalize_analysis()
+        status = anl_manager.finalize_analysis()
         puts "finalize_analysis() returned #{ANL.status_to_string(status)}."
       end
-      if ANL::ANLException.verbose_level >= 3
-        raise
-      end
+      raise
     end
 
     # Start the ANL interactive session for running the ANL analysis.
     #
     def run_interactive()
-      anl = define() unless self.definition_already_done?
+      unless @stage.nil? || @stage == :definition_done
+        raise "Analysis cannot start at this stage: #{@stage}."
+      end
+      anl_manager = define()
+      return unless anl_manager
 
-      load_all_parameters() unless @stage == :loading_parameters_done
+      load_all_parameters()
 
-      status = anl.do_interactive_comunication()
+      status = anl_manager.do_interactive_comunication()
       check_status(status, "do_interactive_comunication()") or return
+      load_all_parameters()
 
       if parameters_json_filename() && parameters_json_master()
         File.open(parameters_json_filename(), 'w') do |fout|
@@ -832,35 +866,37 @@ module ANL
         end
       end
 
-      status = anl.pre_initialize_analysis()
+      @stage = :pre_initialization
+      status = anl_manager.pre_initialize_analysis()
       check_status(status, "pre_initialize_analysis()") or return
       @stage = :pre_initialization_done
+      load_all_parameters()
 
       if parameters_json_filename() && !parameters_json_master()
-        anl.parameters_to_json(parameters_json_filename())
+        anl_manager.parameters_to_json(parameters_json_filename())
       end
 
-      status = anl.initialize_analysis()
+      @stage = :initialization
+      status = anl_manager.initialize_analysis()
       check_status(status, "initialize_analysis()") or return
       @stage = :initialization_done
 
-      status = anl.do_interactive_analysis()
+      status = anl_manager.do_interactive_analysis()
       if check_status(status, "do_interactive_analysis()")
         @stage = :analysis_done
       end
 
-      status = anl.finalize_analysis()
+      status = anl_manager.finalize_analysis()
       check_status(status, "finalize_analysis()") or return
       @stage = :finalization_done
-    rescue RuntimeError => ex
+    rescue StandardError => ex
+      @stage = :error_to_terminate unless @stage == :error_to_finalize
       print_exception(ex)
       if @stage == :error_to_finalize
-        status = anl.finalize_analysis()
+        status = anl_manager.finalize_analysis()
         puts "finalize_analysis() returned #{ANL.status_to_string(status)}."
       end
-      if ANL::ANLException.verbose_level >= 3
-        raise
-      end
+      raise
     end
 
     def print_exception(ex)

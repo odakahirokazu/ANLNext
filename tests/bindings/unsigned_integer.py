@@ -44,19 +44,22 @@ def modify(c):
     expect_error(lambda: original.set_parameter_integer('address', -1))
     expect_error(lambda: original.set_parameter_unsigned_integer('count', maximum))
     expect_error(lambda: original.get_parameter('count').get_value_unsigned_integer())
-    for bad in [-1, maximum + 1]:
-        c.expose_module('unsigned')
-        c.with_parameters({'address': bad})
-        expect_error(c.load_all_parameters)
-        c.parameter_setter_list.clear()
-        assert anlnext.get_value(param) == maximum
 
 
 chain.modify(modify)
 chain.run(0)
+for bad in [-1, maximum + 1]:
+    invalid = anlnext.AnalysisChain()
+    invalid.chain(UnsignedIntegerExample, 'unsigned').with_parameters({'address': maximum})
+    assert invalid.define() == anlnext.ANLStatus_ok
+    invalid.load_all_parameters()
+    invalid.with_parameters({'address': bad})
+    expect_error(invalid.load_all_parameters)
+    assert anlnext.get_value(invalid.get_module('unsigned').get_parameter('address')) == maximum
+
 with tempfile.TemporaryDirectory() as directory:
     filename = Path(directory) / 'unsigned.json'
-    chain.anl.parameters_to_json(str(filename))
+    chain.anl_manager.parameters_to_json(str(filename))
     application = json.loads(filename.read_text())['application']
     for key in ['module_list', 'chain1']:
         parameters = {p['name']: p for p in application[key][0]['parameter_list']}

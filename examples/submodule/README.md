@@ -99,9 +99,12 @@ Ordinary map parameters use keys without the trailing `_`, and their map
 entries are passed through unchanged. An empty group applies no settings.
 Both forms can be mixed in the same call and are applied in entry order.
 
-Ruby applies settings immediately after definition, or queues them before
-definition. Python queues them until `load_all_parameters()`, as for parent
-parameters. Normal `run()` applies queued settings automatically.
+Ruby and Python both queue settings until `load_all_parameters()`, including
+settings registered after definition. Normal `run()` applies them before
+pre-initialization and chain duplication, and again after `modify` before
+initialization. To read a newly configured value during setup, explicitly
+call `load_all_parameters()` after definition. Initialization closes the
+Chain configuration API; direct module setters remain immediate operations.
 
 ## Display and read
 

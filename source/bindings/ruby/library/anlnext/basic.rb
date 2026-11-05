@@ -242,11 +242,14 @@ module ANL
       @methods_to_play << m
     end
 
-    [:with_parameters, :with, :with_submodule, :push_to_vector, :insert_to_map].each do |m|
+    [:set_parameter, :set_parameters, :with_submodule, :push_to_vector, :insert_to_map].each do |m|
       define_method(m) do |*args, &block|
         keep_method(m, args, &block)
       end
     end
+
+    alias :with_parameters :set_parameters
+    alias :with :set_parameters
 
     def play_methods(receiver)
       @methods_to_play.each do |m|
