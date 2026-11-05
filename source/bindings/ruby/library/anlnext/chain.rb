@@ -372,7 +372,7 @@ module ANL
         mod.set_parameter(name, value)
         return
       end
-      parameter_setter = make_parameter_setter(mod, name, value)
+      parameter_setter = make_parameter_setter(mod, name, ANL.copy_parameter_value(value))
 
       reserve_parameter(parameter_setter)
 
@@ -393,7 +393,7 @@ module ANL
     end
 
     private def make_parameter_setter(mod, name, value)
-      name = name.to_s
+      name = name.to_s.dup
       if name.include?('.')
         parts = name.split('.', -1)
         unless parts.size == 2 && parts.none?(&:empty?)
@@ -458,6 +458,9 @@ module ANL
         return
       end
 
+      map_name = map_name.to_s.dup
+      key = key.to_s.dup
+      map_values = ANL.copy_parameter_value(map_values)
       parameter_setter = lambda do
         mod.insert_to_map(map_name.to_s, key.to_s) do |v|
           map_values.each do |value_name, value|
@@ -488,6 +491,8 @@ module ANL
         return
       end
 
+      vector_name = vector_name.to_s.dup
+      values = ANL.copy_parameter_value(values)
       parameter_setter = lambda do
         mod.push_to_vector(vector_name.to_s) do |v|
           values.each do |value_name, value|
@@ -603,8 +608,10 @@ module ANL
     alias :with :set_parameters
 
     def with_submodule(name, key)
+      name = name.to_s.dup
+      key = key.to_s.dup
       set_parameters do |mod|
-        mod.set_submodule_by_key(name.to_s, key.to_s)
+        mod.set_submodule_by_key(name, key)
       end
     end
 

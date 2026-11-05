@@ -97,6 +97,13 @@ once; an empty queue makes no changes. If a setter fails, its exception propagat
 and the chain cannot resume parameter application or analysis. Previously applied
 values are retained; automatic retry and rollback are not provided.
 
+Ordinary scripted settings copy their values when reserved, including nested
+arrays and mappings. Mutating the original objects later does not change those
+reservations. Ruby's `ModuleInitializer` also captures values at the first
+setting call, before building the chain. Names and keys are fixed at reservation
+time. Arbitrary setting blocks/functions retain their normal closure behavior
+and can use external state at execution time.
+
 The reader checks the top-level structure, parameter-name types, and all module
 IDs before queuing settings. Unknown/unset submodules, unknown
 parameters, and invalid parameter values raise the existing setting errors

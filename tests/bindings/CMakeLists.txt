@@ -70,6 +70,13 @@ add_test(NAME parameter_reservations_ruby COMMAND ${Ruby_EXECUTABLE} ${CMAKE_CUR
 set_tests_properties(parameter_reservations_ruby PROPERTIES TIMEOUT 15
   ENVIRONMENT "RUBYLIB=${CMAKE_CURRENT_BINARY_DIR}/ruby:${CMAKE_CURRENT_BINARY_DIR}")
 
+add_test(NAME parameter_snapshots_python COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/parameter_snapshots.py)
+set_tests_properties(parameter_snapshots_python PROPERTIES TIMEOUT 15
+  ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python:${CMAKE_CURRENT_BINARY_DIR}")
+add_test(NAME parameter_snapshots_ruby COMMAND ${Ruby_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/parameter_snapshots.rb)
+set_tests_properties(parameter_snapshots_ruby PROPERTIES TIMEOUT 15
+  ENVIRONMENT "RUBYLIB=${CMAKE_CURRENT_BINARY_DIR}/ruby:${CMAKE_CURRENT_BINARY_DIR}")
+
 add_subdirectory(${PROJECT_SOURCE_DIR}/examples/submodule/source submodule_example)
 foreach(parallels 1 3)
   add_test(NAME submodule_example_python_${parallels}

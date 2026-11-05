@@ -235,6 +235,38 @@ module ANL
     end
   end
 
+  # Copy supported script values without cloning modules or callbacks.
+  def self.copy_parameter_value(value, copies={})
+    id = value.object_id
+    return copies[id] if copies.key?(id)
+
+    case value
+    when String
+      copies[id] = value.dup
+    when Array
+      result = []
+      copies[id] = result
+      value.each { |element| result << copy_parameter_value(element, copies) }
+      result
+    when Hash
+      result = {}
+      copies[id] = result
+      value.each do |key, element|
+        result[copy_parameter_value(key, copies)] = copy_parameter_value(element, copies)
+      end
+      result
+    when Vector
+      result = value.dup
+      copies[id] = result
+      result.set(copy_parameter_value(value.x, copies),
+                 copy_parameter_value(value.y, copies),
+                 copy_parameter_value(value.z, copies))
+      result
+    else
+      value
+    end
+  end
+
   # Class of ANL module + its parameters
   #
   class ModuleInitializer
@@ -247,6 +279,7 @@ module ANL
     attr_reader :module_class
 
     def keep_method(method, args, &block)
+      args = ANL.copy_parameter_value(args)
       m = lambda do |receiver|
         receiver.send(method, *args, &block)
       end

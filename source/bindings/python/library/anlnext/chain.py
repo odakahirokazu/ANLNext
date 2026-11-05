@@ -10,6 +10,7 @@ import math
 import datetime
 import sys
 import ctypes
+from copy import deepcopy
 
 #
 # utility
@@ -84,7 +85,9 @@ class AnalysisChain:
 
 
     def insert_to_map(self, map_name, key, values):
+        self._check_parameter_configuration()
         mod = self.current_module
+        values = deepcopy(values)
         def parameter_setter():
             anlnext.insert_to_map(mod, map_name, key, values)
         self._reserve_parameter(parameter_setter)
@@ -92,7 +95,9 @@ class AnalysisChain:
       
 
     def push_to_vector(self, vector_name, values):
+        self._check_parameter_configuration()
         mod = self.current_module
+        values = deepcopy(values)
         def parameter_setter():
             anlnext.push_to_vector(mod, vector_name, values)
         self._reserve_parameter(parameter_setter)
@@ -100,7 +105,9 @@ class AnalysisChain:
 
 
     def set_parameter(self, name, value):
+        self._check_parameter_configuration()
         mod = self.current_module
+        value = deepcopy(value)
         def parameter_setter():
             target = mod
             parameter_name = name
