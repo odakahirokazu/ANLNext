@@ -112,6 +112,8 @@ factor = anlnext.get_value(algorithm.get_parameter('factor'))
 Normal initialization also prints the submodule's parameters. Ruby's
 `parameters_to_object()` and the manager's JSON output include submodules.
 Unknown or unset submodules and unknown parameters raise the existing errors.
+Submodule names and output follow declaration order. Replacing an instance
+preserves its position, and parallel copies retain the same order.
 
 ## Parallel execution
 

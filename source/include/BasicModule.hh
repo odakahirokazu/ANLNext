@@ -209,8 +209,10 @@ protected:
    * Submodule
    */
   void define_submodule(const std::string& name);
+
   template <typename ModuleClass, typename SubModuleType>
   void define_submodule(const std::string& name, SubModuleType* ModuleClass::* member);
+
   void set_submodule(const std::string& name, std::unique_ptr<BasicSubModule>&& submod);
 
 protected:
@@ -225,6 +227,8 @@ private:
   void copy_submodules(const BasicModule& source);
   void check_submodule_configuration(const std::string& name) const;
   void define_submodule_impl(std::unique_ptr<SubModuleEntry> entry);
+  SubModuleEntry* find_submodule_entry(const std::string& name);
+  const SubModuleEntry* find_submodule_entry(const std::string& name) const;
 
 private:
   bool order_sensitive_ = false;
@@ -243,7 +247,7 @@ private:
   int singleton_copy_id_ = 0;
   std::shared_ptr<BasicModule*> singleton_ptr_;
 
-  std::map<std::string, std::unique_ptr<SubModuleEntry>> submodule_map_;
+  std::vector<std::unique_ptr<SubModuleEntry>> submodule_entries_;
 
   std::string (BasicModule::*module_id_method_)() const;
 };

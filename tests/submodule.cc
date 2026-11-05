@@ -61,8 +61,8 @@ public:
   using BasicModule::set_submodule;
   ANLStatus mod_define() override
   {
-    define_submodule("algorithm");
     define_submodule("optional");
+    define_submodule("algorithm");
     return AS_OK;
   }
   void set_submodule_by_key(const std::string& name, const std::string& key) override
@@ -174,7 +174,10 @@ int main()
     parent.set_evs_manager(&evs1);
     parent.set_module_access(&access1);
     require(parent.mod_define() == AS_OK, "define failed");
+    const std::vector<std::string> expected_names = {"optional", "algorithm"};
+    require(parent.submodule_names() == expected_names, "submodule names lost declaration order");
     require(parent.is_submodule_defined("algorithm"), "declaration missing");
+    require(!parent.is_submodule_defined("missing"), "undeclared submodule found");
     require(!parent.is_submodule_set("algorithm"), "declaration created an instance");
     expect_error<SubModuleAlreadyDefinedError>([&] { parent.define_submodule("algorithm"); });
     expect_error<SubModuleNotSetError>([&] { parent.get_submodule("algorithm"); });
@@ -189,12 +192,18 @@ int main()
     parent.set_submodule_by_key("algorithm", "algorithm");
     original = dynamic_cast<Algorithm*>(parent.get_submodule("algorithm"));
     require(original->value == 10 && original->definitions == 1, "replacement retained settings");
+    require(parent.submodule_names() == expected_names, "replacement changed declaration order");
+    const BasicModule& const_parent = parent;
+    require(const_parent.get_submodule("algorithm") == original, "const lookup returned another instance");
+    expect_error<SubModuleNotSetError>([&] { const_parent.get_submodule("optional"); });
+    expect_error<SubModuleUndefinedError>([&] { const_parent.get_submodule("missing"); });
     original->set_parameter("value", 23);
     parent.set_evs_manager(&evs2);
     parent.set_module_access(&access2);
     require(original->has_services("second") && !original->has_services("first"),
             "service updates not propagated");
     auto cloned = parent.duplicate();
+    require(cloned->submodule_names() == expected_names, "duplication changed declaration order");
     auto* child = dynamic_cast<Algorithm*>(cloned->get_submodule("algorithm"));
     require(child && child != original && child->value == 23 && child->definitions == 1,
             "duplication lost state or redefined parameters");
@@ -216,14 +225,14 @@ int main()
     const auto tree = parent.parameters_to_property_tree();
     const auto& entries = tree.get_child("submodule_list");
     require(entries.size() == 2, "submodule output lost declarations");
-    const auto& set = entries.front().second;
+    const auto& set = entries.back().second;
     require(set.get<std::string>("registered_name") == "algorithm" &&
             set.get<std::string>("name") == "Algorithm" &&
             set.get<std::string>("version") == "1.0" &&
             set.get<std::string>("state") == "set", "submodule metadata mismatch");
     require(set.get_child("parameter_list").front().second.get<int>("value") == 23,
             "submodule parameter output mismatch");
-    const auto& unset = entries.back().second;
+    const auto& unset = entries.front().second;
     require(unset.size() == 2 && unset.get<std::string>("registered_name") == "optional" &&
             unset.get<std::string>("state") == "unset", "unset output mismatch");
     std::ostringstream output;
@@ -240,6 +249,8 @@ int main()
     require(output.str().find("[algorithm: Algorithm / 1.0]") != std::string::npos &&
             output.str().find("[optional: unset]") != std::string::npos &&
             output.str().find("23") != std::string::npos, "submodule display mismatch");
+    require(output.str().find("[optional: unset]") < output.str().find("[algorithm: Algorithm / 1.0]"),
+            "submodule display lost declaration order");
     auto second = parent.duplicate();
     require(second->is_submodule_set("algorithm"), "second duplication failed");
   }
