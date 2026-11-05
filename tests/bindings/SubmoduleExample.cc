@@ -12,6 +12,8 @@ void ContainerAlgorithm::define_parameters()
   ExampleAlgorithm::define_parameters();
   define_parameter("samples", &ContainerAlgorithm::samples_);
   define_parameter("weights", &ContainerAlgorithm::weights_);
+  define_parameter("enabled", &ContainerAlgorithm::enabled_);
+  define_parameter("label", &ContainerAlgorithm::label_);
 }
 
 int ExampleAlgorithm::calculate(int input, const BasicModule* parent)

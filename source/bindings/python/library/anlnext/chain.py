@@ -96,33 +96,30 @@ class AnalysisChain:
     def set_parameter(self, name, value):
         mod = self.current_module
         def set_param():
-            self._set_parameter(mod, name, value)
+            target = mod
+            parameter_name = name
+            if '.' in name:
+                parts = name.split('.')
+                if len(parts) != 2 or not all(parts):
+                    raise ValueError(f'Invalid submodule parameter path: {name}')
+                submodule_name, parameter_name = parts
+                target = mod.get_submodule(submodule_name)
+            if isinstance(value, dict):
+                anlnext.set_map_parameter(target, parameter_name, value)
+            elif isinstance(value, list):
+                anlnext.set_vector_parameter(target, parameter_name, value)
+            else:
+                if isinstance(value, bool):
+                    target.set_parameter(parameter_name, value)
+                elif isinstance(value, int):
+                    if target.get_parameter(parameter_name).type_name() == "unsigned_integer":
+                        target.set_parameter_unsigned_integer(parameter_name, value)
+                    else:
+                        target.set_parameter_integer(parameter_name, value)
+                else:
+                    target.set_parameter(parameter_name, value)
         self.parameter_setter_list.append(set_param)
         return self
-
-
-    @staticmethod
-    def _set_parameter(mod, name, value):
-        if '.' in name:
-            parts = name.split('.')
-            if len(parts) != 2 or not all(parts):
-                raise ValueError(f'Invalid submodule parameter path: {name}')
-            submodule_name, name = parts
-            mod = mod.get_submodule(submodule_name)
-        if isinstance(value, dict):
-            anlnext.set_map_parameter(mod, name, value)
-        elif isinstance(value, list):
-            anlnext.set_vector_parameter(mod, name, value)
-        else:
-            if isinstance(value, bool):
-                mod.set_parameter(name, value)
-            elif isinstance(value, int):
-                if mod.get_parameter(name).type_name() == "unsigned_integer":
-                    mod.set_parameter_unsigned_integer(name, value)
-                else:
-                    mod.set_parameter_integer(name, value)
-            else:
-                mod.set_parameter(name, value)
 
 
     def with_parameters(self, parameters):
@@ -135,6 +132,37 @@ class AnalysisChain:
                     self.set_parameter(f'{submodule_name}.{parameter_name}', parameter_value)
             else:
                 self.set_parameter(name, value)
+        return self
+
+
+    def load_parameters_from_yaml(self, filename):
+        try:
+            import yaml
+        except ImportError as error:
+            raise ImportError('YAML parameter files require PyYAML: install it with python -m pip install PyYAML') from error
+
+        with open(filename, encoding='utf-8') as stream:
+            parameters_by_module = yaml.safe_load(stream)
+        if not isinstance(parameters_by_module, dict):
+            raise ValueError('YAML parameter file must map module IDs to parameter mappings.')
+
+        settings = []
+        for module_id, parameters in parameters_by_module.items():
+            if (not isinstance(module_id, str) or not isinstance(parameters, dict)
+                    or not all(isinstance(name, str) for name in parameters)):
+                raise ValueError('YAML module IDs and parameter names must be strings, with a mapping for each module.')
+            mod = self.get_module(module_id)
+            if mod is None:
+                raise ValueError(f'Unknown module ID in YAML parameter file: {module_id}')
+            settings.append((mod, parameters))
+
+        current_module = self.current_module
+        try:
+            for mod, parameters in settings:
+                self.current_module = mod
+                self.with_parameters(parameters)
+        finally:
+            self.current_module = current_module
         return self
 
 

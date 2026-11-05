@@ -21,6 +21,8 @@ public:
 private:
   std::vector<int> samples_;
   std::map<std::string, double> weights_;
+  bool enabled_ = false;
+  std::string label_;
 };
 
 class SubmoduleExample : public anlnext::BasicModule {

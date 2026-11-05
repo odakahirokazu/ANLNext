@@ -1,0 +1,7 @@
+multiply:
+  input: 4.0
+  algorithm_:
+    factor: 7.0
+offset:
+  input: 4.0
+  algorithm.offset: 3.0

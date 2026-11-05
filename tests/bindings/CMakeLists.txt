@@ -56,6 +56,13 @@ add_test(NAME submodule_parameters_ruby COMMAND ${Ruby_EXECUTABLE} ${CMAKE_CURRE
 set_tests_properties(submodule_parameters_ruby PROPERTIES TIMEOUT 15
   ENVIRONMENT "RUBYLIB=${CMAKE_CURRENT_BINARY_DIR}/ruby:${CMAKE_CURRENT_BINARY_DIR}")
 
+add_test(NAME yaml_parameters_python COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/yaml_parameters.py)
+set_tests_properties(yaml_parameters_python PROPERTIES TIMEOUT 15
+  ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python:${CMAKE_CURRENT_BINARY_DIR}")
+add_test(NAME yaml_parameters_ruby COMMAND ${Ruby_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/yaml_parameters.rb)
+set_tests_properties(yaml_parameters_ruby PROPERTIES TIMEOUT 15
+  ENVIRONMENT "RUBYLIB=${CMAKE_CURRENT_BINARY_DIR}/ruby:${CMAKE_CURRENT_BINARY_DIR}")
+
 add_subdirectory(${PROJECT_SOURCE_DIR}/examples/submodule/source submodule_example)
 foreach(parallels 1 3)
   add_test(NAME submodule_example_python_${parallels}
@@ -65,6 +72,16 @@ foreach(parallels 1 3)
   add_test(NAME submodule_example_ruby_${parallels}
     COMMAND ${Ruby_EXECUTABLE} ${PROJECT_SOURCE_DIR}/examples/submodule/run/run_submodule.rb ${parallels})
   set_tests_properties(submodule_example_ruby_${parallels} PROPERTIES TIMEOUT 15
+    ENVIRONMENT "RUBYLIB=${CMAKE_CURRENT_BINARY_DIR}/ruby:${CMAKE_CURRENT_BINARY_DIR}/submodule_example")
+  add_test(NAME submodule_example_yaml_python_${parallels}
+    COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/examples/submodule/run_py/run_submodule.py ${parallels}
+      ${PROJECT_SOURCE_DIR}/examples/submodule/parameters.yaml)
+  set_tests_properties(submodule_example_yaml_python_${parallels} PROPERTIES TIMEOUT 15
+    ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python:${CMAKE_CURRENT_BINARY_DIR}/submodule_example")
+  add_test(NAME submodule_example_yaml_ruby_${parallels}
+    COMMAND ${Ruby_EXECUTABLE} ${PROJECT_SOURCE_DIR}/examples/submodule/run/run_submodule.rb ${parallels}
+      ${PROJECT_SOURCE_DIR}/examples/submodule/parameters.yaml)
+  set_tests_properties(submodule_example_yaml_ruby_${parallels} PROPERTIES TIMEOUT 15
     ENVIRONMENT "RUBYLIB=${CMAKE_CURRENT_BINARY_DIR}/ruby:${CMAKE_CURRENT_BINARY_DIR}/submodule_example")
 endforeach()
 

@@ -6,14 +6,17 @@ require 'submoduleExample'
 chain = ANL::AnalysisChain.new
 chain.console = false
 chain.num_parallels = Integer(ARGV.fetch(0, '3'))
+parameter_file = ARGV[1]
 
 chain.chain(SubmoduleExample::AlgorithmModule, :multiply)
 chain.with_submodule('algorithm', 'multiply')
-chain.with_parameters(input: 4.0, "algorithm.factor": 7.0)
+chain.with_parameters(input: 4.0, "algorithm.factor": 7.0) unless parameter_file
 
 chain.chain(SubmoduleExample::AlgorithmModule, :offset)
 chain.with_submodule('algorithm', 'offset')
-chain.with_parameters(input: 4.0, algorithm_: {offset: 3.0})
+chain.with_parameters(input: 4.0, algorithm_: {offset: 3.0}) unless parameter_file
+
+chain.load_parameters_from_yaml(parameter_file) if parameter_file
 
 chain.run(10)
 

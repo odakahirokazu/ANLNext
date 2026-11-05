@@ -24,6 +24,8 @@ News
 
 - **submodule**: A module can have submodules, and each submodule has parameter registry system.
   See the [submodule example](examples/submodule/README.md) for selection, parameter setting, display, and value retrieval in Ruby and Python.
+- **YAML parameter files**: Ruby and Python can load module and submodule values
+  with `load_parameters_from_yaml()`. See [YAML parameter files](documentation/yaml_parameters_v3.md).
 
 
 ### Version 2.3

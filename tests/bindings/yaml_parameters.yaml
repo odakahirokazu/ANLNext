@@ -1,0 +1,27 @@
+first:
+  input: 4
+  algorithm_: &algorithm
+    factor: 7
+    samples: [2, 3]
+    weights: {left_: 0.5, a.b: 1.5}
+    enabled: true
+    label: "on"
+second:
+  input: 5
+  algorithm_: *algorithm
+  algorithm.factor: 11
+  algorithm.enabled: false
+maps:
+  map_i_i: {-1: 3, 2: 5}
+  map_i_d: {-1: 0.5, 2: 1.5}
+  map_i_str: {-1: "", 2: "a b"}
+  map_str_i: {left_: 3, a.b: 5}
+  map_str_d: {left_: 0.5, a.b: 1.5}
+  map_str_str: {state: "off", date: "2026-11-05", unicode: "解析"}
+  vector_i: [7, -3]
+  vector_d: [1.5, 2.5]
+  vector_str: ["on", "2026-11-05", "解析"]
+unsigned:
+  address: 0xffffffffffffffff
+  count: 3
+  signed_value: -9223372036854775808

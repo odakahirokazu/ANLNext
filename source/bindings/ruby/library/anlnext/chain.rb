@@ -75,6 +75,7 @@ module ANL
       :expose_module, :get_module, :get_parallel_module, :index, :rindex,
       :insert_to_map, :push_to_vector,
       :set_parameters, :with_parameters, :with_submodule, :chain_with_parameters,
+      :load_parameters_from_yaml,
       :modify, :modify_parameters,
       :define, :load_all_parameters,
       :print_all_parameters, :parameters_to_object, :make_doc,
@@ -529,6 +530,43 @@ module ANL
     def set_parameters(module_id, parameters=nil, &parameter_setter)
       expose_module(module_id)
       with_parameters(parameters, &parameter_setter)
+    end
+
+    def load_parameters_from_yaml(filename)
+      require 'yaml'
+
+      text = File.read(filename, encoding: 'UTF-8')
+      # safe_load() reads only the first document.
+      documents = YAML.parse_stream(text, filename: filename.to_s)
+      unless documents.children.size == 1
+        raise ArgumentError, 'YAML parameter file must contain exactly one document.'
+      end
+      parameters_by_module = YAML.safe_load(text, filename: filename.to_s, aliases: true)
+      unless parameters_by_module.is_a?(Hash)
+        raise ArgumentError, 'YAML parameter file must map module IDs to parameter mappings.'
+      end
+
+      settings = parameters_by_module.map do |module_id, parameters|
+        unless module_id.is_a?(String) && parameters.is_a?(Hash) && parameters.keys.all?{|name| name.is_a?(String) }
+          raise ArgumentError, 'YAML module IDs and parameter names must be strings, with a mapping for each module.'
+        end
+        mod = get_module(module_id)
+        unless mod
+          raise ArgumentError, "Unknown module ID in YAML parameter file: #{module_id}"
+        end
+        [mod, parameters]
+      end
+
+      current_module = @current_module
+      begin
+        settings.each do |mod, parameters|
+          @current_module = mod
+          with_parameters(parameters)
+        end
+      ensure
+        @current_module = current_module
+      end
+      return
     end
 
     # Utility method to set parameters of the current module.
