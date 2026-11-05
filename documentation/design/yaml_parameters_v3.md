@@ -125,5 +125,5 @@ includes YAML tests and therefore requires PyYAML in its Python interpreter.
 To use a virtual environment for those tests, configure CMake with
 `-DPython3_EXECUTABLE=/path/to/venv/bin/python`.
 
-The [submodule example](../examples/submodule/README.md) runs with either inline
+The [submodule example](../../examples/submodule/README.md) runs with either inline
 settings or a shared YAML file, in Ruby/Python and with one or three chains.

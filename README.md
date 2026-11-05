@@ -8,6 +8,7 @@ For prerelease versions, `a` means alpha (`-2`) and `b` means beta (`-1`).
 
 ## Table of Contents
 
+- [Version 3 manual (Japanese)](documentation/manual/README.md)
 - [News](#news)
 - [Introduction](#introduction)
 - [ANL Model](#anl-model)
@@ -25,7 +26,7 @@ News
 - **submodule**: A module can have submodules, and each submodule has parameter registry system.
   See the [submodule example](examples/submodule/README.md) for selection, parameter setting, display, and value retrieval in Ruby and Python.
 - **YAML parameter files**: Ruby and Python can load module and submodule values
-  with `load_parameters_from_yaml()`. See [YAML parameter files](documentation/yaml_parameters_v3.md).
+  with `load_parameters_from_yaml()`. See [YAML parameter files](documentation/design/yaml_parameters_v3.md).
 
 
 ### Version 2.3
@@ -171,7 +172,7 @@ ANL Model
 ----------------------------------------
 
 (now writing..., figure to be updated)
-![ANL Model](./documentation/anlmodel.png)
+![ANL Model](./documentation/figures/anlmodel.png)
 
 
 Installation

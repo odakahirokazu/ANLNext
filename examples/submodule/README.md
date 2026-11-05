@@ -48,7 +48,7 @@ python3 run_py/run_submodule.py 3 parameters.yaml
 The Python YAML reader requires PyYAML (`python3 -m pip install PyYAML`).
 Submodule implementations are still selected by the script. Only parameter
 values move into the YAML file; omit the filename to use the inline settings.
-See [YAML parameter files](../../documentation/yaml_parameters_v3.md) for details.
+See [YAML parameter files](../../documentation/design/yaml_parameters_v3.md) for details.
 
 ## Select and configure
 
