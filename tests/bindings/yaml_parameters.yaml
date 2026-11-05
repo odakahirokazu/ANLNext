@@ -19,7 +19,7 @@ maps:
   map_str_d: {left_: 0.5, a.b: 1.5}
   map_str_str: {state: "off", date: "2026-11-05", unicode: "解析"}
   vector_i: [7, -3]
-  vector_d: [1.5, 2.5]
+  vector_d: [1, 2.5]
   vector_str: ["on", "2026-11-05", "解析"]
 unsigned:
   address: 0xffffffffffffffff

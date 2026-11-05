@@ -428,21 +428,6 @@ module ANL
         else
           lambda{ mod.set_parameter(name, value.x, value.y) }
         end
-      elsif value.is_a? Array
-        if value.empty?
-          lambda{ mod.clear_array(name) }
-        else
-          f = value.first
-          if f.is_a? String
-            lambda{ mod.set_parameter_vector_str(name, value) }
-          elsif f.is_a? Float
-            lambda{ mod.set_parameter_vector_d(name, value) }
-          elsif f.is_a? Integer
-            lambda{ mod.set_parameter_vector_i(name, value) }
-          else
-            raise "AnalysisChain#set_parameter(): type invalid (Array of *)."
-          end
-        end
       else
         if value.is_a? Integer
           lambda do

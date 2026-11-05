@@ -68,12 +68,16 @@ AnalysisChainの`chain.insert_to_map()`／`chain.push_to_vector()`は変更し�
 不正な入力は例外となり、レコードを追加しません。要素を省略した場合や空の辞書では
 編集用バッファの現在値を使います。通常の挿入後はバッファが初期値へ戻ります。
 
-## Pythonのvector設定
+## Ruby/Pythonのvector設定
 
-AnalysisChainのリスト設定は、定義後のパラメータ型からsetterを選びます。
-`with_parameters({'values': []})`はvectorを空にします。
+AnalysisChainのArray/list設定は、実行時に登録済みのC++パラメータ型からsetterを選びます。
+対象は`vector<int>`、`vector<double>`、`vector<string>`です。
+空のArray/listは、登録されたvector型のsetterへ渡してvectorを空にします。
 先頭要素の型による推測は行わず、要素の変換には既存のSWIG APIを使います。
-直接操作する場合も、`anlnext.set_vector_parameter(module, 'values', [])`を利用できます。
+`vector<double>`には`[1, 2]`や`[1, 2.5]`も設定できます。
+Rubyでは`ParameterRegistry#set_parameter()`が型を判定するため、Chainからの予約と
+`mod.set_parameter('values', [])`による直接設定で同じ処理を使います。
+Pythonでは`anlnext.set_vector_parameter(module, 'values', [])`を使い、Chainもこの補助関数を呼びます。
 対象がvectorでない場合や、要素の型・数値範囲が不正な場合は例外になります。
 
 ## 内部実装・補助コード・サンプル

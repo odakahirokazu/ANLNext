@@ -10,6 +10,12 @@ module ANL
   AS_SKIP           = ANL::ANLStatus_skip
   AS_QUIT           = ANL::ANLStatus_quit
 
+  VECTOR_PARAMETER_TYPES = {
+    'vector<int>' => 'i',
+    'vector<double>' => 'd',
+    'vector<string>' => 'str',
+  }.freeze
+
   MAP_PARAMETER_TYPES = {
     'map<int,int>' => 'i_i',
     'map<int,double>' => 'i_d',
@@ -27,6 +33,11 @@ module ANL
         suffix = MAP_PARAMETER_TYPES[type]
         raise TypeError, "#{name} is not a map parameter: #{type}" unless suffix
         public_send("set_parameter_map_#{suffix}", name.to_s, values.first)
+      elsif values.size == 1 && values.first.is_a?(Array)
+        type = get_parameter(name).type_name()
+        suffix = VECTOR_PARAMETER_TYPES[type]
+        raise TypeError, "#{name} is not a vector parameter: #{type}" unless suffix
+        public_send("set_parameter_vector_#{suffix}", name.to_s, values.first)
       elsif values.size == 1 && values.first.is_a?(Integer) &&
             get_parameter(name).type_name() == 'unsigned_integer'
         set_parameter_unsigned_integer(name.to_s, values.first)

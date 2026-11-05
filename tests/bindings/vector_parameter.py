@@ -32,13 +32,23 @@ for name, expected in values.items():
     assert list(anlnext.get_value(module.get_parameter(name))) == []
     anlnext.set_vector_parameter(module, name, expected)
 
+chain.set_parameter('vector_d', [1, 2])
+chain.load_all_parameters()
+assert list(anlnext.get_value(module.get_parameter('vector_d'))) == [1.0, 2.0]
+anlnext.set_vector_parameter(module, 'vector_d', values['vector_d'])
+
 for name, bad in [('vector_i', [1.5]), ('vector_i', ['7']),
                   ('vector_i', [0, 2147483648]), ('vector_i', [None]),
                   ('vector_d', ['bad']), ('vector_str', [7])]:
     expect_error(lambda: anlnext.set_vector_parameter(module, name, bad))
     assert list(anlnext.get_value(module.get_parameter(name))) == values[name]
 
+anlnext.set_map_parameter(module, 'map_i_i', {1: 3})
 expect_error(lambda: anlnext.set_vector_parameter(module, 'map_i_i', []))
+assert anlnext.get_value(module.get_parameter('map_i_i')) == {1: 3}
+anlnext.push_to_vector(module, 'rows', {'count': 7})
+expect_error(lambda: anlnext.set_vector_parameter(module, 'rows', []))
+assert anlnext.get_value(module.get_parameter('rows')) == [{'count': 7}]
 expect_error(lambda: anlnext.set_vector_parameter(module, 'missing', []))
 chain.with_parameters({'missing': []})
 expect_error(chain.load_all_parameters)
