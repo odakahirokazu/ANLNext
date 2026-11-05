@@ -692,7 +692,7 @@ module ANL
       end
 
       case status
-      when AS_OK
+      when ANL::ANLStatus_proceed
         return true
       when ANL::ANLStatus_critical_error_to_finalize, ANL::ANLStatus_critical_error_to_finalize_from_exception
         if @stage == :initialization_done || @stage == :analysis_done

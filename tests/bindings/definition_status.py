@@ -27,7 +27,7 @@ for status in [anlnext.ANLStatus_critical_error_to_terminate,
         assert module.analyze_calls == 0
         assert module.finalize_calls == 0
 
-chain, calls = make_chain(anlnext.ANLStatus_ok)
+chain, calls = make_chain(anlnext.ANLStatus_proceed)
 chain.run(1)
 module = chain.get_module('status')
 assert calls == ['parameters', 'modify']

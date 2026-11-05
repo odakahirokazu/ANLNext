@@ -25,7 +25,7 @@ chain.with_parameters(count: 5)
 expected_maps = YAML.safe_load_file(filename, aliases: true)['maps']
 manager = chain.define
 chain.load_all_parameters
-raise unless manager.pre_initialize_analysis == ANL::AS_OK
+raise unless manager.pre_initialize_analysis == ANL::AS_PROCEED
 3.times do |index|
   [:first, :second].each do |id|
     mod = chain.get_parallel_module(index, id)

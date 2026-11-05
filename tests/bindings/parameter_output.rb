@@ -7,7 +7,7 @@ require 'json'
   mod = Submodule_ruby::MapExample.new
   manager = ANL::ANLManager.new
   manager.set_modules([mod])
-  raise unless manager.define_analysis == ANL::AS_OK
+  raise unless manager.define_analysis == ANL::AS_PROCEED
   mod.expose_parameter(name)
   mod.set_value_element('count', 3)
   mod.set_map_key('stored.key')

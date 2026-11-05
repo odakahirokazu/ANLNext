@@ -31,6 +31,53 @@ MTの`next_loop_index_`は、次に割り当てる番号であり、各ワーカ
 `print_event_index()`は`print_loop_index()`、`ANLRequest::show_event_index`は`show_loop_index`へ改名した。
 物理イベントを扱う例題や、Evsのevent selectionという用語は維持する。
 
+## ANLStatusの名前と別名
+
+`AS_`はANL Statusの略とする。通常の制御結果は次の8種類とする。
+列挙値の数値と制御動作は、今回の改名では変更しない。
+
+| 正規名 | `ANLStatus`の列挙名 | mod_analyze()の制御 |
+| --- | --- | --- |
+| `AS_PROCEED` | `proceed` | 次のModuleへ進む |
+| `AS_PROCEED_WITH_ERROR` | `proceed_with_error` | エラーを集計し、次のModuleへ進む |
+| `AS_SKIP` | `skip` | 現在の反復の残りを飛ばす |
+| `AS_SKIP_WITH_ERROR` | `skip_with_error` | エラーを集計し、現在の反復の残りを飛ばす |
+| `AS_QUIT` | `quit` | 自チェーンのrunを終了する |
+| `AS_QUIT_WITH_ERROR` | `quit_with_error` | エラーを集計し、自チェーンのrunを終了する |
+| `AS_QUIT_ALL` | `quit_all` | 全チェーンにrunの終了を要求する |
+| `AS_QUIT_ALL_WITH_ERROR` | `quit_all_with_error` | エラーを集計し、全チェーンにrunの終了を要求する |
+
+`enum class ANLStatus`は正規の値だけを定義する。
+C++の`AS_OK`は、グローバルな`constexpr`定数として`AS_PROCEED`の正式な別名を維持し、
+非推奨にはしない。`WITH_ERROR`は、制御方法を変えずにエラー情報を付加する。
+たとえば`AS_PROCEED_WITH_ERROR`は、Moduleのerrorとokの両カウントを増やし、後段へ進む。
+処理時にエラー情報を集計した後、対応するエラーなしのステータスに変換する。
+run全体の戻り値に、このエラー情報を保持する仕様ではない。
+
+C++の旧エラー名は、グローバルな`constexpr`定数として移行用の別名を残す。
+
+| 旧名 | 推奨する正規名 |
+| --- | --- |
+| `AS_ERROR` | `AS_PROCEED_WITH_ERROR` |
+| `AS_SKIP_ERROR` | `AS_SKIP_WITH_ERROR` |
+| `AS_QUIT_ERROR` | `AS_QUIT_WITH_ERROR` |
+| `AS_QUIT_ALL_ERROR` | `AS_QUIT_ALL_WITH_ERROR` |
+
+C++の旧`AS_*`定数には`[[deprecated]]`を付ける。
+`ok`を含む旧列挙名は削除する。
+Rubyは`ANL::AS_*`、Pythonは`anlnext.status.AS_*`で正規名と正式な別名`AS_OK`を公開する。
+両言語とも`AS_OK = AS_PROCEED`と定義し、非推奨にはしない。旧エラー名は公開しない。
+SWIGの列挙名も正規名のみとする（例：`ANLStatus_proceed`、`ANLStatus_skip_with_error`）。
+Ruby／Pythonの内部処理は、この`ANLStatus_*`を直接参照する。
+
+critical系の4列挙値と動作は変更しない。
+`AS_CRITICAL_ERROR_TO_FINALIZE`と`AS_CRITICAL_ERROR_TO_TERMINATE`は全言語で公開する。
+例外からの変換を表す`critical_error_to_finalize_from_exception`と
+`critical_error_to_terminate_from_exception`には、新しい短縮定数を設けない。
+
+`status_to_string()`とC++のストリーム出力は正規名を表示する。
+したがって、`AS_OK`も`AS_PROCEED`と表示され、旧エラー名も新しい`*_WITH_ERROR`名で表示される。
+
 ## 順序保証
 
 順序依存Moduleのmod_analyzeはloop番号順に実行する。

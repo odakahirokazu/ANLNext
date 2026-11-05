@@ -51,7 +51,7 @@ chain.run(0)
 for bad in [-1, maximum + 1]:
     invalid = anlnext.AnalysisChain()
     invalid.chain(UnsignedIntegerExample, 'unsigned').with_parameters({'address': maximum})
-    assert invalid.define() == anlnext.ANLStatus_ok
+    assert invalid.define() == anlnext.ANLStatus_proceed
     invalid.load_all_parameters()
     invalid.with_parameters({'address': bad})
     expect_error(invalid.load_all_parameters)

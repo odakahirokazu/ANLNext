@@ -27,7 +27,7 @@ def proposed_display_period(num_loop):
 
 
 def check_status(status, text):
-    if status==anlnext.status.AS_OK:
+    if status==anlnext.ANLStatus_proceed:
         return True
     else:
         return False
@@ -227,7 +227,7 @@ class AnalysisChain:
     def define(self):
         self._check_parameter_configuration()
         if self._stage is not None:
-            return anlnext.status.AS_OK
+            return anlnext.ANLStatus_proceed
         try:
             if self.num_parallels > 1:
                 self.anl_manager = anlnext.ANLManagerMT(self.num_parallels)
@@ -236,7 +236,7 @@ class AnalysisChain:
             self.anl_manager.set_modules(self.module_list)
             self._stage = 'definition'
             status = self.anl_manager.define_analysis()
-            if status == anlnext.status.AS_OK:
+            if status == anlnext.ANLStatus_proceed:
                 self._stage = 'definition_done'
             else:
                 self._stage = 'error_to_terminate'

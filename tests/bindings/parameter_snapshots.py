@@ -41,7 +41,7 @@ record['count'] = 99
 late = {'count': 17}
 chain.with_setter(lambda module: anlnext.push_to_vector(module, 'rows', late))
 late['count'] = 23
-assert chain.define() == anlnext.ANLStatus_ok
+assert chain.define() == anlnext.ANLStatus_proceed
 chain.load_all_parameters()
 verify_values(chain.get_module('data'))
 
@@ -60,7 +60,7 @@ settings = {'algorithm_': {'samples': [3, 5], 'weights': {'left': 0.5}}}
 chain.set_parameters(settings)
 settings['algorithm_']['samples'].append(7)
 settings['algorithm_']['weights']['left'] = 9.0
-assert chain.define() == anlnext.ANLStatus_ok
+assert chain.define() == anlnext.ANLStatus_proceed
 chain.load_all_parameters()
 algorithm = chain.get_module('worker').get_submodule('algorithm')
 assert list(value(algorithm, 'samples')) == [3, 5]

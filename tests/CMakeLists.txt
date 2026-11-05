@@ -1,5 +1,10 @@
 find_package(Threads REQUIRED)
 
+add_executable(anlnext_anl_status anl_status.cc)
+target_link_libraries(anlnext_anl_status PRIVATE ANLNext)
+add_test(NAME anl_status COMMAND anlnext_anl_status)
+set_tests_properties(anl_status PROPERTIES TIMEOUT 15)
+
 add_executable(anlnext_evs_manager evs_manager.cc)
 target_link_libraries(anlnext_evs_manager PRIVATE ANLNext)
 add_test(NAME evs_manager COMMAND anlnext_evs_manager)
@@ -19,7 +24,7 @@ endforeach()
 
 add_executable(anlnext_loop_control loop_control.cc)
 target_link_libraries(anlnext_loop_control PRIVATE ANLNext Threads::Threads)
-foreach(mode serial ordered skip quit quit_all exception anl_exception terminate_exception critical reduce)
+foreach(mode serial ordered skip quit quit_all proceed_with_error skip_with_error quit_with_error quit_all_with_error exception anl_exception terminate_exception critical reduce)
   add_test(NAME loop_control_${mode} COMMAND anlnext_loop_control ${mode})
   set_tests_properties(loop_control_${mode} PROPERTIES TIMEOUT 15)
 endforeach()

@@ -57,7 +57,7 @@ ANLStatus FillHistogram::mod_analyze()
 ANLStatus FillHistogram::mod_merge(const BasicModule* parallel)
 {
   const mod_class* m = dynamic_cast<const mod_class*>(parallel);
-  if (m==nullptr) { return AS_QUIT_ERROR; }
+  if (m==nullptr) { return AS_QUIT_WITH_ERROR; }
 
   spectrum_->Add(m->spectrum_);
   

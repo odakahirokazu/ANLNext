@@ -48,7 +48,7 @@ ANLStatus ANLManager::do_interactive_comunication()
       {"quit", "help", "chain", "show", "review", "modify", "print", "on", "off", "initialize"}
       );
     const int count = reader.read("iANL> ");
-    if (count == -1) { return AS_QUIT_ERROR; }
+    if (count == -1) { return AS_QUIT_WITH_ERROR; }
     if (count == 0) { continue; }
     std::istringstream is(reader.c_str());
 #else
@@ -316,7 +316,7 @@ ANLStatus ANLManager::do_interactive_analysis()
     ReadLine reader;
     reader.set_completion_candidates({"exit", "help", "run"});
     const int count = reader.read("iANL> ");
-    if (count == -1) { return AS_QUIT_ERROR; }
+    if (count == -1) { return AS_QUIT_WITH_ERROR; }
     if (count == 0) { continue; }
     std::istringstream is(reader.c_str());
 #else

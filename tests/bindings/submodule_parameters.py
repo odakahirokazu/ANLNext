@@ -8,7 +8,7 @@ chain.with_parameters(settings)
 settings['algorithm_']['factor'] = 99
 chain.chain(SubmoduleExample, 'second').with_submodule('algorithm', 'containers')
 chain.with_parameters({'algorithm.factor': 11})
-assert chain.define() == anlnext.ANLStatus_ok
+assert chain.define() == anlnext.ANLStatus_proceed
 chain.load_all_parameters()
 first = chain.get_module('first').get_submodule('algorithm')
 second = chain.get_module('second').get_submodule('algorithm')
@@ -42,7 +42,7 @@ for submodule, parameters, error in [
         invalid = anlnext.AnalysisChain()
         invalid.chain(SubmoduleExample).with_submodule('algorithm', 'multiply')
         invalid.with_parameters(settings)
-        assert invalid.define() == anlnext.ANLStatus_ok
+        assert invalid.define() == anlnext.ANLStatus_proceed
         try:
             invalid.load_all_parameters()
         except RuntimeError as exception:
@@ -62,7 +62,7 @@ for name in ['.factor', 'algorithm.', 'algorithm.factor.extra']:
     invalid = anlnext.AnalysisChain()
     invalid.chain(SubmoduleExample).with_submodule('algorithm', 'multiply')
     invalid.with_parameters({name: 1})
-    assert invalid.define() == anlnext.ANLStatus_ok
+    assert invalid.define() == anlnext.ANLStatus_proceed
     try:
         invalid.load_all_parameters()
     except ValueError:

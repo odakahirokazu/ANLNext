@@ -10,8 +10,8 @@ require 'submodule_ruby'
   modules = order == 'valid' ? [producer, consumer] : [consumer, producer]
   manager.set_modules(order == 'missing' ? [consumer] : modules)
   if order == 'valid'
-    raise unless manager.define_analysis == ANL::AS_OK
-    raise unless manager.pre_initialize_analysis == ANL::AS_OK
+    raise unless manager.define_analysis == ANL::AS_PROCEED
+    raise unless manager.pre_initialize_analysis == ANL::AS_PROCEED
   else
     begin
       manager.define_analysis

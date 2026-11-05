@@ -21,6 +21,7 @@
 #define ANLNEXT_ANLStatus_H 1
 
 #include <ostream>
+#include <string>
 
 namespace anlnext
 {
@@ -33,14 +34,14 @@ namespace anlnext
  * @date 2017-07-26 | more flow control keywords
  */
 enum class ANLStatus {
-  ok,
-  error,
+  proceed,
+  proceed_with_error,
   skip,
-  skip_error,
+  skip_with_error,
   quit,
-  quit_error,
+  quit_with_error,
   quit_all,
-  quit_all_error,
+  quit_all_with_error,
   critical_error_to_finalize,
   critical_error_to_terminate,
   critical_error_to_finalize_from_exception,
@@ -56,14 +57,25 @@ ANLStatus eliminate_normal_error_status(ANLStatus status);
 inline bool is_error(ANLStatus status)
 { return is_normal_error(status) || is_critical_error(status); }
 
-constexpr ANLStatus AS_OK             = ANLStatus::ok;
-constexpr ANLStatus AS_ERROR          = ANLStatus::error;
-constexpr ANLStatus AS_SKIP           = ANLStatus::skip;
-constexpr ANLStatus AS_SKIP_ERROR     = ANLStatus::skip_error;
-constexpr ANLStatus AS_QUIT           = ANLStatus::quit;
-constexpr ANLStatus AS_QUIT_ERROR     = ANLStatus::quit_error;
-constexpr ANLStatus AS_QUIT_ALL       = ANLStatus::quit_all;
-constexpr ANLStatus AS_QUIT_ALL_ERROR = ANLStatus::quit_all_error;
+constexpr ANLStatus AS_PROCEED             = ANLStatus::proceed;
+constexpr ANLStatus AS_PROCEED_WITH_ERROR  = ANLStatus::proceed_with_error;
+constexpr ANLStatus AS_SKIP                = ANLStatus::skip;
+constexpr ANLStatus AS_SKIP_WITH_ERROR     = ANLStatus::skip_with_error;
+constexpr ANLStatus AS_QUIT                = ANLStatus::quit;
+constexpr ANLStatus AS_QUIT_WITH_ERROR     = ANLStatus::quit_with_error;
+constexpr ANLStatus AS_QUIT_ALL            = ANLStatus::quit_all;
+constexpr ANLStatus AS_QUIT_ALL_WITH_ERROR = ANLStatus::quit_all_with_error;
+
+constexpr ANLStatus AS_OK = AS_PROCEED;
+
+[[deprecated("Use AS_PROCEED_WITH_ERROR")]]
+constexpr ANLStatus AS_ERROR = AS_PROCEED_WITH_ERROR;
+[[deprecated("Use AS_SKIP_WITH_ERROR")]]
+constexpr ANLStatus AS_SKIP_ERROR = AS_SKIP_WITH_ERROR;
+[[deprecated("Use AS_QUIT_WITH_ERROR")]]
+constexpr ANLStatus AS_QUIT_ERROR = AS_QUIT_WITH_ERROR;
+[[deprecated("Use AS_QUIT_ALL_WITH_ERROR")]]
+constexpr ANLStatus AS_QUIT_ALL_ERROR = AS_QUIT_ALL_WITH_ERROR;
 
 constexpr ANLStatus AS_CRITICAL_ERROR_TO_FINALIZE = ANLStatus::critical_error_to_finalize;
 constexpr ANLStatus AS_CRITICAL_ERROR_TO_TERMINATE = ANLStatus::critical_error_to_terminate;

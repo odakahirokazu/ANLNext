@@ -61,11 +61,15 @@ public:
         throw ex;
       }
       if (state_->mode == "quit") { return AS_QUIT; }
+      if (state_->mode == "quit_with_error") { return AS_QUIT_WITH_ERROR; }
       if (state_->mode == "quit_all") { return AS_QUIT_ALL; }
+      if (state_->mode == "quit_all_with_error") { return AS_QUIT_ALL_WITH_ERROR; }
       if (state_->mode == "critical") { return AS_CRITICAL_ERROR_TO_FINALIZE; }
     }
     if (state_->mode == "skip" && index % 2 == 0) { return AS_SKIP; }
+    if (state_->mode == "skip_with_error" && index % 2 == 0) { return AS_SKIP_WITH_ERROR; }
     std::this_thread::yield();
+    if (state_->mode == "proceed_with_error") { return AS_PROCEED_WITH_ERROR; }
     return AS_OK;
   }
   ANLStatus mod_reduce(const std::vector<BasicModule*>& parallel_modules) override
@@ -153,12 +157,15 @@ int main(int argc, char** argv)
     }
     else {
       require(status == AS_OK, "Analyze failed");
-      if (state.mode == "quit" || state.mode == "quit_all") {
+      if (state.mode == "quit" || state.mode == "quit_all" ||
+          state.mode == "quit_with_error" || state.mode == "quit_all_with_error") {
         require(std::is_sorted(state.output.begin(), state.output.end()), "quit broke ordering");
         require(std::find(state.output.begin(), state.output.end(), 0) == state.output.end(), "quit event continued");
-        if (state.mode == "quit") { require(state.input.size() == 100, "QUIT stopped other workers"); }
+        if (state.mode == "quit" || state.mode == "quit_with_error") {
+          require(state.input.size() == 100, "QUIT stopped other workers");
+        }
       }
-      else { verify_complete(state, state.mode == "skip"); }
+      else { verify_complete(state, state.mode == "skip" || state.mode == "skip_with_error"); }
     }
 
     // Reuse the manager: neither completed nor cancelled keepers may retain state.

@@ -26,22 +26,22 @@ namespace anlnext
 std::string status_to_string(ANLStatus status)
 {
   switch (status) {
-    case ANLStatus::ok:
-      return "AS_OK";
-    case ANLStatus::error:
-      return "AS_ERROR";
+    case ANLStatus::proceed:
+      return "AS_PROCEED";
+    case ANLStatus::proceed_with_error:
+      return "AS_PROCEED_WITH_ERROR";
     case ANLStatus::skip:
       return "AS_SKIP";
-    case ANLStatus::skip_error:
-      return "AS_SKIP_ERROR";
+    case ANLStatus::skip_with_error:
+      return "AS_SKIP_WITH_ERROR";
     case ANLStatus::quit:
       return "AS_QUIT";
-    case ANLStatus::quit_error:
-      return "AS_QUIT_ERROR";
+    case ANLStatus::quit_with_error:
+      return "AS_QUIT_WITH_ERROR";
     case ANLStatus::quit_all:
       return "AS_QUIT_ALL";
-    case ANLStatus::quit_all_error:
-      return "AS_QUIT_ALL_ERROR";
+    case ANLStatus::quit_all_with_error:
+      return "AS_QUIT_ALL_WITH_ERROR";
     case ANLStatus::critical_error_to_finalize:
       return "AS_CRITICAL_ERROR_TO_FINALIZE";
     case ANLStatus::critical_error_to_terminate:
@@ -58,10 +58,10 @@ std::string status_to_string(ANLStatus status)
 
 bool is_normal_error(ANLStatus status)
 {
-  return ((status==ANLStatus::error) ||
-          (status==ANLStatus::skip_error) ||
-          (status==ANLStatus::quit_error) ||
-          (status==ANLStatus::quit_all_error));
+  return ((status==ANLStatus::proceed_with_error) ||
+          (status==ANLStatus::skip_with_error) ||
+          (status==ANLStatus::quit_with_error) ||
+          (status==ANLStatus::quit_all_with_error));
 }
 
 bool is_critical_error(ANLStatus status)
@@ -74,10 +74,10 @@ bool is_critical_error(ANLStatus status)
 
 ANLStatus eliminate_normal_error_status(ANLStatus status)
 {
-  if (status==ANLStatus::error) { return ANLStatus::ok; }
-  if (status==ANLStatus::skip_error) { return ANLStatus::skip; }
-  if (status==ANLStatus::quit_error) { return ANLStatus::quit; }
-  if (status==ANLStatus::quit_all_error) { return ANLStatus::quit_all; }
+  if (status==ANLStatus::proceed_with_error) { return ANLStatus::proceed; }
+  if (status==ANLStatus::skip_with_error) { return ANLStatus::skip; }
+  if (status==ANLStatus::quit_with_error) { return ANLStatus::quit; }
+  if (status==ANLStatus::quit_all_with_error) { return ANLStatus::quit_all; }
   return status;
 }
 

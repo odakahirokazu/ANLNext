@@ -9,7 +9,7 @@ for name in ['table', 'rows']:
     module = MapExample()
     manager = anlnext.ANLManager()
     manager.set_modules([module])
-    assert manager.define_analysis() == anlnext.ANLStatus_ok
+    assert manager.define_analysis() == anlnext.ANLStatus_proceed
     if name == 'table':
         anlnext.insert_to_map(module, name, 'stored.key', {'count': 3})
         key = 'stored.key'

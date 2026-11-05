@@ -62,14 +62,14 @@ namespace anlnext
 {
 
 enum class ANLStatus {
-  ok,
-  error,
+  proceed,
+  proceed_with_error,
   skip,
-  skip_error,
+  skip_with_error,
   quit,
-  quit_error,
+  quit_with_error,
   quit_all,
-  quit_all_error,
+  quit_all_with_error,
   critical_error_to_finalize,
   critical_error_to_terminate,
   critical_error_to_finalize_from_exception,

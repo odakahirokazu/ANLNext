@@ -11,12 +11,12 @@ raise unless undefined_run_index == ANL::BasicModule.undefined_run_index && unde
   manager.set_modules([mod])
   manager.set_print_parallel_modules(false)
   raise unless manager.run_index == undefined_run_index && mod.get_run_index == undefined_run_index
-  raise unless manager.define_analysis == ANL::AS_OK
-  raise unless manager.pre_initialize_analysis == ANL::AS_OK
-  raise unless manager.initialize_analysis == ANL::AS_OK
+  raise unless manager.define_analysis == ANL::AS_PROCEED
+  raise unless manager.pre_initialize_analysis == ANL::AS_PROCEED
+  raise unless manager.initialize_analysis == ANL::AS_PROCEED
   raise unless manager.run_index == undefined_run_index
   [5, 0, 2].each_with_index do |count, run_index|
-    raise unless manager.run_analysis(count, false) == ANL::AS_OK
+    raise unless manager.run_analysis(count, false) == ANL::AS_PROCEED
     raise unless manager.run_index == run_index
     parallels.times do |chain_index|
       copy = manager.access_to_module(chain_index, 'module')
@@ -25,6 +25,6 @@ raise unless undefined_run_index == ANL::BasicModule.undefined_run_index && unde
       raise unless count != 0 || copy.get_loop_index == undefined_loop_index
     end
   end
-  raise unless manager.finalize_analysis == ANL::AS_OK
+  raise unless manager.finalize_analysis == ANL::AS_PROCEED
   raise unless manager.run_index == 2
 end

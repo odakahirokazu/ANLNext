@@ -204,14 +204,14 @@ manager.define_singleton_method(:do_interactive_comunication) do
   raise unless chain.get_module(:target).get_parameter_value('count') == 2
   chain.with_parameters(count: 3)
   communication_done = true
-  ANL::AS_OK
+  ANL::AS_PROCEED
 end
 manager.define_singleton_method(:do_interactive_analysis) do
   2.times do |index|
     raise unless chain.get_parallel_module(index, :target).get_parameter_value('count') == 3
   end
   analysis_done = true
-  ANL::AS_OK
+  ANL::AS_PROCEED
 end
 chain.run_interactive
 raise unless communication_done && analysis_done && chain.finalization_done?

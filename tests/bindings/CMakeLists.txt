@@ -42,6 +42,13 @@ add_custom_target(submodule_binding_runtime ALL
   COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:ANL> ${CMAKE_CURRENT_BINARY_DIR}/ruby/anlnext/
   DEPENDS anlnextpy ANL)
 
+add_test(NAME anl_status_python COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/anl_status.py)
+set_tests_properties(anl_status_python PROPERTIES TIMEOUT 15
+  ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python:${CMAKE_CURRENT_BINARY_DIR}")
+add_test(NAME anl_status_ruby COMMAND ${Ruby_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/anl_status.rb)
+set_tests_properties(anl_status_ruby PROPERTIES TIMEOUT 15
+  ENVIRONMENT "RUBYLIB=${CMAKE_CURRENT_BINARY_DIR}/ruby:${CMAKE_CURRENT_BINARY_DIR}")
+
 add_test(NAME submodule_python COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/submodule.py)
 set_tests_properties(submodule_python PROPERTIES TIMEOUT 15
   ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/python:${CMAKE_CURRENT_BINARY_DIR}")

@@ -25,9 +25,9 @@ def value(module, name):
 chain = make_chain(UnsignedIntegerExample)
 chain.with_parameters({'count': 1})
 expect_error('Definition stage', chain.load_all_parameters)
-assert chain.define() == anlnext.ANLStatus_ok
+assert chain.define() == anlnext.ANLStatus_proceed
 manager = chain.anl_manager
-assert chain.define() == anlnext.ANLStatus_ok and chain.anl_manager is manager
+assert chain.define() == anlnext.ANLStatus_proceed and chain.anl_manager is manager
 chain.with_parameters({'count': 2})
 module = chain.get_module('target')
 assert value(module, 'count') == 0
@@ -67,7 +67,7 @@ chain.with_setter(first)
 chain.push_to_vector('rows', {'count': 11})
 chain.with_setter(lambda module: calls.append('second'))
 chain.insert_to_map('table', 'row', {'count': 5})
-assert chain.define() == anlnext.ANLStatus_ok
+assert chain.define() == anlnext.ANLStatus_proceed
 chain.load_all_parameters()
 module = chain.get_module('target')
 assert [row['count'] for row in value(module, 'rows')] == [7, 11, 13]
@@ -81,7 +81,7 @@ chain = make_chain(SubmoduleExample)
 chain.num_parallels = 2
 chain.with_submodule('algorithm', 'multiply')
 chain.with_parameters({'input': 4, 'algorithm_': {'factor': 7}})
-assert chain.define() == anlnext.ANLStatus_ok
+assert chain.define() == anlnext.ANLStatus_proceed
 chain.load_all_parameters()
 chain.with_parameters({'input': 5})
 
@@ -108,7 +108,7 @@ chain.push_to_vector('rows', {'count': 7})
 chain.with_setter(lambda module: calls.append('before'))
 chain.with_parameters({'missing': 1})
 chain.with_setter(lambda module: calls.append('after'))
-assert chain.define() == anlnext.ANLStatus_ok
+assert chain.define() == anlnext.ANLStatus_proceed
 expect_error('ParameterNotFound', chain.load_all_parameters)
 for _ in range(2):
     expect_error('not allowed', chain.load_all_parameters)
@@ -140,7 +140,7 @@ def reenter(module):
 
 
 chain.with_setter(reenter)
-assert chain.define() == anlnext.ANLStatus_ok
+assert chain.define() == anlnext.ANLStatus_proceed
 expect_error('already in progress', chain.load_all_parameters)
 expect_error('not allowed', chain.load_all_parameters)
 assert calls == ['entered']
@@ -161,7 +161,7 @@ chain.with_setter(lambda module: module.set_parameter_integer('count', 5))
 expect_error('not registered', lambda: chain.set_module_parameter('missing', 'count', 0))
 expect_error('not registered', lambda: chain.set_module_parameters('missing', {'count': 0}))
 assert chain.current_module is chain.get_module('other')
-assert chain.define() == anlnext.ANLStatus_ok
+assert chain.define() == anlnext.ANLStatus_proceed
 assert value(chain.get_module('target'), 'count') == 0
 chain.load_all_parameters()
 assert value(chain.get_module('target'), 'count') == 4

@@ -71,7 +71,7 @@ with tempfile.TemporaryDirectory() as directory:
     invalid = make_chain()
     file.write_text('first: {algorithm_: {missing: 1}}', encoding='utf-8')
     invalid.load_parameters_from_yaml(file)
-    assert invalid.define() == anlnext.ANLStatus_ok
+    assert invalid.define() == anlnext.ANLStatus_proceed
     try:
         invalid.load_all_parameters()
     except RuntimeError as error:
@@ -80,7 +80,7 @@ with tempfile.TemporaryDirectory() as directory:
         raise AssertionError('Accepted an unknown parameter')
 
     chain = make_chain()
-    assert chain.define() == anlnext.ANLStatus_ok
+    assert chain.define() == anlnext.ANLStatus_proceed
     chain.load_all_parameters()
     file.write_text('unsigned: {count: 17}', encoding='utf-8')
     chain.load_parameters_from_yaml(file)
