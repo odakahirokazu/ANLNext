@@ -39,7 +39,7 @@ class SubModuleMember : public SubModuleEntry
                 "Submodule binding requires a BasicSubModule pointer.");
 
 public:
-  SubModuleMember(const BasicModule* module, const std::string& name, member_pointer_type member);
+  SubModuleMember(const std::string& name, const BasicModule* module, member_pointer_type member);
 
 protected:
   SubModuleMember(const SubModuleMember&) = default;
@@ -52,7 +52,7 @@ private:
 
 template <typename ModuleClass, typename SubModuleType>
 SubModuleMember<ModuleClass, SubModuleType>::SubModuleMember(
-  const BasicModule* module, const std::string& name, member_pointer_type member)
+  const std::string& name, const BasicModule* module, member_pointer_type member)
   : SubModuleEntry(name), member_(member)
 {
   if (!member_) {
@@ -67,8 +67,7 @@ std::unique_ptr<SubModuleEntry> SubModuleMember<ModuleClass, SubModuleType>::clo
 }
 
 template <typename ModuleClass, typename SubModuleType>
-void SubModuleMember<ModuleClass, SubModuleType>::bind_instance(
-  BasicModule* module, BasicSubModule* submodule) const
+void SubModuleMember<ModuleClass, SubModuleType>::bind_instance(BasicModule* module, BasicSubModule* submodule) const
 {
   auto* owner = dynamic_cast<ModuleClass*>(module);
   if (!owner) {

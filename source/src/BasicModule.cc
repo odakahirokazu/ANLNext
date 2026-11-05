@@ -199,7 +199,7 @@ void BasicModule::define_submodule_impl(std::unique_ptr<SubModuleEntry> entry)
   if (is_submodule_defined(name)) {
     BOOST_THROW_EXCEPTION(SubModuleAlreadyDefinedError(this, name));
   }
-  entry->bind(this);
+  entry->set_instance(this, nullptr);
   submodule_entries_.push_back(std::move(entry));
 }
 

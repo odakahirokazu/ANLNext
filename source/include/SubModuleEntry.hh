@@ -40,7 +40,6 @@ public:
   BasicSubModule* instance() { return instance_.get(); }
   const BasicSubModule* instance() const { return instance_.get(); }
 
-  void bind(BasicModule* module) const;
   void set_instance(BasicModule* module, std::unique_ptr<BasicSubModule>&& instance);
   std::unique_ptr<SubModuleEntry> duplicate(BasicModule* module) const;
 

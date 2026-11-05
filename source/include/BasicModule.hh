@@ -258,7 +258,7 @@ using AMConstIter = std::vector<BasicModule*>::const_iterator;
 template <typename ModuleClass, typename SubModuleType>
 void BasicModule::define_submodule(const std::string& name, SubModuleType* ModuleClass::* member)
 {
-  define_submodule_impl(std::make_unique<SubModuleMember<ModuleClass, SubModuleType>>(this, name, member));
+  define_submodule_impl(std::make_unique<SubModuleMember<ModuleClass, SubModuleType>>(name, this, member));
 }
 
 template <typename ModuleType>

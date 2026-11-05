@@ -40,11 +40,6 @@ std::unique_ptr<SubModuleEntry> SubModuleEntry::clone() const
   return std::unique_ptr<SubModuleEntry>(new SubModuleEntry(*this));
 }
 
-void SubModuleEntry::bind(BasicModule* module) const
-{
-  bind_instance(module, instance_.get());
-}
-
 void SubModuleEntry::bind_instance(BasicModule*, BasicSubModule*) const
 {}
 
