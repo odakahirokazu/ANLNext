@@ -42,7 +42,7 @@ add_executable(anlnext_console_control console_control.cc)
 target_link_libraries(anlnext_console_control PRIVATE ANLNext Threads::Threads)
 foreach(mode serial_idle serial_partial serial_exception parallel_partial parallel_exception quit index summary eof quit_eof)
   add_test(NAME console_control_${mode} COMMAND anlnext_console_control ${mode})
-  set_tests_properties(console_control_${mode} PROPERTIES TIMEOUT 15)
+  set_tests_properties(console_control_${mode} PROPERTIES TIMEOUT 15 FAIL_REGULAR_EXPRESSION "ANL> ")
 endforeach()
 
 add_executable(anlnext_parameter_selection parameter_selection.cc)

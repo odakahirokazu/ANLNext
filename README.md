@@ -1,7 +1,7 @@
 ANL Next
 ========================================
 
-- Version: 3.0.0
+- Version: 3.0.1
 - Author: Hirokazu Odaka
 
 For prerelease versions, `a` means alpha (`-2`) and `b` means beta (`-1`).
@@ -18,6 +18,15 @@ For prerelease versions, `a` means alpha (`-2`) and `b` means beta (`-1`).
 
 News
 ----------------------------------------
+
+### Version 3.0.1
+
+**Released on November 6, 2026**
+
+- Removed the `ANL>` prompt during analysis so progress messages start on their own lines.
+- Updated the `simple_loop` example to use the value-based `add_value_element()` API.
+- Migrated the histogram examples to the `ANLNextSwigRuby` and `ANLNextSwigPython`
+  CMake helpers and removed the legacy `CreateSwigRuby` and `CreateSwigPython` helpers.
 
 ### Version 3.0.0
 

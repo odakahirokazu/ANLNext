@@ -25,10 +25,6 @@ public:
 
 private:
   std::map<std::string, std::tuple<int, std::string, double, double>> my_map_;
-  int buffer_id_ = 0;
-  std::string buffer_type_ = "pixel";
-  double buffer_x_ = 0.0;
-  double buffer_y_ = 0.0;
 };
 
 #endif /* MyMapModule_H */

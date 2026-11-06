@@ -79,6 +79,7 @@ SWIGの`ANLStatus_ok`などの旧列挙名は残しません。
 | `mod_reduce()`の`std::list`引数 | `const std::vector<BasicModule*>&` |
 | Rubyの`set_parameters(module_id, parameters)` | `set_module_parameters(module_id, parameters)` |
 | Pythonのモジュールに対するレコード挿入 | `anlnext.insert_to_map()`／`anlnext.push_to_vector()` |
+| `CreateSwigRuby.cmake`／`CreateSwigPython.cmake` | `ANLNextSwigRuby.cmake`／`ANLNextSwigPython.cmake`の`anlnext_add_swig_*_binding()` |
 
 C++の旧エラー定数とModuleAccessの旧メソッド名は、移行用にdeprecatedな別名を残します。
 Ruby／Pythonでは旧エラー定数を追加しません。

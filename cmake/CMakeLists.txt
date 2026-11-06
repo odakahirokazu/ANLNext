@@ -1,6 +1,6 @@
 install(
   FILES
-  ANLNextSwigRuby.cmake ANLNextSwigPython.cmake CreateSwigRuby.cmake CreateSwigPython.cmake
+  ANLNextSwigRuby.cmake ANLNextSwigPython.cmake
   DESTINATION
   ${CMAKE_INSTALL_PREFIX}/lib/anlnext
 )

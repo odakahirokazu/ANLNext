@@ -54,7 +54,7 @@ namespace anlnext
 /* version definition */
 const int ANLManager::__version1__ = 3;
 const int ANLManager::__version2__ = 0;
-const int ANLManager::__version3__ = 0;
+const int ANLManager::__version3__ = 1;
 
 
 ANLManager::ANLManager()
@@ -641,7 +641,6 @@ void ANLManager::process_analysis_for_the_thread(std::promise<ANLStatus> status_
 void ANLManager::interactive_session()
 {
   std::string line;
-  std::cout << "ANL> " << std::flush;
   while (!analysis_thread_finished_) {
     fd_set read_fd_set;
     FD_ZERO(&read_fd_set);
@@ -695,7 +694,6 @@ void ANLManager::interactive_session()
         requested_ = ANLRequest::show_evs_summary;
       }
       line.clear();
-      if (!eof) { std::cout << "ANL> " << std::flush; }
     }
     if (eof) { return; }
   }
