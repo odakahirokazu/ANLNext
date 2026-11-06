@@ -81,7 +81,6 @@ target_sources(ANLNext
   src/ANLException.cc
   src/EvsManager.cc
   src/CLIUtility.cc
-  src/ModuleParameter_special.cc
   src/ModuleParameter_unsigned_integer.cc
   src/ModuleParameter_map.cc
   src/VModuleParameter.cc
