@@ -71,7 +71,8 @@ if(ANLNEXT_USE_G4VECTOR)
   )
   find_package(Geant4 REQUIRED)
   set(CLHEP_INC_DIR ${Geant4_INCLUDE_DIRS})
-  set(CLHEP_LIB G4clhep)
+  # set(CLHEP_LIB G4clhep)
+  set(CLHEP_LIB ${Geant4_LIBRARIES})
 endif(ANLNEXT_USE_G4VECTOR)
 
 target_sources(ANLNext
