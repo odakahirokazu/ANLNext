@@ -21,6 +21,7 @@ set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 ### options
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(BUILD_TESTING "Build ANLNext tests" OFF)
 ## mode options
 option(ANLNEXT_ENABLE_INTERACTIVE_MODE "enable interactive mode" ON)
 ## library options

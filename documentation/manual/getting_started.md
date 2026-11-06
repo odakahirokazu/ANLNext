@@ -33,8 +33,7 @@ ROOT、CLHEP、Geant4との連携は任意です。
 export ANLNEXT_INSTALL="$HOME/local/anlnext-v3"
 cmake -S . -B build-v3 \
   -DCMAKE_INSTALL_PREFIX="$ANLNEXT_INSTALL" \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DBUILD_TESTING=OFF
+  -DCMAKE_BUILD_TYPE=Release
 cmake --build build-v3 --parallel 4
 cmake --install build-v3
 ```
@@ -52,7 +51,7 @@ Rubyは`-DRuby_EXECUTABLE=/path/to/ruby`で指定できます。
 | `ANLNEXT_USE_TVECTOR` | `OFF` | ROOTの2次元・3次元ベクトル型 |
 | `ANLNEXT_USE_HEPVECTOR` | `OFF` | CLHEPのベクトル型 |
 | `ANLNEXT_USE_G4VECTOR` | `OFF` | Geant4付属CLHEPのベクトル型 |
-| `BUILD_TESTING` | `ON` | 回帰テストとテスト用バインディング |
+| `BUILD_TESTING` | `OFF` | 回帰テストとテスト用バインディング |
 
 外部ライブラリに依存する型を使う場合は、本体と利用側でビルド条件を揃えてください。
 
