@@ -88,12 +88,13 @@ Ruby/Pythonとも、Chain経由の設定は定義の前後を問わず予約す�
 | module_idで指定 | `set_module_parameter(module_id, name, value)` | `set_module_parameters(module_id, parameters)` |
 
 `with_parameters()`は`set_parameters()`の正式な別名として維持する。
-Rubyの`with()`、ブロック付きの呼び出し、`ANLApp`と`ModuleInitializer`の利用も維持する。
+Rubyではブロック付きの呼び出しと、`ANLApp`・`ModuleInitializer`経由の設定も使える。
+設定処理は両言語で`apply_setting()`を使って予約できる。Rubyの`apply_setting`は`set_parameters`の別名とする。
 module_id指定版は対象モジュールを選択して設定を予約し、その後も選択状態を保持する。
 以前のRubyの`set_parameters(module_id, parameters)`は`set_module_parameters()`へ改名した。
 
 `with_parameters()`、YAMLからの値設定、Submodule選択、レコードの挿入、
-設定用ブロックは、登録順に並ぶ一つの予約リストへ入れる。
+`apply_setting()`による設定処理は、登録順に並ぶ一つの予約リストへ入れる。
 同じ名前の設定も省略せず、各操作を順番に実行する。
 通常の値設定は後の設定が優先され、レコードの追加・挿入は既存の操作の意味に従う。
 モジュールを直接操作する`mod.set_parameter()`などは即時設定とする。
@@ -144,7 +145,7 @@ Rubyは対応するスクリプトの値を再帰的にコピーし、Pythonは�
 
 任意の設定用ブロック・関数や`modify`は、関数として保持する。
 クロージャが参照する外部状態は固定せず、実行時の値を使う。
-実行時に設定値を決めたい場合は、ブロック内や`with_setter()`の関数内で値を設定する。
+実行時に設定値を決めたい場合は、`apply_setting()`に渡すブロックや関数内で値を設定する。
 
 ## Interactive modeの位置づけ
 

@@ -8,7 +8,7 @@ def make_chain(status, parallels=1):
     chain.num_parallels = parallels
     chain.chain(lambda: DefinitionStatusExample(status), 'status')
     calls = []
-    chain.with_setter(lambda module: calls.append('parameters'))
+    chain.apply_setting(lambda module: calls.append('parameters'))
     chain.modify(lambda c: calls.append('modify'))
     return chain, calls
 

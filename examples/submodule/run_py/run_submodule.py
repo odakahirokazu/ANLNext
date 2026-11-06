@@ -8,12 +8,12 @@ chain.console = False
 chain.num_parallels = int(sys.argv[1]) if len(sys.argv) > 1 else 3
 parameter_file = sys.argv[2] if len(sys.argv) > 2 else None
 
-chain.chain(AlgorithmModule, 'multiply')
+chain.append(AlgorithmModule, 'multiply')
 chain.with_submodule('algorithm', 'multiply')
 if parameter_file is None:
     chain.with_parameters({'input': 4.0, 'algorithm.factor': 7.0})
 
-chain.chain(AlgorithmModule, 'offset')
+chain.append(AlgorithmModule, 'offset')
 chain.with_submodule('algorithm', 'offset')
 if parameter_file is None:
     chain.with_parameters({'input': 4.0, 'algorithm_': {'offset': 3.0}})

@@ -42,7 +42,7 @@ def modify(chain):
 chain = anlnext.AnalysisChain()
 chain.console = False
 chain.num_parallels = 3
-chain.chain(SubmoduleExample, "example").with_setter(configure).with_parameters({"input": 4})
+chain.chain(SubmoduleExample, "example").apply_setting(configure).with_parameters({"input": 4})
 chain.with_parameters({'algorithm.factor': 7})
 chain.modify(modify)
 chain.run(6)

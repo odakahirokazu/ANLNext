@@ -64,6 +64,9 @@ class AnalysisChain:
         return self
 
 
+    append = chain
+
+
     def get_module(self, module_id):
         for mod in self.module_list:
             if mod.module_id() == module_id:
@@ -209,10 +212,11 @@ class AnalysisChain:
 
 
     def with_submodule(self, name, key):
-        return self.with_setter(lambda module: module.set_submodule_by_key(name, key))
+        return self.apply_setting(lambda module: module.set_submodule_by_key(name, key))
 
 
-    def with_setter(self, func):
+    def apply_setting(self, func):
+        """Queue a callable for the currently selected module."""
         mod = self.current_module
         def parameter_setter():
             func(mod)

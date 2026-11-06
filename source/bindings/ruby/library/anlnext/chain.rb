@@ -71,10 +71,11 @@ module ANL
     ### method delegation to the AnalysisChain object.
     anlapp_methods = [
       :console, :console=, :add_namespace,
-      :push, :insert, :insert_before, :insert_after, :chain,
+      :push, :insert, :insert_before, :insert_after, :chain, :append,
       :expose_module, :get_module, :get_parallel_module, :index, :rindex,
       :insert_to_map, :push_to_vector,
       :set_parameter, :set_parameters, :set_module_parameter, :set_module_parameters,
+      :with_parameters, :apply_setting,
       :with_submodule, :chain_with_parameters,
       :load_parameters_from_yaml,
       :modify, :modify_parameters,
@@ -84,8 +85,6 @@ module ANL
       :display_period=,
     ]
     def_delegators :@_anlapp_analysis_chain, *anlapp_methods
-    alias :with_parameters :set_parameters
-    alias :with :set_parameters
 
     def self.define_setup_module(basename, module_class=nil, array: false)
       if array
@@ -131,7 +130,7 @@ module ANL
           mi = ModuleInitializer.new(module_class, module_id)
           set_function.(self, variable_name, mi, array)
           @_anlapp_analysis_chain.current_module = mi
-          mi.with(parameters, &parameter_setter)
+          mi.with_parameters(parameters, &parameter_setter)
           mi
         end
       else
@@ -140,7 +139,7 @@ module ANL
           mi = ModuleInitializer.new(mod1, module_id)
           set_function.(self, variable_name, mi, array)
           @_anlapp_analysis_chain.current_module = mi
-          mi.with(parameters, &parameter_setter)
+          mi.with_parameters(parameters, &parameter_setter)
           mi
         end
       end
@@ -195,7 +194,9 @@ module ANL
     # (e.g., console, parallel number, display period)
     #
     def clear()
-      raise 'Cannot clear the chain while applying parameters.' if @applying_parameters
+      if @applying_parameters
+        raise "Cannot clear the chain while applying parameters."
+      end
 
       @module_list.clear
       @module_hash = {}
@@ -282,7 +283,7 @@ module ANL
     #
     # @param [Symbol, Class] anl_module_class ANL module to be pushed.
     # @param [String] module_id ANL module ID.
-    # @return [ANLModule] ANL module pushed.
+    # @return [AnalysisChain] This chain.
     #
     def chain(anl_module_class, module_id=nil)
       if anl_module_class.is_a?(String) || anl_module_class.is_a?(Symbol)
@@ -299,7 +300,10 @@ module ANL
       mod = anl_module_class.new
       mod.set_module_id(module_id.to_s) if module_id
       push(mod)
+      return self
     end
+
+    alias :append :chain
 
     # Get an ANL module by module symbol and set it to the current module.
     #
@@ -313,7 +317,7 @@ module ANL
       else
         raise "ANL module #{module_id} is not registered."
       end
-      mod
+      return mod
     end
 
     # Get an ANL module by module symbol.
@@ -373,9 +377,7 @@ module ANL
         return
       end
       parameter_setter = make_parameter_setter(mod, name, ANL.copy_parameter_value(value))
-
       reserve_parameter(parameter_setter)
-
       return
     end
 
@@ -473,7 +475,6 @@ module ANL
       end
 
       reserve_parameter(parameter_setter)
-
       return
     end
 
@@ -505,7 +506,6 @@ module ANL
       end
 
       reserve_parameter(parameter_setter)
-
       return
     end
 
@@ -513,20 +513,6 @@ module ANL
       check_parameter_configuration()
       expose_module(module_id)
       set_parameter(name, value)
-    end
-
-    # Utility method to set parameters of the specified module.
-    # Settings are reserved for execution by load_all_parameters().
-    #
-    # @param [Symbol] module_id ANL module ID.
-    # @param [Hash] parameters list of parameters (name, value).
-    # @yield [mod] a block can be given for additional process.
-    # @yieldparam mod the current module is given.
-    #
-    def set_module_parameters(module_id, parameters=nil, &parameter_setter)
-      check_parameter_configuration()
-      expose_module(module_id)
-      set_parameters(parameters, &parameter_setter)
     end
 
     def load_parameters_from_yaml(filename)
@@ -598,6 +584,7 @@ module ANL
           end
         end
       end
+
       if block_given?
         reserve_parameter(lambda{ parameter_setter.(mod) })
       end
@@ -605,12 +592,18 @@ module ANL
     end
 
     alias :with_parameters :set_parameters
-    alias :with :set_parameters
+    alias :apply_setting :set_parameters
+
+    def set_module_parameters(module_id, parameters=nil, &parameter_setter)
+      check_parameter_configuration()
+      expose_module(module_id)
+      set_parameters(parameters, &parameter_setter)
+    end
 
     def with_submodule(name, key)
       name = name.to_s.dup
       key = key.to_s.dup
-      set_parameters do |mod|
+      apply_setting do |mod|
         mod.set_submodule_by_key(name, key)
       end
     end

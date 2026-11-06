@@ -176,7 +176,7 @@ chain.set_parameters(count: 2) do |mod|
   mod.set_parameter_integer('count', 3)
 end
 chain.with_parameters(count: 4)
-chain.with(count: 5)
+chain.apply_setting { |mod| mod.set_parameter_integer('count', 5) }
 chain.chain_with_parameters(initializer)
 chain.define
 chain.load_all_parameters
@@ -189,7 +189,7 @@ app.set_parameters(count: 2)
 app.set_module_parameter(:target, 'count', 3)
 app.set_module_parameters(:target, count: 4)
 app.with_parameters(count: 5){ |mod| mod.set_parameter_integer('count', 6) }
-app.with(count: 7)
+app.apply_setting { |mod| mod.set_parameter_integer('count', 7) }
 app.define
 app.load_all_parameters
 raise unless app.get_module(:target).get_parameter_value('count') == 7

@@ -15,13 +15,13 @@ chain.with_parameters("algorithm.factor": 7)
 chain.with_parameters(input: 4)
 ```
 
-Pythonでは既存の`with_setter`を使います。
+Pythonでは`apply_setting()`に関数を渡します。
 
 ```python
 def configure(module):
     module.set_submodule_by_key('algorithm', 'multiply')
 
-chain.chain(SubmoduleExample, 'example').with_setter(configure)
+chain.chain(SubmoduleExample, 'example').apply_setting(configure)
 chain.with_parameters({'algorithm.factor': 7})
 chain.with_parameters({'input': 4})
 ```
@@ -50,8 +50,7 @@ bindingと補助ライブラリはビルドディレクトリ内で読み込み�
 `with_submodule(name, key)`で実体を選択し、
 `with_parameters()`の`"algorithm.factor"`のようなキーで値を設定できます。
 親とSubmoduleは値設定処理を共用します。
-Rubyでは定義前は設定を予約し、定義後は直ちに適用します。
-Pythonでは既存の`with_parameters()`と同じく`load_all_parameters()`時に適用します。
+RubyとPythonのどちらも設定を予約し、`load_all_parameters()`で登録順に適用します。
 適用時に親から実体を取得するため、それより前に実体を登録しておく必要があります。
 未宣言・未設定のSubmoduleや未知のパラメータへの設定は、既存の例外になります。
 

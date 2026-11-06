@@ -39,7 +39,7 @@ record['weight'] = 1.5
 chain.insert_to_map('table', 'second', record)
 record['count'] = 99
 late = {'count': 17}
-chain.with_setter(lambda module: anlnext.push_to_vector(module, 'rows', late))
+chain.apply_setting(lambda module: anlnext.push_to_vector(module, 'rows', late))
 late['count'] = 23
 assert chain.define() == anlnext.ANLStatus_proceed
 chain.load_all_parameters()

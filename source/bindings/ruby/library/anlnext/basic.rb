@@ -302,7 +302,6 @@ module ANL
     end
 
     alias :with_parameters :set_parameters
-    alias :with :set_parameters
 
     def play_methods(receiver)
       @methods_to_play.each do |m|

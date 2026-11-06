@@ -4,16 +4,16 @@ import anlnext
 import testHistogramMTPy as th
 
 ### chain definition
-def setup(module):
-    module.chain(th.CreateRootFile)
-    module.with_parameters({
+def setup(chain):
+    chain.append(th.CreateRootFile)
+    chain.with_parameters({
         "filename_base": "output",
         "parallel": True,
         "save_parallel": False
     })
 
-    module.chain(th.GenerateEvents)
-    module.with_parameters({
+    chain.append(th.GenerateEvents)
+    chain.with_parameters({
         "energy": 120.0,
         "sigma": 4.0,
         "num_detectors": 1000,
@@ -21,8 +21,8 @@ def setup(module):
         "random_seed": 500
     })
 
-    module.chain(th.FillHistogram)
-    module.with_parameters({
+    chain.append(th.FillHistogram)
+    chain.with_parameters({
         "nbin": 128,
         "energy_min": 80.0,
         "energy_max": 150.0
@@ -34,9 +34,9 @@ a = anlnext.AnalysisChain()
 a.num_parallels = 4
 setup(a)
 
-def modify_param(module):
-    module.get_parallel_module(0, "GenerateEvents").set_parameter("energy", 90.0)
-    module.get_parallel_module(0, "GenerateEvents").set_parameter("sigma", 6.0)
+def modify_param(chain):
+    chain.get_parallel_module(0, "GenerateEvents").set_parameter("energy", 90.0)
+    chain.get_parallel_module(0, "GenerateEvents").set_parameter("sigma", 6.0)
 
 a.modify(modify_param)
 

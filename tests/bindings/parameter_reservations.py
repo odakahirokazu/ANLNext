@@ -46,7 +46,7 @@ for setter in [
     lambda: chain.insert_to_map('table', 'row', {'count': 4}),
     lambda: chain.with_submodule('algorithm', 'multiply'),
     lambda: chain.load_parameters_from_yaml('not-read.yaml'),
-    lambda: chain.with_setter(lambda module: None),
+    lambda: chain.apply_setting(lambda module: None),
 ]:
     expect_error('not allowed', setter)
 module.set_parameter_integer('count', 4)
@@ -63,9 +63,9 @@ def first(module):
     chain.push_to_vector('rows', {'count': 13})
 
 
-chain.with_setter(first)
+chain.apply_setting(first)
 chain.push_to_vector('rows', {'count': 11})
-chain.with_setter(lambda module: calls.append('second'))
+chain.apply_setting(lambda module: calls.append('second'))
 chain.insert_to_map('table', 'row', {'count': 5})
 assert chain.define() == anlnext.ANLStatus_proceed
 chain.load_all_parameters()
@@ -105,9 +105,9 @@ assert value(chain.get_parallel_module(1, 'target'), 'result') == 99
 chain = make_chain(MapExample)
 calls = []
 chain.push_to_vector('rows', {'count': 7})
-chain.with_setter(lambda module: calls.append('before'))
+chain.apply_setting(lambda module: calls.append('before'))
 chain.with_parameters({'missing': 1})
-chain.with_setter(lambda module: calls.append('after'))
+chain.apply_setting(lambda module: calls.append('after'))
 assert chain.define() == anlnext.ANLStatus_proceed
 expect_error('ParameterNotFound', chain.load_all_parameters)
 for _ in range(2):
@@ -115,7 +115,7 @@ for _ in range(2):
 expect_error('cannot start', lambda: chain.run(0))
 assert value(chain.get_module('target'), 'rows') == [{'count': 7}]
 assert calls == ['before']
-expect_error('not allowed', lambda: chain.with_setter(lambda module: None))
+expect_error('not allowed', lambda: chain.apply_setting(lambda module: None))
 
 chain = make_chain(UnsignedIntegerExample)
 chain.with_parameters({'missing': 1})
@@ -139,7 +139,7 @@ def reenter(module):
     chain.load_all_parameters()
 
 
-chain.with_setter(reenter)
+chain.apply_setting(reenter)
 assert chain.define() == anlnext.ANLStatus_proceed
 expect_error('already in progress', chain.load_all_parameters)
 expect_error('not allowed', chain.load_all_parameters)
@@ -157,7 +157,7 @@ assert chain.current_module is chain.get_module('target')
 assert chain.set_module_parameters('target', {'count': 3}) is chain
 chain.with_parameters({'count': 4})
 chain.set_module_parameters('other', {'address': 11})
-chain.with_setter(lambda module: module.set_parameter_integer('count', 5))
+chain.apply_setting(lambda module: module.set_parameter_integer('count', 5))
 expect_error('not registered', lambda: chain.set_module_parameter('missing', 'count', 0))
 expect_error('not registered', lambda: chain.set_module_parameters('missing', {'count': 0}))
 assert chain.current_module is chain.get_module('other')

@@ -4,27 +4,27 @@ import anlnext # ANL Next library
 import myPackageMTPy as myp # Python extension library using ANL Next
 
 ### chain definition
-def setup(module):
-    module.chain(myp.MyMTModule)
-    module.with_parameters({
+def setup(chain):
+    chain.append(myp.MyMTModule)
+    chain.with_parameters({
         "quit_index": -1,
         "quit_all": True
     })
 
-    module.chain(myp.MyMTModule, "MyMTModule2")
-    module.with_parameters({
+    chain.append(myp.MyMTModule, "MyMTModule2")
+    chain.with_parameters({
         "quit_index": 77777,
         "quit_all": True
     })
 
 ### run analysis chain
-a = anlnext.AnalysisChain()
-a.num_parallels = 4
-setup(a)
+chain = anlnext.AnalysisChain()
+chain.num_parallels = 4
+setup(chain)
 
-def modify_param(module):
-    module.get_parallel_module(2, "MyMTModule2").set_parameter("quit_index", 500)
+def modify_param(chain):
+    chain.get_parallel_module(2, "MyMTModule2").set_parameter("quit_index", 500)
 
-a.modify(modify_param)
+chain.modify(modify_param)
 
-a.run(1000000)
+chain.run(1000000)
