@@ -30,6 +30,7 @@ public:
   {
     ++definitions;
     define_parameter("value", &Algorithm::value);
+    define_parameter("details", &Algorithm::details);
     require(is_evs_defined("first") && exist_module("first"),
             "services must be connected before parameter definition");
   }
@@ -50,6 +51,7 @@ public:
     return !probe.evs_connected && !probe.access_connected;
   }
   int value = 10;
+  std::string details = "first line\nsecond line";
   int definitions = 0;
 };
 
@@ -61,10 +63,12 @@ public:
   using BasicModule::set_submodule;
   ANLStatus mod_define() override
   {
+    define_parameter("input", &Parent::input);
     define_submodule("optional");
     define_submodule("algorithm");
     return AS_OK;
   }
+  int input = 3;
   void set_submodule_by_key(const std::string& name, const std::string& key) override
   {
     if (key != "algorithm") { throw ANLException("Unknown algorithm"); }
@@ -246,11 +250,14 @@ int main()
       throw;
     }
     std::cout.rdbuf(saved);
-    require(output.str().find("[algorithm: Algorithm / 1.0]") != std::string::npos &&
-            output.str().find("[optional: unset]") != std::string::npos &&
-            output.str().find("23") != std::string::npos, "submodule display mismatch");
-    require(output.str().find("[optional: unset]") < output.str().find("[algorithm: Algorithm / 1.0]"),
-            "submodule display lost declaration order");
+    require(output.str() ==
+            "input: 3\n"
+            "[optional: unset]\n"
+            "[algorithm: Algorithm]\n"
+            "value: 23\n"
+            "details: first line\n"
+            "second line\n",
+            "submodule display layout, version or declaration order mismatch");
     auto second = parent.duplicate();
     require(second->is_submodule_set("algorithm"), "second duplication failed");
   }

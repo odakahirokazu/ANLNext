@@ -132,11 +132,10 @@ void BasicModule::print_parameters() const
 {
   ParameterRegistry::print_parameters();
   for (const auto& entry: submodule_entries_) {
-    std::cout << "\n  [" << entry->name() << ": ";
+    std::cout << "[" << entry->name() << ": ";
     const BasicSubModule* submodule = entry->instance();
     if (submodule) {
-      std::cout << submodule->submodule_name() << " / "
-                << submodule->submodule_version() << "]\n";
+      std::cout << submodule->submodule_name() << "]\n";
       submodule->print_parameters();
     }
     else {
