@@ -26,7 +26,7 @@ function(anlnext_add_swig_python_binding target)
   endif()
 
   if(NOT ARG_INSTALL_DESTINATION)
-    set(ARG_INSTALL_DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/python")
+    set(ARG_INSTALL_DESTINATION "lib/python")
   endif()
 
   find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
@@ -82,8 +82,15 @@ function(anlnext_add_swig_python_binding target)
     LIBRARY DESTINATION ${ARG_INSTALL_DESTINATION}
   )
 
+  # With Makefiles, CMake cannot infer the producer of the SWIG-generated .py file.
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.5)
+    set(_swig_install_dependencies BUILD_DEPENDS ${target})
+  else()
+    set(_swig_install_dependencies)
+  endif()
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${target}.py
     DESTINATION ${ARG_INSTALL_DESTINATION}
+    ${_swig_install_dependencies}
   )
 
   if(ARG_INSTALL_FILES)

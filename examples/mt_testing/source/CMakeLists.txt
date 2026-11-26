@@ -70,7 +70,7 @@ target_link_libraries(${MY_LIBRARY}
   ANLNext
 )
 
-install(TARGETS ${MY_LIBRARY} LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+install(TARGETS ${MY_LIBRARY} LIBRARY DESTINATION lib)
 
 if(USE_RUBY)
   add_subdirectory(bindings/ruby)

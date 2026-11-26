@@ -39,4 +39,4 @@ anlnext_add_swig_python_binding(submoduleExamplePy
   INCLUDE_DIRECTORIES ${ANLNEXT_PYTHON_INTERFACE_DIR}
   LIBRARIES SubmoduleAlgorithms)
 
-install(TARGETS SubmoduleAlgorithms LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+install(TARGETS SubmoduleAlgorithms LIBRARY DESTINATION lib)

@@ -119,12 +119,12 @@ target_link_libraries(ANLNext
 
 install(TARGETS ANLNext
   LIBRARY
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+  DESTINATION lib
 )
 
 if(ANLNEXT_INSTALL_HEADERS)
   install(DIRECTORY include/
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/include/anlnext
+    DESTINATION include/anlnext
     FILES_MATCHING PATTERN "*.hh"
   )
 endif(ANLNEXT_INSTALL_HEADERS)

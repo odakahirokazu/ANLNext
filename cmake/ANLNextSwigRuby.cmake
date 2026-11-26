@@ -34,7 +34,7 @@ function(anlnext_add_swig_ruby_binding target)
   endif()
 
   if(NOT ARG_INSTALL_DESTINATION)
-    set(ARG_INSTALL_DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/ruby")
+    set(ARG_INSTALL_DESTINATION "lib/ruby")
   endif()
 
   find_package(Ruby 3.0 REQUIRED COMPONENTS Interpreter Development)
